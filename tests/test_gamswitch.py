@@ -6,7 +6,7 @@ import pytest
 import pickle
 import numpy as np
 
-from gamswitch import gamswitch
+from gamswitch import gamswitch, counterfactuals
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def test_compute_frequency_distance(gs):
     assert(distance_dict['c'] == 0.75)
 
 
-def test_generate_cfs_options(gs, cur_example):
+def test_generate_cfs_options(gs: gamswitch.GAMSwitch, cur_example):
     """Test generating options."""
     cfs = gs.generate_cfs(cur_example, 5)
 
@@ -58,7 +58,7 @@ def test_generate_cfs_options(gs, cur_example):
     assert(total['loan_amnt x revol_bal'] == 1296)
 
 
-def test_generate_cfs_options_with_range(gs, cur_example):
+def test_generate_cfs_options_with_range(gs: gamswitch.GAMSwitch, cur_example):
     """Test generating options with feature_range constraints."""
 
     feature_ranges = {
@@ -76,3 +76,24 @@ def test_generate_cfs_options_with_range(gs, cur_example):
     assert(total['loan_amnt'] == 13)
     assert(total['loan_amnt x revol_bal'] == 468)
     assert(total['home_ownership'] == 2)
+
+
+def test_generate_cfs_model(gs: gamswitch.GAMSwitch, cur_example):
+    """Test formulating the problem into a MILP model."""
+
+    cfs = gs.generate_cfs(
+        cur_example,
+        5,
+        feature_ranges=None
+    )
+
+    total = 0
+
+    for key in cfs.variables:
+        total += len(cfs.variables[key])
+
+    assert(cfs.model.numVariables() == 2184)
+    assert(total == 2184)
+    assert(cfs.model.numConstraints() == 6013)
+
+    cfs.model_summary()

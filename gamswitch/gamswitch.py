@@ -7,13 +7,13 @@ explanations for generalized additive models (GAMs).
 import numpy as np
 import pandas as pd
 import re
+import pulp
 
 from tqdm import tqdm
 from interpret.glassbox import ExplainableBoostingClassifier, ExplainableBoostingRegressor
 from time import time
 from collections import Counter
 from typing import Union
-from pulp import *
 
 from .counterfactuals import Counterfactuals
 
@@ -98,7 +98,7 @@ class GAMSwitch:
                      sim_threshold: float = None,
                      categorical_weight: Union[float, str] = 'auto',
                      features_to_vary: list = None,
-                     feature_ranges: dict = None):
+                     feature_ranges: dict = None) -> Counterfactuals:
         """Generate counterfactual examples.
 
         Use mixed-integer linear programming to generate optimal counterfactual
@@ -144,8 +144,15 @@ class GAMSwitch:
                 associated distances and change information.
         """
 
+        # Transforming some parameters
         if len(cur_example.shape) == 1:
             cur_example = cur_example.reshape(1, -1)
+
+        if features_to_vary is None:
+            features_to_vary = [
+                self.ebm.feature_names[i] for i in range(len(self.ebm.feature_types))
+                if self.ebm.feature_types[i] != 'interaction'
+            ]
 
         # Step 1: Find the current score for each feature
         # This is done by ebm.explain_local()
@@ -167,6 +174,9 @@ class GAMSwitch:
         # Predicted 1 => -1
         if self.is_classifier:
             cf_direction = self.ebm.predict(cur_example)[0] * (-2) + 1
+            total_score = np.sum([cur_scores[k] for k in cur_scores])
+            needed_score_gain = -total_score
+
         else:
             # Regression
             # Increase +1
@@ -182,6 +192,9 @@ class GAMSwitch:
                 cf_direction = 1
             else:
                 cf_direction = -1
+
+            raise ValueError('Need to implement needed_score_gain')
+            # needed_score_gain = -1
 
         # Step 2: Generate continuous and categorical options
         options = {}
@@ -285,7 +298,11 @@ class GAMSwitch:
                     cur_feature_value, cur_feature_score, options
                 )
 
-        cfs = Counterfactuals(np.array([]), True, None, options)
+        # Step 3. Formulate the MILP model and solve it
+        model, variables = self._create_milp(cf_direction, needed_score_gain,
+                                             features_to_vary, options)
+
+        cfs = Counterfactuals(np.array([]), True, model, variables, options)
         return cfs
 
     def _generate_cont_options(self, cf_direction, cur_feature_index, cur_feature_name,
@@ -297,7 +314,8 @@ class GAMSwitch:
         generation or (2) give similar score gain but requires larger distance
 
         Args:
-            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0
+            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0 (classification),
+                +1 if we need to incrase the prediction, -1 if decrease (regression)
             cur_feature_index (int): The index of the current continuous feature
             cur_feature_name (str): Name of the current feature
             cur_feature_value (float): The current feature value
@@ -386,7 +404,8 @@ class GAMSwitch:
         generation.
 
         Args:
-            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0
+            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0 (classification),
+                +1 if we need to incrase the prediction, -1 if decrease (regression)
             cur_feature_index (int): The index of the current continuous feature
             cur_feature_value (float): The current feature value
             cur_feature_score (float): The score for the current feature value
@@ -586,6 +605,128 @@ class GAMSwitch:
                         ])
 
         return inter_options
+
+    @staticmethod
+    def _create_milp(cf_direction, needed_score_gain, features_to_vary,
+                     options, muted_variables=[]):
+        """
+        Create a MILP to find counterfactuals (CF) using PuLP.
+
+        Args:
+            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0 (classification),
+                +1 if we need to incrase the prediction, -1 if decrease (regression)
+            needed_score_gain (float): The score gain needed to achieve the CF goal
+            features_to_vary (list[str]): feature names of features that CF can change
+            options (dict): possible options for each variable. Each option is a
+                list [target, score_gain, distance, bin_index]
+            muted_variables (list[str]): variables that this MILP should not use. This
+                is useful to mute optimal variables so we can explore diverse
+                solutions. This list should not include interaction variables.
+
+        Returns:
+            model (pulp.LpProblem): the PuLP model encoding the MILP problem
+            variables ({}): a dict of variables: feature_name => [variables]
+        """
+
+        # Create a model (minimizing the distance)
+        model = pulp.LpProblem('ebmCounterfactual', pulp.LpMinimize)
+
+        distance = 0
+        score_gain = 0
+
+        muted_variables_set = set(muted_variables)
+
+        # Create variables
+        variables = {}
+        for f in features_to_vary:
+            # Each variable encodes an option (0: not use this option,
+            # 1: use this option)
+            cur_variables = []
+
+            for option in options[f]:
+                var_name = '{}:{}'.format(f, option[3])
+
+                # Skip the muted variables
+                if var_name in muted_variables_set:
+                    continue
+
+                x = pulp.LpVariable(var_name,
+                                    lowBound=0,
+                                    upBound=1,
+                                    cat='Binary')
+
+                score_gain += option[1] * x
+                distance += option[2] * x
+
+                cur_variables.append(x)
+
+            variables[f] = cur_variables
+
+            # A local constraint is that we can only at most selection one option from
+            # one feature
+            model += pulp.lpSum(cur_variables) <= 1
+
+        # Create variables for interaction effects
+        for opt_name in options:
+            if 'x' in opt_name:
+                f1_name = re.sub(r'(.+)\sx\s.+', r'\1', opt_name)
+                f2_name = re.sub(r'.+\sx\s(.+)', r'\1', opt_name)
+
+                if f1_name in features_to_vary and f2_name in features_to_vary:
+
+                    # We need to include this interaction effect
+                    cur_variables = []
+
+                    for option in options[opt_name]:
+                        z = pulp.LpVariable('{}:{}'.format(opt_name, option[3]),
+                                            lowBound=0,
+                                            upBound=1,
+                                            cat='Continuous')
+
+                        # Need to iterate through existing variables for f1 and f2 to find
+                        # the corresponding variables
+                        x_f1 = None
+                        x_f2 = None
+
+                        # Skp if this interaction variable involves muted main variable
+                        x_f1_name = '{}:{}'.format(f1_name, option[3][0])
+                        x_f2_name = '{}:{}'.format(f2_name, option[3][1])
+
+                        if x_f1_name in muted_variables_set or x_f2_name in muted_variables_set:
+                            continue
+
+                        for x in variables[f1_name]:
+                            if x.name == x_f1_name:
+                                x_f1 = x
+                                break
+
+                        for x in variables[f2_name]:
+                            if x.name == x_f2_name:
+                                x_f2 = x
+                                break
+
+                        assert(x_f1 is not None and x_f2 is not None)
+
+                        # variable z is actually the product of x_f1 and x_f2
+                        # We can linearize it by 3 constraints
+                        model += z <= x_f1
+                        model += z <= x_f2
+                        model += z >= x_f1 + x_f2 - 1
+
+                        cur_variables.append(z)
+
+                    variables[opt_name] = cur_variables
+
+        # Use constraint to express counterfactual
+        if cf_direction == 1:
+            model += score_gain >= needed_score_gain
+        else:
+            model += score_gain <= needed_score_gain
+
+        # We want to minimize the distance
+        model += distance
+
+        return model, variables
 
     @staticmethod
     def _compute_mad(xs):

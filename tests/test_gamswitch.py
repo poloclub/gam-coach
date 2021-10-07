@@ -3,22 +3,32 @@
 """Tests for `gamswitch` package."""
 
 import pytest
-
+import pickle
+import numpy as np
 
 from gamswitch import gamswitch
 
-
 @pytest.fixture
-def response():
-    """Sample pytest fixture.
+def gs():
+    ebm = pickle.load(open('tests/data/lc-ebm-ca.pickle', 'rb'))
 
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
+    data = np.load('tests/data/lending-club-data-5000.npz', allow_pickle=True)
+    x_train = data['x_all']
+
+    gs = gamswitch.GAMSwitch(ebm, x_train)
+    return gs
 
 
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
+def test_compute_mad(gs):
+    xs = np.array([0, 0, 1, 5, 10])
+
+    assert(gs._compute_mad(xs) == 1)
+
+
+def test_compute_frequency_distance(gs):
+    xs = ['a', 'a', 'b', 'c']
+    distance_dict = gs._compute_frequency_distance(xs)
+
+    assert(distance_dict['a'] == 0.5)
+    assert(distance_dict['b'] == 0.75)
+    assert(distance_dict['c'] == 0.75)

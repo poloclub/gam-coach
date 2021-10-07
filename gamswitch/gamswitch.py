@@ -1,7 +1,7 @@
-"""
-This is the main module for GAM Switch. GAM Switch implements a simple and
-flexible method to generate counterfactual explanations for generalized
-additive models (GAMs).
+"""Main module for GAM Switch.
+
+GAM Switch implements a simple and flexible method to generate counterfactual
+explanations for generalized additive models (GAMs).
 """
 
 import numpy as np
@@ -13,15 +13,20 @@ from interpret.glassbox import ExplainableBoostingClassifier, ExplainableBoostin
 from time import time
 from collections import Counter
 from typing import Union
-
 from pulp import *
 
+from .counterfactuals import Counterfactuals
+
 SEED = 922
+
 
 class GAMSwitch:
     """Main class for GAM Switch."""
 
-    def __init__(self, ebm, x_train, cont_mads=None, cat_distances=None):
+    def __init__(self, ebm: Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor],
+                 x_train: np.ndarray,
+                 cont_mads=None,
+                 cat_distances=None):
         """Initialize a GAMSwitch object.
 
         Args:
@@ -59,7 +64,7 @@ class GAMSwitch:
         if self.cont_mads is None:
             ebm_cont_indexes = np.array(
                 [i for i in range(len(self.ebm.feature_names))
-                if self.ebm.feature_types[i] == 'continuous']
+                    if self.ebm.feature_types[i] == 'continuous']
             )
 
             self.cont_mads = {}
@@ -81,27 +86,515 @@ class GAMSwitch:
                     self.x_train[:, i]
                 )
 
+        # Determine if the ebm is a classifier or a regressor
+        self.is_classifier = isinstance(self.ebm.intercept_, np.ndarray)
+        """True if the ebm model is a classifier, false if it is a regressor"""
 
-
-    def generate_cfs(self):
+    def generate_cfs(self,
+                     cur_example: np.ndarray,
+                     total_cfs: int,
+                     target_range: tuple = None,
+                     sim_threshold_factor: float = 0.005,
+                     sim_threshold: float = None,
+                     categorical_weight: Union[float, str] = 'auto',
+                     features_to_vary: list = None,
+                     feature_ranges: dict = None):
         """Generate counterfactual examples.
-        
+
         Use mixed-integer linear programming to generate optimal counterfactual
         examples for the given data point.
 
         Args:
-        """
-        pass
+            cur_example (np.ndarray): The data point of interest. This function
+                aims to find similar examples that the model gives different
+                predictions.
+            total_cfs (int): The total number of counterfactuals to generate.
+            target_range (tuple, optional): The targetted prediction range. This
+                parameter is required if the EBM is a regressor.
+            sim_threshold_factor (float, optional): A positive float to automatically
+                generate a similarity threshold. This parameter has no effect if
+                `sim_threshold` is provided. If `sim_threshold` is
+                not provided, we compute `sim_threshold` as `sim_threshold_factor`
+                * average additive score range of all continuous features. If
+                `sim_threshold_factor` is too small, it takes longer time to
+                generate CFs. If `sim_threshold_factor` is too large, the
+                algorithm might miss some optimal CFs.
+            sim_threshold (float, optional): A positive float to determine how we
+                decide if two bins of a continuous feature have similar scores.
+                Two bins $b_1$ and $b_2$ are similar (the distant one will be
+                removed) if $|b_1 - b_2| \\leq \\text{sim_threshold}$.
+            categorical_weight (Union[float, str], optional): A positive float
+                to scale the distances of options for categorical variables. Since
+                we have very different distance functions for continuous and
+                categorical features, we need to scale them so they are at a
+                comparable range. To do that, we multiply the categorical feature's
+                distances by `categorical_weight`. By default ('auto'), we scale
+                the distances of categorical features so that they have the mean
+                distance as continuous features.
+            features_to_vary ([str], optional): A list of feature names that
+                the CFs can change. If it is `None`, this function will use all
+                features.
+            feature_ranges (dict, optional): A dictionary to control the permitted
+                ranges/values for continuous/categorical features. It maps
+                feature_name -> [min_value, max_value] for continuous features,
+                feature_name -> [level1, level2, ...] for categorical features.
 
+        Returns:
+            Counterfactuals: The generated counterfactual examples with their
+                associated distances and change information.
+        """
+
+        if len(cur_example.shape) == 1:
+            cur_example = cur_example.reshape(1, -1)
+
+        # Step 1: Find the current score for each feature
+        # This is done by ebm.explain_local()
+        cur_scores = {}
+        cur_scores['intercept'] = self.ebm.intercept_[0]
+
+        local_data = self.ebm.explain_local(cur_example)._internal_obj
+
+        for i in range(len(self.ebm.feature_names)):
+            cur_feature_name = self.ebm.feature_names[i]
+            cur_feature_type = self.ebm.feature_types[i]
+
+            cur_scores[cur_feature_name] = local_data['specific'][0]['scores'][i]
+
+        # Find the CF direction
+
+        # Binary classification
+        # Predicted 0 => +1
+        # Predicted 1 => -1
+        if self.is_classifier:
+            cf_direction = self.ebm.predict(cur_example)[0] * (-2) + 1
+        else:
+            # Regression
+            # Increase +1
+            # Decrease -1
+            if target_range is None:
+                raise ValueError('target_range cannot be None when the model is a regressor')
+
+            predicted_value = self.ebm.predict(cur_example)[0]
+            if predicted_value >= target_range[0] and predicted_value <= target_range[1]:
+                raise ValueError('The target_range cannot cover the current prediction')
+
+            elif predicted_value < target_range[0]:
+                cf_direction = 1
+            else:
+                cf_direction = -1
+
+        # Step 2: Generate continuous and categorical options
+        options = {}
+
+        # Generate a similarity threshold if it is not provided
+        if sim_threshold is None:
+            additive_ranges = []
+
+            for i in range(len(self.ebm.feature_names)):
+                if self.ebm.feature_types[i] == 'continuous':
+                    cur_values = self.ebm.additive_terms_[i]
+                    additive_ranges.append(np.max(cur_values) - np.min(cur_values))
+
+            sim_threshold = np.mean(additive_ranges) * sim_threshold_factor
+
+        # To make it faster to solve the MILP problem, we can decrease the
+        # number of variables by filtering out unhelpful and redundant options
+        #
+        # (1) Unhelpful options: options that move the score to an undesirable
+        # direction. For example, if we want to flip 0 to 1, options that decrease
+        # the score are unhelpful.
+        #
+        # (2) Redundant options: for a set of options that give similar score
+        # gains (bounded by a parameter epsilon), we only need to incldue one
+        # option that has the lowest distance. This is only relevant for
+        # continuous variables. Users can set the parameter epsilon. The default
+        # should be relatively small, otherwise we might miss the optimal solution.
+
+        # Step 2.1: Find all good options from continuous and categorical features
+        for cur_feature_id in range(len(self.ebm.feature_names)):
+
+            cur_feature_name = self.ebm.feature_names[cur_feature_id]
+            cur_feature_type = self.ebm.feature_types[cur_feature_id]
+            cur_feature_index = self.ebm.feature_groups_[cur_feature_id][0]
+
+            if cur_feature_type == 'interaction':
+                continue
+
+            elif cur_feature_type == 'continuous':
+                # The parameter epsilon controls the threshold of how we determine
+                # "similar" options for continuous variables
+                epsilon = sim_threshold
+
+                cur_feature_score = cur_scores[cur_feature_name]
+                cur_feature_value = float(cur_example[0][cur_feature_id])
+
+                cur_cont_options = self._generate_cont_options(
+                    cf_direction, cur_feature_index, cur_feature_name,
+                    cur_feature_value, cur_feature_score, self.cont_mads, epsilon
+                )
+
+                options[cur_feature_name] = cur_cont_options
+
+            elif cur_feature_type == 'categorical':
+                cur_feature_score = cur_scores[cur_feature_name]
+                cur_feature_value = str(cur_example[0][cur_feature_id])
+                cur_cat_distance = self.cat_distances[cur_feature_name]
+
+                cur_cat_options = self._generate_cat_options(
+                    cf_direction, cur_feature_index, cur_feature_value,
+                    cur_feature_score, cur_cat_distance
+                )
+
+                options[cur_feature_name] = cur_cat_options
+
+        # Step 2.2: Filter out undesired options (based on the feature_range)
+        if feature_ranges is not None:
+            for f_name in feature_ranges:
+                cur_range = feature_ranges[f_name]
+                f_index = self.ebm.feature_names.index(f_name)
+                f_type = self.ebm.feature_types[f_index]
+
+                if f_type == 'continuous':
+                    # Delete options that use ineligible options
+                    for o in range(len(options[f_name]) - 1, -1, -1):
+                        cur_target = options[f_name][o][0]
+                        if cur_target < cur_range[0] or cur_target > cur_range[1]:
+                            options[f_name].pop(o)
+                elif f_type == 'categorical':
+                    for o in range(len(options[f_name]) - 1, -1, -1):
+                        if options[f_name][o][0] not in cur_range:
+                            options[f_name].pop(o)
+
+        # Step 2.3: Compute the interaction offsets for all possible options
+        for cur_feature_id in range(len(self.ebm.feature_names)):
+
+            cur_feature_name = self.ebm.feature_names[cur_feature_id]
+            cur_feature_type = self.ebm.feature_types[cur_feature_id]
+
+            if cur_feature_type == 'interaction':
+
+                cur_feature_index_1 = self.ebm.feature_groups_[cur_feature_id][0]
+                cur_feature_index_2 = self.ebm.feature_groups_[cur_feature_id][1]
+
+                cur_feature_score = cur_scores[cur_feature_name]
+                cur_feature_value = [cur_example[0][cur_feature_index_1],
+                                     cur_example[0][cur_feature_index_2]]
+
+                options[cur_feature_name] = self._generate_inter_options(
+                    cur_feature_id, cur_feature_index_1, cur_feature_index_2,
+                    cur_feature_value, cur_feature_score, options
+                )
+
+        cfs = Counterfactuals(np.array([]), True, None, options)
+        return cfs
+
+    def _generate_cont_options(self, cf_direction, cur_feature_index, cur_feature_name,
+                               cur_feature_value, cur_feature_score, cont_mads,
+                               epsilon=0.005):
+        """
+        Generage all alternative options for this continuous variable. This function
+        would filter out all options that are (1) not helpful for the counterfactual
+        generation or (2) give similar score gain but requires larger distance
+
+        Args:
+            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0
+            cur_feature_index (int): The index of the current continuous feature
+            cur_feature_name (str): Name of the current feature
+            cur_feature_value (float): The current feature value
+            cur_feature_score (float): The score for the current feature value
+            cont_mads (dict): A map of feature_name => MAD score
+            epsilon (float): The threshold to determine if two options give similar
+                score gains. Score gains s1 and s2 are similar if |s1 - s2| < epsilon.
+                Smaller epsilon significantly increases the time to solve the MILP.
+                Large epsilon might filter out the optimal CF.
+                Defaults to 0.005.
+
+        Return:
+            list: List of option tuples (target, score gain, distance, bin_index)
+        """
+
+        # For each continuous feature, each bin is a variable
+        # For each bin, we need to compute (1) score gain, (2) distance
+        # (1) score gain is the difference between new bin and current bin
+        # (2) distance is L1 distance divided by median absolute deviation (MAD)
+
+        # Get the additive scores of this feature
+        additives = self.ebm.additive_terms_[cur_feature_index][1:]
+
+        # Get the bin edges of this feature
+        bin_starts = self.ebm.preprocessor_._get_bin_labels(cur_feature_index)[:-1]
+
+        # Create "options", each option is a tuple (target, score_gain, distance, bin_index)
+        cont_options = []
+
+        # Identify which bin this value falls into
+        cur_bin_id = search_sorted_lower_index(bin_starts, cur_feature_value)
+        assert(additives[cur_bin_id] == cur_feature_score)
+
+        for i in range(len(additives)):
+            # We only add options that are helpful for the goal
+            score_gain = additives[i] - cur_feature_score
+
+            if cf_direction * score_gain <= 0:
+                continue
+
+            # Because of the special binning structure of EBM, the distance of bins on
+            # the left to the current value is different from the bins that are on the right
+            #
+            # For bins on the left, the raw distance is abs(bin_start[i + 1] - x)
+            # For bins on the right, the raw distance is abs(bin_start[i] - x)
+            target = cur_feature_value
+            distance = 0
+
+            if i < cur_bin_id:
+                target = bin_starts[i + 1]
+                distance = np.abs(target - cur_feature_value)
+
+                # Subtract a very smaller value to make the target technically fall
+                # into the left bin
+                target -= 1e-6
+
+            elif i > cur_bin_id:
+                target = bin_starts[i]
+                distance = np.abs(target - cur_feature_value)
+
+            # Scale the distance based on the deviation of the feature (how changable it is)
+            if cont_mads[cur_feature_name] > 0:
+                distance /= cont_mads[cur_feature_name]
+
+            cont_options.append([target, score_gain, distance, i])
+
+        # Now we can apply the second round of filtering to remove redundant options
+        # Redundant options refer to bins that give similar score gain with larger distance
+        cont_options = sorted(cont_options, key=lambda x: x[2])
+
+        start = 0
+        while start < len(cont_options):
+            for i in range(len(cont_options) - 1, start, -1):
+                if np.abs(cont_options[i][1] - cont_options[start][1]) < epsilon:
+                    cont_options.pop(i)
+
+            start += 1
+
+        return cont_options
+
+    def _generate_cat_options(self, cf_direction, cur_feature_index,
+                              cur_feature_value, cur_feature_score, cur_cat_distance):
+        """
+        Generage all alternative options for this categorical variable. This function
+        would filter out all options that are not helpful for the counterfactual
+        generation.
+
+        Args:
+            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0
+            cur_feature_index (int): The index of the current continuous feature
+            cur_feature_value (float): The current feature value
+            cur_feature_score (float): The score for the current feature value
+            cur_cat_distance (dict): A map of feature_level => 1 - frequency
+
+        Return:
+            list: List of option tuples (target, score_gain, distance, bin_index)
+        """
+
+        # Find other options for this categorical variable
+        # For each option, we compute the (1) score gain, and (2) distance
+        #
+        # (1) Score gain is the same as continuous variables
+        # (2) The distance is determined by 1 - the level frequency in the
+        # training data. It implies that levels with high frequency are easier
+        # to "move to"
+
+        # Get the additive scores of this feature
+        additives = self.ebm.additive_terms_[cur_feature_index][1:]
+
+        # Get the bin edges of this feature
+        levels = self.ebm.preprocessor_._get_bin_labels(cur_feature_index)
+
+        # Create "options", each option is a tuple (target, score_gain, distance, bin_index)
+        cat_options = []
+
+        for i in range(len(additives)):
+            if levels[i] != cur_feature_value:
+                target = levels[i]
+                score_gain = additives[i] - cur_feature_score
+
+                # Skip unhelpful options
+                if cf_direction * score_gain <= 0:
+                    continue
+
+                distance = cur_cat_distance[target]
+
+                cat_options.append([target, score_gain, distance, i])
+
+        return cat_options
+
+    def _generate_inter_options(self, cur_feature_id, cur_feature_index_1,
+                                cur_feature_index_2, cur_feature_value,
+                                cur_feature_score, options):
+        """
+        Generage all possible options for this interaction variable.
+
+        Interaction terms are interesting in this MILP. Each option counts as a
+        variable, but each variable only affects the score gain, not the distance.
+
+        Note that in EBM, the bin definitions for interaction terms can be different
+        from their defintiions for individual continuous variables.
+
+        To model interaction terms, we can think it as a binary variable. The value is
+        determined by the multiplication of two main effect variables. Each interaction
+        variable describes a combination of two main effect variables. Therefore, say
+        continuous variable A has x probable options, and another continuous variable
+        B has y probable options, then we should add x * y binary variables to offset
+        their probable interaction effects.
+
+        Args:
+            cur_feature_id (int): The id of this interaction effect
+            cur_feature_index_1 (int): The index of the first main effect
+            cur_feature_index_2 (int): The index of the second main effect
+            cur_feature_value (float): The current feature value
+            cur_feature_score (float): The score for the current feature value
+            options (dict): The current option list, feature_name ->
+                [target, score_gain, distance, bin_id]
+
+        Return:
+            List of option tuples (target, score_gain, distance, bin_index)
+        """
+
+        # Get the sub-types for this interaction term
+        cur_feature_type_1 = self.ebm.feature_types[cur_feature_index_1]
+        cur_feature_type_2 = self.ebm.feature_types[cur_feature_index_2]
+
+        # Get the sub-names for this interaction term
+        cur_feature_name_1 = self.ebm.feature_names[cur_feature_index_1]
+        cur_feature_name_2 = self.ebm.feature_names[cur_feature_index_2]
+
+        # The first column and row are reserved for missing values (even with
+        # categorical features)
+        additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
+
+        bin_starts_1 = self.ebm.pair_preprocessor_._get_bin_labels(cur_feature_index_1)
+        bin_starts_2 = self.ebm.pair_preprocessor_._get_bin_labels(cur_feature_index_2)
+
+        # Four possibilities here: cont x cont, cont x cat, cat x cont, cat x cat.
+        # Each has a different way to lookup the bin table.
+        inter_options = []
+
+        if cur_feature_type_1 == 'continuous':
+            if cur_feature_type_2 == 'continuous':
+                # cont x cont
+                cur_feature_value = [
+                    float(cur_feature_value[0]), float(cur_feature_value[1])]
+                bin_starts_1 = bin_starts_1[:-1]
+                bin_starts_2 = bin_starts_2[:-1]
+
+                # Iterate through all possible combinations of options from these two
+                # variables
+                for opt_1 in options[cur_feature_name_1]:
+                    for opt_2 in options[cur_feature_name_2]:
+
+                        # locate the bin for each option value
+                        bin_1 = search_sorted_lower_index(bin_starts_1, opt_1[0])
+                        bin_2 = search_sorted_lower_index(bin_starts_2, opt_2[0])
+                        new_score = additives[bin_1, bin_2]
+                        score_gain = new_score - cur_feature_score
+
+                        # Optimization: here we cannot comapre the score_gain with
+                        # original interaction score to filter interaction options,
+                        # because the choice of two individual main effects do not
+                        # consier this interaction score
+                        #
+                        # Basically, the score gain of one interaction effect does
+                        # not affect the way we choose options for the main
+                        # variables. Only the solver can decide that :(
+
+                        inter_options.append([
+                            [opt_1[0], opt_2[0]],
+                            score_gain,
+                            0,
+                            [opt_1[3], opt_2[3]]
+                        ])
+
+            else:
+                # cont x cat
+                cur_feature_value = [
+                    float(cur_feature_value[0]), cur_feature_value[1]]
+                bin_starts_1 = bin_starts_1[:-1]
+
+                # Iterate through all possible combinations of options from these two
+                # variables
+                for opt_1 in options[cur_feature_name_1]:
+                    for opt_2 in options[cur_feature_name_2]:
+
+                        # locate the bin for each option value
+                        bin_1 = search_sorted_lower_index(bin_starts_1, opt_1[0])
+                        bin_2 = bin_starts_2.index(opt_2[0])
+                        new_score = additives[bin_1, bin_2]
+                        score_gain = new_score - cur_feature_score
+
+                        inter_options.append([
+                            [opt_1[0], opt_2[0]],
+                            score_gain,
+                            0,
+                            [opt_1[3], opt_2[3]]
+                        ])
+
+        else:
+            if cur_feature_type_2 == 'continuous':
+                # cat x cont
+                cur_feature_value = [cur_feature_value[0],
+                                     float(cur_feature_value[1])]
+                bin_starts_2 = bin_starts_2[:-1]
+
+                # Iterate through all possible combinations of options from these two
+                # variables
+                for opt_1 in options[cur_feature_name_1]:
+                    for opt_2 in options[cur_feature_name_2]:
+
+                        # locate the bin for each option value
+                        bin_1 = bin_starts_1.index(opt_1[0])
+                        bin_2 = search_sorted_lower_index(bin_starts_2, opt_2[0])
+
+                        new_score = additives[bin_1, bin_2]
+                        score_gain = new_score - cur_feature_score
+
+                        inter_options.append([
+                            [opt_1[0], opt_2[0]],
+                            score_gain,
+                            0,
+                            [opt_1[3], opt_2[3]]
+                        ])
+            else:
+                # cat x cat
+
+                # Iterate through all possible combinations of options from these two
+                # variables
+                for opt_1 in options[cur_feature_name_1]:
+                    for opt_2 in options[cur_feature_name_2]:
+
+                        # locate the bin for each option value
+                        bin_1 = bin_starts_1.index(opt_1[0])
+                        bin_2 = bin_starts_2.index(opt_2[0])
+
+                        new_score = additives[bin_1, bin_2]
+                        score_gain = new_score - cur_feature_score
+
+                        inter_options.append([
+                            [opt_1[0], opt_2[0]],
+                            score_gain,
+                            0,
+                            [opt_1[3], opt_2[3]]
+                        ])
+
+        return inter_options
 
     @staticmethod
     def _compute_mad(xs):
         """
         Compute the median absolute deviation of a continuous feature.
-        
+
         Args:
-            xs (np.ndarray): a column of continuous values
-            
+            xs (np.ndarray): A column of continuous values
+
         Return:
             float: MAD value of xs
         """
@@ -109,16 +602,15 @@ class GAMSwitch:
         mad = np.median(np.abs(xs - xs_median))
         return mad
 
-
     @staticmethod
     def _compute_frequency_distance(xs):
         """
         For categorical variables, we compute 1 - frequency as their distance. It implies
         that switching to a frequent value takes less effort.
-        
+
         Args:
-            xs (np.ndarray): a column of categorical values.
-        
+            xs (np.ndarray): A column of categorical values.
+
         Return:
             dict: category level -> 1 - frequency
         """
@@ -133,9 +625,7 @@ class GAMSwitch:
 
 
 def search_sorted_lower_index(sorted_edges, value):
-    """
-    Binary search function for locating the correct bin for continuous features.
-    """
+    """Binary search to locate the correct bin for continuous features."""
     left = 0
     right = len(sorted_edges) - 1
 
@@ -159,4 +649,5 @@ def search_sorted_lower_index(sorted_edges, value):
 
 
 def sigmoid(x):
+    """Sigmoid function."""
     return 1 / (1 + np.exp(x))

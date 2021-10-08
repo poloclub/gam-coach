@@ -30,20 +30,21 @@ class GAMSwitch:
         """Initialize a GAMSwitch object.
 
         Args:
-        ebm (Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor]):
-            The trained EBM model. It can be either a classifier or a regressor.
-        x_train (np.ndarray): The training data. It is used to compute the
-            distance for different features.
-        cont_mads (dict, optional): feature_name -> median absolute
-            deviation score. If it is provided, it is used to overwrite the
-            computed MADs for continuous variables. It is useful when you want to
-            provide a custom normalization function to compute the distance between
-            continuous features.
-        cat_distances (dict, optional): feature_name -> {level_name -> distance}.
-            Level distance of categorical variables. By default, the distance is
-            computed by (1 - frequency(level)) for each level. It imples that it
-            is easier to move to a more frequent. If cat_distance is provided,
-            it will overwrite the default distance for categorical variables.
+            ebm (Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor]):
+                The trained EBM model. It can be either a classifier or a regressor.
+            x_train (np.ndarray): The training data. It is used to compute the
+                distance for different features.
+            cont_mads (dict, optional): `feature_name` -> `median absolute
+                deviation score`. If it is provided, it is used to overwrite the
+                computed MADs for continuous variables. It is useful when you
+                want to provide a custom normalization function to compute the
+                distance between continuous features.
+            cat_distances (dict, optional): `feature_name` -> {`level_name` -> `distance`}.
+                Level distance of categorical variables. By default, the distance
+                is computed by (1 - frequency(level)) for each level. It imples
+                that it is easier to move to a more frequent. If `cat_distances`
+                is provided, it will overwrite the default distance for
+                categorical variables.
         """
 
         self.ebm: Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor] = ebm
@@ -56,8 +57,9 @@ class GAMSwitch:
 
         self.cat_distances: dict = cat_distances
         """Level distance of categorical variables. By default, the distance is
-        computed by (1 - frequency(level)) for each level. It implies that it is
-        easier to move to a more frequent level.
+        computed by $(1 - \\frac{\\text{count of} L_i}{\\text{count of all L}})$
+        for one level $L_i$. It implies that it is easier to move to a more
+        frequent level.
         """
 
         # If cont_mads is not given, we compute it from the training data
@@ -70,7 +72,7 @@ class GAMSwitch:
             self.cont_mads = {}
 
             for i in ebm_cont_indexes:
-                self.cont_mads[ebm.feature_names[i]] = self._compute_mad(self.x_train[:, i])
+                self.cont_mads[ebm.feature_names[i]] = self.compute_mad(self.x_train[:, i])
 
         # If cat_distance is not given, we compute it from the training data
         if self.cat_distances is None:
@@ -82,13 +84,13 @@ class GAMSwitch:
             self.cat_distances = {}
 
             for i in ebm_cat_indexes:
-                self.cat_distances[self.ebm.feature_names[i]] = self._compute_frequency_distance(
+                self.cat_distances[self.ebm.feature_names[i]] = self.compute_frequency_distance(
                     self.x_train[:, i]
                 )
 
         # Determine if the ebm is a classifier or a regressor
         self.is_classifier = isinstance(self.ebm.intercept_, np.ndarray)
-        """True if the ebm model is a classifier, false if it is a regressor"""
+        """True if the ebm model is a classifier, false if it is a regressor."""
 
     def generate_cfs(self,
                      cur_example: np.ndarray,
@@ -122,7 +124,7 @@ class GAMSwitch:
             sim_threshold (float, optional): A positive float to determine how we
                 decide if two bins of a continuous feature have similar scores.
                 Two bins $b_1$ and $b_2$ are similar (the distant one will be
-                removed) if $|b_1 - b_2| \\leq \\text{sim_threshold}$.
+                removed) if $|b_1 - b_2| \\leq$ `sim_threshold`.
             categorical_weight (Union[float, str], optional): A positive float
                 to scale the distances of options for categorical variables. Since
                 we have very different distance functions for continuous and
@@ -136,8 +138,8 @@ class GAMSwitch:
                 features.
             feature_ranges (dict, optional): A dictionary to control the permitted
                 ranges/values for continuous/categorical features. It maps
-                feature_name -> [min_value, max_value] for continuous features,
-                feature_name -> [level1, level2, ...] for categorical features.
+                `feature_name` -> [`min_value`, `max_value`] for continuous features,
+                `feature_name` -> [`level1`, `level2`, ...] for categorical features.
 
         Returns:
             Counterfactuals: The generated counterfactual examples with their
@@ -241,7 +243,7 @@ class GAMSwitch:
                 cur_feature_score = cur_scores[cur_feature_name]
                 cur_feature_value = float(cur_example[0][cur_feature_id])
 
-                cur_cont_options = self._generate_cont_options(
+                cur_cont_options = self.generate_cont_options(
                     cf_direction, cur_feature_index, cur_feature_name,
                     cur_feature_value, cur_feature_score, self.cont_mads, epsilon
                 )
@@ -253,7 +255,7 @@ class GAMSwitch:
                 cur_feature_value = str(cur_example[0][cur_feature_id])
                 cur_cat_distance = self.cat_distances[cur_feature_name]
 
-                cur_cat_options = self._generate_cat_options(
+                cur_cat_options = self.generate_cat_options(
                     cf_direction, cur_feature_index, cur_feature_value,
                     cur_feature_score, cur_cat_distance
                 )
@@ -293,41 +295,46 @@ class GAMSwitch:
                 cur_feature_value = [cur_example[0][cur_feature_index_1],
                                      cur_example[0][cur_feature_index_2]]
 
-                options[cur_feature_name] = self._generate_inter_options(
+                options[cur_feature_name] = self.generate_inter_options(
                     cur_feature_id, cur_feature_index_1, cur_feature_index_2,
                     cur_feature_value, cur_feature_score, options
                 )
 
         # Step 3. Formulate the MILP model and solve it
-        model, variables = self._create_milp(cf_direction, needed_score_gain,
-                                             features_to_vary, options)
+        # Find diverse solutions by accumulatively muting the optimal solutions
+
+        model, variables = self.create_milp(cf_direction, needed_score_gain,
+                                            features_to_vary, options)
 
         cfs = Counterfactuals(np.array([]), True, model, variables, options)
         return cfs
 
-    def _generate_cont_options(self, cf_direction, cur_feature_index, cur_feature_name,
-                               cur_feature_value, cur_feature_score, cont_mads,
-                               epsilon=0.005):
+    def generate_cont_options(self, cf_direction, cur_feature_index,
+                              cur_feature_name, cur_feature_value,
+                              cur_feature_score, cont_mads, epsilon=0.005):
         """
         Generage all alternative options for this continuous variable. This function
-        would filter out all options that are (1) not helpful for the counterfactual
-        generation or (2) give similar score gain but requires larger distance
+        would filter out all options that are:
+
+        1. Not helpful for the counterfactual generation.
+        2. Give similar score gain but requires larger distance.
 
         Args:
-            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0 (classification),
-                +1 if we need to incrase the prediction, -1 if decrease (regression)
-            cur_feature_index (int): The index of the current continuous feature
-            cur_feature_name (str): Name of the current feature
-            cur_feature_value (float): The current feature value
-            cur_feature_score (float): The score for the current feature value
-            cont_mads (dict): A map of feature_name => MAD score
+            cf_direction (int): Integer `+1` if 0 => 1, `-1` if 1 => 0
+                (classification); `+1` if we need to incrase the prediction,
+                `-1` if decrease (regression).
+            cur_feature_index (int): The index of the current continuous feature.
+            cur_feature_name (str): Name of the current feature.
+            cur_feature_value (float): The current feature value.
+            cur_feature_score (float): The score for the current feature value.
+            cont_mads (dict): A map of feature_name => MAD score.
             epsilon (float): The threshold to determine if two options give similar
-                score gains. Score gains s1 and s2 are similar if |s1 - s2| < epsilon.
-                Smaller epsilon significantly increases the time to solve the MILP.
-                Large epsilon might filter out the optimal CF.
-                Defaults to 0.005.
+                score gains. Score gains $s_1$ and $s_2$ are similar if
+                $|s_1 - s_2| <$ epsilon. Smaller epsilon significantly increases
+                the time to solve the MILP. Large epsilon might filter out the
+                optimal CF. Defaults to 0.005.
 
-        Return:
+        Returns:
             list: List of option tuples (target, score gain, distance, bin_index)
         """
 
@@ -342,7 +349,8 @@ class GAMSwitch:
         # Get the bin edges of this feature
         bin_starts = self.ebm.preprocessor_._get_bin_labels(cur_feature_index)[:-1]
 
-        # Create "options", each option is a tuple (target, score_gain, distance, bin_index)
+        # Create "options", each option is a tuple (target, score_gain, distance,
+        # bin_index)
         cont_options = []
 
         # Identify which bin this value falls into
@@ -356,8 +364,9 @@ class GAMSwitch:
             if cf_direction * score_gain <= 0:
                 continue
 
-            # Because of the special binning structure of EBM, the distance of bins on
-            # the left to the current value is different from the bins that are on the right
+            # Because of the special binning structure of EBM, the distance of
+            # bins on the left to the current value is different from the bins
+            # that are on the right
             #
             # For bins on the left, the raw distance is abs(bin_start[i + 1] - x)
             # For bins on the right, the raw distance is abs(bin_start[i] - x)
@@ -396,23 +405,25 @@ class GAMSwitch:
 
         return cont_options
 
-    def _generate_cat_options(self, cf_direction, cur_feature_index,
-                              cur_feature_value, cur_feature_score, cur_cat_distance):
+    def generate_cat_options(self, cf_direction, cur_feature_index,
+                             cur_feature_value, cur_feature_score,
+                             cur_cat_distance):
         """
         Generage all alternative options for this categorical variable. This function
         would filter out all options that are not helpful for the counterfactual
         generation.
 
         Args:
-            cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0 (classification),
-                +1 if we need to incrase the prediction, -1 if decrease (regression)
-            cur_feature_index (int): The index of the current continuous feature
-            cur_feature_value (float): The current feature value
-            cur_feature_score (float): The score for the current feature value
-            cur_cat_distance (dict): A map of feature_level => 1 - frequency
+            cf_direction (int): Integer `+1` if 0 => 1, `-1` if 1 => 0
+                (classification); `+1` if we need to incrase the prediction,
+                `-1` if decrease (regression).
+            cur_feature_index (int): The index of the current continuous feature.
+            cur_feature_value (float): The current feature value.
+            cur_feature_score (float): The score for the current feature value.
+            cur_cat_distance (dict): A map of feature_level => 1 - frequency.
 
-        Return:
-            list: List of option tuples (target, score_gain, distance, bin_index)
+        Returns:
+            list: List of option tuples (target, score_gain, distance, bin_index).
         """
 
         # Find other options for this categorical variable
@@ -447,9 +458,9 @@ class GAMSwitch:
 
         return cat_options
 
-    def _generate_inter_options(self, cur_feature_id, cur_feature_index_1,
-                                cur_feature_index_2, cur_feature_value,
-                                cur_feature_score, options):
+    def generate_inter_options(self, cur_feature_id, cur_feature_index_1,
+                               cur_feature_index_2, cur_feature_value,
+                               cur_feature_score, options):
         """
         Generage all possible options for this interaction variable.
 
@@ -459,23 +470,24 @@ class GAMSwitch:
         Note that in EBM, the bin definitions for interaction terms can be different
         from their defintiions for individual continuous variables.
 
-        To model interaction terms, we can think it as a binary variable. The value is
-        determined by the multiplication of two main effect variables. Each interaction
-        variable describes a combination of two main effect variables. Therefore, say
-        continuous variable A has x probable options, and another continuous variable
-        B has y probable options, then we should add x * y binary variables to offset
-        their probable interaction effects.
+        To model interaction terms, we can think it as a binary variable. The
+        value is determined by the multiplication of two main effect variables.
+        Each interaction variable describes a combination of two main effect
+        variables. Therefore, say continuous variable A has $x$ probable options,
+        and another continuous variable B has $y$ probable options, then we should
+        add $x \\times y$ binary variables to offset their probable interaction
+        effects.
 
         Args:
-            cur_feature_id (int): The id of this interaction effect
-            cur_feature_index_1 (int): The index of the first main effect
-            cur_feature_index_2 (int): The index of the second main effect
-            cur_feature_value (float): The current feature value
-            cur_feature_score (float): The score for the current feature value
+            cur_feature_id (int): The id of this interaction effect.
+            cur_feature_index_1 (int): The index of the first main effect.
+            cur_feature_index_2 (int): The index of the second main effect.
+            cur_feature_value (float): The current feature value.
+            cur_feature_score (float): The score for the current feature value.
             options (dict): The current option list, feature_name ->
-                [target, score_gain, distance, bin_id]
+                [`target`, `score_gain`, `distance`, `bin_id`].
 
-        Return:
+        Returns:
             List of option tuples (target, score_gain, distance, bin_index)
         """
 
@@ -564,8 +576,8 @@ class GAMSwitch:
                                      float(cur_feature_value[1])]
                 bin_starts_2 = bin_starts_2[:-1]
 
-                # Iterate through all possible combinations of options from these two
-                # variables
+                # Iterate through all possible combinations of options from
+                # these two variables
                 for opt_1 in options[cur_feature_name_1]:
                     for opt_2 in options[cur_feature_name_2]:
 
@@ -585,8 +597,8 @@ class GAMSwitch:
             else:
                 # cat x cat
 
-                # Iterate through all possible combinations of options from these two
-                # variables
+                # Iterate through all possible combinations of options from
+                # these two variables
                 for opt_1 in options[cur_feature_name_1]:
                     for opt_2 in options[cur_feature_name_2]:
 
@@ -607,25 +619,27 @@ class GAMSwitch:
         return inter_options
 
     @staticmethod
-    def _create_milp(cf_direction, needed_score_gain, features_to_vary,
-                     options, muted_variables=[]):
+    def create_milp(cf_direction, needed_score_gain, features_to_vary,
+                    options, muted_variables=[]):
         """
         Create a MILP to find counterfactuals (CF) using PuLP.
 
         Args:
             cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0 (classification),
-                +1 if we need to incrase the prediction, -1 if decrease (regression)
-            needed_score_gain (float): The score gain needed to achieve the CF goal
-            features_to_vary (list[str]): feature names of features that CF can change
+                +1 if we need to incrase the prediction, -1 if decrease (regression).
+            needed_score_gain (float): The score gain needed to achieve the CF goal.
+            features_to_vary (list[str]): feature names of features that the
+                generated CF can change.
             options (dict): possible options for each variable. Each option is a
-                list [target, score_gain, distance, bin_index]
-            muted_variables (list[str]): variables that this MILP should not use. This
-                is useful to mute optimal variables so we can explore diverse
+                list [target, score_gain, distance, bin_index].
+            muted_variables (list[str]): variables that this MILP should not use.
+                This is useful to mute optimal variables so we can explore diverse
                 solutions. This list should not include interaction variables.
 
         Returns:
-            model (pulp.LpProblem): the PuLP model encoding the MILP problem
-            variables ({}): a dict of variables: feature_name => [variables]
+            A tuple (`model`, `variables`), where `model` is a pulp.LpProblem
+            model that encodes the MILP problem, and `variables` is a dict of
+            variables used in the `model`: `feature_name` => [`variables`].
         """
 
         # Create a model (minimizing the distance)
@@ -729,22 +743,22 @@ class GAMSwitch:
         return model, variables
 
     @staticmethod
-    def _compute_mad(xs):
+    def compute_mad(xs):
         """
         Compute the median absolute deviation of a continuous feature.
 
         Args:
-            xs (np.ndarray): A column of continuous values
+            xs (np.ndarray): A column of continuous values.
 
-        Return:
-            float: MAD value of xs
+        Returns:
+            float: MAD value of xs.
         """
         xs_median = np.median(xs)
         mad = np.median(np.abs(xs - xs_median))
         return mad
 
     @staticmethod
-    def _compute_frequency_distance(xs):
+    def compute_frequency_distance(xs):
         """
         For categorical variables, we compute 1 - frequency as their distance. It implies
         that switching to a frequent value takes less effort.
@@ -752,8 +766,8 @@ class GAMSwitch:
         Args:
             xs (np.ndarray): A column of categorical values.
 
-        Return:
-            dict: category level -> 1 - frequency
+        Returns:
+            dict: category level -> 1 - frequency.
         """
         counter = Counter(xs)
 

@@ -33,12 +33,12 @@ def cur_example():
 def test_compute_mad(gs):
     xs = np.array([0, 0, 1, 5, 10])
 
-    assert(gs._compute_mad(xs) == 1)
+    assert(gs.compute_mad(xs) == 1)
 
 
 def test_compute_frequency_distance(gs):
     xs = ['a', 'a', 'b', 'c']
-    distance_dict = gs._compute_frequency_distance(xs)
+    distance_dict = gs.compute_frequency_distance(xs)
 
     assert(distance_dict['a'] == 0.5)
     assert(distance_dict['b'] == 0.75)

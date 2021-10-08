@@ -11,7 +11,6 @@ import pulp
 
 from tqdm import tqdm
 from interpret.glassbox import ExplainableBoostingClassifier, ExplainableBoostingRegressor
-from time import time
 from collections import Counter
 from typing import Union
 
@@ -100,7 +99,8 @@ class GAMSwitch:
                      sim_threshold: float = None,
                      categorical_weight: Union[float, str] = 'auto',
                      features_to_vary: list = None,
-                     feature_ranges: dict = None) -> Counterfactuals:
+                     feature_ranges: dict = None,
+                     verbose: bool = False) -> Counterfactuals:
         """Generate counterfactual examples.
 
         Use mixed-integer linear programming to generate optimal counterfactual
@@ -140,6 +140,8 @@ class GAMSwitch:
                 ranges/values for continuous/categorical features. It maps
                 `feature_name` -> [`min_value`, `max_value`] for continuous features,
                 `feature_name` -> [`level1`, `level2`, ...] for categorical features.
+            verbose (bool): True if you want it to print out the optimization
+                process from each iteration.
 
         Returns:
             Counterfactuals: The generated counterfactual examples with their
@@ -301,12 +303,46 @@ class GAMSwitch:
                 )
 
         # Step 3. Formulate the MILP model and solve it
+
         # Find diverse solutions by accumulatively muting the optimal solutions
+        solutions = []
+        muted_variables = []
+        is_successful = True
 
-        model, variables = self.create_milp(cf_direction, needed_score_gain,
-                                            features_to_vary, options)
+        for _ in tqdm(range(total_cfs)):
+            model, variables = self.create_milp(cf_direction, needed_score_gain,
+                                                features_to_vary, options,
+                                                muted_variables=muted_variables)
 
-        cfs = Counterfactuals(np.array([]), True, model, variables, options)
+            model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose, warmStart=True))
+
+            if model.status != 1:
+                is_successful = False
+
+            if verbose:
+                print('solver runs for {:.2f} seconds'.format(model.solutionTime))
+                print('status: {}'.format(pulp.LpStatus[model.status]))
+
+            active_variables = []
+
+            # Print the optimal solution
+            for key in variables:
+                for x in variables[key]:
+                    if x.varValue > 0:
+                        active_variables.append(x)
+
+            if verbose:
+                print('\nFound solutions:')
+                self.print_solution(cur_example, active_variables, options)
+
+            # Collect the current solution and mute the associated variables
+            solutions.append([active_variables, pulp.value(model.objective)])
+
+            for var in active_variables:
+                if 'x' not in var.name:
+                    muted_variables.append(var.name)
+
+        cfs = Counterfactuals(solutions, is_successful, model, variables, options)
         return cfs
 
     def generate_cont_options(self, cf_direction, cur_feature_index,
@@ -668,6 +704,7 @@ class GAMSwitch:
                                     lowBound=0,
                                     upBound=1,
                                     cat='Binary')
+                x.setInitialValue(0)
 
                 score_gain += option[1] * x
                 distance += option[2] * x
@@ -696,6 +733,7 @@ class GAMSwitch:
                                             lowBound=0,
                                             upBound=1,
                                             cat='Continuous')
+                        z.setInitialValue(0)
 
                         # Need to iterate through existing variables for f1 and f2 to find
                         # the corresponding variables
@@ -741,6 +779,53 @@ class GAMSwitch:
         model += distance
 
         return model, variables
+
+    def print_solution(self, cur_example, active_variables, options):
+        """
+        Print the optimal solution.
+
+        Args:
+            cur_example (np.ndarray): the original data point.
+            active_variables (list[variable]): binary variables with value 1.
+            options (dict): all the possible options for all features.
+        """
+
+        for var in active_variables:
+            # Skip interaction vars (included)
+            if 'x' not in var.name:
+                f_name = re.sub(r'(.+):\d+', r'\1', var.name)
+                bin_i = int(re.sub(r'.+:(\d+)', r'\1', var.name))
+
+                # Find the original value
+                org_value = cur_example[0][self.ebm.feature_names.index(f_name)]
+
+                # Find the target bin
+                f_index = self.ebm.feature_names.index(f_name)
+                f_type = self.ebm.feature_types[f_index]
+
+                if f_type == 'continuous':
+                    bin_starts = self.ebm.preprocessor_._get_bin_labels(f_index)[:-1]
+
+                    target_bin = '[{},'.format(bin_starts[bin_i])
+
+                    if bin_i + 1 < len(bin_starts):
+                        target_bin += ' {})'.format(bin_starts[bin_i + 1])
+                    else:
+                        target_bin += ' inf)'
+                else:
+                    target_bin = ''
+                    org_value = '"{}"'.format(org_value)
+
+                for option in options[f_name]:
+                    if option[3] == bin_i:
+                        print('Change <{}> from {} to {} {}'.format(
+                            f_name, org_value, option[0], target_bin
+                        ))
+                        print('\t* score gain: {:.4f}\n\t* distance cost: {:.4f}'.format(
+                            option[1], option[2]
+                        ))
+                        break
+        print()
 
     @staticmethod
     def compute_mad(xs):

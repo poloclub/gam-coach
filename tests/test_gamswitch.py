@@ -47,7 +47,7 @@ def test_compute_frequency_distance(gs):
 
 def test_generate_cfs_options(gs: gamswitch.GAMSwitch, cur_example):
     """Test generating options."""
-    cfs = gs.generate_cfs(cur_example, 5)
+    cfs = gs.generate_cfs(cur_example, 1, verbose=True)
 
     total = {}
 
@@ -66,7 +66,8 @@ def test_generate_cfs_options_with_range(gs: gamswitch.GAMSwitch, cur_example):
         'emp_length': ['1 year', '7 years']
     }
 
-    cfs = gs.generate_cfs(cur_example, 5, feature_ranges=feature_ranges)
+    cfs = gs.generate_cfs(cur_example, 1, feature_ranges=feature_ranges,
+                          verbose=True)
 
     total = {}
 
@@ -83,8 +84,9 @@ def test_generate_cfs_model(gs: gamswitch.GAMSwitch, cur_example):
 
     cfs = gs.generate_cfs(
         cur_example,
-        5,
-        feature_ranges=None
+        1,
+        feature_ranges=None,
+        verbose=True,
     )
 
     total = 0
@@ -97,3 +99,17 @@ def test_generate_cfs_model(gs: gamswitch.GAMSwitch, cur_example):
     assert(cfs.model.numConstraints() == 6013)
 
     cfs.model_summary()
+
+
+def test_generate_cfs_diverse(gs: gamswitch.GAMSwitch, cur_example):
+    """Test generating diverse solutions."""
+
+    cfs = gs.generate_cfs(
+        cur_example,
+        5,
+        feature_ranges=None,
+        verbose=True,
+    )
+
+    cfs.model_summary()
+    assert(len(cfs.data) == 5)

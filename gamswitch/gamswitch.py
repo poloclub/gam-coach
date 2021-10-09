@@ -22,7 +22,8 @@ SEED = 922
 class GAMSwitch:
     """Main class for GAM Switch."""
 
-    def __init__(self, ebm: Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor],
+    def __init__(self,
+                 ebm: Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor],
                  x_train: np.ndarray,
                  cont_mads=None,
                  cat_distances=None):
@@ -302,6 +303,33 @@ class GAMSwitch:
                     cur_feature_value, cur_feature_score, options
                 )
 
+        # Step 2.4: Rescale categorical distances so that they have the same mean
+        # as continuous variables (default)
+        if categorical_weight == 'auto':
+            cont_distances = []
+            cat_distances = []
+
+            for f_name in options:
+                f_index = self.ebm.feature_names.index(f_name)
+                f_type = self.ebm.feature_types[f_index]
+
+                if f_type == 'continuous':
+                    for option in options[f_name]:
+                        cont_distances.append(option[2])
+                elif f_type == 'categorical':
+                    for option in options[f_name]:
+                        cat_distances.append(option[2])
+
+            categorical_weight = np.mean(cont_distances) / np.mean(cat_distances)
+
+        for f_name in options:
+            f_index = self.ebm.feature_names.index(f_name)
+            f_type = self.ebm.feature_types[f_index]
+
+            if f_type == 'categorical':
+                for option in options[f_name]:
+                    option[2] = option[2] * categorical_weight
+
         # Step 3. Formulate the MILP model and solve it
 
         # Find diverse solutions by accumulatively muting the optimal solutions
@@ -342,7 +370,8 @@ class GAMSwitch:
                 if 'x' not in var.name:
                     muted_variables.append(var.name)
 
-        cfs = Counterfactuals(solutions, is_successful, model, variables, options)
+        cfs = Counterfactuals(solutions, is_successful, model, variables,
+                              self.ebm, cur_example, options)
         return cfs
 
     def generate_cont_options(self, cf_direction, cur_feature_index,

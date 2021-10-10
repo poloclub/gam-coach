@@ -138,6 +138,13 @@ class Counterfactuals:
             self.model.numConstraints()
         ))
 
-        print(self.data)
-        print(self.target_ranges)
-        print(self.values)
+        data_df = pd.DataFrame(self.data)
+        data_df.columns = np.array(self.ebm.feature_names)[
+            [i for i in range(len(self.ebm.feature_types))
+                if self.ebm.feature_types[i] != 'interaction']
+        ]
+
+        new_predictions = self.ebm.predict(self.data)
+        data_df['new_prediction'] = new_predictions
+
+        print(data_df)

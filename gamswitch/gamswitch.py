@@ -100,6 +100,7 @@ class GAMSwitch:
                      sim_threshold: float = None,
                      categorical_weight: Union[float, str] = 'auto',
                      features_to_vary: list = None,
+                     max_num_features_to_vary: int = None,
                      feature_ranges: dict = None,
                      continuous_integer_features: list = None,
                      verbose: bool = False) -> Counterfactuals:
@@ -138,6 +139,8 @@ class GAMSwitch:
             features_to_vary ([str], optional): A list of feature names that
                 the CFs can change. If it is `None`, this function will use all
                 features.
+            max_num_features_to_vary (int, optional): The max number of features
+                that the CF can vary. Default is no maximum.
             feature_ranges (dict, optional): A dictionary to control the permitted
                 ranges/values for continuous/categorical features. It maps
                 `feature_name` -> [`min_value`, `max_value`] for continuous features,
@@ -354,9 +357,14 @@ class GAMSwitch:
         is_successful = True
 
         for _ in tqdm(range(total_cfs)):
-            model, variables = self.create_milp(cf_direction, needed_score_gain,
-                                                features_to_vary, options,
-                                                muted_variables=muted_variables)
+            model, variables = self.create_milp(
+                cf_direction,
+                needed_score_gain,
+                features_to_vary,
+                max_num_features_to_vary,
+                options,
+                muted_variables=muted_variables
+            )
 
             model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose, warmStart=True))
 
@@ -754,7 +762,7 @@ class GAMSwitch:
 
     @staticmethod
     def create_milp(cf_direction, needed_score_gain, features_to_vary,
-                    options, muted_variables=[]):
+                    max_num_features_to_vary, options, muted_variables=[]):
         """
         Create a MILP to find counterfactuals (CF) using PuLP.
 
@@ -762,11 +770,14 @@ class GAMSwitch:
             cf_direction (int): Integer +1 if 0 => 1, -1 if 1 => 0 (classification),
                 +1 if we need to incrase the prediction, -1 if decrease (regression).
             needed_score_gain (float): The score gain needed to achieve the CF goal.
-            features_to_vary (list[str]): feature names of features that the
+            features_to_vary (list[str]): Feature names of features that the
                 generated CF can change.
-            options (dict): possible options for each variable. Each option is a
+            max_num_features_to_vary (int): Max number of features that the
+                generated CF can change. If the value is `None`, the CFs can
+                change any number of features.
+            options (dict): Possible options for each variable. Each option is a
                 list [target, score_gain, distance, bin_index].
-            muted_variables (list[str]): variables that this MILP should not use.
+            muted_variables (list[str]): Variables that this MILP should not use.
                 This is useful to mute optimal variables so we can explore diverse
                 solutions. This list should not include interaction variables.
 
@@ -814,6 +825,15 @@ class GAMSwitch:
             # A local constraint is that we can only at most selection one option from
             # one feature
             model += pulp.lpSum(cur_variables) <= 1
+
+        # Users can also set `max_num_features_to_vary` to control the total
+        # number of features to vary
+        if max_num_features_to_vary is not None:
+            main_variables = []
+            for f in variables:
+                main_variables.extend(variables[f])
+
+            model += pulp.lpSum(main_variables) <= max_num_features_to_vary
 
         # Create variables for interaction effects
         for opt_name in options:

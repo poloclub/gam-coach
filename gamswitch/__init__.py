@@ -5,11 +5,11 @@ explanations for Generalized Additive Models (GAMs).
 
 In many machine learning (ML) applications, people use CF examples to help end
 users learn about model decisions.
-Given a data sample, a CF example is a similar example where the machine learning
+Given a data point, a CF example is a similar example where the machine learning
 model gives a different prediction.
 Take loan application as an example, one can explain why a borrower's application
-is rejected with a CF example—"if your annual income were $5k higher, your application would
-be approved."
+is rejected with a CF example — *"if your annual income were $5k higher, your application would
+be approved."*
 
 GAM Switch is designed to generate CFs for [Explanable Boosting Machine
 (EBM)](https://interpret.ml/docs/ebm.html), the state-of-the-art GAM trained with
@@ -18,10 +18,13 @@ GAM Switch uses [mixed-integer linear programming](https://en.wikipedia.org/wiki
 it can efficiently generates CFs are gauranteed to be optimal (minimal changes)
 and sparse (use minimal features).
 
-GAM Switch is flexible, where users can easily impose diverse constraints
-for their target CFs. For example, one can tell GAM Switch to only generate CFs
-that use certain features, within certain ranges.
-GAM Switch supports both binary classification and regression problems.
+GAM Switch is flexible. You can easily impose diverse constraints
+for your target CFs. For example, you can tell GAM Switch to generate CFs
+that only **use certain features**, **within some ranges**, and **make at most
+some number of changes**. Then, GAM Switch is gauranteed to find the best CFs
+meet these conditions (if feasible). In addition to the classic binary
+classification problems (e.g., *loan approval* prediction), GAM Switch also
+supports regression problems (e.g., *loan interest rate* prediction).
 
 # How to use GAM Switch?
 

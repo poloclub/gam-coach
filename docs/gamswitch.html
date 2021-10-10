@@ -79,11 +79,11 @@ explanations for Generalized Additive Models (GAMs).</p>
 
 <p>In many machine learning (ML) applications, people use CF examples to help end
 users learn about model decisions.
-Given a data sample, a CF example is a similar example where the machine learning
+Given a data point, a CF example is a similar example where the machine learning
 model gives a different prediction.
 Take loan application as an example, one can explain why a borrower's application
-is rejected with a CF example—"if your annual income were $5k higher, your application would
-be approved."</p>
+is rejected with a CF example — <em>"if your annual income were $5k higher, your application would
+be approved."</em></p>
 
 <p>GAM Switch is designed to generate CFs for <a href="https://interpret.ml/docs/ebm.html">Explanable Boosting Machine
 (EBM)</a>, the state-of-the-art GAM trained with
@@ -92,10 +92,13 @@ GAM Switch uses <a href="https://en.wikipedia.org/wiki/Integer_programming">mixe
 it can efficiently generates CFs are gauranteed to be optimal (minimal changes)
 and sparse (use minimal features).</p>
 
-<p>GAM Switch is flexible, where users can easily impose diverse constraints
-for their target CFs. For example, one can tell GAM Switch to only generate CFs
-that use certain features, within certain ranges.
-GAM Switch supports both binary classification and regression problems.</p>
+<p>GAM Switch is flexible. You can easily impose diverse constraints
+for your target CFs. For example, you can tell GAM Switch to generate CFs
+that only <strong>use certain features</strong>, <strong>within some ranges</strong>, and <strong>make at most
+some number of changes</strong>. Then, GAM Switch is gauranteed to find the best CFs
+meet these conditions (if feasible). In addition to the classic binary
+classification problems (e.g., <em>loan approval</em> prediction), GAM Switch also
+supports regression problems (e.g., <em>loan interest rate</em> prediction).</p>
 
 <h1 id="how-to-use-gam-switch">How to use GAM Switch?</h1>
 
@@ -118,11 +121,11 @@ classification</a>, <a href=".">regression</a>). The main functions you will use
 
 <span class="sd">In many machine learning (ML) applications, people use CF examples to help end</span>
 <span class="sd">users learn about model decisions.</span>
-<span class="sd">Given a data sample, a CF example is a similar example where the machine learning</span>
+<span class="sd">Given a data point, a CF example is a similar example where the machine learning</span>
 <span class="sd">model gives a different prediction.</span>
 <span class="sd">Take loan application as an example, one can explain why a borrower&#39;s application</span>
-<span class="sd">is rejected with a CF example—&quot;if your annual income were $5k higher, your application would</span>
-<span class="sd">be approved.&quot;</span>
+<span class="sd">is rejected with a CF example — *&quot;if your annual income were $5k higher, your application would</span>
+<span class="sd">be approved.&quot;*</span>
 
 <span class="sd">GAM Switch is designed to generate CFs for [Explanable Boosting Machine</span>
 <span class="sd">(EBM)](https://interpret.ml/docs/ebm.html), the state-of-the-art GAM trained with</span>
@@ -131,10 +134,13 @@ classification</a>, <a href=".">regression</a>). The main functions you will use
 <span class="sd">it can efficiently generates CFs are gauranteed to be optimal (minimal changes)</span>
 <span class="sd">and sparse (use minimal features).</span>
 
-<span class="sd">GAM Switch is flexible, where users can easily impose diverse constraints</span>
-<span class="sd">for their target CFs. For example, one can tell GAM Switch to only generate CFs</span>
-<span class="sd">that use certain features, within certain ranges.</span>
-<span class="sd">GAM Switch supports both binary classification and regression problems.</span>
+<span class="sd">GAM Switch is flexible. You can easily impose diverse constraints</span>
+<span class="sd">for your target CFs. For example, you can tell GAM Switch to generate CFs</span>
+<span class="sd">that only **use certain features**, **within some ranges**, and **make at most</span>
+<span class="sd">some number of changes**. Then, GAM Switch is gauranteed to find the best CFs</span>
+<span class="sd">meet these conditions (if feasible). In addition to the classic binary</span>
+<span class="sd">classification problems (e.g., *loan approval* prediction), GAM Switch also</span>
+<span class="sd">supports regression problems (e.g., *loan interest rate* prediction).</span>
 
 <span class="sd"># How to use GAM Switch?</span>
 

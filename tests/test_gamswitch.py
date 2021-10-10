@@ -145,6 +145,12 @@ def test_generate_cfs_regression(gs_regression: gamswitch.GAMSwitch,
         cur_example_regression,
         1,
         feature_ranges=None,
+        continuous_integer_features=[
+            'fico_score',
+            'open_acc',
+            'earliest_cr_line',
+            'total_acc'
+        ],
         verbose=True,
         target_range=[3, 9]
     )

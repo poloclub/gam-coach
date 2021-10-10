@@ -101,6 +101,7 @@ class GAMSwitch:
                      categorical_weight: Union[float, str] = 'auto',
                      features_to_vary: list = None,
                      feature_ranges: dict = None,
+                     continuous_integer_features: list = None,
                      verbose: bool = False) -> Counterfactuals:
         """Generate counterfactual examples.
 
@@ -141,6 +142,8 @@ class GAMSwitch:
                 ranges/values for continuous/categorical features. It maps
                 `feature_name` -> [`min_value`, `max_value`] for continuous features,
                 `feature_name` -> [`level1`, `level2`, ...] for categorical features.
+            continuous_integer_features (list, optional): A list of names of
+                continuous features that need to be integers (e.g., age, FICO score)
             verbose (bool): True if you want it to print out the optimization
                 process from each iteration.
 
@@ -252,10 +255,16 @@ class GAMSwitch:
                 cur_feature_score = cur_scores[cur_feature_name]
                 cur_feature_value = float(cur_example[0][cur_feature_id])
 
+                # Users can require the continuous feature to have integer values
+                # For example, age, FICO score, and number of accounts
+                need_to_be_int = False
+                if continuous_integer_features and cur_feature_name in continuous_integer_features:
+                    need_to_be_int = True
+
                 cur_cont_options = self.generate_cont_options(
                     cf_direction, cur_feature_index, cur_feature_name,
                     cur_feature_value, cur_feature_score, self.cont_mads,
-                    score_gain_bound, epsilon
+                    score_gain_bound, epsilon, need_to_be_int
                 )
 
                 options[cur_feature_name] = cur_cont_options
@@ -384,7 +393,7 @@ class GAMSwitch:
     def generate_cont_options(self, cf_direction, cur_feature_index,
                               cur_feature_name, cur_feature_value,
                               cur_feature_score, cont_mads, score_gain_bound=None,
-                              epsilon=0.005):
+                              epsilon=0.005, need_to_be_int=False):
         """
         Generage all alternative options for this continuous variable. This function
         would filter out all options that are:
@@ -410,6 +419,8 @@ class GAMSwitch:
                 $|s_1 - s_2| <$ epsilon. Smaller epsilon significantly increases
                 the time to solve the MILP. Large epsilon might filter out the
                 optimal CF. Defaults to 0.005.
+            need_to_be_int (bool): True if the target values for this continuous
+                variable need to have integer values.
 
         Returns:
             list: List of option tuples (target, score gain, distance, bin_index)
@@ -458,16 +469,44 @@ class GAMSwitch:
             distance = 0
 
             if i < cur_bin_id:
-                target = bin_starts[i + 1]
-                distance = np.abs(target - cur_feature_value)
+                # First need to consier if it is need to be an integer
+                # If so, it would be the closest integer to the right point
+                if need_to_be_int:
+                    target = float(int(bin_starts[i + 1]))
+                    if target == bin_starts[i + 1]:
+                        target -= 1
 
-                # Subtract a very smaller value to make the target technically fall
-                # into the left bin
-                target -= 1e-6
+                    # Skip this option if it is not possible to find an int value
+                    if target < bin_starts[i]:
+                        continue
+
+                    distance = np.abs(target - cur_feature_value)
+
+                else:
+                    target = bin_starts[i + 1]
+                    distance = np.abs(target - cur_feature_value)
+
+                    # Subtract a very smaller value to make the target
+                    # technically fall into the left bin
+                    target -= 1e-6
 
             elif i > cur_bin_id:
-                target = bin_starts[i]
-                distance = np.abs(target - cur_feature_value)
+                # First need to consier if it should be an integer value
+                # If so, it would be the closest integer to the left point
+                if need_to_be_int:
+                    target = float(np.ceil(bin_starts[i]))
+                    if target == bin_starts[i]:
+                        target += 1
+
+                    # Skip this option if it is not possible to find an int value
+                    if i + 1 < len(additives) and target >= bin_starts[i + 1]:
+                        continue
+
+                    distance = np.abs(target - cur_feature_value)
+
+                else:
+                    target = bin_starts[i]
+                    distance = np.abs(target - cur_feature_value)
 
             # Scale the distance based on the deviation of the feature (how changable it is)
             if cont_mads[cur_feature_name] > 0:

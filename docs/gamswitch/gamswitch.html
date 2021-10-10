@@ -81,6 +81,9 @@
                                 <a class="function" href="#GAMSwitch.create_milp">create_milp</a>
                         </li>
                         <li>
+                                <a class="function" href="#GAMSwitch.print_solution">print_solution</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#GAMSwitch.compute_mad">compute_mad</a>
                         </li>
                         <li>
@@ -132,7 +135,6 @@ explanations for generalized additive models (GAMs).</p>
 
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">interpret.glassbox</span> <span class="kn">import</span> <span class="n">ExplainableBoostingClassifier</span><span class="p">,</span> <span class="n">ExplainableBoostingRegressor</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
@@ -144,7 +146,8 @@ explanations for generalized additive models (GAMs).</p>
 <span class="k">class</span> <span class="nc">GAMSwitch</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Main class for GAM Switch.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ebm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ExplainableBoostingClassifier</span><span class="p">,</span> <span class="n">ExplainableBoostingRegressor</span><span class="p">],</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">ebm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ExplainableBoostingClassifier</span><span class="p">,</span> <span class="n">ExplainableBoostingRegressor</span><span class="p">],</span>
                  <span class="n">x_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                  <span class="n">cont_mads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">cat_distances</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -221,7 +224,9 @@ explanations for generalized additive models (GAMs).</p>
                      <span class="n">sim_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">categorical_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
                      <span class="n">features_to_vary</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">feature_ranges</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counterfactuals</span><span class="p">:</span>
+                     <span class="n">feature_ranges</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">continuous_integer_features</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counterfactuals</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generate counterfactual examples.</span>
 
 <span class="sd">        Use mixed-integer linear programming to generate optimal counterfactual</span>
@@ -261,6 +266,10 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">                ranges/values for continuous/categorical features. It maps</span>
 <span class="sd">                `feature_name` -&gt; [`min_value`, `max_value`] for continuous features,</span>
 <span class="sd">                `feature_name` -&gt; [`level1`, `level2`, ...] for categorical features.</span>
+<span class="sd">            continuous_integer_features (list, optional): A list of names of</span>
+<span class="sd">                continuous features that need to be integers (e.g., age, FICO score)</span>
+<span class="sd">            verbose (bool): True if you want it to print out the optimization</span>
+<span class="sd">                process from each iteration.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Counterfactuals: The generated counterfactual examples with their</span>
@@ -280,7 +289,11 @@ explanations for generalized additive models (GAMs).</p>
         <span class="c1"># Step 1: Find the current score for each feature</span>
         <span class="c1"># This is done by ebm.explain_local()</span>
         <span class="n">cur_scores</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span><span class="p">:</span>
+            <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span>
 
         <span class="n">local_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">explain_local</span><span class="p">(</span><span class="n">cur_example</span><span class="p">)</span><span class="o">.</span><span class="n">_internal_obj</span>
 
@@ -299,6 +312,7 @@ explanations for generalized additive models (GAMs).</p>
             <span class="n">cf_direction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">cur_example</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">total_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">cur_scores</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_scores</span><span class="p">])</span>
             <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="o">-</span><span class="n">total_score</span>
+            <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Regression</span>
@@ -313,11 +327,12 @@ explanations for generalized additive models (GAMs).</p>
 
             <span class="k">elif</span> <span class="n">predicted_value</span> <span class="o">&lt;</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="n">cf_direction</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
+                <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">cf_direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need to implement needed_score_gain&#39;</span><span class="p">)</span>
-            <span class="c1"># needed_score_gain = -1</span>
+                <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
+                <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
 
         <span class="c1"># Step 2: Generate continuous and categorical options</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
@@ -364,9 +379,16 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="n">cur_feature_score</span> <span class="o">=</span> <span class="n">cur_scores</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span>
                 <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_id</span><span class="p">])</span>
 
+                <span class="c1"># Users can require the continuous feature to have integer values</span>
+                <span class="c1"># For example, age, FICO score, and number of accounts</span>
+                <span class="n">need_to_be_int</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">continuous_integer_features</span> <span class="ow">and</span> <span class="n">cur_feature_name</span> <span class="ow">in</span> <span class="n">continuous_integer_features</span><span class="p">:</span>
+                    <span class="n">need_to_be_int</span> <span class="o">=</span> <span class="kc">True</span>
+
                 <span class="n">cur_cont_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_cont_options</span><span class="p">(</span>
                     <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span> <span class="n">cur_feature_name</span><span class="p">,</span>
-                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cont_mads</span><span class="p">,</span> <span class="n">epsilon</span>
+                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cont_mads</span><span class="p">,</span>
+                    <span class="n">score_gain_bound</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">need_to_be_int</span>
                 <span class="p">)</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_cont_options</span>
@@ -378,7 +400,7 @@ explanations for generalized additive models (GAMs).</p>
 
                 <span class="n">cur_cat_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_cat_options</span><span class="p">(</span>
                     <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cur_cat_distance</span>
+                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cur_cat_distance</span><span class="p">,</span> <span class="n">score_gain_bound</span>
                 <span class="p">)</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_cat_options</span>
@@ -421,18 +443,81 @@ explanations for generalized additive models (GAMs).</p>
                     <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
                 <span class="p">)</span>
 
+        <span class="c1"># Step 2.4: Rescale categorical distances so that they have the same mean</span>
+        <span class="c1"># as continuous variables (default)</span>
+        <span class="k">if</span> <span class="n">categorical_weight</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="n">cont_distances</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cat_distances</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="n">cont_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="n">cat_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="n">categorical_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cont_distances</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cat_distances</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+            <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">categorical_weight</span>
+
         <span class="c1"># Step 3. Formulate the MILP model and solve it</span>
+
         <span class="c1"># Find diverse solutions by accumulatively muting the optimal solutions</span>
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">muted_variables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="n">model</span><span class="p">,</span> <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span>
-                                            <span class="n">features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">total_cfs</span><span class="p">)):</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span>
+                                                <span class="n">features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span>
+                                                <span class="n">muted_variables</span><span class="o">=</span><span class="n">muted_variables</span><span class="p">)</span>
 
-        <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">pulp</span><span class="o">.</span><span class="n">apis</span><span class="o">.</span><span class="n">PULP_CBC_CMD</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">warmStart</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;solver runs for </span><span class="si">{:.2f}</span><span class="s1"> seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solutionTime</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;status: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pulp</span><span class="o">.</span><span class="n">LpStatus</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">status</span><span class="p">]))</span>
+
+            <span class="n">active_variables</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Print the optimal solution</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">varValue</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">active_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Found solutions:&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_solution</span><span class="p">(</span><span class="n">cur_example</span><span class="p">,</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+            <span class="c1"># Collect the current solution and mute the associated variables</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">active_variables</span><span class="p">,</span> <span class="n">pulp</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">objective</span><span class="p">)])</span>
+
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">muted_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cfs</span>
 
     <span class="k">def</span> <span class="nf">generate_cont_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
                               <span class="n">cur_feature_name</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                              <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cont_mads</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.005</span><span class="p">):</span>
+                              <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cont_mads</span><span class="p">,</span> <span class="n">score_gain_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">need_to_be_int</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all alternative options for this continuous variable. This function</span>
 <span class="sd">        would filter out all options that are:</span>
@@ -449,11 +534,17 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            cont_mads (dict): A map of feature_name =&gt; MAD score.</span>
+<span class="sd">            score_gain_bound (float): Bound of the score gain. We do not collect</span>
+<span class="sd">                options that give `score_gain` &gt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=1`), or `score_gain` &lt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=-1`)</span>
 <span class="sd">            epsilon (float): The threshold to determine if two options give similar</span>
 <span class="sd">                score gains. Score gains $s_1$ and $s_2$ are similar if</span>
 <span class="sd">                $|s_1 - s_2| &lt;$ epsilon. Smaller epsilon significantly increases</span>
 <span class="sd">                the time to solve the MILP. Large epsilon might filter out the</span>
 <span class="sd">                optimal CF. Defaults to 0.005.</span>
+<span class="sd">            need_to_be_int (bool): True if the target values for this continuous</span>
+<span class="sd">                variable need to have integer values.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of option tuples (target, score gain, distance, bin_index)</span>
@@ -485,6 +576,13 @@ explanations for generalized additive models (GAMs).</p>
             <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">*</span> <span class="n">score_gain</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
 
+            <span class="c1"># Filter out of bound options</span>
+            <span class="k">if</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&gt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&lt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
             <span class="c1"># Because of the special binning structure of EBM, the distance of</span>
             <span class="c1"># bins on the left to the current value is different from the bins</span>
             <span class="c1"># that are on the right</span>
@@ -495,16 +593,44 @@ explanations for generalized additive models (GAMs).</p>
             <span class="n">distance</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+                <span class="c1"># First need to consier if it is need to be an integer</span>
+                <span class="c1"># If so, it would be the closest integer to the right point</span>
+                <span class="k">if</span> <span class="n">need_to_be_int</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">target</span> <span class="o">-=</span> <span class="mi">1</span>
 
-                <span class="c1"># Subtract a very smaller value to make the target technically fall</span>
-                <span class="c1"># into the left bin</span>
-                <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
+                    <span class="c1"># Skip this option if it is not possible to find an int value</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                    <span class="c1"># Subtract a very smaller value to make the target</span>
+                    <span class="c1"># technically fall into the left bin</span>
+                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
 
             <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+                <span class="c1"># First need to consier if it should be an integer value</span>
+                <span class="c1"># If so, it would be the closest integer to the left point</span>
+                <span class="k">if</span> <span class="n">need_to_be_int</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="n">target</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># Skip this option if it is not possible to find an int value</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">additives</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">&gt;=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
 
             <span class="c1"># Scale the distance based on the deviation of the feature (how changable it is)</span>
             <span class="k">if</span> <span class="n">cont_mads</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -528,7 +654,7 @@ explanations for generalized additive models (GAMs).</p>
 
     <span class="k">def</span> <span class="nf">generate_cat_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
                              <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span>
-                             <span class="n">cur_cat_distance</span><span class="p">):</span>
+                             <span class="n">cur_cat_distance</span><span class="p">,</span> <span class="n">score_gain_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all alternative options for this categorical variable. This function</span>
 <span class="sd">        would filter out all options that are not helpful for the counterfactual</span>
@@ -542,6 +668,10 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            cur_cat_distance (dict): A map of feature_level =&gt; 1 - frequency.</span>
+<span class="sd">            score_gain_bound (float): Bound of the score gain. We do not collect</span>
+<span class="sd">                options that give `score_gain` &gt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=1`), or `score_gain` &lt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=-1`)</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of option tuples (target, score_gain, distance, bin_index).</span>
@@ -572,6 +702,13 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="c1"># Skip unhelpful options</span>
                 <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">*</span> <span class="n">score_gain</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">continue</span>
+
+                <span class="c1"># Filter out of bound options</span>
+                <span class="k">if</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&gt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&lt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                        <span class="k">continue</span>
 
                 <span class="n">distance</span> <span class="o">=</span> <span class="n">cur_cat_distance</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
 
@@ -789,6 +926,7 @@ explanations for generalized additive models (GAMs).</p>
                                     <span class="n">lowBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                     <span class="n">upBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                     <span class="n">cat</span><span class="o">=</span><span class="s1">&#39;Binary&#39;</span><span class="p">)</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">setInitialValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="n">score_gain</span> <span class="o">+=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span>
                 <span class="n">distance</span> <span class="o">+=</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span>
@@ -813,10 +951,13 @@ explanations for generalized additive models (GAMs).</p>
                     <span class="n">cur_variables</span> <span class="o">=</span> <span class="p">[]</span>
 
                     <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">opt_name</span><span class="p">]:</span>
-                        <span class="n">z</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpVariable</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt_name</span><span class="p">,</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                        <span class="n">z</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpVariable</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt_name</span><span class="p">,</span>
+                                                              <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                              <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
                                             <span class="n">lowBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                             <span class="n">upBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                             <span class="n">cat</span><span class="o">=</span><span class="s1">&#39;Continuous&#39;</span><span class="p">)</span>
+                        <span class="n">z</span><span class="o">.</span><span class="n">setInitialValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                         <span class="c1"># Need to iterate through existing variables for f1 and f2 to find</span>
                         <span class="c1"># the corresponding variables</span>
@@ -862,6 +1003,69 @@ explanations for generalized additive models (GAMs).</p>
         <span class="n">model</span> <span class="o">+=</span> <span class="n">distance</span>
 
         <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span>
+
+    <span class="k">def</span> <span class="nf">print_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the optimal solution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cur_example (np.ndarray): the original data point.</span>
+<span class="sd">            active_variables (list[variable]): binary variables with value 1.</span>
+<span class="sd">            options (dict): all the possible options for all features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+            <span class="c1"># Skip interaction vars (included)</span>
+            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                <span class="c1"># Find the original value</span>
+                <span class="n">org_value</span> <span class="o">=</span> <span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)]</span>
+
+                <span class="c1"># Find the target bin</span>
+                <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="n">bin_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">f_index</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">):</span>
+                        <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; inf)&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Change &lt;</span><span class="si">{}</span><span class="s1">&gt; from </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">f_name</span><span class="p">,</span> <span class="n">org_value</span><span class="p">,</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target_bin</span>
+                        <span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="p">))</span>
+                        <span class="k">break</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">f_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_x_&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="p">)</span>
+                <span class="n">bin_0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+),\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">bin_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:\d+,(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_0</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_1</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trigger interaction term: &lt;</span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">f_name</span>
+                        <span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
+                        <span class="p">))</span>
+                        <span class="k">break</span>
+        <span class="nb">print</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">compute_mad</span><span class="p">(</span><span class="n">xs</span><span class="p">):</span>
@@ -946,7 +1150,8 @@ explanations for generalized additive models (GAMs).</p>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GAMSwitch</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Main class for GAM Switch.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ebm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ExplainableBoostingClassifier</span><span class="p">,</span> <span class="n">ExplainableBoostingRegressor</span><span class="p">],</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">ebm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ExplainableBoostingClassifier</span><span class="p">,</span> <span class="n">ExplainableBoostingRegressor</span><span class="p">],</span>
                  <span class="n">x_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                  <span class="n">cont_mads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">cat_distances</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1023,7 +1228,9 @@ explanations for generalized additive models (GAMs).</p>
                      <span class="n">sim_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">categorical_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
                      <span class="n">features_to_vary</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">feature_ranges</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counterfactuals</span><span class="p">:</span>
+                     <span class="n">feature_ranges</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">continuous_integer_features</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counterfactuals</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generate counterfactual examples.</span>
 
 <span class="sd">        Use mixed-integer linear programming to generate optimal counterfactual</span>
@@ -1063,6 +1270,10 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">                ranges/values for continuous/categorical features. It maps</span>
 <span class="sd">                `feature_name` -&gt; [`min_value`, `max_value`] for continuous features,</span>
 <span class="sd">                `feature_name` -&gt; [`level1`, `level2`, ...] for categorical features.</span>
+<span class="sd">            continuous_integer_features (list, optional): A list of names of</span>
+<span class="sd">                continuous features that need to be integers (e.g., age, FICO score)</span>
+<span class="sd">            verbose (bool): True if you want it to print out the optimization</span>
+<span class="sd">                process from each iteration.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Counterfactuals: The generated counterfactual examples with their</span>
@@ -1082,7 +1293,11 @@ explanations for generalized additive models (GAMs).</p>
         <span class="c1"># Step 1: Find the current score for each feature</span>
         <span class="c1"># This is done by ebm.explain_local()</span>
         <span class="n">cur_scores</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span><span class="p">:</span>
+            <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span>
 
         <span class="n">local_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">explain_local</span><span class="p">(</span><span class="n">cur_example</span><span class="p">)</span><span class="o">.</span><span class="n">_internal_obj</span>
 
@@ -1101,6 +1316,7 @@ explanations for generalized additive models (GAMs).</p>
             <span class="n">cf_direction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">cur_example</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">total_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">cur_scores</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_scores</span><span class="p">])</span>
             <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="o">-</span><span class="n">total_score</span>
+            <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Regression</span>
@@ -1115,11 +1331,12 @@ explanations for generalized additive models (GAMs).</p>
 
             <span class="k">elif</span> <span class="n">predicted_value</span> <span class="o">&lt;</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="n">cf_direction</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
+                <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">cf_direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need to implement needed_score_gain&#39;</span><span class="p">)</span>
-            <span class="c1"># needed_score_gain = -1</span>
+                <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
+                <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
 
         <span class="c1"># Step 2: Generate continuous and categorical options</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1166,9 +1383,16 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="n">cur_feature_score</span> <span class="o">=</span> <span class="n">cur_scores</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span>
                 <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_id</span><span class="p">])</span>
 
+                <span class="c1"># Users can require the continuous feature to have integer values</span>
+                <span class="c1"># For example, age, FICO score, and number of accounts</span>
+                <span class="n">need_to_be_int</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">continuous_integer_features</span> <span class="ow">and</span> <span class="n">cur_feature_name</span> <span class="ow">in</span> <span class="n">continuous_integer_features</span><span class="p">:</span>
+                    <span class="n">need_to_be_int</span> <span class="o">=</span> <span class="kc">True</span>
+
                 <span class="n">cur_cont_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_cont_options</span><span class="p">(</span>
                     <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span> <span class="n">cur_feature_name</span><span class="p">,</span>
-                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cont_mads</span><span class="p">,</span> <span class="n">epsilon</span>
+                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cont_mads</span><span class="p">,</span>
+                    <span class="n">score_gain_bound</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">need_to_be_int</span>
                 <span class="p">)</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_cont_options</span>
@@ -1180,7 +1404,7 @@ explanations for generalized additive models (GAMs).</p>
 
                 <span class="n">cur_cat_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_cat_options</span><span class="p">(</span>
                     <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cur_cat_distance</span>
+                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cur_cat_distance</span><span class="p">,</span> <span class="n">score_gain_bound</span>
                 <span class="p">)</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_cat_options</span>
@@ -1223,18 +1447,81 @@ explanations for generalized additive models (GAMs).</p>
                     <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
                 <span class="p">)</span>
 
+        <span class="c1"># Step 2.4: Rescale categorical distances so that they have the same mean</span>
+        <span class="c1"># as continuous variables (default)</span>
+        <span class="k">if</span> <span class="n">categorical_weight</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="n">cont_distances</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cat_distances</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="n">cont_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="n">cat_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="n">categorical_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cont_distances</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cat_distances</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+            <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">categorical_weight</span>
+
         <span class="c1"># Step 3. Formulate the MILP model and solve it</span>
+
         <span class="c1"># Find diverse solutions by accumulatively muting the optimal solutions</span>
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">muted_variables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="n">model</span><span class="p">,</span> <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span>
-                                            <span class="n">features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">total_cfs</span><span class="p">)):</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span>
+                                                <span class="n">features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span>
+                                                <span class="n">muted_variables</span><span class="o">=</span><span class="n">muted_variables</span><span class="p">)</span>
 
-        <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">pulp</span><span class="o">.</span><span class="n">apis</span><span class="o">.</span><span class="n">PULP_CBC_CMD</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">warmStart</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;solver runs for </span><span class="si">{:.2f}</span><span class="s1"> seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solutionTime</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;status: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pulp</span><span class="o">.</span><span class="n">LpStatus</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">status</span><span class="p">]))</span>
+
+            <span class="n">active_variables</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Print the optimal solution</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">varValue</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">active_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Found solutions:&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_solution</span><span class="p">(</span><span class="n">cur_example</span><span class="p">,</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+            <span class="c1"># Collect the current solution and mute the associated variables</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">active_variables</span><span class="p">,</span> <span class="n">pulp</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">objective</span><span class="p">)])</span>
+
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">muted_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cfs</span>
 
     <span class="k">def</span> <span class="nf">generate_cont_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
                               <span class="n">cur_feature_name</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                              <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cont_mads</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.005</span><span class="p">):</span>
+                              <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cont_mads</span><span class="p">,</span> <span class="n">score_gain_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">need_to_be_int</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all alternative options for this continuous variable. This function</span>
 <span class="sd">        would filter out all options that are:</span>
@@ -1251,11 +1538,17 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            cont_mads (dict): A map of feature_name =&gt; MAD score.</span>
+<span class="sd">            score_gain_bound (float): Bound of the score gain. We do not collect</span>
+<span class="sd">                options that give `score_gain` &gt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=1`), or `score_gain` &lt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=-1`)</span>
 <span class="sd">            epsilon (float): The threshold to determine if two options give similar</span>
 <span class="sd">                score gains. Score gains $s_1$ and $s_2$ are similar if</span>
 <span class="sd">                $|s_1 - s_2| &lt;$ epsilon. Smaller epsilon significantly increases</span>
 <span class="sd">                the time to solve the MILP. Large epsilon might filter out the</span>
 <span class="sd">                optimal CF. Defaults to 0.005.</span>
+<span class="sd">            need_to_be_int (bool): True if the target values for this continuous</span>
+<span class="sd">                variable need to have integer values.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of option tuples (target, score gain, distance, bin_index)</span>
@@ -1287,6 +1580,13 @@ explanations for generalized additive models (GAMs).</p>
             <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">*</span> <span class="n">score_gain</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
 
+            <span class="c1"># Filter out of bound options</span>
+            <span class="k">if</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&gt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&lt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
             <span class="c1"># Because of the special binning structure of EBM, the distance of</span>
             <span class="c1"># bins on the left to the current value is different from the bins</span>
             <span class="c1"># that are on the right</span>
@@ -1297,16 +1597,44 @@ explanations for generalized additive models (GAMs).</p>
             <span class="n">distance</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+                <span class="c1"># First need to consier if it is need to be an integer</span>
+                <span class="c1"># If so, it would be the closest integer to the right point</span>
+                <span class="k">if</span> <span class="n">need_to_be_int</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">target</span> <span class="o">-=</span> <span class="mi">1</span>
 
-                <span class="c1"># Subtract a very smaller value to make the target technically fall</span>
-                <span class="c1"># into the left bin</span>
-                <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
+                    <span class="c1"># Skip this option if it is not possible to find an int value</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                    <span class="c1"># Subtract a very smaller value to make the target</span>
+                    <span class="c1"># technically fall into the left bin</span>
+                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
 
             <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+                <span class="c1"># First need to consier if it should be an integer value</span>
+                <span class="c1"># If so, it would be the closest integer to the left point</span>
+                <span class="k">if</span> <span class="n">need_to_be_int</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="n">target</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># Skip this option if it is not possible to find an int value</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">additives</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">&gt;=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
 
             <span class="c1"># Scale the distance based on the deviation of the feature (how changable it is)</span>
             <span class="k">if</span> <span class="n">cont_mads</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1330,7 +1658,7 @@ explanations for generalized additive models (GAMs).</p>
 
     <span class="k">def</span> <span class="nf">generate_cat_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
                              <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span>
-                             <span class="n">cur_cat_distance</span><span class="p">):</span>
+                             <span class="n">cur_cat_distance</span><span class="p">,</span> <span class="n">score_gain_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all alternative options for this categorical variable. This function</span>
 <span class="sd">        would filter out all options that are not helpful for the counterfactual</span>
@@ -1344,6 +1672,10 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            cur_cat_distance (dict): A map of feature_level =&gt; 1 - frequency.</span>
+<span class="sd">            score_gain_bound (float): Bound of the score gain. We do not collect</span>
+<span class="sd">                options that give `score_gain` &gt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=1`), or `score_gain` &lt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=-1`)</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of option tuples (target, score_gain, distance, bin_index).</span>
@@ -1374,6 +1706,13 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="c1"># Skip unhelpful options</span>
                 <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">*</span> <span class="n">score_gain</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">continue</span>
+
+                <span class="c1"># Filter out of bound options</span>
+                <span class="k">if</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&gt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&lt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                        <span class="k">continue</span>
 
                 <span class="n">distance</span> <span class="o">=</span> <span class="n">cur_cat_distance</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
 
@@ -1591,6 +1930,7 @@ explanations for generalized additive models (GAMs).</p>
                                     <span class="n">lowBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                     <span class="n">upBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                     <span class="n">cat</span><span class="o">=</span><span class="s1">&#39;Binary&#39;</span><span class="p">)</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">setInitialValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="n">score_gain</span> <span class="o">+=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span>
                 <span class="n">distance</span> <span class="o">+=</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span>
@@ -1615,10 +1955,13 @@ explanations for generalized additive models (GAMs).</p>
                     <span class="n">cur_variables</span> <span class="o">=</span> <span class="p">[]</span>
 
                     <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">opt_name</span><span class="p">]:</span>
-                        <span class="n">z</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpVariable</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt_name</span><span class="p">,</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                        <span class="n">z</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpVariable</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt_name</span><span class="p">,</span>
+                                                              <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                              <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
                                             <span class="n">lowBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                             <span class="n">upBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                             <span class="n">cat</span><span class="o">=</span><span class="s1">&#39;Continuous&#39;</span><span class="p">)</span>
+                        <span class="n">z</span><span class="o">.</span><span class="n">setInitialValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                         <span class="c1"># Need to iterate through existing variables for f1 and f2 to find</span>
                         <span class="c1"># the corresponding variables</span>
@@ -1664,6 +2007,69 @@ explanations for generalized additive models (GAMs).</p>
         <span class="n">model</span> <span class="o">+=</span> <span class="n">distance</span>
 
         <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span>
+
+    <span class="k">def</span> <span class="nf">print_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the optimal solution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cur_example (np.ndarray): the original data point.</span>
+<span class="sd">            active_variables (list[variable]): binary variables with value 1.</span>
+<span class="sd">            options (dict): all the possible options for all features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+            <span class="c1"># Skip interaction vars (included)</span>
+            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                <span class="c1"># Find the original value</span>
+                <span class="n">org_value</span> <span class="o">=</span> <span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)]</span>
+
+                <span class="c1"># Find the target bin</span>
+                <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="n">bin_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">f_index</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">):</span>
+                        <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; inf)&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Change &lt;</span><span class="si">{}</span><span class="s1">&gt; from </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">f_name</span><span class="p">,</span> <span class="n">org_value</span><span class="p">,</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target_bin</span>
+                        <span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="p">))</span>
+                        <span class="k">break</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">f_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_x_&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="p">)</span>
+                <span class="n">bin_0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+),\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">bin_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:\d+,(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_0</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_1</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trigger interaction term: &lt;</span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">f_name</span>
+                        <span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
+                        <span class="p">))</span>
+                        <span class="k">break</span>
+        <span class="nb">print</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">compute_mad</span><span class="p">(</span><span class="n">xs</span><span class="p">):</span>
@@ -1722,7 +2128,8 @@ explanations for generalized additive models (GAMs).</p>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ebm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ExplainableBoostingClassifier</span><span class="p">,</span> <span class="n">ExplainableBoostingRegressor</span><span class="p">],</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">ebm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ExplainableBoostingClassifier</span><span class="p">,</span> <span class="n">ExplainableBoostingRegressor</span><span class="p">],</span>
                  <span class="n">x_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                  <span class="n">cont_mads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">cat_distances</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1879,7 +2286,9 @@ frequent level.</p>
     sim_threshold: float = None,
     categorical_weight: Union[float, str] = &#39;auto&#39;,
     features_to_vary: list = None,
-    feature_ranges: dict = None
+    feature_ranges: dict = None,
+    continuous_integer_features: list = None,
+    verbose: bool = False
 ) -&gt; <a href="counterfactuals.html#Counterfactuals">gamswitch.counterfactuals.Counterfactuals</a></span>:
     </div>
 
@@ -1893,7 +2302,9 @@ frequent level.</p>
                      <span class="n">sim_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">categorical_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
                      <span class="n">features_to_vary</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">feature_ranges</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counterfactuals</span><span class="p">:</span>
+                     <span class="n">feature_ranges</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">continuous_integer_features</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counterfactuals</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generate counterfactual examples.</span>
 
 <span class="sd">        Use mixed-integer linear programming to generate optimal counterfactual</span>
@@ -1933,6 +2344,10 @@ frequent level.</p>
 <span class="sd">                ranges/values for continuous/categorical features. It maps</span>
 <span class="sd">                `feature_name` -&gt; [`min_value`, `max_value`] for continuous features,</span>
 <span class="sd">                `feature_name` -&gt; [`level1`, `level2`, ...] for categorical features.</span>
+<span class="sd">            continuous_integer_features (list, optional): A list of names of</span>
+<span class="sd">                continuous features that need to be integers (e.g., age, FICO score)</span>
+<span class="sd">            verbose (bool): True if you want it to print out the optimization</span>
+<span class="sd">                process from each iteration.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Counterfactuals: The generated counterfactual examples with their</span>
@@ -1952,7 +2367,11 @@ frequent level.</p>
         <span class="c1"># Step 1: Find the current score for each feature</span>
         <span class="c1"># This is done by ebm.explain_local()</span>
         <span class="n">cur_scores</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span><span class="p">:</span>
+            <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cur_scores</span><span class="p">[</span><span class="s1">&#39;intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span>
 
         <span class="n">local_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">explain_local</span><span class="p">(</span><span class="n">cur_example</span><span class="p">)</span><span class="o">.</span><span class="n">_internal_obj</span>
 
@@ -1971,6 +2390,7 @@ frequent level.</p>
             <span class="n">cf_direction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">cur_example</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">total_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">cur_scores</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_scores</span><span class="p">])</span>
             <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="o">-</span><span class="n">total_score</span>
+            <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Regression</span>
@@ -1985,11 +2405,12 @@ frequent level.</p>
 
             <span class="k">elif</span> <span class="n">predicted_value</span> <span class="o">&lt;</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="n">cf_direction</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
+                <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">cf_direction</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need to implement needed_score_gain&#39;</span><span class="p">)</span>
-            <span class="c1"># needed_score_gain = -1</span>
+                <span class="n">needed_score_gain</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
+                <span class="n">score_gain_bound</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted_value</span>
 
         <span class="c1"># Step 2: Generate continuous and categorical options</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2036,9 +2457,16 @@ frequent level.</p>
                 <span class="n">cur_feature_score</span> <span class="o">=</span> <span class="n">cur_scores</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span>
                 <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_id</span><span class="p">])</span>
 
+                <span class="c1"># Users can require the continuous feature to have integer values</span>
+                <span class="c1"># For example, age, FICO score, and number of accounts</span>
+                <span class="n">need_to_be_int</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">continuous_integer_features</span> <span class="ow">and</span> <span class="n">cur_feature_name</span> <span class="ow">in</span> <span class="n">continuous_integer_features</span><span class="p">:</span>
+                    <span class="n">need_to_be_int</span> <span class="o">=</span> <span class="kc">True</span>
+
                 <span class="n">cur_cont_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_cont_options</span><span class="p">(</span>
                     <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span> <span class="n">cur_feature_name</span><span class="p">,</span>
-                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cont_mads</span><span class="p">,</span> <span class="n">epsilon</span>
+                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cont_mads</span><span class="p">,</span>
+                    <span class="n">score_gain_bound</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">need_to_be_int</span>
                 <span class="p">)</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_cont_options</span>
@@ -2050,7 +2478,7 @@ frequent level.</p>
 
                 <span class="n">cur_cat_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_cat_options</span><span class="p">(</span>
                     <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cur_cat_distance</span>
+                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cur_cat_distance</span><span class="p">,</span> <span class="n">score_gain_bound</span>
                 <span class="p">)</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_cat_options</span>
@@ -2093,13 +2521,75 @@ frequent level.</p>
                     <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
                 <span class="p">)</span>
 
+        <span class="c1"># Step 2.4: Rescale categorical distances so that they have the same mean</span>
+        <span class="c1"># as continuous variables (default)</span>
+        <span class="k">if</span> <span class="n">categorical_weight</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="n">cont_distances</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cat_distances</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="n">cont_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="n">cat_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="n">categorical_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cont_distances</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cat_distances</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+            <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">categorical_weight</span>
+
         <span class="c1"># Step 3. Formulate the MILP model and solve it</span>
+
         <span class="c1"># Find diverse solutions by accumulatively muting the optimal solutions</span>
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">muted_variables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="n">model</span><span class="p">,</span> <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span>
-                                            <span class="n">features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">total_cfs</span><span class="p">)):</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span>
+                                                <span class="n">features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span>
+                                                <span class="n">muted_variables</span><span class="o">=</span><span class="n">muted_variables</span><span class="p">)</span>
 
-        <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">pulp</span><span class="o">.</span><span class="n">apis</span><span class="o">.</span><span class="n">PULP_CBC_CMD</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">warmStart</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">is_successful</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;solver runs for </span><span class="si">{:.2f}</span><span class="s1"> seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solutionTime</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;status: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pulp</span><span class="o">.</span><span class="n">LpStatus</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">status</span><span class="p">]))</span>
+
+            <span class="n">active_variables</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Print the optimal solution</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">varValue</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">active_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Found solutions:&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_solution</span><span class="p">(</span><span class="n">cur_example</span><span class="p">,</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+            <span class="c1"># Collect the current solution and mute the associated variables</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">active_variables</span><span class="p">,</span> <span class="n">pulp</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">objective</span><span class="p">)])</span>
+
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">muted_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cfs</span>
 </pre></div>
 
@@ -2148,6 +2638,10 @@ features.</li>
 ranges/values for continuous/categorical features. It maps
 <code>feature_name</code> -> [<code>min_value</code>, <code>max_value</code>] for continuous features,
 <code>feature_name</code> -> [<code>level1</code>, <code>level2</code>, ...] for categorical features.</li>
+<li><strong>continuous_integer_features (list, optional):</strong>  A list of names of
+continuous features that need to be integers (e.g., age, FICO score)</li>
+<li><strong>verbose (bool):</strong>  True if you want it to print out the optimization
+process from each iteration.</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -2173,7 +2667,9 @@ ranges/values for continuous/categorical features. It maps
     cur_feature_value,
     cur_feature_score,
     cont_mads,
-    epsilon=0.005
+    score_gain_bound=None,
+    epsilon=0.005,
+    need_to_be_int=False
 )</span>:
     </div>
 
@@ -2181,7 +2677,8 @@ ranges/values for continuous/categorical features. It maps
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">generate_cont_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
                               <span class="n">cur_feature_name</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                              <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cont_mads</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.005</span><span class="p">):</span>
+                              <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">cont_mads</span><span class="p">,</span> <span class="n">score_gain_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">need_to_be_int</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all alternative options for this continuous variable. This function</span>
 <span class="sd">        would filter out all options that are:</span>
@@ -2198,11 +2695,17 @@ ranges/values for continuous/categorical features. It maps
 <span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            cont_mads (dict): A map of feature_name =&gt; MAD score.</span>
+<span class="sd">            score_gain_bound (float): Bound of the score gain. We do not collect</span>
+<span class="sd">                options that give `score_gain` &gt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=1`), or `score_gain` &lt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=-1`)</span>
 <span class="sd">            epsilon (float): The threshold to determine if two options give similar</span>
 <span class="sd">                score gains. Score gains $s_1$ and $s_2$ are similar if</span>
 <span class="sd">                $|s_1 - s_2| &lt;$ epsilon. Smaller epsilon significantly increases</span>
 <span class="sd">                the time to solve the MILP. Large epsilon might filter out the</span>
 <span class="sd">                optimal CF. Defaults to 0.005.</span>
+<span class="sd">            need_to_be_int (bool): True if the target values for this continuous</span>
+<span class="sd">                variable need to have integer values.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of option tuples (target, score gain, distance, bin_index)</span>
@@ -2234,6 +2737,13 @@ ranges/values for continuous/categorical features. It maps
             <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">*</span> <span class="n">score_gain</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
 
+            <span class="c1"># Filter out of bound options</span>
+            <span class="k">if</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&gt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&lt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
             <span class="c1"># Because of the special binning structure of EBM, the distance of</span>
             <span class="c1"># bins on the left to the current value is different from the bins</span>
             <span class="c1"># that are on the right</span>
@@ -2244,16 +2754,44 @@ ranges/values for continuous/categorical features. It maps
             <span class="n">distance</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+                <span class="c1"># First need to consier if it is need to be an integer</span>
+                <span class="c1"># If so, it would be the closest integer to the right point</span>
+                <span class="k">if</span> <span class="n">need_to_be_int</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">target</span> <span class="o">-=</span> <span class="mi">1</span>
 
-                <span class="c1"># Subtract a very smaller value to make the target technically fall</span>
-                <span class="c1"># into the left bin</span>
-                <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
+                    <span class="c1"># Skip this option if it is not possible to find an int value</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                    <span class="c1"># Subtract a very smaller value to make the target</span>
+                    <span class="c1"># technically fall into the left bin</span>
+                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
 
             <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+                <span class="c1"># First need to consier if it should be an integer value</span>
+                <span class="c1"># If so, it would be the closest integer to the left point</span>
+                <span class="k">if</span> <span class="n">need_to_be_int</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="n">target</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># Skip this option if it is not possible to find an int value</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">additives</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">&gt;=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">bin_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">cur_feature_value</span><span class="p">)</span>
 
             <span class="c1"># Scale the distance based on the deviation of the feature (how changable it is)</span>
             <span class="k">if</span> <span class="n">cont_mads</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -2297,11 +2835,17 @@ would filter out all options that are:</p>
 <li><strong>cur_feature_value (float):</strong>  The current feature value.</li>
 <li><strong>cur_feature_score (float):</strong>  The score for the current feature value.</li>
 <li><strong>cont_mads (dict):</strong>  A map of feature_name =&gt; MAD score.</li>
+<li><strong>score_gain_bound (float):</strong>  Bound of the score gain. We do not collect
+options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (when
+<code>cf_direction=1</code>), or <code>score_gain</code> &lt; <code>score_gain_bound</code> (when
+<code>cf_direction=-1</code>)</li>
 <li><strong>epsilon (float):</strong>  The threshold to determine if two options give similar
 score gains. Score gains $s_1$ and $s_2$ are similar if
 $|s_1 - s_2| <$ epsilon. Smaller epsilon significantly increases
 the time to solve the MILP. Large epsilon might filter out the
 optimal CF. Defaults to 0.005.</li>
+<li><strong>need_to_be_int (bool):</strong>  True if the target values for this continuous
+variable need to have integer values.</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -2324,7 +2868,8 @@ optimal CF. Defaults to 0.005.</li>
     cur_feature_index,
     cur_feature_value,
     cur_feature_score,
-    cur_cat_distance
+    cur_cat_distance,
+    score_gain_bound=None
 )</span>:
     </div>
 
@@ -2332,7 +2877,7 @@ optimal CF. Defaults to 0.005.</li>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">generate_cat_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
                              <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span>
-                             <span class="n">cur_cat_distance</span><span class="p">):</span>
+                             <span class="n">cur_cat_distance</span><span class="p">,</span> <span class="n">score_gain_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all alternative options for this categorical variable. This function</span>
 <span class="sd">        would filter out all options that are not helpful for the counterfactual</span>
@@ -2346,6 +2891,10 @@ optimal CF. Defaults to 0.005.</li>
 <span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            cur_cat_distance (dict): A map of feature_level =&gt; 1 - frequency.</span>
+<span class="sd">            score_gain_bound (float): Bound of the score gain. We do not collect</span>
+<span class="sd">                options that give `score_gain` &gt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=1`), or `score_gain` &lt; `score_gain_bound` (when</span>
+<span class="sd">                `cf_direction=-1`)</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of option tuples (target, score_gain, distance, bin_index).</span>
@@ -2377,6 +2926,13 @@ optimal CF. Defaults to 0.005.</li>
                 <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">*</span> <span class="n">score_gain</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">continue</span>
 
+                <span class="c1"># Filter out of bound options</span>
+                <span class="k">if</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&gt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">cf_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">score_gain</span> <span class="o">&lt;</span> <span class="n">score_gain_bound</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
                 <span class="n">distance</span> <span class="o">=</span> <span class="n">cur_cat_distance</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
 
                 <span class="n">cat_options</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">target</span><span class="p">,</span> <span class="n">score_gain</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
@@ -2400,6 +2956,10 @@ generation.</p>
 <li><strong>cur_feature_value (float):</strong>  The current feature value.</li>
 <li><strong>cur_feature_score (float):</strong>  The score for the current feature value.</li>
 <li><strong>cur_cat_distance (dict):</strong>  A map of feature_level =&gt; 1 - frequency.</li>
+<li><strong>score_gain_bound (float):</strong>  Bound of the score gain. We do not collect
+options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (when
+<code>cf_direction=1</code>), or <code>score_gain</code> &lt; <code>score_gain_bound</code> (when
+<code>cf_direction=-1</code>)</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -2696,6 +3256,7 @@ effects.</p>
                                     <span class="n">lowBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                     <span class="n">upBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                     <span class="n">cat</span><span class="o">=</span><span class="s1">&#39;Binary&#39;</span><span class="p">)</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">setInitialValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="n">score_gain</span> <span class="o">+=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span>
                 <span class="n">distance</span> <span class="o">+=</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span>
@@ -2720,10 +3281,13 @@ effects.</p>
                     <span class="n">cur_variables</span> <span class="o">=</span> <span class="p">[]</span>
 
                     <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">opt_name</span><span class="p">]:</span>
-                        <span class="n">z</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpVariable</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt_name</span><span class="p">,</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                        <span class="n">z</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpVariable</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt_name</span><span class="p">,</span>
+                                                              <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                              <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
                                             <span class="n">lowBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                             <span class="n">upBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                             <span class="n">cat</span><span class="o">=</span><span class="s1">&#39;Continuous&#39;</span><span class="p">)</span>
+                        <span class="n">z</span><span class="o">.</span><span class="n">setInitialValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                         <span class="c1"># Need to iterate through existing variables for f1 and f2 to find</span>
                         <span class="c1"># the corresponding variables</span>
@@ -2797,6 +3361,95 @@ solutions. This list should not include interaction variables.</li>
   model that encodes the MILP problem, and <code>variables</code> is a dict of
   variables used in the <code>model</code>: <code>feature_name</code> =&gt; [<code>variables</code>].</p>
 </blockquote>
+</div>
+
+
+                            </div>
+                            <div id="GAMSwitch.print_solution" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#GAMSwitch.print_solution">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">print_solution</span><span class="signature">(self, cur_example, active_variables, options)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">print_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the optimal solution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cur_example (np.ndarray): the original data point.</span>
+<span class="sd">            active_variables (list[variable]): binary variables with value 1.</span>
+<span class="sd">            options (dict): all the possible options for all features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+            <span class="c1"># Skip interaction vars (included)</span>
+            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                <span class="c1"># Find the original value</span>
+                <span class="n">org_value</span> <span class="o">=</span> <span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)]</span>
+
+                <span class="c1"># Find the target bin</span>
+                <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="n">bin_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">f_index</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">):</span>
+                        <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; inf)&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Change &lt;</span><span class="si">{}</span><span class="s1">&gt; from </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">f_name</span><span class="p">,</span> <span class="n">org_value</span><span class="p">,</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target_bin</span>
+                        <span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="p">))</span>
+                        <span class="k">break</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">f_name</span> <span class="o">=</span> <span class="n">f_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_x_&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="p">)</span>
+                <span class="n">bin_0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+),\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">bin_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:\d+,(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_0</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_1</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trigger interaction term: &lt;</span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">f_name</span>
+                        <span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
+                        <span class="p">))</span>
+                        <span class="k">break</span>
+        <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Print the optimal solution.</p>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>cur_example (np.ndarray):</strong>  the original data point.</li>
+<li><strong>active_variables (list[variable]):</strong>  binary variables with value 1.</li>
+<li><strong>options (dict):</strong>  all the possible options for all features.</li>
+</ul>
 </div>
 
 

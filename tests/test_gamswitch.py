@@ -30,6 +30,27 @@ def cur_example():
     return cur_example
 
 
+@pytest.fixture
+def gs_regression():
+    ebm = pickle.load(open('tests/data/lc-ebm-ny.pickle', 'rb'))
+    data = np.load('tests/data/lending-club-data-ny-5000.npz', allow_pickle=True)
+    x_train = data['x_all']
+
+    gs = gamswitch.GAMSwitch(ebm, x_train)
+    return gs
+
+
+@pytest.fixture
+def cur_example_regression():
+    cur_example = np.array([[
+        12000.0, '36 months', '1 year', 'RENT', 4.916,
+        'Source Verified', 'other', 9.25, 2002.0, 7.0, '0',
+        1.591, 0.2, 16.0, 'Individual', '0', '0', 732.0
+    ]])
+
+    return cur_example
+
+
 # def test_compute_mad(gs):
 #     xs = np.array([0, 0, 1, 5, 10])
 
@@ -101,15 +122,35 @@ def cur_example():
 #     cfs.model_summary()
 
 
-def test_generate_cfs_diverse(gs: gamswitch.GAMSwitch, cur_example):
-    """Test generating diverse solutions."""
+# def test_generate_cfs_diverse(gs: gamswitch.GAMSwitch, cur_example):
+#     """Test generating diverse solutions."""
 
-    cfs = gs.generate_cfs(
-        cur_example,
-        2,
+#     cfs = gs.generate_cfs(
+#         cur_example,
+#         5,
+#         feature_ranges=None,
+#         verbose=True,
+#     )
+
+#     cfs.model_summary()
+#     assert(len(cfs.data) == 5)
+
+
+def test_generate_cfs_regression(gs_regression: gamswitch.GAMSwitch,
+    cur_example_regression):
+    """Test generating diverse solutions."""
+    print(gs_regression.is_classifier)
+
+    cfs = gs_regression.generate_cfs(
+        cur_example_regression,
+        1,
         feature_ranges=None,
         verbose=True,
+        target_range=[3, 9]
     )
 
-    cfs.model_summary()
+    result = cfs.ebm.predict(cfs.data)
+    print(result)
+
+    # cfs.model_summary()
     # assert(len(cfs.data) == 5)

@@ -162,7 +162,11 @@ class GAMSwitch:
         # Step 1: Find the current score for each feature
         # This is done by ebm.explain_local()
         cur_scores = {}
-        cur_scores['intercept'] = self.ebm.intercept_[0]
+
+        if self.is_classifier:
+            cur_scores['intercept'] = self.ebm.intercept_[0]
+        else:
+            cur_scores['intercept'] = self.ebm.intercept_
 
         local_data = self.ebm.explain_local(cur_example)._internal_obj
 
@@ -181,6 +185,7 @@ class GAMSwitch:
             cf_direction = self.ebm.predict(cur_example)[0] * (-2) + 1
             total_score = np.sum([cur_scores[k] for k in cur_scores])
             needed_score_gain = -total_score
+            score_gain_bound = None
 
         else:
             # Regression
@@ -195,11 +200,12 @@ class GAMSwitch:
 
             elif predicted_value < target_range[0]:
                 cf_direction = 1
+                needed_score_gain = target_range[0] - predicted_value
+                score_gain_bound = target_range[1] - predicted_value
             else:
                 cf_direction = -1
-
-            raise ValueError('Need to implement needed_score_gain')
-            # needed_score_gain = -1
+                needed_score_gain = target_range[1] - predicted_value
+                score_gain_bound = target_range[0] - predicted_value
 
         # Step 2: Generate continuous and categorical options
         options = {}
@@ -248,7 +254,8 @@ class GAMSwitch:
 
                 cur_cont_options = self.generate_cont_options(
                     cf_direction, cur_feature_index, cur_feature_name,
-                    cur_feature_value, cur_feature_score, self.cont_mads, epsilon
+                    cur_feature_value, cur_feature_score, self.cont_mads,
+                    score_gain_bound, epsilon
                 )
 
                 options[cur_feature_name] = cur_cont_options
@@ -260,7 +267,7 @@ class GAMSwitch:
 
                 cur_cat_options = self.generate_cat_options(
                     cf_direction, cur_feature_index, cur_feature_value,
-                    cur_feature_score, cur_cat_distance
+                    cur_feature_score, cur_cat_distance, score_gain_bound
                 )
 
                 options[cur_feature_name] = cur_cat_options
@@ -376,7 +383,8 @@ class GAMSwitch:
 
     def generate_cont_options(self, cf_direction, cur_feature_index,
                               cur_feature_name, cur_feature_value,
-                              cur_feature_score, cont_mads, epsilon=0.005):
+                              cur_feature_score, cont_mads, score_gain_bound=None,
+                              epsilon=0.005):
         """
         Generage all alternative options for this continuous variable. This function
         would filter out all options that are:
@@ -393,6 +401,10 @@ class GAMSwitch:
             cur_feature_value (float): The current feature value.
             cur_feature_score (float): The score for the current feature value.
             cont_mads (dict): A map of feature_name => MAD score.
+            score_gain_bound (float): Bound of the score gain. We do not collect
+                options that give `score_gain` > `score_gain_bound` (when
+                `cf_direction=1`), or `score_gain` < `score_gain_bound` (when
+                `cf_direction=-1`)
             epsilon (float): The threshold to determine if two options give similar
                 score gains. Score gains $s_1$ and $s_2$ are similar if
                 $|s_1 - s_2| <$ epsilon. Smaller epsilon significantly increases
@@ -428,6 +440,13 @@ class GAMSwitch:
 
             if cf_direction * score_gain <= 0:
                 continue
+
+            # Filter out of bound options
+            if score_gain_bound:
+                if cf_direction == 1 and score_gain > score_gain_bound:
+                    continue
+                if cf_direction == -1 and score_gain < score_gain_bound:
+                    continue
 
             # Because of the special binning structure of EBM, the distance of
             # bins on the left to the current value is different from the bins
@@ -472,7 +491,7 @@ class GAMSwitch:
 
     def generate_cat_options(self, cf_direction, cur_feature_index,
                              cur_feature_value, cur_feature_score,
-                             cur_cat_distance):
+                             cur_cat_distance, score_gain_bound=None):
         """
         Generage all alternative options for this categorical variable. This function
         would filter out all options that are not helpful for the counterfactual
@@ -486,6 +505,10 @@ class GAMSwitch:
             cur_feature_value (float): The current feature value.
             cur_feature_score (float): The score for the current feature value.
             cur_cat_distance (dict): A map of feature_level => 1 - frequency.
+            score_gain_bound (float): Bound of the score gain. We do not collect
+                options that give `score_gain` > `score_gain_bound` (when
+                `cf_direction=1`), or `score_gain` < `score_gain_bound` (when
+                `cf_direction=-1`)
 
         Returns:
             list: List of option tuples (target, score_gain, distance, bin_index).
@@ -516,6 +539,13 @@ class GAMSwitch:
                 # Skip unhelpful options
                 if cf_direction * score_gain <= 0:
                     continue
+
+                # Filter out of bound options
+                if score_gain_bound:
+                    if cf_direction == 1 and score_gain > score_gain_bound:
+                        continue
+                    if cf_direction == -1 and score_gain < score_gain_bound:
+                        continue
 
                 distance = cur_cat_distance[target]
 
@@ -758,7 +788,9 @@ class GAMSwitch:
                     cur_variables = []
 
                     for option in options[opt_name]:
-                        z = pulp.LpVariable('{}:{}'.format(opt_name, option[3]),
+                        z = pulp.LpVariable('{}:{},{}'.format(opt_name,
+                                                              option[3][0],
+                                                              option[3][1]),
                                             lowBound=0,
                                             upBound=1,
                                             cat='Continuous')
@@ -852,6 +884,22 @@ class GAMSwitch:
                         ))
                         print('\t* score gain: {:.4f}\n\t* distance cost: {:.4f}'.format(
                             option[1], option[2]
+                        ))
+                        break
+
+            else:
+                f_name = re.sub(r'(.+):.+', r'\1', var.name)
+                f_name = f_name.replace('_x_', ' x ')
+                bin_0 = int(re.sub(r'.+:(\d+),\d+', r'\1', var.name))
+                bin_1 = int(re.sub(r'.+:\d+,(\d+)', r'\1', var.name))
+
+                for option in options[f_name]:
+                    if option[3][0] == bin_0 and option[3][1] == bin_1:
+                        print('Trigger interaction term: <{}>'.format(
+                            f_name
+                        ))
+                        print('\t* score gain: {:.4f}\n\t* distance cost: {:.4f}'.format(
+                            option[1], 0
                         ))
                         break
         print()

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-"""Tests for `gamswitch` package."""
+"""Tests for `gamcoach` package."""
 
 import pytest
 import pickle
 import numpy as np
 
-from gamswitch import gamswitch, counterfactuals
+from gamcoach import gamcoach, counterfactuals
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def gs():
     data = np.load('tests/data/lending-club-data-5000.npz', allow_pickle=True)
     x_train = data['x_all']
 
-    gs = gamswitch.GAMSwitch(ebm, x_train)
+    gs = gamcoach.GAMCoach(ebm, x_train)
     return gs
 
 
@@ -36,7 +36,7 @@ def gs_regression():
     data = np.load('tests/data/lending-club-data-ny-5000.npz', allow_pickle=True)
     x_train = data['x_all']
 
-    gs = gamswitch.GAMSwitch(ebm, x_train)
+    gs = gamcoach.GAMCoach(ebm, x_train)
     return gs
 
 
@@ -66,7 +66,7 @@ def test_compute_frequency_distance(gs):
     assert(distance_dict['c'] == 0.75)
 
 
-def test_generate_cfs_options(gs: gamswitch.GAMSwitch, cur_example):
+def test_generate_cfs_options(gs: gamcoach.GAMCoach, cur_example):
     """Test generating options."""
     cfs = gs.generate_cfs(cur_example, 1, verbose=True)
 
@@ -79,7 +79,7 @@ def test_generate_cfs_options(gs: gamswitch.GAMSwitch, cur_example):
     assert(total['loan_amnt x revol_bal'] == 1296)
 
 
-def test_generate_cfs_options_with_range(gs: gamswitch.GAMSwitch, cur_example):
+def test_generate_cfs_options_with_range(gs: gamcoach.GAMCoach, cur_example):
     """Test generating options with feature_range constraints."""
 
     feature_ranges = {
@@ -100,7 +100,7 @@ def test_generate_cfs_options_with_range(gs: gamswitch.GAMSwitch, cur_example):
     assert(total['home_ownership'] == 2)
 
 
-def test_generate_cfs_model(gs: gamswitch.GAMSwitch, cur_example):
+def test_generate_cfs_model(gs: gamcoach.GAMCoach, cur_example):
     """Test formulating the problem into a MILP model."""
 
     cfs = gs.generate_cfs(
@@ -122,7 +122,7 @@ def test_generate_cfs_model(gs: gamswitch.GAMSwitch, cur_example):
     cfs.model_summary()
 
 
-def test_generate_cfs_diverse(gs: gamswitch.GAMSwitch, cur_example):
+def test_generate_cfs_diverse(gs: gamcoach.GAMCoach, cur_example):
     """Test generating diverse solutions."""
 
     cfs = gs.generate_cfs(
@@ -136,7 +136,7 @@ def test_generate_cfs_diverse(gs: gamswitch.GAMSwitch, cur_example):
     assert(len(cfs.data) == 5)
 
 
-def test_generate_cfs_regression(gs_regression: gamswitch.GAMSwitch,
+def test_generate_cfs_regression(gs_regression: gamcoach.GAMCoach,
                                  cur_example_regression):
     """Test generating diverse solutions."""
     print(gs_regression.is_classifier)

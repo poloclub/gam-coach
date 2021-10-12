@@ -1,6 +1,6 @@
-"""#What is GAM Switch?
+"""#What is GAM Coach?
 
-GAM Switch is a simple and flexible algorithm to generate counterfactual (CF)
+GAM Coach is a simple and flexible algorithm to generate counterfactual (CF)
 explanations for Generalized Additive Models (GAMs).
 
 In many machine learning (ML) applications, people use CF examples to help end
@@ -11,27 +11,27 @@ Take loan application as an example, one can explain why a borrower's applicatio
 is rejected with a CF example — *"if your annual income were $5k higher, your application would
 be approved."*
 
-GAM Switch is designed to generate CFs for [Explanable Boosting Machine
+GAM Coach is designed to generate CFs for [Explanable Boosting Machine
 (EBM)](https://interpret.ml/docs/ebm.html), the state-of-the-art GAM trained with
 boosting trees.
-GAM Switch uses [mixed-integer linear programming](https://en.wikipedia.org/wiki/Integer_programming):
+GAM Coach uses [mixed-integer linear programming](https://en.wikipedia.org/wiki/Integer_programming):
 it can efficiently generates CFs are gauranteed to be optimal (minimal changes)
 and sparse (use minimal features).
 
-GAM Switch is flexible. You can easily impose diverse constraints
-for your target CFs. For example, you can tell GAM Switch to generate CFs
+GAM Coach is flexible. You can easily impose diverse constraints
+for your target CFs. For example, you can tell GAM Coach to generate CFs
 that only **use certain features**, **within some ranges**, and **make at most
-some number of changes**. Then, GAM Switch is gauranteed to find the best CFs
+some number of changes**. Then, GAM Coach is gauranteed to find the best CFs
 meet these conditions (if feasible). In addition to the classic binary
-classification problems (e.g., *loan approval* prediction), GAM Switch also
+classification problems (e.g., *loan approval* prediction), GAM Coach also
 supports regression problems (e.g., *loan interest rate* prediction).
 
-# How to use GAM Switch?
+# How to use GAM Coach?
 
-To learn how to use GAM Switch, you can check out some example notebooks ([binary
+To learn how to use GAM Coach, you can check out some example notebooks ([binary
 classification](.), [regression](.)). The main functions you will use are
-[`GAMSwitch()`](./gamswitch/gamswitch.html#GAMSwitch.__init__) and
-[`generate_cfs()`](./gamswitch/gamswitch.html#GAMSwitch.generate_cfs)
+[`gamcoach()`](./gamcoach/gamcoach.html#gamcoach.__init__) and
+[`generate_cfs()`](./gamcoach/gamcoach.html#gamcoach.generate_cfs)
 
 ```python
 import numpy as np

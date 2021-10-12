@@ -1,6 +1,6 @@
-"""Main module for GAM Switch.
+"""Main module for GAM Coach.
 
-GAM Switch implements a simple and flexible method to generate counterfactual
+GAM Coach implements a simple and flexible method to generate counterfactual
 explanations for generalized additive models (GAMs).
 """
 
@@ -19,15 +19,15 @@ from .counterfactuals import Counterfactuals
 SEED = 922
 
 
-class GAMSwitch:
-    """Main class for GAM Switch."""
+class GAMCoach:
+    """Main class for GAM Coach."""
 
     def __init__(self,
                  ebm: Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor],
                  x_train: np.ndarray,
                  cont_mads=None,
                  cat_distances=None):
-        """Initialize a GAMSwitch object.
+        """Initialize a GAMCoach object.
 
         Args:
             ebm (Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor]):

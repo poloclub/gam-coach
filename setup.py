@@ -33,8 +33,6 @@ setup(
     keywords='gamcoach',
     name='gamcoach',
     packages=find_packages(include=['gamcoach', 'gamcoach.*']),
-    test_suite='tests',
-    tests_require=test_requirements,
     url='https://github.com/xiaohk/gam-coach',
     version='0.1.1',
     zip_safe=False,

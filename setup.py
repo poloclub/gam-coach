@@ -4,13 +4,10 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
-requirements = [ ]
+requirements = ['interpret', 'pulp']
 
 test_requirements = ['pytest>=3', ]
 
@@ -31,14 +28,14 @@ setup(
     description="Generating counterfactual explanations for GAMs",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='gamcoach',
     name='gamcoach',
     packages=find_packages(include=['gamcoach', 'gamcoach.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/xiaohk/gamcoach',
+    url='https://github.com/xiaohk/gam-coach',
     version='0.1.0',
     zip_safe=False,
 )

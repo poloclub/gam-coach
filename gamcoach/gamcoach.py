@@ -94,7 +94,7 @@ class GAMCoach:
 
     def generate_cfs(self,
                      cur_example: np.ndarray,
-                     total_cfs: int,
+                     total_cfs: int = 1,
                      target_range: tuple = None,
                      sim_threshold_factor: float = 0.005,
                      sim_threshold: float = None,
@@ -113,7 +113,8 @@ class GAMCoach:
             cur_example (np.ndarray): The data point of interest. This function
                 aims to find similar examples that the model gives different
                 predictions.
-            total_cfs (int): The total number of counterfactuals to generate.
+            total_cfs (int, optional): The total number of counterfactuals to,
+                generate. Default to 1.
             target_range (tuple, optional): The targetted prediction range. This
                 parameter is required if the EBM is a regressor.
             sim_threshold_factor (float, optional): A positive float to automatically
@@ -396,6 +397,7 @@ class GAMCoach:
 
         cfs = Counterfactuals(solutions, is_successful, model, variables,
                               self.ebm, cur_example, options)
+
         return cfs
 
     def generate_cont_options(self, cf_direction, cur_feature_index,
@@ -496,7 +498,7 @@ class GAMCoach:
 
                     # Subtract a very smaller value to make the target
                     # technically fall into the left bin
-                    target -= 1e-6
+                    target -= 1e-4
 
             elif i > cur_bin_id:
                 # First need to consier if it should be an integer value
@@ -974,8 +976,8 @@ class GAMCoach:
         Returns:
             float: MAD value of xs.
         """
-        xs_median = np.median(xs)
-        mad = np.median(np.abs(xs - xs_median))
+        xs_median = np.median(xs.astype(float))
+        mad = np.median(np.abs(xs.astype(float) - xs_median))
         return mad
 
     @staticmethod

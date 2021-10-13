@@ -42,3 +42,6 @@ import numpy as np
 __author__ = """Jay Wang"""
 __email__ = 'jay@zijie.wang'
 __version__ = '0.1.0'
+
+from gamcoach.gamcoach import *
+from gamcoach.counterfactuals import *

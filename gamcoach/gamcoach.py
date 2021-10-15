@@ -362,8 +362,8 @@ class GAMCoach:
                 cf_direction,
                 needed_score_gain,
                 features_to_vary,
-                max_num_features_to_vary,
                 options,
+                max_num_features_to_vary,
                 muted_variables=muted_variables
             )
 
@@ -764,7 +764,7 @@ class GAMCoach:
 
     @staticmethod
     def create_milp(cf_direction, needed_score_gain, features_to_vary,
-                    max_num_features_to_vary, options, muted_variables=[]):
+                    options, max_num_features_to_vary=None, muted_variables=[]):
         """
         Create a MILP to find counterfactuals (CF) using PuLP.
 
@@ -774,14 +774,14 @@ class GAMCoach:
             needed_score_gain (float): The score gain needed to achieve the CF goal.
             features_to_vary (list[str]): Feature names of features that the
                 generated CF can change.
-            max_num_features_to_vary (int): Max number of features that the
-                generated CF can change. If the value is `None`, the CFs can
-                change any number of features.
             options (dict): Possible options for each variable. Each option is a
                 list [target, score_gain, distance, bin_index].
-            muted_variables (list[str]): Variables that this MILP should not use.
-                This is useful to mute optimal variables so we can explore diverse
-                solutions. This list should not include interaction variables.
+            max_num_features_to_vary (int, optional): Max number of features that the
+                generated CF can change. If the value is `None`, the CFs can
+                change any number of features.
+            muted_variables (list[str], optional): Variables that this MILP should
+                not use. This is useful to mute optimal variables so we can explore
+                diverse solutions. This list should not include interaction variables.
 
         Returns:
             A tuple (`model`, `variables`), where `model` is a pulp.LpProblem

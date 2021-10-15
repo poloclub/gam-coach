@@ -218,7 +218,7 @@ explanations for generalized additive models (GAMs).</p>
 
     <span class="k">def</span> <span class="nf">generate_cfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">cur_example</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                     <span class="n">total_cfs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="n">total_cfs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                      <span class="n">target_range</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">sim_threshold_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
                      <span class="n">sim_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -237,7 +237,8 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_example (np.ndarray): The data point of interest. This function</span>
 <span class="sd">                aims to find similar examples that the model gives different</span>
 <span class="sd">                predictions.</span>
-<span class="sd">            total_cfs (int): The total number of counterfactuals to generate.</span>
+<span class="sd">            total_cfs (int, optional): The total number of counterfactuals to,</span>
+<span class="sd">                generate. Default to 1.</span>
 <span class="sd">            target_range (tuple, optional): The targetted prediction range. This</span>
 <span class="sd">                parameter is required if the EBM is a regressor.</span>
 <span class="sd">            sim_threshold_factor (float, optional): A positive float to automatically</span>
@@ -485,8 +486,8 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="n">cf_direction</span><span class="p">,</span>
                 <span class="n">needed_score_gain</span><span class="p">,</span>
                 <span class="n">features_to_vary</span><span class="p">,</span>
-                <span class="n">max_num_features_to_vary</span><span class="p">,</span>
                 <span class="n">options</span><span class="p">,</span>
+                <span class="n">max_num_features_to_vary</span><span class="p">,</span>
                 <span class="n">muted_variables</span><span class="o">=</span><span class="n">muted_variables</span>
             <span class="p">)</span>
 
@@ -520,6 +521,7 @@ explanations for generalized additive models (GAMs).</p>
 
         <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
                               <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">cfs</span>
 
     <span class="k">def</span> <span class="nf">generate_cont_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
@@ -620,7 +622,7 @@ explanations for generalized additive models (GAMs).</p>
 
                     <span class="c1"># Subtract a very smaller value to make the target</span>
                     <span class="c1"># technically fall into the left bin</span>
-                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
+                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-4</span>
 
             <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
                 <span class="c1"># First need to consier if it should be an integer value</span>
@@ -886,7 +888,7 @@ explanations for generalized additive models (GAMs).</p>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span> <span class="n">features_to_vary</span><span class="p">,</span>
-                    <span class="n">max_num_features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">muted_variables</span><span class="o">=</span><span class="p">[]):</span>
+                    <span class="n">options</span><span class="p">,</span> <span class="n">max_num_features_to_vary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">muted_variables</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MILP to find counterfactuals (CF) using PuLP.</span>
 
@@ -896,14 +898,14 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            needed_score_gain (float): The score gain needed to achieve the CF goal.</span>
 <span class="sd">            features_to_vary (list[str]): Feature names of features that the</span>
 <span class="sd">                generated CF can change.</span>
-<span class="sd">            max_num_features_to_vary (int): Max number of features that the</span>
-<span class="sd">                generated CF can change. If the value is `None`, the CFs can</span>
-<span class="sd">                change any number of features.</span>
 <span class="sd">            options (dict): Possible options for each variable. Each option is a</span>
 <span class="sd">                list [target, score_gain, distance, bin_index].</span>
-<span class="sd">            muted_variables (list[str]): Variables that this MILP should not use.</span>
-<span class="sd">                This is useful to mute optimal variables so we can explore diverse</span>
-<span class="sd">                solutions. This list should not include interaction variables.</span>
+<span class="sd">            max_num_features_to_vary (int, optional): Max number of features that the</span>
+<span class="sd">                generated CF can change. If the value is `None`, the CFs can</span>
+<span class="sd">                change any number of features.</span>
+<span class="sd">            muted_variables (list[str], optional): Variables that this MILP should</span>
+<span class="sd">                not use. This is useful to mute optimal variables so we can explore</span>
+<span class="sd">                diverse solutions. This list should not include interaction variables.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A tuple (`model`, `variables`), where `model` is a pulp.LpProblem</span>
@@ -1098,8 +1100,8 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">        Returns:</span>
 <span class="sd">            float: MAD value of xs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xs_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
-        <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xs</span> <span class="o">-</span> <span class="n">xs_median</span><span class="p">))</span>
+        <span class="n">xs_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">-</span> <span class="n">xs_median</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">mad</span>
 
     <span class="nd">@staticmethod</span>
@@ -1242,7 +1244,7 @@ explanations for generalized additive models (GAMs).</p>
 
     <span class="k">def</span> <span class="nf">generate_cfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">cur_example</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                     <span class="n">total_cfs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="n">total_cfs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                      <span class="n">target_range</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">sim_threshold_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
                      <span class="n">sim_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1261,7 +1263,8 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_example (np.ndarray): The data point of interest. This function</span>
 <span class="sd">                aims to find similar examples that the model gives different</span>
 <span class="sd">                predictions.</span>
-<span class="sd">            total_cfs (int): The total number of counterfactuals to generate.</span>
+<span class="sd">            total_cfs (int, optional): The total number of counterfactuals to,</span>
+<span class="sd">                generate. Default to 1.</span>
 <span class="sd">            target_range (tuple, optional): The targetted prediction range. This</span>
 <span class="sd">                parameter is required if the EBM is a regressor.</span>
 <span class="sd">            sim_threshold_factor (float, optional): A positive float to automatically</span>
@@ -1509,8 +1512,8 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="n">cf_direction</span><span class="p">,</span>
                 <span class="n">needed_score_gain</span><span class="p">,</span>
                 <span class="n">features_to_vary</span><span class="p">,</span>
-                <span class="n">max_num_features_to_vary</span><span class="p">,</span>
                 <span class="n">options</span><span class="p">,</span>
+                <span class="n">max_num_features_to_vary</span><span class="p">,</span>
                 <span class="n">muted_variables</span><span class="o">=</span><span class="n">muted_variables</span>
             <span class="p">)</span>
 
@@ -1544,6 +1547,7 @@ explanations for generalized additive models (GAMs).</p>
 
         <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
                               <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">cfs</span>
 
     <span class="k">def</span> <span class="nf">generate_cont_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf_direction</span><span class="p">,</span> <span class="n">cur_feature_index</span><span class="p">,</span>
@@ -1644,7 +1648,7 @@ explanations for generalized additive models (GAMs).</p>
 
                     <span class="c1"># Subtract a very smaller value to make the target</span>
                     <span class="c1"># technically fall into the left bin</span>
-                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
+                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-4</span>
 
             <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
                 <span class="c1"># First need to consier if it should be an integer value</span>
@@ -1910,7 +1914,7 @@ explanations for generalized additive models (GAMs).</p>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span> <span class="n">features_to_vary</span><span class="p">,</span>
-                    <span class="n">max_num_features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">muted_variables</span><span class="o">=</span><span class="p">[]):</span>
+                    <span class="n">options</span><span class="p">,</span> <span class="n">max_num_features_to_vary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">muted_variables</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MILP to find counterfactuals (CF) using PuLP.</span>
 
@@ -1920,14 +1924,14 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            needed_score_gain (float): The score gain needed to achieve the CF goal.</span>
 <span class="sd">            features_to_vary (list[str]): Feature names of features that the</span>
 <span class="sd">                generated CF can change.</span>
-<span class="sd">            max_num_features_to_vary (int): Max number of features that the</span>
-<span class="sd">                generated CF can change. If the value is `None`, the CFs can</span>
-<span class="sd">                change any number of features.</span>
 <span class="sd">            options (dict): Possible options for each variable. Each option is a</span>
 <span class="sd">                list [target, score_gain, distance, bin_index].</span>
-<span class="sd">            muted_variables (list[str]): Variables that this MILP should not use.</span>
-<span class="sd">                This is useful to mute optimal variables so we can explore diverse</span>
-<span class="sd">                solutions. This list should not include interaction variables.</span>
+<span class="sd">            max_num_features_to_vary (int, optional): Max number of features that the</span>
+<span class="sd">                generated CF can change. If the value is `None`, the CFs can</span>
+<span class="sd">                change any number of features.</span>
+<span class="sd">            muted_variables (list[str], optional): Variables that this MILP should</span>
+<span class="sd">                not use. This is useful to mute optimal variables so we can explore</span>
+<span class="sd">                diverse solutions. This list should not include interaction variables.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A tuple (`model`, `variables`), where `model` is a pulp.LpProblem</span>
@@ -2122,8 +2126,8 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">        Returns:</span>
 <span class="sd">            float: MAD value of xs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xs_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
-        <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xs</span> <span class="o">-</span> <span class="n">xs_median</span><span class="p">))</span>
+        <span class="n">xs_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">-</span> <span class="n">xs_median</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">mad</span>
 
     <span class="nd">@staticmethod</span>
@@ -2320,7 +2324,7 @@ frequent level.</p>
             <span class="name">generate_cfs</span><span class="signature">(
     self,
     cur_example: numpy.ndarray,
-    total_cfs: int,
+    total_cfs: int = 1,
     target_range: tuple = None,
     sim_threshold_factor: float = 0.005,
     sim_threshold: float = None,
@@ -2337,7 +2341,7 @@ frequent level.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">generate_cfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">cur_example</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                     <span class="n">total_cfs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="n">total_cfs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                      <span class="n">target_range</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">sim_threshold_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
                      <span class="n">sim_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2356,7 +2360,8 @@ frequent level.</p>
 <span class="sd">            cur_example (np.ndarray): The data point of interest. This function</span>
 <span class="sd">                aims to find similar examples that the model gives different</span>
 <span class="sd">                predictions.</span>
-<span class="sd">            total_cfs (int): The total number of counterfactuals to generate.</span>
+<span class="sd">            total_cfs (int, optional): The total number of counterfactuals to,</span>
+<span class="sd">                generate. Default to 1.</span>
 <span class="sd">            target_range (tuple, optional): The targetted prediction range. This</span>
 <span class="sd">                parameter is required if the EBM is a regressor.</span>
 <span class="sd">            sim_threshold_factor (float, optional): A positive float to automatically</span>
@@ -2604,8 +2609,8 @@ frequent level.</p>
                 <span class="n">cf_direction</span><span class="p">,</span>
                 <span class="n">needed_score_gain</span><span class="p">,</span>
                 <span class="n">features_to_vary</span><span class="p">,</span>
-                <span class="n">max_num_features_to_vary</span><span class="p">,</span>
                 <span class="n">options</span><span class="p">,</span>
+                <span class="n">max_num_features_to_vary</span><span class="p">,</span>
                 <span class="n">muted_variables</span><span class="o">=</span><span class="n">muted_variables</span>
             <span class="p">)</span>
 
@@ -2639,6 +2644,7 @@ frequent level.</p>
 
         <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
                               <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="p">,</span> <span class="n">cur_example</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">cfs</span>
 </pre></div>
 
@@ -2655,7 +2661,8 @@ examples for the given data point.</p>
 <li><strong>cur_example (np.ndarray):</strong>  The data point of interest. This function
 aims to find similar examples that the model gives different
 predictions.</li>
-<li><strong>total_cfs (int):</strong>  The total number of counterfactuals to generate.</li>
+<li><strong>total_cfs (int, optional):</strong>  The total number of counterfactuals to,
+generate. Default to 1.</li>
 <li><strong>target_range (tuple, optional):</strong>  The targetted prediction range. This
 parameter is required if the EBM is a regressor.</li>
 <li><strong>sim_threshold_factor (float, optional):</strong>  A positive float to automatically
@@ -2824,7 +2831,7 @@ process from each iteration.</li>
 
                     <span class="c1"># Subtract a very smaller value to make the target</span>
                     <span class="c1"># technically fall into the left bin</span>
-                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-6</span>
+                    <span class="n">target</span> <span class="o">-=</span> <span class="mf">1e-4</span>
 
             <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">cur_bin_id</span><span class="p">:</span>
                 <span class="c1"># First need to consier if it should be an integer value</span>
@@ -3250,8 +3257,8 @@ effects.</p>
     cf_direction,
     needed_score_gain,
     features_to_vary,
-    max_num_features_to_vary,
     options,
+    max_num_features_to_vary=None,
     muted_variables=[]
 )</span>:
     </div>
@@ -3260,7 +3267,7 @@ effects.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">create_milp</span><span class="p">(</span><span class="n">cf_direction</span><span class="p">,</span> <span class="n">needed_score_gain</span><span class="p">,</span> <span class="n">features_to_vary</span><span class="p">,</span>
-                    <span class="n">max_num_features_to_vary</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">muted_variables</span><span class="o">=</span><span class="p">[]):</span>
+                    <span class="n">options</span><span class="p">,</span> <span class="n">max_num_features_to_vary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">muted_variables</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a MILP to find counterfactuals (CF) using PuLP.</span>
 
@@ -3270,14 +3277,14 @@ effects.</p>
 <span class="sd">            needed_score_gain (float): The score gain needed to achieve the CF goal.</span>
 <span class="sd">            features_to_vary (list[str]): Feature names of features that the</span>
 <span class="sd">                generated CF can change.</span>
-<span class="sd">            max_num_features_to_vary (int): Max number of features that the</span>
-<span class="sd">                generated CF can change. If the value is `None`, the CFs can</span>
-<span class="sd">                change any number of features.</span>
 <span class="sd">            options (dict): Possible options for each variable. Each option is a</span>
 <span class="sd">                list [target, score_gain, distance, bin_index].</span>
-<span class="sd">            muted_variables (list[str]): Variables that this MILP should not use.</span>
-<span class="sd">                This is useful to mute optimal variables so we can explore diverse</span>
-<span class="sd">                solutions. This list should not include interaction variables.</span>
+<span class="sd">            max_num_features_to_vary (int, optional): Max number of features that the</span>
+<span class="sd">                generated CF can change. If the value is `None`, the CFs can</span>
+<span class="sd">                change any number of features.</span>
+<span class="sd">            muted_variables (list[str], optional): Variables that this MILP should</span>
+<span class="sd">                not use. This is useful to mute optimal variables so we can explore</span>
+<span class="sd">                diverse solutions. This list should not include interaction variables.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A tuple (`model`, `variables`), where `model` is a pulp.LpProblem</span>
@@ -3411,14 +3418,14 @@ effects.</p>
 <li><strong>needed_score_gain (float):</strong>  The score gain needed to achieve the CF goal.</li>
 <li><strong>features_to_vary (list[str]):</strong>  Feature names of features that the
 generated CF can change.</li>
-<li><strong>max_num_features_to_vary (int):</strong>  Max number of features that the
-generated CF can change. If the value is <code>None</code>, the CFs can
-change any number of features.</li>
 <li><strong>options (dict):</strong>  Possible options for each variable. Each option is a
 list [target, score_gain, distance, bin_index].</li>
-<li><strong>muted_variables (list[str]):</strong>  Variables that this MILP should not use.
-This is useful to mute optimal variables so we can explore diverse
-solutions. This list should not include interaction variables.</li>
+<li><strong>max_num_features_to_vary (int, optional):</strong>  Max number of features that the
+generated CF can change. If the value is <code>None</code>, the CFs can
+change any number of features.</li>
+<li><strong>muted_variables (list[str], optional):</strong>  Variables that this MILP should
+not use. This is useful to mute optimal variables so we can explore
+diverse solutions. This list should not include interaction variables.</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -3543,8 +3550,8 @@ solutions. This list should not include interaction variables.</li>
 <span class="sd">        Returns:</span>
 <span class="sd">            float: MAD value of xs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xs_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
-        <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xs</span> <span class="o">-</span> <span class="n">xs_median</span><span class="p">))</span>
+        <span class="n">xs_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">-</span> <span class="n">xs_median</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">mad</span>
 </pre></div>
 

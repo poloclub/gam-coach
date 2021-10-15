@@ -72,6 +72,9 @@
                                 <a class="variable" href="#Counterfactuals.options">options</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Counterfactuals.solutions">solutions</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Counterfactuals.data">data</a>
                         </li>
                         <li>
@@ -84,7 +87,13 @@
                                 <a class="function" href="#Counterfactuals.convert_cfs_to_data">convert_cfs_to_data</a>
                         </li>
                         <li>
+                                <a class="function" href="#Counterfactuals.show">show</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Counterfactuals.model_summary">model_summary</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Counterfactuals.to_df">to_df</a>
                         </li>
                 </ul>
 
@@ -179,6 +188,9 @@ generated counterfactual explanations.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
         <span class="sd">&quot;&quot;&quot;All possible options.&quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span> <span class="o">=</span> <span class="n">solutions</span>
+        <span class="sd">&quot;&quot;&quot;Solutions for MILP.&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
         <span class="sd">&quot;&quot;&quot;Generated CFs in the original data dataformat.&quot;&quot;&quot;</span>
 
@@ -189,6 +201,8 @@ generated counterfactual explanations.</p>
         <span class="sd">&quot;&quot;&quot;Cooresponding objective values (total distance) of each `data` row.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">convert_cfs_to_data</span><span class="p">(</span><span class="n">solutions</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found </span><span class="si">{}</span><span class="s1"> counterfactual examples.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">solutions</span><span class="p">)))</span>
 
     <span class="k">def</span> <span class="nf">convert_cfs_to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solutions</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert optimal CF solutions to the original dataformat.</span>
@@ -228,7 +242,6 @@ generated counterfactual explanations.</p>
                         <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                         <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
 
-
                     <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
                         <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
                             <span class="n">target_value</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -246,12 +259,81 @@ generated counterfactual explanations.</p>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">model_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the optimal solutions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;## Strategy </span><span class="si">{}</span><span class="s1"> ##&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+                <span class="c1"># Skip interaction vars (included)</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                    <span class="c1"># Find the original value</span>
+                    <span class="n">org_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cur_example</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)]</span>
+
+                    <span class="c1"># Find the target bin</span>
+                    <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                    <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                        <span class="n">bin_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">f_index</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                        <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span><span class="p">])</span>
+
+                        <span class="k">if</span> <span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">):</span>
+                            <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; inf)&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                        <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
+                            <span class="n">new_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span>
+                                         <span class="k">else</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Change &lt;</span><span class="si">{}</span><span class="s1">&gt; from </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">f_name</span><span class="p">,</span> <span class="n">org_value</span><span class="p">,</span> <span class="n">new_value</span><span class="p">,</span> <span class="n">target_bin</span>
+                            <span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                            <span class="p">))</span>
+                            <span class="k">break</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">f_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_x_&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="p">)</span>
+                    <span class="n">bin_0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+),\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                    <span class="n">bin_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:\d+,(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_0</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_1</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trigger interaction term: &lt;</span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">f_name</span>
+                            <span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
+                            <span class="p">))</span>
+                            <span class="k">break</span>
+            <span class="nb">print</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">model_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Print out a summary of the MILP model.&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MILP model with </span><span class="si">{}</span><span class="s1"> variables and </span><span class="si">{}</span><span class="s1"> constraints.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numVariables</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numConstraints</span><span class="p">()</span>
-        <span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Top </span><span class="si">{}</span><span class="s1"> solution to a MILP model with </span><span class="si">{}</span><span class="s1"> variables and </span><span class="si">{}</span><span class="s1"> constraints.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numVariables</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numConstraints</span><span class="p">()</span>
+            <span class="p">))</span>
 
         <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)[</span>
@@ -262,7 +344,15 @@ generated counterfactual explanations.</p>
         <span class="n">new_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;new_prediction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_predictions</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_df</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_summary</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">summary</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">to_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_summary</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">summary</span>
 </pre></div>
 
         </details>
@@ -325,6 +415,9 @@ generated counterfactual explanations.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
         <span class="sd">&quot;&quot;&quot;All possible options.&quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span> <span class="o">=</span> <span class="n">solutions</span>
+        <span class="sd">&quot;&quot;&quot;Solutions for MILP.&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
         <span class="sd">&quot;&quot;&quot;Generated CFs in the original data dataformat.&quot;&quot;&quot;</span>
 
@@ -335,6 +428,8 @@ generated counterfactual explanations.</p>
         <span class="sd">&quot;&quot;&quot;Cooresponding objective values (total distance) of each `data` row.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">convert_cfs_to_data</span><span class="p">(</span><span class="n">solutions</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found </span><span class="si">{}</span><span class="s1"> counterfactual examples.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">solutions</span><span class="p">)))</span>
 
     <span class="k">def</span> <span class="nf">convert_cfs_to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solutions</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert optimal CF solutions to the original dataformat.</span>
@@ -374,7 +469,6 @@ generated counterfactual explanations.</p>
                         <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                         <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
 
-
                     <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
                         <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
                             <span class="n">target_value</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -392,12 +486,81 @@ generated counterfactual explanations.</p>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">model_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the optimal solutions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;## Strategy </span><span class="si">{}</span><span class="s1"> ##&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+                <span class="c1"># Skip interaction vars (included)</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                    <span class="c1"># Find the original value</span>
+                    <span class="n">org_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cur_example</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)]</span>
+
+                    <span class="c1"># Find the target bin</span>
+                    <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                    <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                        <span class="n">bin_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">f_index</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                        <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span><span class="p">])</span>
+
+                        <span class="k">if</span> <span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">):</span>
+                            <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; inf)&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                        <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
+                            <span class="n">new_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span>
+                                         <span class="k">else</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Change &lt;</span><span class="si">{}</span><span class="s1">&gt; from </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">f_name</span><span class="p">,</span> <span class="n">org_value</span><span class="p">,</span> <span class="n">new_value</span><span class="p">,</span> <span class="n">target_bin</span>
+                            <span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                            <span class="p">))</span>
+                            <span class="k">break</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">f_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_x_&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="p">)</span>
+                    <span class="n">bin_0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+),\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                    <span class="n">bin_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:\d+,(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_0</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_1</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trigger interaction term: &lt;</span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">f_name</span>
+                            <span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
+                            <span class="p">))</span>
+                            <span class="k">break</span>
+            <span class="nb">print</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">model_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Print out a summary of the MILP model.&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MILP model with </span><span class="si">{}</span><span class="s1"> variables and </span><span class="si">{}</span><span class="s1"> constraints.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numVariables</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numConstraints</span><span class="p">()</span>
-        <span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Top </span><span class="si">{}</span><span class="s1"> solution to a MILP model with </span><span class="si">{}</span><span class="s1"> variables and </span><span class="si">{}</span><span class="s1"> constraints.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numVariables</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numConstraints</span><span class="p">()</span>
+            <span class="p">))</span>
 
         <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)[</span>
@@ -408,7 +571,15 @@ generated counterfactual explanations.</p>
         <span class="n">new_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;new_prediction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_predictions</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_df</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_summary</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">summary</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">to_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_summary</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">summary</span>
 </pre></div>
 
         </details>
@@ -477,6 +648,9 @@ generated counterfactual explanations.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
         <span class="sd">&quot;&quot;&quot;All possible options.&quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span> <span class="o">=</span> <span class="n">solutions</span>
+        <span class="sd">&quot;&quot;&quot;Solutions for MILP.&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
         <span class="sd">&quot;&quot;&quot;Generated CFs in the original data dataformat.&quot;&quot;&quot;</span>
 
@@ -487,6 +661,8 @@ generated counterfactual explanations.</p>
         <span class="sd">&quot;&quot;&quot;Cooresponding objective values (total distance) of each `data` row.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">convert_cfs_to_data</span><span class="p">(</span><span class="n">solutions</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found </span><span class="si">{}</span><span class="s1"> counterfactual examples.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">solutions</span><span class="p">)))</span>
 </pre></div>
 
         </details>
@@ -579,6 +755,17 @@ distance, bin_id]]</code></li>
 
 
                             </div>
+                            <div id="Counterfactuals.solutions" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Counterfactuals.solutions">#&nbsp;&nbsp</a>
+
+        <span class="name">solutions</span>
+    </div>
+
+            <div class="docstring"><p>Solutions for MILP.</p>
+</div>
+
+
+                            </div>
                             <div id="Counterfactuals.data" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Counterfactuals.data">#&nbsp;&nbsp</a>
 
@@ -660,7 +847,6 @@ distance, bin_id]]</code></li>
                         <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                         <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
 
-
                     <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
                         <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
                             <span class="n">target_value</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -686,22 +872,109 @@ distance, bin_id]]</code></li>
 
 
                             </div>
+                            <div id="Counterfactuals.show" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Counterfactuals.show">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">show</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the optimal solutions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">active_variables</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;## Strategy </span><span class="si">{}</span><span class="s1"> ##&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
+                <span class="c1"># Skip interaction vars (included)</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                    <span class="c1"># Find the original value</span>
+                    <span class="n">org_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cur_example</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)]</span>
+
+                    <span class="c1"># Find the target bin</span>
+                    <span class="n">f_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                    <span class="n">f_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">f_index</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                        <span class="n">bin_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">f_index</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                        <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span><span class="p">])</span>
+
+                        <span class="k">if</span> <span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">):</span>
+                            <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_starts</span><span class="p">[</span><span class="n">bin_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">target_bin</span> <span class="o">+=</span> <span class="s1">&#39; inf)&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">target_bin</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                        <span class="n">org_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org_value</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_i</span><span class="p">:</span>
+                            <span class="n">new_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">f_type</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span>
+                                         <span class="k">else</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Change &lt;</span><span class="si">{}</span><span class="s1">&gt; from </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">f_name</span><span class="p">,</span> <span class="n">org_value</span><span class="p">,</span> <span class="n">new_value</span><span class="p">,</span> <span class="n">target_bin</span>
+                            <span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">option</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                            <span class="p">))</span>
+                            <span class="k">break</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">f_name</span> <span class="o">=</span> <span class="n">f_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_x_&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="p">)</span>
+                    <span class="n">bin_0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+),\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                    <span class="n">bin_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:\d+,(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">f_name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_0</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">bin_1</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trigger interaction term: &lt;</span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">f_name</span>
+                            <span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">* score gain: </span><span class="si">{:.4f}</span><span class="se">\n\t</span><span class="s1">* distance cost: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
+                            <span class="p">))</span>
+                            <span class="k">break</span>
+            <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Print the optimal solutions.</p>
+</div>
+
+
+                            </div>
                             <div id="Counterfactuals.model_summary" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Counterfactuals.model_summary">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">model_summary</span><span class="signature">(self)</span>:
+            <span class="name">model_summary</span><span class="signature">(self, verbose=True)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">model_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">model_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Print out a summary of the MILP model.&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MILP model with </span><span class="si">{}</span><span class="s1"> variables and </span><span class="si">{}</span><span class="s1"> constraints.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numVariables</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numConstraints</span><span class="p">()</span>
-        <span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Top </span><span class="si">{}</span><span class="s1"> solution to a MILP model with </span><span class="si">{}</span><span class="s1"> variables and </span><span class="si">{}</span><span class="s1"> constraints.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numVariables</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numConstraints</span><span class="p">()</span>
+            <span class="p">))</span>
 
         <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)[</span>
@@ -712,7 +985,7 @@ distance, bin_id]]</code></li>
         <span class="n">new_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;new_prediction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_predictions</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_df</span>
 </pre></div>
 
         </details>
@@ -720,6 +993,26 @@ distance, bin_id]]</code></li>
             <div class="docstring"><p>Print out a summary of the MILP model.</p>
 </div>
 
+
+                            </div>
+                            <div id="Counterfactuals.to_df" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Counterfactuals.to_df">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">to_df</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">to_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_summary</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">summary</span>
+</pre></div>
+
+        </details>
+
+    
 
                             </div>
                 </section>

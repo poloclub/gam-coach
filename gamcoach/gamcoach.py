@@ -392,7 +392,7 @@ class GAMCoach:
             solutions.append([active_variables, pulp.value(model.objective)])
 
             for var in active_variables:
-                if 'x' not in var.name:
+                if ' x ' not in var.name:
                     muted_variables.append(var.name)
 
         cfs = Counterfactuals(solutions, is_successful, model, variables,
@@ -839,7 +839,7 @@ class GAMCoach:
 
         # Create variables for interaction effects
         for opt_name in options:
-            if 'x' in opt_name:
+            if ' x ' in opt_name:
                 f1_name = re.sub(r'(.+)\sx\s.+', r'\1', opt_name)
                 f2_name = re.sub(r'.+\sx\s(.+)', r'\1', opt_name)
 
@@ -914,7 +914,7 @@ class GAMCoach:
 
         for var in active_variables:
             # Skip interaction vars (included)
-            if 'x' not in var.name:
+            if ' x ' not in var.name:
                 f_name = re.sub(r'(.+):\d+', r'\1', var.name)
                 bin_i = int(re.sub(r'.+:(\d+)', r'\1', var.name))
 

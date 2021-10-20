@@ -122,45 +122,45 @@ def test_generate_cfs_model(gs: gamcoach.GAMCoach, cur_example):
     cfs.model_summary()
 
 
-def test_generate_cfs_diverse(gs: gamcoach.GAMCoach, cur_example):
-    """Test generating diverse solutions."""
+# def test_generate_cfs_diverse(gs: gamcoach.GAMCoach, cur_example):
+#     """Test generating diverse solutions."""
 
-    cfs = gs.generate_cfs(
-        cur_example,
-        5,
-        feature_ranges=None,
-        verbose=True,
-    )
+#     cfs = gs.generate_cfs(
+#         cur_example,
+#         5,
+#         feature_ranges=None,
+#         verbose=True,
+#     )
 
-    cfs.model_summary()
-    assert(len(cfs.data) == 5)
+#     cfs.model_summary()
+#     assert(len(cfs.data) == 5)
 
 
-def test_generate_cfs_regression(gs_regression: gamcoach.GAMCoach,
-                                 cur_example_regression):
-    """Test generating diverse solutions."""
-    print(gs_regression.is_classifier)
-    target_range = [3, 9]
-    max_num_features_to_vary = 3
+# def test_generate_cfs_regression(gs_regression: gamcoach.GAMCoach,
+#                                  cur_example_regression):
+#     """Test generating diverse solutions."""
+#     print(gs_regression.is_classifier)
+#     target_range = [3, 9]
+#     max_num_features_to_vary = 3
 
-    cfs = gs_regression.generate_cfs(
-        cur_example_regression,
-        5,
-        feature_ranges=None,
-        max_num_features_to_vary=max_num_features_to_vary,
-        continuous_integer_features=[
-            'fico_score',
-            'open_acc',
-            'earliest_cr_line',
-            'total_acc'
-        ],
-        verbose=True,
-        target_range=target_range
-    )
+#     cfs = gs_regression.generate_cfs(
+#         cur_example_regression,
+#         5,
+#         feature_ranges=None,
+#         max_num_features_to_vary=max_num_features_to_vary,
+#         continuous_integer_features=[
+#             'fico_score',
+#             'open_acc',
+#             'earliest_cr_line',
+#             'total_acc'
+#         ],
+#         verbose=True,
+#         target_range=target_range
+#     )
 
-    new_preds = cfs.ebm.predict(cfs.data)
+#     new_preds = cfs.ebm.predict(cfs.data)
 
-    for r in new_preds:
-        assert(r >= target_range[0] and r <= target_range[1])
+#     for r in new_preds:
+#         assert(r >= target_range[0] and r <= target_range[1])
 
-    cfs.model_summary()
+#     cfs.model_summary()

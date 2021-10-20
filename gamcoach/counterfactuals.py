@@ -94,7 +94,7 @@ class Counterfactuals:
 
             for var in active_variables:
                 # Skip interaction vars (included)
-                if 'x' not in var.name:
+                if ' x ' not in var.name:
                     f_name = re.sub(r'(.+):\d+', r'\1', var.name)
                     bin_i = int(re.sub(r'.+:(\d+)', r'\1', var.name))
 
@@ -147,7 +147,7 @@ class Counterfactuals:
 
             for var in active_variables:
                 # Skip interaction vars (included)
-                if 'x' not in var.name:
+                if ' x ' not in var.name:
                     f_name = re.sub(r'(.+):\d+', r'\1', var.name)
                     bin_i = int(re.sub(r'.+:(\d+)', r'\1', var.name))
 

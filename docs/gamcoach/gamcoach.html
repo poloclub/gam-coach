@@ -98,6 +98,9 @@
             <li>
                     <a class="function" href="#sigmoid">sigmoid</a>
             </li>
+            <li>
+                    <a class="function" href="#get_model_data">get_model_data</a>
+            </li>
     </ul>
 
 
@@ -439,12 +442,10 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="n">cur_feature_index_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">cur_feature_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="n">cur_feature_score</span> <span class="o">=</span> <span class="n">cur_scores</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_index_1</span><span class="p">],</span>
-                                     <span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_index_2</span><span class="p">]]</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_inter_options</span><span class="p">(</span>
                     <span class="n">cur_feature_id</span><span class="p">,</span> <span class="n">cur_feature_index_1</span><span class="p">,</span> <span class="n">cur_feature_index_2</span><span class="p">,</span>
-                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
+                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
                 <span class="p">)</span>
 
         <span class="c1"># Step 2.4: Rescale categorical distances so that they have the same mean</span>
@@ -516,7 +517,7 @@ explanations for generalized additive models (GAMs).</p>
             <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">active_variables</span><span class="p">,</span> <span class="n">pulp</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">objective</span><span class="p">)])</span>
 
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                     <span class="n">muted_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
@@ -727,8 +728,7 @@ explanations for generalized additive models (GAMs).</p>
         <span class="k">return</span> <span class="n">cat_options</span>
 
     <span class="k">def</span> <span class="nf">generate_inter_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_feature_id</span><span class="p">,</span> <span class="n">cur_feature_index_1</span><span class="p">,</span>
-                               <span class="n">cur_feature_index_2</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                               <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+                               <span class="n">cur_feature_index_2</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all possible options for this interaction variable.</span>
 
@@ -750,7 +750,6 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_feature_id (int): The id of this interaction effect.</span>
 <span class="sd">            cur_feature_index_1 (int): The index of the first main effect.</span>
 <span class="sd">            cur_feature_index_2 (int): The index of the second main effect.</span>
-<span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            options (dict): The current option list, feature_name -&gt;</span>
 <span class="sd">                [`target`, `score_gain`, `distance`, `bin_id`].</span>
@@ -781,8 +780,6 @@ explanations for generalized additive models (GAMs).</p>
         <span class="k">if</span> <span class="n">cur_feature_type_1</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cur_feature_type_2</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
                 <span class="c1"># cont x cont</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
                 <span class="n">bin_starts_1</span> <span class="o">=</span> <span class="n">bin_starts_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">bin_starts_2</span> <span class="o">=</span> <span class="n">bin_starts_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -815,8 +812,6 @@ explanations for generalized additive models (GAMs).</p>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># cont x cat</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="n">bin_starts_1</span> <span class="o">=</span> <span class="n">bin_starts_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># Iterate through all possible combinations of options from these two</span>
@@ -840,8 +835,6 @@ explanations for generalized additive models (GAMs).</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cur_feature_type_2</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
                 <span class="c1"># cat x cont</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                     <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
                 <span class="n">bin_starts_2</span> <span class="o">=</span> <span class="n">bin_starts_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># Iterate through all possible combinations of options from</span>
@@ -963,7 +956,7 @@ explanations for generalized additive models (GAMs).</p>
 
         <span class="c1"># Create variables for interaction effects</span>
         <span class="k">for</span> <span class="n">opt_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">opt_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">in</span> <span class="n">opt_name</span><span class="p">:</span>
                 <span class="n">f1_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+)\sx\s.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">opt_name</span><span class="p">)</span>
                 <span class="n">f2_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+\sx\s(.+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">opt_name</span><span class="p">)</span>
 
@@ -1038,7 +1031,7 @@ explanations for generalized additive models (GAMs).</p>
 
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
             <span class="c1"># Skip interaction vars (included)</span>
-            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
@@ -1153,6 +1146,258 @@ explanations for generalized additive models (GAMs).</p>
 <span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sigmoid function.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_resort_categorical_level</span><span class="p">(</span><span class="n">col_mapping</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resort the levels in the categorical encoders if all levels can be converted</span>
+<span class="sd">    to numbers (integer or float).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        col_mapping: the dictionary that maps level string to int</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        New col_mapping if all levels can be converted to numbers, otherwise</span>
+<span class="sd">        the original col_mapping</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">is_number</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">is_number</span><span class="p">,</span> <span class="n">col_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+
+        <span class="n">key_tuples</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">col_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">sorted_key_tuples</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">key_tuples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">new_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">sorted_key_tuples</span><span class="p">:</span>
+            <span class="n">new_mapping</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">new_mapping</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">col_mapping</span>
+
+
+<span class="k">def</span> <span class="nf">get_model_data</span><span class="p">(</span><span class="n">ebm</span><span class="p">,</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">resort_categorical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the model data for GAM Coach.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ebm: Trained EBM model. ExplainableBoostingClassifier or</span>
+<span class="sd">            ExplainableBoostingRegressor object.</span>
+<span class="sd">        x_train: Training data. We use it to compute the mean absolute deviation</span>
+<span class="sd">            score for continuous features, and frequency scores for categorical</span>
+<span class="sd">            features.</span>
+<span class="sd">        resort_categorical: Whether to sort the levels in categorical variable</span>
+<span class="sd">            by increasing order if all levels can be converted to numbers.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A Python dictionary of model data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ROUND</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="c1"># Main model info on each feature</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Track the encoding of categorical feature levels</span>
+    <span class="n">labelEncoder</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Track the score range</span>
+    <span class="n">score_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)):</span>
+        <span class="n">cur_feature</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;importance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># Handle interaction term differently from cont/cat</span>
+        <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
+            <span class="n">cur_id</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)</span>
+
+            <span class="c1"># Info for each individual feature</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="c1"># Skip the first item from both dimensions</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="c1"># Get the bin label info</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># Encode categorical levels as integers</span>
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type1&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span>
+                    <span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel1&#39;</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type2&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span>
+                    <span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel2&#39;</span><span class="p">]))</span>
+
+            <span class="c1"># Get density info</span>
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type1&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ROUND</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type2&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ROUND</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Skip the first item (reserved for missing value)</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">cur_id</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">col_bin_counts_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># Track the global score range</span>
+            <span class="n">score_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">score_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                 <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">score_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">score_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                 <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+            <span class="c1"># Add the binning information for continuous features</span>
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                <span class="c1"># Add the bin information</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)</span>
+
+                <span class="c1"># Add the hist information</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="c1"># Get the level value mapping</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">resort_categorical</span><span class="p">:</span>
+                    <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">_resort_categorical_level</span><span class="p">(</span>
+                        <span class="n">level_str_to_int</span><span class="p">)</span>
+
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                               <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)))</span>
+
+                <span class="c1"># Add the hist information</span>
+                <span class="c1"># For categorical data, the edges are strings</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                               <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)))</span>
+
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">resort_categorical</span><span class="p">:</span>
+                    <span class="n">cur_bin_info</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel&#39;</span><span class="p">],</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">],</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">],</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">],</span>
+                    <span class="p">))</span>
+                    <span class="n">cur_bin_info</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cur_bin_info</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+
+                    <span class="n">cur_hist_info</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                        <span class="nb">zip</span><span class="p">(</span><span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">],</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]))</span>
+                    <span class="n">cur_hist_info</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cur_hist_info</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_hist_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_hist_info</span><span class="p">]</span>
+
+                <span class="c1"># Add the label encoding information</span>
+                <span class="n">labelEncoder</span><span class="p">[</span><span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">i</span><span class="p">:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">level_str_to_int</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur_feature</span><span class="p">)</span>
+
+    <span class="n">score_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ROUND</span><span class="p">),</span> <span class="n">score_range</span><span class="p">))</span>
+
+    <span class="n">feature_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">feature_types</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Sample data does not record interaction features</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;interaction&#39;</span><span class="p">):</span>
+            <span class="n">feature_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">feature_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># Compute the MAD scores and frequencies</span>
+    <span class="n">ebm_cont_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">contMads</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ebm_cont_indexes</span><span class="p">:</span>
+        <span class="n">contMads</span><span class="p">[</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">GAMCoach</span><span class="o">.</span><span class="n">compute_mad</span><span class="p">(</span><span class="n">x_train</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+    <span class="n">ebm_cat_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">catDistances</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ebm_cat_indexes</span><span class="p">:</span>
+        <span class="n">catDistances</span><span class="p">[</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">GAMCoach</span><span class="o">.</span><span class="n">compute_frequency_distance</span><span class="p">(</span>
+            <span class="n">x_train</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;intercept&#39;</span><span class="p">:</span> <span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ebm</span><span class="p">,</span> <span class="s1">&#39;classes_&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">,</span>
+        <span class="s1">&#39;isClassifier&#39;</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ebm</span><span class="p">,</span> <span class="s1">&#39;classes_&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="n">features</span><span class="p">,</span>
+        <span class="s1">&#39;labelEncoder&#39;</span><span class="p">:</span> <span class="n">labelEncoder</span><span class="p">,</span>
+        <span class="s1">&#39;scoreRange&#39;</span><span class="p">:</span> <span class="n">score_range</span><span class="p">,</span>
+        <span class="s1">&#39;featureNames&#39;</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span>
+        <span class="s1">&#39;featureTypes&#39;</span><span class="p">:</span> <span class="n">feature_types</span><span class="p">,</span>
+        <span class="s1">&#39;contMads&#39;</span><span class="p">:</span> <span class="n">contMads</span><span class="p">,</span>
+        <span class="s1">&#39;catDistances&#39;</span><span class="p">:</span> <span class="n">catDistances</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">data</span>
 </pre></div>
 
         </details>
@@ -1465,12 +1710,10 @@ explanations for generalized additive models (GAMs).</p>
                 <span class="n">cur_feature_index_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">cur_feature_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="n">cur_feature_score</span> <span class="o">=</span> <span class="n">cur_scores</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_index_1</span><span class="p">],</span>
-                                     <span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_index_2</span><span class="p">]]</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_inter_options</span><span class="p">(</span>
                     <span class="n">cur_feature_id</span><span class="p">,</span> <span class="n">cur_feature_index_1</span><span class="p">,</span> <span class="n">cur_feature_index_2</span><span class="p">,</span>
-                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
+                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
                 <span class="p">)</span>
 
         <span class="c1"># Step 2.4: Rescale categorical distances so that they have the same mean</span>
@@ -1542,7 +1785,7 @@ explanations for generalized additive models (GAMs).</p>
             <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">active_variables</span><span class="p">,</span> <span class="n">pulp</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">objective</span><span class="p">)])</span>
 
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                     <span class="n">muted_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
@@ -1753,8 +1996,7 @@ explanations for generalized additive models (GAMs).</p>
         <span class="k">return</span> <span class="n">cat_options</span>
 
     <span class="k">def</span> <span class="nf">generate_inter_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_feature_id</span><span class="p">,</span> <span class="n">cur_feature_index_1</span><span class="p">,</span>
-                               <span class="n">cur_feature_index_2</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                               <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+                               <span class="n">cur_feature_index_2</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all possible options for this interaction variable.</span>
 
@@ -1776,7 +2018,6 @@ explanations for generalized additive models (GAMs).</p>
 <span class="sd">            cur_feature_id (int): The id of this interaction effect.</span>
 <span class="sd">            cur_feature_index_1 (int): The index of the first main effect.</span>
 <span class="sd">            cur_feature_index_2 (int): The index of the second main effect.</span>
-<span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            options (dict): The current option list, feature_name -&gt;</span>
 <span class="sd">                [`target`, `score_gain`, `distance`, `bin_id`].</span>
@@ -1807,8 +2048,6 @@ explanations for generalized additive models (GAMs).</p>
         <span class="k">if</span> <span class="n">cur_feature_type_1</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cur_feature_type_2</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
                 <span class="c1"># cont x cont</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
                 <span class="n">bin_starts_1</span> <span class="o">=</span> <span class="n">bin_starts_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">bin_starts_2</span> <span class="o">=</span> <span class="n">bin_starts_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -1841,8 +2080,6 @@ explanations for generalized additive models (GAMs).</p>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># cont x cat</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="n">bin_starts_1</span> <span class="o">=</span> <span class="n">bin_starts_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># Iterate through all possible combinations of options from these two</span>
@@ -1866,8 +2103,6 @@ explanations for generalized additive models (GAMs).</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cur_feature_type_2</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
                 <span class="c1"># cat x cont</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                     <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
                 <span class="n">bin_starts_2</span> <span class="o">=</span> <span class="n">bin_starts_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># Iterate through all possible combinations of options from</span>
@@ -1989,7 +2224,7 @@ explanations for generalized additive models (GAMs).</p>
 
         <span class="c1"># Create variables for interaction effects</span>
         <span class="k">for</span> <span class="n">opt_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">opt_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">in</span> <span class="n">opt_name</span><span class="p">:</span>
                 <span class="n">f1_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+)\sx\s.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">opt_name</span><span class="p">)</span>
                 <span class="n">f2_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+\sx\s(.+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">opt_name</span><span class="p">)</span>
 
@@ -2064,7 +2299,7 @@ explanations for generalized additive models (GAMs).</p>
 
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
             <span class="c1"># Skip interaction vars (included)</span>
-            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
@@ -2562,12 +2797,10 @@ frequent level.</p>
                 <span class="n">cur_feature_index_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">cur_feature_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="n">cur_feature_score</span> <span class="o">=</span> <span class="n">cur_scores</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_index_1</span><span class="p">],</span>
-                                     <span class="n">cur_example</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">cur_feature_index_2</span><span class="p">]]</span>
 
                 <span class="n">options</span><span class="p">[</span><span class="n">cur_feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_inter_options</span><span class="p">(</span>
                     <span class="n">cur_feature_id</span><span class="p">,</span> <span class="n">cur_feature_index_1</span><span class="p">,</span> <span class="n">cur_feature_index_2</span><span class="p">,</span>
-                    <span class="n">cur_feature_value</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
+                    <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span>
                 <span class="p">)</span>
 
         <span class="c1"># Step 2.4: Rescale categorical distances so that they have the same mean</span>
@@ -2639,7 +2872,7 @@ frequent level.</p>
             <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">active_variables</span><span class="p">,</span> <span class="n">pulp</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">objective</span><span class="p">)])</span>
 
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                     <span class="n">muted_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="n">cfs</span> <span class="o">=</span> <span class="n">Counterfactuals</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="n">is_successful</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span>
@@ -3039,7 +3272,6 @@ options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (wh
     cur_feature_id,
     cur_feature_index_1,
     cur_feature_index_2,
-    cur_feature_value,
     cur_feature_score,
     options
 )</span>:
@@ -3048,8 +3280,7 @@ options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (wh
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">generate_inter_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_feature_id</span><span class="p">,</span> <span class="n">cur_feature_index_1</span><span class="p">,</span>
-                               <span class="n">cur_feature_index_2</span><span class="p">,</span> <span class="n">cur_feature_value</span><span class="p">,</span>
-                               <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+                               <span class="n">cur_feature_index_2</span><span class="p">,</span> <span class="n">cur_feature_score</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generage all possible options for this interaction variable.</span>
 
@@ -3071,7 +3302,6 @@ options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (wh
 <span class="sd">            cur_feature_id (int): The id of this interaction effect.</span>
 <span class="sd">            cur_feature_index_1 (int): The index of the first main effect.</span>
 <span class="sd">            cur_feature_index_2 (int): The index of the second main effect.</span>
-<span class="sd">            cur_feature_value (float): The current feature value.</span>
 <span class="sd">            cur_feature_score (float): The score for the current feature value.</span>
 <span class="sd">            options (dict): The current option list, feature_name -&gt;</span>
 <span class="sd">                [`target`, `score_gain`, `distance`, `bin_id`].</span>
@@ -3102,8 +3332,6 @@ options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (wh
         <span class="k">if</span> <span class="n">cur_feature_type_1</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cur_feature_type_2</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
                 <span class="c1"># cont x cont</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
                 <span class="n">bin_starts_1</span> <span class="o">=</span> <span class="n">bin_starts_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">bin_starts_2</span> <span class="o">=</span> <span class="n">bin_starts_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -3136,8 +3364,6 @@ options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (wh
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># cont x cat</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="n">bin_starts_1</span> <span class="o">=</span> <span class="n">bin_starts_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># Iterate through all possible combinations of options from these two</span>
@@ -3161,8 +3387,6 @@ options that give <code>score_gain</code> &gt; <code>score_gain_bound</code> (wh
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cur_feature_type_2</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
                 <span class="c1"># cat x cont</span>
-                <span class="n">cur_feature_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                     <span class="nb">float</span><span class="p">(</span><span class="n">cur_feature_value</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
                 <span class="n">bin_starts_2</span> <span class="o">=</span> <span class="n">bin_starts_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># Iterate through all possible combinations of options from</span>
@@ -3232,7 +3456,6 @@ effects.</p>
 <li><strong>cur_feature_id (int):</strong>  The id of this interaction effect.</li>
 <li><strong>cur_feature_index_1 (int):</strong>  The index of the first main effect.</li>
 <li><strong>cur_feature_index_2 (int):</strong>  The index of the second main effect.</li>
-<li><strong>cur_feature_value (float):</strong>  The current feature value.</li>
 <li><strong>cur_feature_score (float):</strong>  The score for the current feature value.</li>
 <li><strong>options (dict):</strong>  The current option list, feature_name ->
 [<code>target</code>, <code>score_gain</code>, <code>distance</code>, <code>bin_id</code>].</li>
@@ -3342,7 +3565,7 @@ effects.</p>
 
         <span class="c1"># Create variables for interaction effects</span>
         <span class="k">for</span> <span class="n">opt_name</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">opt_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">in</span> <span class="n">opt_name</span><span class="p">:</span>
                 <span class="n">f1_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+)\sx\s.+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">opt_name</span><span class="p">)</span>
                 <span class="n">f2_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+\sx\s(.+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">opt_name</span><span class="p">)</span>
 
@@ -3461,7 +3684,7 @@ diverse solutions. This list should not include interaction variables.</li>
 
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">active_variables</span><span class="p">:</span>
             <span class="c1"># Skip interaction vars (included)</span>
-            <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39; x &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">f_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+):\d+&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">bin_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.+:(\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
@@ -3687,6 +3910,255 @@ that switching to a frequent value takes less effort.</p>
         </details>
 
             <div class="docstring"><p>Sigmoid function.</p>
+</div>
+
+
+                </section>
+                <section id="get_model_data">
+                            <div class="attr function"><a class="headerlink" href="#get_model_data">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_model_data</span><span class="signature">(ebm, x_train, resort_categorical=False)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_model_data</span><span class="p">(</span><span class="n">ebm</span><span class="p">,</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">resort_categorical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the model data for GAM Coach.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ebm: Trained EBM model. ExplainableBoostingClassifier or</span>
+<span class="sd">            ExplainableBoostingRegressor object.</span>
+<span class="sd">        x_train: Training data. We use it to compute the mean absolute deviation</span>
+<span class="sd">            score for continuous features, and frequency scores for categorical</span>
+<span class="sd">            features.</span>
+<span class="sd">        resort_categorical: Whether to sort the levels in categorical variable</span>
+<span class="sd">            by increasing order if all levels can be converted to numbers.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A Python dictionary of model data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ROUND</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="c1"># Main model info on each feature</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Track the encoding of categorical feature levels</span>
+    <span class="n">labelEncoder</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Track the score range</span>
+    <span class="n">score_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)):</span>
+        <span class="n">cur_feature</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;importance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># Handle interaction term differently from cont/cat</span>
+        <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
+            <span class="n">cur_id</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)</span>
+
+            <span class="c1"># Info for each individual feature</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="c1"># Skip the first item from both dimensions</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="c1"># Get the bin label info</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># Encode categorical levels as integers</span>
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type1&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span>
+                    <span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel1&#39;</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type2&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span>
+                    <span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel2&#39;</span><span class="p">]))</span>
+
+            <span class="c1"># Get density info</span>
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type1&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ROUND</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type2&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">pair_preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ROUND</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Skip the first item (reserved for missing value)</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ROUND</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">cur_id</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">feature_groups_</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">col_bin_counts_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># Track the global score range</span>
+            <span class="n">score_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">score_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                 <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">score_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">score_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                 <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">additive_terms_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">ebm</span><span class="o">.</span><span class="n">term_standard_deviations_</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+            <span class="c1"># Add the binning information for continuous features</span>
+            <span class="k">if</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                <span class="c1"># Add the bin information</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)</span>
+
+                <span class="c1"># Add the hist information</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="c1"># Get the level value mapping</span>
+                <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">col_mapping_</span><span class="p">[</span><span class="n">cur_id</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">resort_categorical</span><span class="p">:</span>
+                    <span class="n">level_str_to_int</span> <span class="o">=</span> <span class="n">_resort_categorical_level</span><span class="p">(</span>
+                        <span class="n">level_str_to_int</span><span class="p">)</span>
+
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                               <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_bin_labels</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)))</span>
+
+                <span class="c1"># Add the hist information</span>
+                <span class="c1"># For categorical data, the edges are strings</span>
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">level_str_to_int</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+                                               <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_edges</span><span class="p">(</span><span class="n">cur_id</span><span class="p">)))</span>
+
+                <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">ebm</span><span class="o">.</span><span class="n">preprocessor_</span><span class="o">.</span><span class="n">_get_hist_counts</span><span class="p">(</span><span class="n">cur_id</span><span class="p">),</span> <span class="n">ROUND</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">resort_categorical</span><span class="p">:</span>
+                    <span class="n">cur_bin_info</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel&#39;</span><span class="p">],</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">],</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">],</span>
+                        <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">],</span>
+                    <span class="p">))</span>
+                    <span class="n">cur_bin_info</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cur_bin_info</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;binLabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_bin_info</span><span class="p">]</span>
+
+                    <span class="n">cur_hist_info</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                        <span class="nb">zip</span><span class="p">(</span><span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">],</span> <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]))</span>
+                    <span class="n">cur_hist_info</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cur_hist_info</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histEdge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_hist_info</span><span class="p">]</span>
+                    <span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;histCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cur_hist_info</span><span class="p">]</span>
+
+                <span class="c1"># Add the label encoding information</span>
+                <span class="n">labelEncoder</span><span class="p">[</span><span class="n">cur_feature</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">i</span><span class="p">:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">level_str_to_int</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur_feature</span><span class="p">)</span>
+
+    <span class="n">score_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ROUND</span><span class="p">),</span> <span class="n">score_range</span><span class="p">))</span>
+
+    <span class="n">feature_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">feature_types</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Sample data does not record interaction features</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;interaction&#39;</span><span class="p">):</span>
+            <span class="n">feature_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">feature_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># Compute the MAD scores and frequencies</span>
+    <span class="n">ebm_cont_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">contMads</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ebm_cont_indexes</span><span class="p">:</span>
+        <span class="n">contMads</span><span class="p">[</span><span class="n">ebm</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">GAMCoach</span><span class="o">.</span><span class="n">compute_mad</span><span class="p">(</span><span class="n">x_train</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+    <span class="n">ebm_cat_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">feature_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">catDistances</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ebm_cat_indexes</span><span class="p">:</span>
+        <span class="n">catDistances</span><span class="p">[</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">GAMCoach</span><span class="o">.</span><span class="n">compute_frequency_distance</span><span class="p">(</span>
+            <span class="n">x_train</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;intercept&#39;</span><span class="p">:</span> <span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ebm</span><span class="p">,</span> <span class="s1">&#39;classes_&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">ebm</span><span class="o">.</span><span class="n">intercept_</span><span class="p">,</span>
+        <span class="s1">&#39;isClassifier&#39;</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ebm</span><span class="p">,</span> <span class="s1">&#39;classes_&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="n">features</span><span class="p">,</span>
+        <span class="s1">&#39;labelEncoder&#39;</span><span class="p">:</span> <span class="n">labelEncoder</span><span class="p">,</span>
+        <span class="s1">&#39;scoreRange&#39;</span><span class="p">:</span> <span class="n">score_range</span><span class="p">,</span>
+        <span class="s1">&#39;featureNames&#39;</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">,</span>
+        <span class="s1">&#39;featureTypes&#39;</span><span class="p">:</span> <span class="n">feature_types</span><span class="p">,</span>
+        <span class="s1">&#39;contMads&#39;</span><span class="p">:</span> <span class="n">contMads</span><span class="p">,</span>
+        <span class="s1">&#39;catDistances&#39;</span><span class="p">:</span> <span class="n">catDistances</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get the model data for GAM Coach.</p>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>ebm:</strong>  Trained EBM model. ExplainableBoostingClassifier or
+ExplainableBoostingRegressor object.</li>
+<li><strong>x_train:</strong>  Training data. We use it to compute the mean absolute deviation
+score for continuous features, and frequency scores for categorical
+features.</li>
+<li><strong>resort_categorical:</strong>  Whether to sort the levels in categorical variable
+by increasing order if all levels can be converted to numbers.</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>A Python dictionary of model data</p>
+</blockquote>
 </div>
 
 

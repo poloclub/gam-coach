@@ -5,7 +5,10 @@ module.exports = {
     'es6': true
   },
   'extends': 'eslint:recommended',
-  'parser': 'babel-eslint',
+  'parser': '@babel/eslint-parser',
+  'parserOptions': {
+    'requireConfigFile': false,
+  },
   'plugins': [
     'svelte3'
   ],

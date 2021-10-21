@@ -5,7 +5,7 @@
 </svelte:head>
 
 <script>
-  import Main from './Main.svelte';
+  import Coach from './Coach.svelte';
 </script>
 
 <style lang='scss'>
@@ -20,5 +20,5 @@
 </style>
 
 <div class='stand-alone-page'>
-	<Main />
+	<Coach />
 </div>

@@ -1,6 +1,5 @@
 <script>
-  // import Header from './Header.svelte';
-  // import GAM from './GAM.svelte';
+  import FeatureCard from './components/FeatureCard.svelte';
   import Tooltip from './components/Tooltip.svelte';
 
   import { tooltipConfigStore } from './store';
@@ -10,6 +9,9 @@
   let tooltipConfig = null;
 
   tooltipConfigStore.subscribe(value => {tooltipConfig = value;});
+
+  // Set up the GAM Coach object
+
 </script>
 
 <style lang='scss'>
@@ -35,6 +37,7 @@
     width: 100vw;
     box-sizing: border-box;
     border: 1px solid $gray-border;
+    background: $coolGray-50;
   }
 
 
@@ -49,7 +52,7 @@
 
   <div class='content'>
 
-    <!-- <GAM /> -->
+    <FeatureCard />
 
   </div>
 

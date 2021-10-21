@@ -36,21 +36,57 @@
     name: 'FICO Score',
     featureName: 'fico_score',
     valueMin: 600,
-    valueMax: 800
+    valueMax: 800,
+    requiresInt: true,
+    curValue: 728,
   };
+
+  feature.curMin = feature.valueMin;
+  feature.curMax = feature.valueMax;
 
   /**
    * Handling the mousedown event for thumbs on the slider.
    * @param e Event
    */
   const mouseDownHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let thumb = e.target;
+    let track = thumb.parentNode;
+    let trackWidth = track.getBoundingClientRect().width;
+    thumb.focus();
+
     const mouseMoveHandler = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
+      const deltaX = e.pageX - track.getBoundingClientRect().x;
+      let newValue;
+
+      // Handle integer value if it is required
+      if (feature.requiresInt) {
+        newValue = feature.valueMin + parseInt((feature.valueMax - feature.valueMin) * deltaX / trackWidth);
+      } else {
+        newValue = feature.valueMin + parseFloat((feature.valueMax - feature.valueMin) * deltaX / trackWidth);
+      }
+
+      console.log(newValue);
+      moveThumb(thumb.id, newValue);
     };
 
-    const mouseUpHandler = (e) => {
-
+    const mouseUpHandler = () => {
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('mouseup', mouseUpHandler);
+      document.body.style.cursor = 'default';
+      thumb.blur();
     };
+
+    // Listen to mouse move on the whole page (users can drag outside of the
+    // thumb, track, or even GAM Coach!)
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+    document.body.style.cursor = 'grabbing';
   };
 
   /**
@@ -69,14 +105,17 @@
       .select(`#${leftThumbID}`)
       .on('mousedown', mouseDownHandler);
 
+    d3.select(component)
+      .select(`#${rightThumbID}`)
+      .on('mousedown', mouseDownHandler);
   };
 
   /**
    * Move the specified thumb to the given value on the slider.
-   * @param{string} thumbId The ID of the thumb element.
+   * @param{string} thumbID The ID of the thumb element.
    * @param{number} value The target value to move the thumb to.
    */
-  const moveThumb = (thumbId, value) => {
+  const moveThumb = (thumbID, value) => {
     // Make sure we are only moving within the range of the feature value
     if (value > feature.valueMax) {
       value = feature.valueMax;
@@ -88,7 +127,7 @@
 
     // Save the current value to the HTML element
     const thumb = d3.select(component)
-      .select(`#${thumbId}`)
+      .select(`#${thumbID}`)
       .attr('data-curValue', value);
 
     // Compute the position to move the thumb to
@@ -99,23 +138,41 @@
       * trackBBox.width;
 
     // Need to offset the xPos based on the thumb type
-    if (thumbId.includes('right')) {
+    // Also register different values based on the thumb type
+    switch(thumbID) {
+    case 'slider-left-thumb':
       xPos -= thumbBBox.width;
+      feature.curMin = value;
+      break;
+    case 'slider-right-thumb':
+      feature.curMax = value;
+      break;
+    case 'slider-middle-thumb':
+      break;
+    default:
+      console.warn('Unknown thumb type in moveThumb()');
+      break;
     }
 
-    console.log(thumbBBox, trackBBox);
-
     thumb.style('left', `${xPos}px`);
+  };
 
-    console.log(thumb);
+  /**
+   * Init the states of different elements. Some functions require bbox,
+   * which is only accurate after content is loaded
+   */
+  const windowContentLoadedHandler = () => {
+    // Init the slider
+    initSlider();
   };
 
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
 
-    // Init the slider
-    initSlider();
+    d3.select(window)
+      .on('load', windowContentLoadedHandler);
+
   });
 
 </script>
@@ -124,18 +181,23 @@
   @import '../define';
   @use 'sass:math';
 
+  $range-thumb-width: 8px;
+  $base-circle-radius: 5px;
+
   .feature-card {
     display: flex;
     flex-direction: column;
     height: 200px;
     width: 300px;
     border-radius: 10px;
-    padding: 0.5em 0.8em;
+    padding: 8px 16px;
     box-shadow: $shadow-border-light;
     background: white;
+    position: relative;
   }
 
   .feature-header {
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -219,11 +281,14 @@
   }
 
   .feature-slider {
+    position: relative;
+    width: 100%;
 
     .track {
-      width: 100%;
+      width: calc(100% - #{2 * $range-thumb-width});
       background-color: $gray-200;
-      position: relative;
+      position: absolute;
+      left: $range-thumb-width;
       height: 4px;
     }
 
@@ -239,10 +304,7 @@
 
       :global(svg) {
         width: 8px;
-        height: unset;
       }
-
-      $base-circle-radius: 5px;
 
       &::before {
         content: '';
@@ -264,13 +326,16 @@
 
     .svg-icon.thumb:hover {
       &::before {
-        transform: scale(6);
+        transform: scale(5);
       }
     }
 
     .svg-icon.thumb:focus {
+      cursor: grabbing;
+      outline: none;
+
       &::before {
-        transform: scale(8);
+        transform: scale(7);
       }
     }
 
@@ -313,15 +378,21 @@
 
     <div class='track'>
       <div id='slider-left-thumb'
+        tabindex='-1'
         class='svg-icon icon-range-thumb-left thumb'>
       </div>
 
       <div id='slider-right-thumb'
+        tabindex='-1'
         class='svg-icon icon-range-thumb-right thumb'>
       </div>
 
     </div>
 
+  </div>
+
+  <div class='temp' style='margin-top: 60px; font-size: 0.5em;'>
+    {feature.curMin} {feature.curMax}
   </div>
 
 </div>

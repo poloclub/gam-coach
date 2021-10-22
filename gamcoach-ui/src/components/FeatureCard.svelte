@@ -6,6 +6,34 @@
   import rightArrowIcon from '../img/icon-right-arrow.svg';
   import rangeThumbLeftIcon from '../img/icon-range-thumb-left.svg';
   import rangeThumbRightIcon from '../img/icon-range-thumb-right.svg';
+  import rangeThumbMiddleIcon from '../img/icon-range-thumb-middle.svg';
+
+  // Constants
+  const tickHeights = {
+    default: 6,
+    original: 20,
+    user: 20,
+    coach: 20,
+  };
+
+  // Binding variables, which will be initialized after window is loaded
+  let component = null;
+  let tickSVG = null;
+  let tickXScale = null;
+
+  let feature = {
+    name: 'FICO Score',
+    featureName: 'fico_score',
+    valueMin: 600,
+    valueMax: 800,
+    requiresInt: true,
+    originalValue: 728,
+    curValue: 728,
+    coachValue: 755,
+  };
+
+  feature.curMin = feature.valueMin;
+  feature.curMax = feature.valueMax;
 
   const preProcessSVG = (svgString) => {
     return svgString.replaceAll('black', 'currentcolor')
@@ -28,24 +56,11 @@
     d3.select(component)
       .selectAll('.svg-icon.icon-range-thumb-right')
       .html(preProcessSVG(rangeThumbRightIcon));
+
+    d3.select(component)
+      .selectAll('.svg-icon.icon-range-thumb-middle')
+      .html(preProcessSVG(rangeThumbMiddleIcon));
   };
-
-  // Binding variables
-  let component = null;
-  let tickSVG = null;
-
-  let feature = {
-    name: 'FICO Score',
-    featureName: 'fico_score',
-    valueMin: 600,
-    valueMax: 800,
-    requiresInt: true,
-    originalValue: 728,
-    curValue: 755,
-  };
-
-  feature.curMin = feature.valueMin;
-  feature.curMax = feature.valueMax;
 
   /**
    * Handling the mousedown event for thumbs on the slider.
@@ -100,6 +115,7 @@
   const initSlider = () => {
     const leftThumbID = 'slider-left-thumb';
     const rightThumbID = 'slider-right-thumb';
+    const middleThumbID = 'slider-middle-thumb';
 
     // Move two range thumbs to the left and right ends
     moveThumb(leftThumbID, feature.valueMin);
@@ -112,6 +128,13 @@
 
     d3.select(component)
       .select(`#${rightThumbID}`)
+      .on('mousedown', mouseDownHandler);
+
+    // Move the curValue thumb to the original value
+    moveThumb(middleThumbID, feature.originalValue);
+
+    d3.select(component)
+      .select(`#${middleThumbID}`)
       .on('mousedown', mouseDownHandler);
 
     syncRangeTrack();
@@ -147,12 +170,12 @@
       break;
 
     case 'slider-middle-thumb':
-      if (value > feature.curMax) {
-        value = feature.curMax;
-      }
-      if (value < feature.curMin) {
-        value = feature.curMin;
-      }
+      // if (value > feature.curMax) {
+      //   value = feature.curMax;
+      // }
+      // if (value < feature.curMin) {
+      //   value = feature.curMin;
+      // }
       break;
 
     default:
@@ -189,6 +212,27 @@
       break;
 
     case 'slider-middle-thumb':
+      xPos -= thumbBBox.width / 2;
+      feature.curValue = value;
+
+      // Update the color for middle thumb
+      if (feature.curValue === feature.originalValue) {
+        thumb.classed('user', false);
+        thumb.classed('coach', false);
+      } else if (feature.curValue === feature.coachValue) {
+        thumb.classed('user', false);
+        thumb.classed('coach', true);
+      } else {
+        thumb.classed('user', true);
+        thumb.classed('coach', false);
+      }
+
+      // Move the user tick mark
+      if (tickSVG !== null) {
+        tickSVG.select('.user-mark')
+          .attr('transform', `translate(${tickXScale(value)}, 0)`);
+      }
+
       break;
 
     default:
@@ -248,6 +292,9 @@
       .style('width', `${rangeWidth}px`);
   };
 
+  /**
+   * Initialize position ticks and the original value tick.
+   */
   const initTicks = () => {
 
     // Use the parent size to initialize the SVG size
@@ -258,7 +305,7 @@
     const width = parentBBox.width;
     const height = parentBBox.height;
 
-    let svg = d3.select(component)
+    tickSVG = d3.select(component)
       .select('.svg-ticks')
       .attr('width', width)
       .attr('height', height);
@@ -270,7 +317,7 @@
       .offsetWidth;
 
     const padding = {
-      top: 7,
+      top: 8,
       left: thumbWidth,
       right: thumbWidth,
       bottom: 0
@@ -278,17 +325,16 @@
 
     // Add ticks
     const tickTotalWidth = width - padding.left - padding.right;
-    const tickHeight = 5;
 
-    let tickGroup = svg.append('g')
+    let tickGroup = tickSVG.append('g')
       .attr('class', 'tick-group')
       .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
-    let tickXScale = d3.scaleLinear()
+    tickXScale = d3.scaleLinear()
       .domain([feature.valueMin, feature.valueMax])
       .range([0, tickTotalWidth]);
 
-    let tickCount = 50;
+    let tickCount = 30;
     let tickArray = [];
     for (let i = 0; i <= tickCount; i++) {
       tickArray.push(feature.valueMin + (feature.valueMax - feature.valueMin) * i / tickCount);
@@ -300,11 +346,51 @@
       .attr('class', 'tick')
       .attr('transform', d => `translate(${tickXScale(d)}, 0)`)
       .append('line')
-      .attr('y2', tickHeight);
+      .attr('y2', tickHeights.default);
 
-    tickSVG = svg;
-
+    // Initialize the style
     syncTicks();
+
+    // Add annotations to the user value
+    tickGroup.append('g')
+      .attr('class', 'user-mark')
+      .attr('transform', `translate(${tickXScale(feature.originalValue)}, 0)`)
+      .append('line')
+      .attr('y2', tickHeights.user);
+
+    // Add annotations to the original value
+    tickGroup.append('g')
+      .attr('class', 'original-mark')
+      .attr('transform', `translate(${tickXScale(feature.originalValue)}, 0)`)
+      .append('line')
+      .attr('y2', tickHeights.original);
+
+  };
+
+  /**
+   * Move the target tick to the specified value.
+   * @param name Name of the tick ('user' or 'coach')
+   * @param value Value of the tick
+   */
+  const moveTick = (name, value) => {
+    if (name !== 'user' && name !== 'coach') {
+      console.warn('Unknown tick name in moveTick()');
+      return;
+    }
+
+    if (tickSVG === null) {
+      return;
+    }
+
+    let tickGroup = tickSVG.select('.tick-group');
+
+    tickGroup.selectAll(`g.${name}-mark`)
+      .data([1])
+      .join('g')
+      .attr('class', `${name}-mark`)
+      .attr('transform', `translate(${tickXScale(value)}, 0)`)
+      .append('line')
+      .attr('y2', tickHeights[name]);
   };
 
   /**
@@ -317,6 +403,9 @@
 
     // Draw ticks in the svg below the slider
     initTicks();
+
+    // TEMP: add the coach mark
+    moveTick('coach', feature.coachValue);
   };
 
   onMount(() => {
@@ -376,7 +465,7 @@
     margin: 0 5px;
 
     .svg-icon {
-      color: $coolGray-800;
+      color: $gray-800;
       :global(svg) {
         width: 10px;
         height: 5px;
@@ -385,8 +474,8 @@
   }
 
   .svg-icon {
-    color: $coolGray-800;
-    fill: $coolGray-800;
+    color: $gray-800;
+    fill: $gray-800;
     display: flex;
 
     :global(svg) {
@@ -459,8 +548,8 @@
       margin: 0px;
       top: -4px;
 
-      color: $orange-400;
-      fill: $orange-400;
+      color: $orange-300;
+      fill: $orange-300;
       cursor: grab;
 
       :global(svg) {
@@ -471,6 +560,7 @@
         content: '';
         display: inline-block;
         position: absolute;
+        z-index: 1;
         width: $base-circle-radius;
         height: $base-circle-radius;
         border-radius: 50%;
@@ -481,6 +571,7 @@
         top: 50%;
         margin-top: -($base-circle-radius / 2);
         margin-left: -($base-circle-radius / 2);
+        transform: scale(0.1);
         transition: transform 300ms ease-in-out;
       }
     }
@@ -499,6 +590,30 @@
         transform: scale(7);
       }
     }
+
+    .svg-icon.icon-range-thumb-middle {
+      fill: $gray-400;
+      color: $gray-400;
+      stroke: $gray-100;
+      stroke-width: 15;
+
+      :global(svg) {
+        width: 1.2em;
+        height: 1.2em;
+      }
+    }
+
+    :global(.svg-icon.icon-range-thumb-middle.user) {
+      fill: $blue-400;
+      color: $blue-400;
+      stroke: $blue-100;
+    }
+
+    :global(.svg-icon.icon-range-thumb-middle.coach) {
+      fill: $orange-400;
+      color: $orange-400;
+      stroke: $orange-100;
+    }
   }
 
   .feature-ticks {
@@ -510,14 +625,29 @@
 
   .svg-ticks {
     :global(.tick line) {
-      stroke: $orange-300;
-      transform: scaleY(2);
+      stroke: $orange-100;
+      transform: scaleY(1.8);
       transition: transform 300ms ease-in-out;
     }
 
     :global(.tick.out-range line) {
-      stroke: $gray-300;
+      stroke: $gray-200;
       transform: scaleY(1);
+    }
+
+    :global(.original-mark line) {
+      stroke-width: 2;
+      stroke: $gray-600;
+    }
+
+    :global(.user-mark line) {
+      stroke-width: 2;
+      stroke: $blue-500;
+    }
+
+    :global(.coach-mark line) {
+      stroke-width: 2;
+      stroke: $orange-500;
     }
   }
 
@@ -537,7 +667,7 @@
 
       <div class='feature-arrow'>
         <span class='value-change'>
-          {`${(feature.curValue - feature.originalValue) < 0 ? '-1' : '+'}${feature.curValue - feature.originalValue}`}
+          {`${(feature.curValue - feature.originalValue) < 0 ? '' : '+'}${feature.curValue - feature.originalValue}`}
         </span>
 
         <div class='arrow-right'></div>
@@ -568,6 +698,12 @@
         tabindex='-1'
         class='svg-icon icon-range-thumb-right thumb'>
       </div>
+
+      <div id='slider-middle-thumb'
+        tabindex='-1'
+        class='svg-icon icon-range-thumb-middle thumb'>
+      </div>
+
     </div>
 
   </div>

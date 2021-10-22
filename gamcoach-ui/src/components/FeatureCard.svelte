@@ -30,7 +30,9 @@
       .html(preProcessSVG(rangeThumbRightIcon));
   };
 
+  // Binding variables
   let component = null;
+  let tickSVG = null;
 
   let feature = {
     name: 'FICO Score',
@@ -53,6 +55,8 @@
     e.stopPropagation();
 
     let thumb = e.target;
+    if (!thumb.id.includes('thumb')) { return; }
+
     let track = thumb.parentNode;
     let trackWidth = track.getBoundingClientRect().width;
     thumb.focus();
@@ -71,7 +75,7 @@
         newValue = feature.valueMin + parseFloat((feature.valueMax - feature.valueMin) * deltaX / trackWidth);
       }
 
-      console.log(newValue);
+      // console.log(newValue);
       moveThumb(thumb.id, newValue);
     };
 
@@ -125,6 +129,34 @@
       value = feature.valueMin;
     }
 
+    // Special rules based on the thumb type
+    switch(thumbID) {
+    case 'slider-left-thumb':
+      if (value > feature.curMax) {
+        value = feature.curMax;
+      }
+      break;
+
+    case 'slider-right-thumb':
+      if (value < feature.curMin) {
+        value = feature.curMin;
+      }
+      break;
+
+    case 'slider-middle-thumb':
+      if (value > feature.curMax) {
+        value = feature.curMax;
+      }
+      if (value < feature.curMin) {
+        value = feature.curMin;
+      }
+      break;
+
+    default:
+      console.warn('Unknown thumb type in moveThumb()');
+      break;
+    }
+
     // Save the current value to the HTML element
     const thumb = d3.select(component)
       .select(`#${thumbID}`)
@@ -143,12 +175,17 @@
     case 'slider-left-thumb':
       xPos -= thumbBBox.width;
       feature.curMin = value;
+      restyleTicks();
       break;
+
     case 'slider-right-thumb':
       feature.curMax = value;
+      restyleTicks();
       break;
+
     case 'slider-middle-thumb':
       break;
+
     default:
       console.warn('Unknown thumb type in moveThumb()');
       break;
@@ -158,12 +195,102 @@
   };
 
   /**
+   * Sync up ticks with the current min & max range
+   */
+  const restyleTicks = () => {
+    if (tickSVG === null) {
+      return;
+    }
+
+    tickSVG.select('g.tick-group')
+      .selectAll('g.tick')
+      .filter(d => d >= feature.curMin && d <= feature.curMax)
+      // .classed('in-range', true)
+      .classed('out-range', false);
+
+    tickSVG.select('g.tick-group')
+      .selectAll('g.tick')
+      .filter(d => d < feature.curMin || d > feature.curMax)
+      // .classed('in-range', false)
+      .classed('out-range', true);
+
+    if (feature.curMax === feature.curMin) {
+      tickSVG.select('g.tick-group')
+        .selectAll('g.tick')
+        // .classed('in-range', false)
+        .classed('out-range', true);
+    }
+  };
+
+  const initTicks = () => {
+
+    // Use the parent size to initialize the SVG size
+    let parentDiv = d3.select(component)
+      .select('.feature-ticks');
+    let parentBBox = parentDiv.node().getBoundingClientRect();
+
+    const width = parentBBox.width;
+    const height = parentBBox.height;
+
+    let svg = d3.select(component)
+      .select('.svg-ticks')
+      .attr('width', width)
+      .attr('height', height);
+
+    // Offset the range thumb to align with the track
+    const thumbWidth = d3.select(component)
+      .select('#slider-left-thumb')
+      .node()
+      .offsetWidth;
+
+    const padding = {
+      top: 7,
+      left: thumbWidth,
+      right: thumbWidth,
+      bottom: 0
+    };
+
+    // Add ticks
+    const tickTotalWidth = width - padding.left - padding.right;
+    const tickHeight = 5;
+
+    let tickGroup = svg.append('g')
+      .attr('class', 'tick-group')
+      .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
+
+    let tickXScale = d3.scaleLinear()
+      .domain([feature.valueMin, feature.valueMax])
+      .range([0, tickTotalWidth]);
+
+    let tickCount = 50;
+    let tickArray = [];
+    for (let i = 0; i <= tickCount; i++) {
+      tickArray.push(feature.valueMin + (feature.valueMax - feature.valueMin) * i / tickCount);
+    }
+
+    tickGroup.selectAll('g.tick')
+      .data(tickArray)
+      .join('g')
+      .attr('class', 'tick')
+      .attr('transform', d => `translate(${tickXScale(d)}, 0)`)
+      .append('line')
+      .attr('y2', tickHeight);
+
+    tickSVG = svg;
+
+    restyleTicks();
+  };
+
+  /**
    * Init the states of different elements. Some functions require bbox,
    * which is only accurate after content is loaded
    */
   const windowContentLoadedHandler = () => {
     // Init the slider
     initSlider();
+
+    // Draw ticks in the svg below the slider
+    initTicks();
   };
 
   onMount(() => {
@@ -283,6 +410,8 @@
   .feature-slider {
     position: relative;
     width: 100%;
+    display: flex;
+    flex-direction: column;
 
     .track {
       width: calc(100% - #{2 * $range-thumb-width});
@@ -338,7 +467,26 @@
         transform: scale(7);
       }
     }
+  }
 
+  .feature-ticks {
+    // border: 1px solid $gray-200;
+    margin: 0 0 10px 0;
+    height: 40px;
+    box-sizing: border-box;
+  }
+
+  .svg-ticks {
+    :global(.tick line) {
+      stroke: $orange-300;
+      transform: scaleY(2);
+      transition: transform 300ms ease-in-out;
+    }
+
+    :global(.tick.out-range line) {
+      stroke: $gray-300;
+      transform: scaleY(1);
+    }
   }
 
 </style>
@@ -386,12 +534,15 @@
         tabindex='-1'
         class='svg-icon icon-range-thumb-right thumb'>
       </div>
-
     </div>
 
   </div>
 
-  <div class='temp' style='margin-top: 60px; font-size: 0.5em;'>
+  <div class='feature-ticks'>
+    <svg class='svg-ticks'></svg>
+  </div>
+
+  <div class='temp' style='margin-top: 0px; font-size: 0.5em;'>
     {feature.curMin} {feature.curMax}
   </div>
 

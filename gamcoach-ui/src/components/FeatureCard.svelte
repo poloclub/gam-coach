@@ -40,7 +40,8 @@
     valueMin: 600,
     valueMax: 800,
     requiresInt: true,
-    curValue: 728,
+    originalValue: 728,
+    curValue: 755,
   };
 
   feature.curMin = feature.valueMin;
@@ -112,6 +113,8 @@
     d3.select(component)
       .select(`#${rightThumbID}`)
       .on('mousedown', mouseDownHandler);
+
+    syncRangeTrack();
   };
 
   /**
@@ -175,12 +178,14 @@
     case 'slider-left-thumb':
       xPos -= thumbBBox.width;
       feature.curMin = value;
-      restyleTicks();
+      syncTicks();
+      syncRangeTrack();
       break;
 
     case 'slider-right-thumb':
       feature.curMax = value;
-      restyleTicks();
+      syncTicks();
+      syncRangeTrack();
       break;
 
     case 'slider-middle-thumb':
@@ -197,7 +202,7 @@
   /**
    * Sync up ticks with the current min & max range
    */
-  const restyleTicks = () => {
+  const syncTicks = () => {
     if (tickSVG === null) {
       return;
     }
@@ -220,6 +225,27 @@
         // .classed('in-range', false)
         .classed('out-range', true);
     }
+  };
+
+  /**
+   * Sync the background range track with teh current min & max range
+   */
+  const syncRangeTrack = () => {
+    let leftThumb = d3.select(component)
+      .select('#slider-left-thumb');
+
+    let rightThumb = d3.select(component)
+      .select('#slider-right-thumb');
+
+    let thumbWidth = leftThumb.node().getBoundingClientRect().width;
+    let leftThumbLeft = parseFloat(leftThumb.style('left'));
+    let rightThumbLeft = parseFloat(rightThumb.style('left'));
+    let rangeWidth = rightThumbLeft - leftThumbLeft;
+
+    d3.select(component)
+      .select('.track .range-track')
+      .style('left', `${leftThumbLeft + thumbWidth}px`)
+      .style('width', `${rangeWidth}px`);
   };
 
   const initTicks = () => {
@@ -278,7 +304,7 @@
 
     tickSVG = svg;
 
-    restyleTicks();
+    syncTicks();
   };
 
   /**
@@ -419,6 +445,12 @@
       position: absolute;
       left: $range-thumb-width;
       height: 4px;
+
+      .range-track {
+        position: absolute;
+        height: 4px;
+        background-color: $orange-100;
+      }
     }
 
     .svg-icon.thumb {
@@ -500,19 +532,19 @@
 
     <div class='values'>
       <span class='value-old'>
-        728
+        {feature.originalValue}
       </span>
 
       <div class='feature-arrow'>
         <span class='value-change'>
-          +20.55
+          {`${(feature.curValue - feature.originalValue) < 0 ? '-1' : '+'}${feature.curValue - feature.originalValue}`}
         </span>
 
         <div class='arrow-right'></div>
       </div>
 
       <span class='value-new'>
-        800
+        {feature.curValue}
       </span>
     </div>
 
@@ -525,6 +557,8 @@
   <div class='feature-slider'>
 
     <div class='track'>
+      <div class='range-track'></div>
+
       <div id='slider-left-thumb'
         tabindex='-1'
         class='svg-icon icon-range-thumb-left thumb'>

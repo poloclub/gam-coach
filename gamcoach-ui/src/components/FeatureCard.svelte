@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import { tooltipConfigStore } from '../store';
 
-  import {initSlider, moveThumb, initTicks, moveTick
+  import {initSlider, moveThumb, initTicks, moveTick, initHist
   } from './FeatureCard';
 
   import rightArrowIcon from '../img/icon-right-arrow.svg';
@@ -14,6 +14,7 @@
   export let featureInfo = null;
   export let requiresInt = false;
   export let originalValue = null;
+  export let featureID = null;
 
   let state = {};
 
@@ -31,6 +32,7 @@
 
   state.tickSVG = null;
   state.tickXScale = null;
+  state.densityClip = null;
 
   state.feature = {
     name: '',
@@ -43,6 +45,9 @@
     coachValue: 0,
     curMin: 0,
     curMax: 0,
+    histEdge: null,
+    histCount: null,
+    id: 0,
   };
 
   let tooltipConfig = null;
@@ -98,6 +103,10 @@
       coachValue: 755,
       curMin: featureInfo.binEdge[0],
       curMax: featureInfo.binEdge[featureInfo.binEdge.length - 1],
+      histEdge: featureInfo.histEdge,
+      histCount: featureInfo.histCount,
+      id: featureID,
+      densityClip: null,
     };
 
     if (requiresInt) {
@@ -115,6 +124,8 @@
 
     // TEMP: add the coach mark
     moveTick(state, 'coach', state.feature.coachValue);
+
+    initHist(component, state);
   };
 
   onMount(() => {

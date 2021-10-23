@@ -291,3 +291,17 @@ $base-circle-radius: 5px;
   border-bottom: 10px solid transparent;
   border-top: 10px solid black;
 }
+
+.svg-hist {
+  :global(.area-path) {
+    fill: $gray-300;
+
+    &.selected {
+      fill: pink;
+    }
+  }
+
+  :global(.area-path.selected) {
+    fill: $orange-300;
+  }
+}

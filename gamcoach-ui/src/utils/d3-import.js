@@ -49,7 +49,8 @@ import {
 
 import {
   line,
-  curveStepAfter
+  curveStepAfter,
+  curveMonotoneX
 } from 'd3-shape';
 
 import {
@@ -98,5 +99,6 @@ export default {
   zoom,
   zoomIdentity,
   drag,
-  format
+  format,
+  curveMonotoneX
 };

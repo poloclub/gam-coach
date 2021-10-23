@@ -1,4 +1,7 @@
 import d3 from '../utils/d3-import';
+import { config } from '../config';
+
+let colors = config.colors;
 
 /**
  * Handling the mousedown event for thumbs on the slider.
@@ -75,7 +78,7 @@ export const initSlider = (component, state) => {
     .select(`#${middleThumbID}`)
     .on('mousedown', e => mouseDownHandler(e, component, state));
 
-  syncRangeTrack(component);
+  syncRangeTrack(component, state);
 };
 
 /**
@@ -140,13 +143,13 @@ export const moveThumb = (component, state, thumbID, value) => {
     xPos -= thumbBBox.width;
     state.feature.curMin = value;
     syncTicks(state);
-    syncRangeTrack(component);
+    syncRangeTrack(component, state);
     break;
 
   case 'slider-right-thumb':
     state.feature.curMax = value;
     syncTicks(state);
-    syncRangeTrack(component);
+    syncRangeTrack(component, state);
     break;
 
   case 'slider-middle-thumb':
@@ -230,7 +233,7 @@ const syncTooltips = (component, state) => {
 /**
  * Sync the background range track with teh current min & max range
  */
-const syncRangeTrack = (component) => {
+const syncRangeTrack = (component, state) => {
   let leftThumb = d3.select(component)
     .select('#slider-left-thumb');
 
@@ -246,6 +249,13 @@ const syncRangeTrack = (component) => {
     .select('.track .range-track')
     .style('left', `${leftThumbLeft + thumbWidth}px`)
     .style('width', `${rangeWidth}px`);
+
+  // Move the clip in the density plot
+  if (state.densityClip !== null) {
+    state.densityClip
+      .attr('x', state.tickXScale(state.feature.curMin))
+      .attr('width', state.tickXScale(state.feature.curMax) - state.tickXScale(state.feature.curMin));
+  }
 };
 
 /**
@@ -281,6 +291,10 @@ export const initTicks = (component, state) => {
 
   // Add ticks
   const tickTotalWidth = width - padding.left - padding.right;
+
+  let backGroup = state.tickSVG.append('g')
+    .attr('class', 'back-group')
+    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   let tickGroup = state.tickSVG.append('g')
     .attr('class', 'tick-group')
@@ -321,6 +335,27 @@ export const initTicks = (component, state) => {
     .append('line')
     .attr('y2', state.tickHeights.original);
 
+  // Add labels for the min and max value
+  backGroup.append('text')
+    .attr('class', 'label-min-value')
+    .attr('x', -2)
+    .attr('y', state.tickHeights.default * 1.9)
+    .style('text-anchor', 'start')
+    .style('dominant-baseline', 'hanging')
+    .style('font-size', '0.9em')
+    .style('fill', colors['gray-400'])
+    .text(d3.format('.2~f')(state.feature.valueMin));
+
+  backGroup.append('text')
+    .attr('class', 'label-max-value')
+    .attr('x', tickTotalWidth + 2)
+    .attr('y', state.tickHeights.default * 1.9)
+    .style('text-anchor', 'end')
+    .style('dominant-baseline', 'hanging')
+    .style('font-size', '0.9em')
+    .style('fill', colors['gray-400'])
+    .text(d3.format('.2~f')(state.feature.valueMax));
+
 };
 
 /**
@@ -347,4 +382,80 @@ export const moveTick = (state, name, value) => {
     .attr('transform', `translate(${state.tickXScale(value)}, 0)`)
     .append('line')
     .attr('y2', state.tickHeights[name]);
+};
+
+/**
+ * Initialize the density plot.
+ */
+export const initHist = (component, state) => {
+  console.log(state.feature);
+
+  // Use the parent size to initialize the SVG size
+  let parentDiv = d3.select(component)
+    .select('.feature-hist');
+  let parentBBox = parentDiv.node().getBoundingClientRect();
+
+  const width = parentBBox.width;
+  const height = parentBBox.height;
+
+  state.histSVG = d3.select(component)
+    .select('.svg-hist')
+    .attr('width', width)
+    .attr('height', height);
+
+  // Offset the range thumb to align with the track
+  const thumbWidth = d3.select(component)
+    .select('#slider-left-thumb')
+    .node()
+    .offsetWidth;
+
+  const padding = {
+    top: 10,
+    left: thumbWidth,
+    right: thumbWidth,
+    bottom: 2
+  };
+
+  // Add ticks
+  let histGroup = state.histSVG.append('g')
+    .attr('class', 'hist-group')
+    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
+
+  // Compute the frequency
+  const totalSampleNum = state.feature.histCount.reduce((a, b) => a + b);
+  let curDensity = state.feature.histCount.map((d, i) => [state.feature.histEdge[i], d / totalSampleNum]);
+  curDensity.unshift([state.feature.histEdge[0], 0]);
+  curDensity.push([state.feature.histEdge[state.feature.histEdge.length - 1], 0]);
+
+  // Create the axis scales
+  // We can re-use the tick svg's x-scale. Just need to create a local y scale.
+
+  let yScale = d3.scaleLinear()
+    .domain([0, d3.max(curDensity, d => d[1])])
+    .range([height - padding.bottom - padding.top, padding.top]);
+
+  let curve = d3.line()
+    .curve(d3.curveMonotoneX)
+    .x(d => state.tickXScale(d[0]))
+    .y(d => yScale(d[1]));
+
+  // Draw the area curve
+  let underArea = histGroup.append('path')
+    .attr('class', 'area-path')
+    .datum(curDensity)
+    .attr('d', curve);
+
+  let upperArea = underArea.clone(true)
+    .classed('selected', true);
+
+  // Create a clip path
+  state.densityClip = histGroup.append('clipPath')
+    .attr('id', `${state.feature.id}-area-clip`)
+    .append('rect')
+    .attr('x', state.tickXScale(state.feature.curMin))
+    .attr('width', state.tickXScale(state.feature.curMax) - state.tickXScale(state.feature.curMin))
+    .attr('height', height);
+
+  upperArea.attr('clip-path', `url(#${state.feature.id}-area-clip)`);
+
 };

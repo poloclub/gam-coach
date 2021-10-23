@@ -1,16 +1,24 @@
 <script>
   import FeatureCard from './components/FeatureCard.svelte';
   import Tooltip from './components/Tooltip.svelte';
+  import d3 from './utils/d3-import';
 
   import { tooltipConfigStore } from './store';
 
   // Set up tooltip
   let tooltip = null;
   let tooltipConfig = null;
-
   tooltipConfigStore.subscribe(value => {tooltipConfig = value;});
 
   // Set up the GAM Coach object
+  let data = null;
+
+  const initData = async() => {
+    data = await d3.json('/data/lc-classifier.json');
+    console.log(data);
+  };
+
+  initData();
 
 </script>
 
@@ -52,7 +60,10 @@
 
   <div class='content'>
 
-    <FeatureCard />
+    <FeatureCard featureInfo={data == null ? null : data.features[17]}
+      requiresInt={true}
+      originalValue={728}
+    />
 
   </div>
 

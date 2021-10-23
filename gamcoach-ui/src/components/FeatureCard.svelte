@@ -8,6 +8,10 @@
   import rangeThumbRightIcon from '../img/icon-range-thumb-right.svg';
   import rangeThumbMiddleIcon from '../img/icon-range-thumb-middle.svg';
 
+  export let featureInfo = null;
+  export let requiresInt = false;
+  export let originalValue = null;
+
   // Constants
   const tickHeights = {
     default: 6,
@@ -20,21 +24,20 @@
   let component = null;
   let tickSVG = null;
   let tickXScale = null;
-  let tooltip = null;
+  let windowLoaded = false;
 
   let feature = {
-    name: 'FICO Score',
-    featureName: 'fico_score',
-    valueMin: 600,
-    valueMax: 800,
-    requiresInt: true,
-    originalValue: 728,
-    curValue: 728,
-    coachValue: 755,
+    name: '',
+    featureName: '',
+    valueMin: 0,
+    valueMax: 0,
+    requiresInt: false,
+    originalValue: 0,
+    curValue: 0,
+    coachValue: 0,
+    curMin: 0,
+    curMax: 0,
   };
-
-  feature.curMin = feature.valueMin;
-  feature.curMax = feature.valueMax;
 
   let tooltipConfig = null;
   tooltipConfigStore.subscribe(value => {
@@ -423,7 +426,30 @@
    * Init the states of different elements. Some functions require bbox,
    * which is only accurate after content is loaded
    */
-  const windowContentLoadedHandler = () => {
+  const initFeatureCard = () => {
+    // Initialize the feature data from the prop
+    feature = {
+      // TODO: Export a feature description name in the model extract function from
+      // python
+      name: 'FICO Score',
+      featureName: featureInfo.name,
+      valueMin: featureInfo.binEdge[0],
+      valueMax: featureInfo.binEdge[featureInfo.binEdge.length - 1],
+      requiresInt: requiresInt,
+      originalValue: originalValue,
+      curValue: originalValue,
+      coachValue: 755,
+      curMin: featureInfo.binEdge[0],
+      curMax: featureInfo.binEdge[featureInfo.binEdge.length - 1],
+    };
+
+    if (requiresInt) {
+      feature.valueMin = Math.floor(feature.valueMin);
+      feature.curMin = Math.floor(feature.curMin);
+      feature.valueMax = Math.ceil(feature.valueMax);
+      feature.curMax = Math.ceil(feature.curMax);
+    }
+
     // Init the slider
     initSlider();
 
@@ -439,9 +465,10 @@
     bindInlineSVG(component);
 
     d3.select(window)
-      .on('load', windowContentLoadedHandler);
-
+      .on('load', () => {windowLoaded = true;});
   });
+
+  $: featureInfo && windowLoaded && initFeatureCard();
 
 </script>
 

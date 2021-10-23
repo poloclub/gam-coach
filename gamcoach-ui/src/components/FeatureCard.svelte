@@ -20,6 +20,7 @@
   let component = null;
   let tickSVG = null;
   let tickXScale = null;
+  let tooltip = null;
 
   let feature = {
     name: 'FICO Score',
@@ -35,6 +36,11 @@
   feature.curMin = feature.valueMin;
   feature.curMax = feature.valueMax;
 
+  let tooltipConfig = null;
+  tooltipConfigStore.subscribe(value => {
+    tooltipConfig = value;
+  });
+
   const preProcessSVG = (svgString) => {
     return svgString.replaceAll('black', 'currentcolor')
       .replaceAll('fill:none', 'fill:currentcolor')
@@ -45,21 +51,23 @@
    * Dynamically bind SVG files as inline SVG strings in this component
    */
   export const bindInlineSVG = (component) => {
-    d3.select(component)
-      .selectAll('.svg-icon.icon-right-arrow')
-      .html(preProcessSVG(rightArrowIcon));
+    const iconList = [
+      { class: 'icon-right-arrow', svg: rightArrowIcon },
+      { class: 'icon-range-thumb-left', svg: rangeThumbLeftIcon },
+      { class: 'icon-range-thumb-right', svg: rangeThumbRightIcon },
+      { class: 'icon-range-thumb-middle', svg: rangeThumbMiddleIcon },
+    ];
 
-    d3.select(component)
-      .selectAll('.svg-icon.icon-range-thumb-left')
-      .html(preProcessSVG(rangeThumbLeftIcon));
-
-    d3.select(component)
-      .selectAll('.svg-icon.icon-range-thumb-right')
-      .html(preProcessSVG(rangeThumbRightIcon));
-
-    d3.select(component)
-      .selectAll('.svg-icon.icon-range-thumb-middle')
-      .html(preProcessSVG(rangeThumbMiddleIcon));
+    iconList.forEach(d => {
+      d3.select(component)
+        .selectAll(`.svg-icon.${d.class}`)
+        .each((_, i, g) => {
+          let ele = d3.select(g[i]);
+          let html = ele.html();
+          html = html.concat(' ', preProcessSVG(d.svg));
+          ele.html(html);
+        });
+    });
   };
 
   /**
@@ -240,6 +248,7 @@
       break;
     }
 
+    syncTooltips();
     thumb.style('left', `${xPos}px`);
   };
 
@@ -269,6 +278,23 @@
         // .classed('in-range', false)
         .classed('out-range', true);
     }
+  };
+
+  const syncTooltips = () => {
+    d3.select(component)
+      .select('#slider-left-thumb')
+      .select('.thumb-label span')
+      .text(feature.curMin);
+
+    d3.select(component)
+      .select('#slider-right-thumb')
+      .select('.thumb-label span')
+      .text(feature.curMax);
+
+    d3.select(component)
+      .select('#slider-middle-thumb')
+      .select('.thumb-label span')
+      .text(feature.curValue);
   };
 
   /**
@@ -420,237 +446,7 @@
 </script>
 
 <style lang="scss">
-  @import '../define';
-  @use 'sass:math';
-
-  $range-thumb-width: 8px;
-  $base-circle-radius: 5px;
-
-  .feature-card {
-    display: flex;
-    flex-direction: column;
-    height: 200px;
-    width: 300px;
-    border-radius: 10px;
-    padding: 8px 16px;
-    box-shadow: $shadow-border-light;
-    background: white;
-    position: relative;
-  }
-
-  .feature-header {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .values {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    .value-change {
-      font-size: 0.8em;
-      padding: 0px 14px 8px 5px;
-      margin: -5px 0 0 0;
-      color: $green-600;
-    }
-  }
-
-  .feature-arrow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0 5px;
-
-    .svg-icon {
-      color: $gray-800;
-      :global(svg) {
-        width: 10px;
-        height: 5px;
-      }
-    }
-  }
-
-  .svg-icon {
-    color: $gray-800;
-    fill: $gray-800;
-    display: flex;
-
-    :global(svg) {
-      width: 1em;
-      height: 1em;
-    }
-  }
-
-  .arrow-right {
-    box-sizing: border-box;
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 5px;
-
-    &::after,&::before {
-      content: "";
-      display: block;
-      box-sizing: border-box;
-      position: absolute;
-      right: 3px;
-    }
-
-    &::after {
-      width: 8px;
-      height: 8px;
-      border-top: 2px solid $gray-400;
-      border-right: 2px solid $gray-400;
-      transform: rotate(45deg);
-      bottom: 7px;
-    }
-
-    &::before {
-      width: calc(100% - 4px);
-      height: 2px;
-      bottom: 10px;
-      background: $gray-400;
-    }
-  }
-
-  .feature-hist {
-    border: 1px solid $gray-200;
-    margin: 0 0 10px 0;
-    height: 80px;
-  }
-
-  .feature-slider {
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-
-    .track {
-      width: calc(100% - #{2 * $range-thumb-width});
-      background-color: $gray-200;
-      position: absolute;
-      left: $range-thumb-width;
-      height: 4px;
-
-      .range-track {
-        position: absolute;
-        height: 4px;
-        background-color: $orange-100;
-      }
-    }
-
-    .svg-icon.thumb {
-      position: absolute;
-      padding: 0;
-      margin: 0px;
-      top: -4px;
-
-      color: $orange-300;
-      fill: $orange-300;
-      cursor: grab;
-
-      :global(svg) {
-        width: 8px;
-      }
-
-      &::before {
-        content: '';
-        display: inline-block;
-        position: absolute;
-        z-index: 1;
-        width: $base-circle-radius;
-        height: $base-circle-radius;
-        border-radius: 50%;
-        background: currentColor;
-        opacity: 0.2;
-        // Center the background circle
-        left: 50%;
-        top: 50%;
-        margin-top: -($base-circle-radius / 2);
-        margin-left: -($base-circle-radius / 2);
-        transform: scale(0.1);
-        transition: transform 300ms ease-in-out;
-      }
-    }
-
-    .svg-icon.thumb:hover {
-      &::before {
-        transform: scale(5);
-      }
-    }
-
-    .svg-icon.thumb:focus {
-      cursor: grabbing;
-      outline: none;
-
-      &::before {
-        transform: scale(7);
-      }
-    }
-
-    .svg-icon.icon-range-thumb-middle {
-      fill: $gray-400;
-      color: $gray-400;
-      stroke: $gray-100;
-      stroke-width: 15;
-
-      :global(svg) {
-        width: 1.2em;
-        height: 1.2em;
-      }
-    }
-
-    :global(.svg-icon.icon-range-thumb-middle.user) {
-      fill: $blue-400;
-      color: $blue-400;
-      stroke: $blue-100;
-    }
-
-    :global(.svg-icon.icon-range-thumb-middle.coach) {
-      fill: $orange-400;
-      color: $orange-400;
-      stroke: $orange-100;
-    }
-  }
-
-  .feature-ticks {
-    // border: 1px solid $gray-200;
-    margin: 0 0 10px 0;
-    height: 40px;
-    box-sizing: border-box;
-  }
-
-  .svg-ticks {
-    :global(.tick line) {
-      stroke: $orange-100;
-      transform: scaleY(1.8);
-      transition: transform 300ms ease-in-out;
-    }
-
-    :global(.tick.out-range line) {
-      stroke: $gray-200;
-      transform: scaleY(1);
-    }
-
-    :global(.original-mark line) {
-      stroke-width: 2;
-      stroke: $gray-600;
-    }
-
-    :global(.user-mark line) {
-      stroke-width: 2;
-      stroke: $blue-500;
-    }
-
-    :global(.coach-mark line) {
-      stroke-width: 2;
-      stroke: $orange-500;
-    }
-  }
-
+  @import './FeatureCard.scss';
 </style>
 
 <div class='feature-card' bind:this={component}>
@@ -692,18 +488,26 @@
       <div id='slider-left-thumb'
         tabindex='-1'
         class='svg-icon icon-range-thumb-left thumb'>
+        <div class='thumb-label thumb-label-left'>
+          <span class='thumb-label-span'>{feature.curMin}</span>
+        </div>
       </div>
 
       <div id='slider-right-thumb'
         tabindex='-1'
         class='svg-icon icon-range-thumb-right thumb'>
+        <div class='thumb-label thumb-label-right'>
+          <span class='thumb-label-span'>{feature.curMax}</span>
+        </div>
       </div>
 
       <div id='slider-middle-thumb'
         tabindex='-1'
         class='svg-icon icon-range-thumb-middle thumb'>
+        <div class='thumb-label thumb-label-middle'>
+          <span class='thumb-label-span'>{feature.curValue}</span>
+        </div>
       </div>
-
     </div>
 
   </div>

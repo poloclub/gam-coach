@@ -168,10 +168,11 @@ export const moveThumb = (component, state, thumbID, value) => {
       thumb.classed('coach', false);
     }
 
-    // Move the user tick mark
-    if (state.tickSVG !== null) {
-      state.tickSVG.select('.user-mark')
-        .attr('transform', `translate(${state.tickXScale(value)}, 0)`);
+    // Move the user tick mark on the density plot
+    if (state.histSVG !== null) {
+      state.densityUserMark.attr(
+        'transform', `translate(${state.tickXScale(value)}, 0)`
+      );
     }
 
     break;
@@ -183,32 +184,30 @@ export const moveThumb = (component, state, thumbID, value) => {
 
   syncTooltips(component, state);
   thumb.style('left', `${xPos}px`);
+  state.stateUpdated();
 };
 
 /**
  * Sync up ticks with the current min & max range
  */
 const syncTicks = (state) => {
-  if (state.tickSVG === null) {
+  if (state.histSVG === null) {
     return;
   }
 
-  state.tickSVG.select('g.tick-group')
+  state.histSVG.select('g.tick-top-group')
     .selectAll('g.tick')
     .filter(d => d >= state.feature.curMin && d <= state.feature.curMax)
-    // .classed('in-range', true)
     .classed('out-range', false);
 
-  state.tickSVG.select('g.tick-group')
+  state.histSVG.select('g.tick-top-group')
     .selectAll('g.tick')
     .filter(d => d < state.feature.curMin || d > state.feature.curMax)
-    // .classed('in-range', false)
     .classed('out-range', true);
 
   if (state.feature.curMax === state.feature.curMin) {
-    state.tickSVG.select('g.tick-group')
+    state.histSVG.select('g.tick-top-group')
       .selectAll('g.tick')
-      // .classed('in-range', false)
       .classed('out-range', true);
   }
 };
@@ -259,132 +258,6 @@ const syncRangeTrack = (component, state) => {
 };
 
 /**
- * Initialize position ticks and the original value tick.
- */
-export const initTicks = (component, state) => {
-
-  // Use the parent size to initialize the SVG size
-  let parentDiv = d3.select(component)
-    .select('.feature-ticks');
-  let parentBBox = parentDiv.node().getBoundingClientRect();
-
-  const width = parentBBox.width;
-  const height = parentBBox.height;
-
-  state.tickSVG = d3.select(component)
-    .select('.svg-ticks')
-    .attr('width', width)
-    .attr('height', height);
-
-  // Offset the range thumb to align with the track
-  const thumbWidth = d3.select(component)
-    .select('#slider-left-thumb')
-    .node()
-    .offsetWidth;
-
-  const padding = {
-    top: 8,
-    left: thumbWidth,
-    right: thumbWidth,
-    bottom: 0
-  };
-
-  // Add ticks
-  const tickTotalWidth = width - padding.left - padding.right;
-
-  let backGroup = state.tickSVG.append('g')
-    .attr('class', 'back-group')
-    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
-
-  let tickGroup = state.tickSVG.append('g')
-    .attr('class', 'tick-group')
-    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
-
-  state.tickXScale = d3.scaleLinear()
-    .domain([state.feature.valueMin, state.feature.valueMax])
-    .range([0, tickTotalWidth]);
-
-  let tickCount = 30;
-  let tickArray = [];
-  for (let i = 0; i <= tickCount; i++) {
-    tickArray.push(state.feature.valueMin + (state.feature.valueMax - state.feature.valueMin) * i / tickCount);
-  }
-
-  tickGroup.selectAll('g.tick')
-    .data(tickArray)
-    .join('g')
-    .attr('class', 'tick')
-    .attr('transform', d => `translate(${state.tickXScale(d)}, 0)`)
-    .append('line')
-    .attr('y2', state.tickHeights.default);
-
-  // Initialize the style
-  syncTicks(state);
-
-  // Add annotations to the user value
-  tickGroup.append('g')
-    .attr('class', 'user-mark')
-    .attr('transform', `translate(${state.tickXScale(state.feature.originalValue)}, 0)`)
-    .append('line')
-    .attr('y2', state.tickHeights.user);
-
-  // Add annotations to the original value
-  tickGroup.append('g')
-    .attr('class', 'original-mark')
-    .attr('transform', `translate(${state.tickXScale(state.feature.originalValue)}, 0)`)
-    .append('line')
-    .attr('y2', state.tickHeights.original);
-
-  // Add labels for the min and max value
-  backGroup.append('text')
-    .attr('class', 'label-min-value')
-    .attr('x', -2)
-    .attr('y', state.tickHeights.default * 1.9)
-    .style('text-anchor', 'start')
-    .style('dominant-baseline', 'hanging')
-    .style('font-size', '0.9em')
-    .style('fill', colors['gray-400'])
-    .text(d3.format('.2~f')(state.feature.valueMin));
-
-  backGroup.append('text')
-    .attr('class', 'label-max-value')
-    .attr('x', tickTotalWidth + 2)
-    .attr('y', state.tickHeights.default * 1.9)
-    .style('text-anchor', 'end')
-    .style('dominant-baseline', 'hanging')
-    .style('font-size', '0.9em')
-    .style('fill', colors['gray-400'])
-    .text(d3.format('.2~f')(state.feature.valueMax));
-
-};
-
-/**
- * Move the target tick to the specified value.
- * @param name Name of the tick ('user' or 'coach')
- * @param value Value of the tick
- */
-export const moveTick = (state, name, value) => {
-  if (name !== 'user' && name !== 'coach') {
-    console.warn('Unknown tick name in moveTick()');
-    return;
-  }
-
-  if (state.tickSVG === null) {
-    return;
-  }
-
-  let tickGroup = state.tickSVG.select('.tick-group');
-
-  tickGroup.selectAll(`g.${name}-mark`)
-    .data([1])
-    .join('g')
-    .attr('class', `${name}-mark`)
-    .attr('transform', `translate(${state.tickXScale(value)}, 0)`)
-    .append('line')
-    .attr('y2', state.tickHeights[name]);
-};
-
-/**
  * Initialize the density plot.
  */
 export const initHist = (component, state) => {
@@ -396,7 +269,10 @@ export const initHist = (component, state) => {
   let parentBBox = parentDiv.node().getBoundingClientRect();
 
   const width = parentBBox.width;
-  const height = parentBBox.height;
+  const histHeight = 80;
+  const tickHeight = 30;
+  const vGap = 15;
+  const height = histHeight + tickHeight + vGap;
 
   state.histSVG = d3.select(component)
     .select('.svg-hist')
@@ -410,15 +286,36 @@ export const initHist = (component, state) => {
     .offsetWidth;
 
   const padding = {
-    top: 10,
+    top: 25,
     left: thumbWidth,
     right: thumbWidth,
-    bottom: 2
+    bottom: 0
   };
 
-  // Add ticks
+  const totalWidth = width - padding.left - padding.right;
+
+  // Draw a bounding box for this density plot
+  state.histSVG.append('g')
+    .attr('class', 'border')
+    .attr('transform', `translate(${0}, ${0})`)
+    .append('rect')
+    .attr('width', totalWidth + 2 * thumbWidth)
+    .attr('height', histHeight)
+    .style('fill', 'none')
+    .style('stroke', colors['gray-200']);
+
+  // Add density plot
   let histGroup = state.histSVG.append('g')
     .attr('class', 'hist-group')
+    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
+
+  let tickGroup = state.histSVG.append('g')
+    .attr('class', 'tick-group')
+    .attr('transform', `translate(${thumbWidth}, ${histHeight + vGap})`);
+
+  // The top layer to show vertical marks
+  let markGroup = state.histSVG.append('g')
+    .attr('class', 'mark-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   // Compute the frequency
@@ -428,11 +325,13 @@ export const initHist = (component, state) => {
   curDensity.push([state.feature.histEdge[state.feature.histEdge.length - 1], 0]);
 
   // Create the axis scales
-  // We can re-use the tick svg's x-scale. Just need to create a local y scale.
+  state.tickXScale = d3.scaleLinear()
+    .domain([state.feature.valueMin, state.feature.valueMax])
+    .range([0, totalWidth]);
 
   let yScale = d3.scaleLinear()
     .domain([0, d3.max(curDensity, d => d[1])])
-    .range([height - padding.bottom - padding.top, padding.top]);
+    .range([histHeight - padding.bottom - padding.top, 0]);
 
   let curve = d3.line()
     .curve(d3.curveMonotoneX)
@@ -454,8 +353,95 @@ export const initHist = (component, state) => {
     .append('rect')
     .attr('x', state.tickXScale(state.feature.curMin))
     .attr('width', state.tickXScale(state.feature.curMax) - state.tickXScale(state.feature.curMin))
-    .attr('height', height);
+    .attr('height', histHeight);
 
   upperArea.attr('clip-path', `url(#${state.feature.id}-area-clip)`);
 
+  // Add vertical marks on the plot
+  state.densityOriginalMark = markGroup.append('g')
+    .attr('class', 'mark density-original-mark')
+    .attr('transform',
+      `translate(${state.tickXScale(state.feature.originalValue)}, ${0})`
+    );
+
+  state.densityOriginalMark.append('line')
+    .attr('y2', histHeight - padding.top + vGap + state.tickHeights.original)
+    .clone(true)
+    .style('stroke-width', 3)
+    .style('stroke', 'white')
+    .style('stroke-dasharray', '0')
+    .lower();
+
+  state.densityUserMark = markGroup.append('g')
+    .attr('class', 'mark density-user-mark')
+    .attr('transform',
+      `translate(${state.tickXScale(state.feature.curValue)}, ${0})`
+    );
+
+  state.densityUserMark.append('line')
+    .attr('y2', histHeight - padding.top + vGap + state.tickHeights.original)
+    .clone(true)
+    .style('stroke-width', 3)
+    .style('stroke', 'white')
+    .style('stroke-dasharray', '0')
+    .lower();
+
+  state.densityCoachMark = markGroup.append('g')
+    .attr('class', 'mark density-coach-mark')
+    .attr('transform',
+      `translate(${state.tickXScale(state.feature.coachValue)}, ${0})`
+    );
+
+  state.densityCoachMark.append('line')
+    .attr('y2', histHeight - padding.top + vGap + state.tickHeights.original)
+    .clone(true)
+    .style('stroke-width', 3)
+    .style('stroke', 'white')
+    .style('stroke-dasharray', '0')
+    .lower();
+
+  // Initialize the ticks below the slider
+  let tickBackGroup = tickGroup.append('g')
+    .attr('class', 'tick-back-group');
+
+  let tickTopGroup = tickGroup.append('g')
+    .attr('class', 'tick-top-group');
+
+  let tickCount = 30;
+  let tickArray = [];
+  for (let i = 0; i <= tickCount; i++) {
+    tickArray.push(state.feature.valueMin + (state.feature.valueMax - state.feature.valueMin) * i / tickCount);
+  }
+
+  tickTopGroup.selectAll('g.tick')
+    .data(tickArray)
+    .join('g')
+    .attr('class', 'tick')
+    .attr('transform', d => `translate(${state.tickXScale(d)}, 0)`)
+    .append('line')
+    .attr('y2', state.tickHeights.default);
+
+  // Initialize the style
+  syncTicks(state);
+
+  // Add labels for the min and max value
+  tickBackGroup.append('text')
+    .attr('class', 'label-min-value')
+    .attr('x', -4)
+    .attr('y', state.tickHeights.default * 2.2)
+    .style('text-anchor', 'start')
+    .style('dominant-baseline', 'hanging')
+    .style('font-size', '0.9em')
+    .style('fill', colors['gray-400'])
+    .text(d3.format('.2~f')(state.feature.valueMin));
+
+  tickBackGroup.append('text')
+    .attr('class', 'label-max-value')
+    .attr('x', totalWidth + 4)
+    .attr('y', state.tickHeights.default * 2.2)
+    .style('text-anchor', 'end')
+    .style('dominant-baseline', 'hanging')
+    .style('font-size', '0.9em')
+    .style('fill', colors['gray-400'])
+    .text(d3.format('.2~f')(state.feature.valueMax));
 };

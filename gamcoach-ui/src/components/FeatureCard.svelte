@@ -3,8 +3,7 @@
   import { onMount } from 'svelte';
   import { tooltipConfigStore } from '../store';
 
-  import {initSlider, moveThumb, initTicks, moveTick, initHist
-  } from './FeatureCard';
+  import {initSlider, initHist} from './FeatureCard';
 
   import rightArrowIcon from '../img/icon-right-arrow.svg';
   import rangeThumbLeftIcon from '../img/icon-range-thumb-left.svg';
@@ -21,17 +20,17 @@
   // Constants
   state.tickHeights = {
     default: 6,
-    original: 20,
-    user: 20,
-    coach: 20,
+    original: 6 * 1.8,
+    user: 6 * 1.8,
+    coach: 6 * 1.8,
   };
 
   // Binding variables, which will be initialized after window is loaded
   let component = null;
   let windowLoaded = false;
 
-  state.tickSVG = null;
   state.tickXScale = null;
+  state.histSVG = null;
   state.densityClip = null;
 
   state.feature = {
@@ -85,6 +84,16 @@
   };
 
   /**
+   * A workaround to listen to changes made in the js functions.
+   */
+  const stateUpdated = () => {
+    // Trigger svelte interactivity
+    state = state;
+  };
+
+  state.stateUpdated = stateUpdated;
+
+  /**
    * Init the states of different elements. Some functions require bbox,
    * which is only accurate after content is loaded
    */
@@ -107,6 +116,7 @@
       histCount: featureInfo.histCount,
       id: featureID,
       densityClip: null,
+      stateUpdated: stateUpdated,
     };
 
     if (requiresInt) {
@@ -119,12 +129,7 @@
     // Init the slider
     initSlider(component, state);
 
-    // Draw ticks in the svg below the slider
-    initTicks(component, state);
-
-    // TEMP: add the coach mark
-    moveTick(state, 'coach', state.feature.coachValue);
-
+    // Init the density plot and ticks
     initHist(component, state);
   };
 
@@ -206,14 +211,6 @@
       </div>
     </div>
 
-  </div>
-
-  <div class='feature-ticks'>
-    <svg class='svg-ticks'></svg>
-  </div>
-
-  <div class='temp' style='margin-top: 0px; font-size: 0.5em;'>
-    {state.feature.curMin} {state.feature.curMax}
   </div>
 
 </div>

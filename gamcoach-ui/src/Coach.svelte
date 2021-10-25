@@ -1,5 +1,6 @@
 <script>
   import FeatureCard from './components/FeatureCard.svelte';
+  import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
   import d3 from './utils/d3-import';
 
@@ -60,11 +61,13 @@
 
   <div class='content'>
 
-    <FeatureCard featureInfo={data == null ? null : data.features[17]}
+    <!-- <FeatureCard featureInfo={data == null ? null : data.features[17]}
       featureID={17}
       requiresInt={true}
       originalValue={728}
-    />
+    /> -->
+
+    <DiffPicker on:selected={(e) => {console.log(e.detail)}}/>
 
     <!-- <FeatureCard featureInfo={data == null ? null : data.features[17]}
       featureID={15}

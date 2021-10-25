@@ -30,8 +30,32 @@ $card-h-padding: 16px;
   flex-direction: row;
   justify-content: space-between;
 
-  .feature-name {
-    // font-weight: 800;
+  .feature-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .feature-name {
+      // font-weight: 800;
+    }
+
+    .feature-difficulty {
+      border-radius: 50%;
+      // background-color: $gray-200;
+      width: 1.4em;
+      height: 1.4em;
+      display: flex;
+      cursor: pointer;
+      border: 1px solid $gray-200;
+
+      .svg-icon {
+        margin: auto;
+        :global(svg) {
+          width: 1.2em;
+          height: 1.2em;
+        }
+      }
+    }
   }
 }
 
@@ -69,6 +93,7 @@ $card-h-padding: 16px;
   fill: $gray-800;
   display: flex;
   align-items: center;
+  justify-content: center;
 
   :global(svg) {
     width: 1em;

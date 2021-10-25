@@ -9,6 +9,11 @@
   import rangeThumbLeftIcon from '../img/icon-range-thumb-left.svg';
   import rangeThumbRightIcon from '../img/icon-range-thumb-right.svg';
   import rangeThumbMiddleIcon from '../img/icon-range-thumb-middle.svg';
+  import easyIcon from '../img/icon-easy.svg';
+  import veryEasyIcon from '../img/icon-very-easy.svg';
+  import neutralIcon from '../img/icon-neutral.svg';
+  import hardIcon from '../img/icon-hard.svg';
+  import veryHardIcon from '../img/icon-very-hard.svg';
   import infoIcon from '../img/icon-info.svg';
 
   export let featureInfo = null;
@@ -71,6 +76,11 @@
       { class: 'icon-range-thumb-left', svg: rangeThumbLeftIcon },
       { class: 'icon-range-thumb-right', svg: rangeThumbRightIcon },
       { class: 'icon-range-thumb-middle', svg: rangeThumbMiddleIcon },
+      { class: 'icon-easy', svg: easyIcon },
+      { class: 'icon-very-easy', svg: veryEasyIcon },
+      { class: 'icon-neutral', svg: neutralIcon },
+      { class: 'icon-hard', svg: hardIcon },
+      { class: 'icon-very-hard', svg: veryHardIcon },
       { class: 'icon-info', svg: infoIcon },
     ];
 
@@ -154,9 +164,14 @@
 <div class='feature-card' bind:this={component}>
 
   <div class='feature-header'>
-    <span class='feature-name'>
-      FICO Score
-    </span>
+    <div class='feature-info'>
+      <span class='feature-name'>
+        FICO Score
+      </span>
+      <div class='feature-difficulty'>
+        <div class='svg-icon icon-neutral'></div>
+      </div>
+    </div>
 
     <div class='values'>
       <span class='value-old'>

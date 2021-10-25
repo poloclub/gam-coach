@@ -45,7 +45,7 @@
     width: 100vw;
     box-sizing: border-box;
     border: 1px solid $gray-border;
-    background: $coolGray-50;
+    background: $coolGray-200;
   }
 
 
@@ -65,6 +65,12 @@
       requiresInt={true}
       originalValue={728}
     />
+
+    <!-- <FeatureCard featureInfo={data == null ? null : data.features[17]}
+      featureID={15}
+      requiresInt={true}
+      originalValue={728}
+    /> -->
 
   </div>
 

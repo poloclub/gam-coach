@@ -3,25 +3,36 @@
 
 $range-thumb-width: 8px;
 $base-circle-radius: 5px;
+$card-v-padding: 8px;
 $card-h-padding: 16px;
 
 .feature-card {
   display: flex;
   flex-direction: column;
-  height: 200px;
+  height: 190px;
   width: 300px;
   border-radius: 10px;
-  padding: 8px $card-h-padding;
+  padding: $card-v-padding $card-h-padding;
   box-shadow: $shadow-border-light;
   background: white;
   position: relative;
 }
 
 .feature-header {
-  width: 100%;
+  width: calc(100% + #{2 * $card-h-padding});
+  margin: #{-$card-v-padding} #{-$card-h-padding} 0px #{-$card-h-padding};
+  padding: $card-v-padding $card-h-padding 5px $card-h-padding;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  background: $gray-100;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+
+  .feature-name {
+    // font-weight: 800;
+  }
 }
 
 .values {
@@ -57,6 +68,7 @@ $card-h-padding: 16px;
   color: $gray-800;
   fill: $gray-800;
   display: flex;
+  align-items: center;
 
   :global(svg) {
     width: 1em;
@@ -97,9 +109,96 @@ $card-h-padding: 16px;
   }
 }
 
+.feature-hist {
+  position: relative;
+  width: 100%;
+}
+
+.feature-annotations {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  font-size: 0.9em;
+
+  .annotation {
+    position: absolute;
+    border-radius: 5px;
+    padding: 0 5px;
+    top: 7px;
+    cursor: default;
+    color: white;
+
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    transform-origin: bottom center;
+    transform: scale(0);
+
+    &:global(.show) {
+      transform: scale(1);
+    }
+
+    &::before {
+      position: absolute;
+      content: '';
+      width: 6px;
+      height: 6px;
+      bottom: 0;
+      left: 51%;
+      transform: translate(-50%, 50%) rotate(45deg);
+      background-color: inherit;
+    }
+
+    &:global(.no-triangle) {
+      &:global(::before) {
+        width: 0px;
+        height: 0px;
+      }
+    }
+  }
+
+  .annotation-name {
+    color: $gray-400;
+    padding: 0px;
+    left: 0px;
+    display: flex;
+    transform-origin: left center;
+
+    .svg-icon {
+      fill: $gray-300;
+      color: $gray-300;
+      margin-right: 4px;
+
+      :global(svg) {
+        width: 1.2em;
+        height: 1.2em;
+      }
+    }
+  }
+
+  .annotation-user {
+    background-color: $blue-500;
+    left: 20px;
+  }
+
+  .annotation-coach {
+    background-color: $orange-500;
+    left: 20px;
+  }
+
+  .annotation-original {
+    background-color: $gray-400;
+    left: 20px;
+  }
+
+  .annotation-range {
+    background-color: $orange-50;
+    color: $orange-500;
+    left: 20px;
+  }
+}
+
 .feature-slider {
   position: absolute;
-  top: 120px;
+  top: 135px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -162,7 +261,7 @@ $card-h-padding: 16px;
     }
 
     .thumb-label {
-      transform: translateX(-50%) translateY(-100%) scale(1);
+      transform: translateX(-50%) translateY(100%) scale(1);
     }
   }
 
@@ -175,7 +274,7 @@ $card-h-padding: 16px;
     }
 
     .thumb-label {
-      transform: translateX(-50%) translateY(-100%) scale(1);
+      transform: translateX(-50%) translateY(100%) scale(1);
     }
   }
 
@@ -207,7 +306,7 @@ $card-h-padding: 16px;
 
 .thumb-label {
   position:absolute;
-  top: -8px;
+  top: 5px;
   left: 50%;
 
   font-size: 0.8em;
@@ -218,13 +317,17 @@ $card-h-padding: 16px;
   color: white;
 
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-  transform-origin: bottom center;
-  transform: translateX(-50%) translateY(-100%) scale(0);
+  transform-origin: top center;
+  transform: translateX(-50%) translateY(100%) scale(0);
 
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.25em;
+
+  &.thumb-label-middle {
+    top: 12px;
+  }
 
   &::before {
     position: absolute;
@@ -233,7 +336,7 @@ $card-h-padding: 16px;
     height: 8px;
     bottom: 0;
     left: 50%;
-    transform: translate(-50%, 50%) rotate(45deg);
+    transform: translate(-50%, -220%) rotate(45deg);
     background-color: inherit;
   }
 }

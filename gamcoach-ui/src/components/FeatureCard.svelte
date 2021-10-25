@@ -9,6 +9,7 @@
   import rangeThumbLeftIcon from '../img/icon-range-thumb-left.svg';
   import rangeThumbRightIcon from '../img/icon-range-thumb-right.svg';
   import rangeThumbMiddleIcon from '../img/icon-range-thumb-middle.svg';
+  import infoIcon from '../img/icon-info.svg';
 
   export let featureInfo = null;
   export let requiresInt = false;
@@ -32,6 +33,7 @@
   state.tickXScale = null;
   state.histSVG = null;
   state.densityClip = null;
+  state.showingAnnotation = null;
 
   state.feature = {
     name: '',
@@ -69,6 +71,7 @@
       { class: 'icon-range-thumb-left', svg: rangeThumbLeftIcon },
       { class: 'icon-range-thumb-right', svg: rangeThumbRightIcon },
       { class: 'icon-range-thumb-middle', svg: rangeThumbMiddleIcon },
+      { class: 'icon-info', svg: infoIcon },
     ];
 
     iconList.forEach(d => {
@@ -137,8 +140,7 @@
     // Bind the SVG icons on mount
     bindInlineSVG(component);
 
-    d3.select(window)
-      .on('load', () => {windowLoaded = true;});
+    windowLoaded = true;
   });
 
   $: featureInfo && windowLoaded && initFeatureCard();
@@ -179,6 +181,30 @@
 
   <div class='feature-hist'>
     <svg class='svg-hist'></svg>
+
+    <div class='feature-annotations'>
+      <div class='annotation annotation-name show'>
+        <div class='svg-icon icon-info'></div>
+        <span>Value Distribution of All Users</span>
+      </div>
+
+      <div class='annotation annotation-user'>
+        My Hypothetical Value
+      </div>
+
+      <div class='annotation annotation-original'>
+        My Original Value
+      </div>
+
+      <div class='annotation annotation-coach'>
+        GAM Coach Suggestion
+      </div>
+
+      <div class='annotation annotation-range'>
+        My Actionable Range
+      </div>
+
+    </div>
   </div>
 
   <div class='feature-slider'>

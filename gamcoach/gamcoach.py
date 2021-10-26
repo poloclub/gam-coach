@@ -1059,7 +1059,47 @@ def _resort_categorical_level(col_mapping):
         return col_mapping
 
 
-def get_model_data(ebm, x_train, resort_categorical=False):
+def _init_feature_descriptions(ebm, label_encoder):
+    # Initialize the feature description dictionary
+    feature_descriptions = {}
+
+    for i in range(len(ebm.feature_names)):
+        cur_name = ebm.feature_names[i]
+        cur_type = ebm.feature_types[i]
+
+        # Use the feature name as the default display name
+        if cur_type == 'continuous':
+            feature_descriptions[cur_name] = {
+                'displayName': cur_name,
+                'description': ''
+            }
+
+        # For categorical features, we can also give display name and description
+        # for different levels
+        elif cur_type == 'categorical':
+
+            level_descriptions = {}
+
+            for level in label_encoder[cur_name]:
+                level_descriptions[level] = {
+                    'displayName': label_encoder[cur_name][level],
+                    'description': '',
+                }
+
+            feature_descriptions[cur_name] = {
+                'displayName': cur_name,
+                'description': '',
+                'level_description': level_descriptions
+            }
+
+        else:
+            continue
+
+    return feature_descriptions
+
+
+def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
+                   feature_level_info=None):
     """
     Get the model data for GAM Coach.
     Args:
@@ -1070,6 +1110,19 @@ def get_model_data(ebm, x_train, resort_categorical=False):
             features.
         resort_categorical: Whether to sort the levels in categorical variable
             by increasing order if all levels can be converted to numbers.
+        feature_info: You can provide a dictionary to give a separate display
+            name and optional description for each feature. By default, the
+            display name is the same as the feature name, and the description
+            is an emtpy string. `feature_info` can be partial (only including
+            some features). It has format:
+            `{'feature_name': ['display_name', 'description']}`
+        feature_level_info: You can provide a dictionary to give separate display
+            name and optional description for each level of categorical features.
+            By default, the display name is the same as the level name, and the
+            description is an emtpy string. `feature_info` can be partial
+            (e.g., only including some levels from some categorical features).
+            It has format:
+            `{'feature_name': {level_id: ['display_name', 'description']}}`
     Returns:
         A Python dictionary of model data
     """
@@ -1084,7 +1137,7 @@ def get_model_data(ebm, x_train, resort_categorical=False):
     # Track the score range
     score_range = [np.inf, -np.inf]
 
-    for i in range(len(ebm.feature_names)):
+    for i in tqdm(range(len(ebm.feature_names))):
         cur_feature = {}
         cur_feature['name'] = ebm.feature_names[i]
         cur_feature['type'] = ebm.feature_types[i]
@@ -1104,7 +1157,8 @@ def get_model_data(ebm, x_train, resort_categorical=False):
 
             # Skip the first item from both dimensions
             cur_feature['additive'] = np.round(ebm.additive_terms_[i], ROUND)[1:, 1:].tolist()
-            cur_feature['error'] = np.round(ebm.term_standard_deviations_[i], ROUND)[1:, 1:].tolist()
+            cur_feature['error'] = np.round(ebm.term_standard_deviations_[
+                                            i], ROUND)[1:, 1:].tolist()
 
             # Get the bin label info
             cur_feature['binLabel1'] = ebm.pair_preprocessor_._get_bin_labels(cur_id[0])
@@ -1129,26 +1183,30 @@ def get_model_data(ebm, x_train, resort_categorical=False):
                 cur_feature['histEdge1'] = ebm.preprocessor_._get_hist_edges(cur_id[0])
                 cur_feature['histEdge1'] = list(map(lambda x: level_str_to_int[x],
                                                     cur_feature['histEdge1']))
-            else:
-                cur_feature['histEdge1'] = np.round(
-                    ebm.preprocessor_._get_hist_edges(cur_id[0]), ROUND
+                cur_feature['histCount1'] = np.round(
+                    ebm.preprocessor_._get_hist_counts(cur_id[0]), ROUND
                 ).tolist()
-            cur_feature['histCount1'] = np.round(
-                ebm.preprocessor_._get_hist_counts(cur_id[0]), ROUND
-            ).tolist()
+            else:
+                # For continuous features, we use np.histogram() to generate
+                # better histograms (better bin width)
+                counts, edges = np.histogram(x_train[:, cur_id[0]], bins='auto')
+                cur_feature['histEdge1'] = edges
+                cur_feature['histCount1'] = counts
 
             if cur_feature['type2'] == 'categorical':
                 level_str_to_int = ebm.pair_preprocessor_.col_mapping_[cur_id[1]]
                 cur_feature['histEdge2'] = ebm.preprocessor_._get_hist_edges(cur_id[1])
                 cur_feature['histEdge2'] = list(map(lambda x: level_str_to_int[x],
                                                     cur_feature['histEdge2']))
-            else:
-                cur_feature['histEdge2'] = np.round(
-                    ebm.preprocessor_._get_hist_edges(cur_id[1]), ROUND
+                cur_feature['histCount2'] = np.round(
+                    ebm.preprocessor_._get_hist_counts(cur_id[1]), ROUND
                 ).tolist()
-            cur_feature['histCount2'] = np.round(
-                ebm.preprocessor_._get_hist_counts(cur_id[1]), ROUND
-            ).tolist()
+            else:
+                # For continuous features, we use np.histogram() to generate
+                # better histograms (better bin width)
+                counts, edges = np.histogram(x_train[:, cur_id[1]], bins='auto')
+                cur_feature['histEdge2'] = edges
+                cur_feature['histCount2'] = counts
 
         else:
             # Skip the first item (reserved for missing value)
@@ -1169,13 +1227,12 @@ def get_model_data(ebm, x_train, resort_categorical=False):
                 # Add the bin information
                 cur_feature['binEdge'] = ebm.preprocessor_._get_bin_labels(cur_id)
 
-                # Add the hist information
-                cur_feature['histEdge'] = np.round(
-                    ebm.preprocessor_._get_hist_edges(cur_id), ROUND
-                ).tolist()
-                cur_feature['histCount'] = np.round(
-                    ebm.preprocessor_._get_hist_counts(cur_id), ROUND
-                ).tolist()
+                # For continuous features, we use np.histogram() to generate
+                # better histograms (better bin width)
+                counts, edges = np.histogram(x_train[:, cur_id], bins='auto')
+
+                cur_feature['histEdge'] = edges
+                cur_feature['histCount'] = counts
 
             elif cur_feature['type'] == 'categorical':
                 # Get the level value mapping
@@ -1258,6 +1315,26 @@ def get_model_data(ebm, x_train, resort_categorical=False):
             x_train[:, i]
         )
 
+    # Initialize a feature description dictionary (provide more information about
+    # each feature in the UI)
+    feature_descriptions = _init_feature_descriptions(ebm, model_data['labelEncoder'])
+
+    # Overwrite some entries in the default feature_descriptions
+    if feature_info:
+        for feature in feature_info:
+            feature_descriptions[feature]['displayName'] = feature_info[feature][0]
+            feature_descriptions[feature]['description'] = feature_info[feature][0]
+
+    if feature_level_info:
+        for feature in feature_level_info:
+            for level in feature_level_info[feature]:
+                display_name = feature_level_info[feature][level][0]
+                description = feature_level_info[feature][level][1]
+                feature_descriptions[feature]['level_description'][
+                    level]['displayName'] = display_name
+                feature_descriptions[feature]['level_description'][
+                    level]['description'] = description
+
     data = {
         'intercept': ebm.intercept_[0] if hasattr(ebm, 'classes_') else ebm.intercept_,
         'isClassifier': hasattr(ebm, 'classes_'),
@@ -1267,7 +1344,8 @@ def get_model_data(ebm, x_train, resort_categorical=False):
         'featureNames': feature_names,
         'featureTypes': feature_types,
         'contMads': contMads,
-        'catDistances': catDistances
+        'catDistances': catDistances,
+        'featureDescriptions': feature_descriptions
     }
 
     return data

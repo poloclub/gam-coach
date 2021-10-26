@@ -1190,8 +1190,8 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                 # For continuous features, we use np.histogram() to generate
                 # better histograms (better bin width)
                 counts, edges = np.histogram(x_train[:, cur_id[0]], bins='auto')
-                cur_feature['histEdge1'] = edges
-                cur_feature['histCount1'] = counts
+                cur_feature['histEdge1'] = edges.tolist()
+                cur_feature['histCount1'] = counts.tolist()
 
             if cur_feature['type2'] == 'categorical':
                 level_str_to_int = ebm.pair_preprocessor_.col_mapping_[cur_id[1]]
@@ -1205,8 +1205,8 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                 # For continuous features, we use np.histogram() to generate
                 # better histograms (better bin width)
                 counts, edges = np.histogram(x_train[:, cur_id[1]], bins='auto')
-                cur_feature['histEdge2'] = edges
-                cur_feature['histCount2'] = counts
+                cur_feature['histEdge2'] = edges.tolist()
+                cur_feature['histCount2'] = counts.tolist()
 
         else:
             # Skip the first item (reserved for missing value)
@@ -1231,8 +1231,8 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                 # better histograms (better bin width)
                 counts, edges = np.histogram(x_train[:, cur_id], bins='auto')
 
-                cur_feature['histEdge'] = edges
-                cur_feature['histCount'] = counts
+                cur_feature['histEdge'] = edges.tolist()
+                cur_feature['histCount'] = counts.tolist()
 
             elif cur_feature['type'] == 'categorical':
                 # Get the level value mapping

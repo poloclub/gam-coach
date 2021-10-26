@@ -1317,7 +1317,7 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
 
     # Initialize a feature description dictionary (provide more information about
     # each feature in the UI)
-    feature_descriptions = _init_feature_descriptions(ebm, model_data['labelEncoder'])
+    feature_descriptions = _init_feature_descriptions(ebm, labelEncoder)
 
     # Overwrite some entries in the default feature_descriptions
     if feature_info:

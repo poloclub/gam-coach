@@ -1,7 +1,7 @@
 <script>
   import d3 from '../utils/d3-import';
   import { onMount } from 'svelte';
-  import { createEventDispatcher } from 'svelte';
+  import { diffPickerConfigStore } from '../store';
 
   import easyIcon from '../img/icon-easy.svg';
   import veryEasyIcon from '../img/icon-very-easy.svg';
@@ -14,7 +14,35 @@
   // Component bindings
   let component = null;
   let description = 'Difficulty to make a change';
-  const dispatch = createEventDispatcher();
+
+  let diffPickerConfig = {
+    feature: null,
+    difficulty: 'neutral',
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    action: ''
+  };
+
+  diffPickerConfigStore.set(diffPickerConfig);
+
+  diffPickerConfigStore.subscribe(value => {
+
+    if (value.action === 'to-show') {
+      // Move to the new location
+      d3.select(component)
+        .style('left', `${value.x}px`)
+        .style('top', `${value.y}px`);
+
+      d3.select(component)
+        .classed('show', true)
+        .node()
+        .focus();
+    }
+
+    diffPickerConfig = value;
+  });
 
   const preProcessSVG = (svgString) => {
     return svgString.replaceAll('black', 'currentcolor')
@@ -80,19 +108,41 @@
   };
 
   const iconClickedHandler = (name) => {
-    const eventName = 'selected';
-    const eventMessage = {difficulty: name};
+    diffPickerConfig.difficulty = name;
+    diffPickerConfig.action = 'picked';
+    diffPickerConfigStore.set(diffPickerConfig);
 
-    dispatch(eventName, eventMessage);
+    d3.select(component)
+      .classed('show', false);
   };
 
   onMount(() => {
     bindInlineSVG(component);
 
     // Fix the width of this component so that hovering doesn't change it
+    // Also register the focusout event
     let bbox = component.getBoundingClientRect();
     d3.select(component)
-      .style('width', `${bbox.width}px`);
+      .style('width', `${bbox.width}px`)
+      .on('focusout', (e) => {
+        d3.select(e.target).classed('show', false);
+      });
+
+    // Record the size info
+    diffPickerConfig.width = bbox.width;
+    diffPickerConfig.height = bbox.height;
+    diffPickerConfigStore.set(diffPickerConfig);
+
+    // Hide the view
+    d3.select(component)
+      .style('visibility', 'hidden')
+      .classed('initial', false);
+
+    d3.timeout(() => {
+      d3.select(component)
+        .style('visibility', null);
+    }, 300);
+
   });
 
 </script>
@@ -101,13 +151,18 @@
   @import '../define';
 
   .diff-picker {
-    // height: 100px;
     background-color: white;
     padding: 0 0 10px 0;
     border-radius: 10px;
     border: 1px solid $gray-border;
     box-shadow: $shadow-border-large;
-    position: relative;
+    position: absolute;
+    top: 100px;
+    left: 100px;
+
+    // transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    transform-origin: 25% 100%;
+    transform: scale(0);
 
     .svg-icon {
       display: flex;
@@ -138,8 +193,34 @@
       bottom: 0;
       left: 25%;
       border-bottom: 1px solid $gray-border;
+      border-right: 1px solid $gray-border;
       transform: translate(-50%, 50%) rotate(45deg);
       background-color: inherit;
+    }
+
+    &:global(.show) {
+      animation-name: enter;
+      animation-duration: 150ms;
+      animation-timing-function: cubic-bezier(0.2, 0, 0.13, 1.5);
+      transform: scale(1);
+    }
+
+    &.initial {
+      transform: scale(1);
+      visibility: hidden;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  @keyframes enter {
+    0% {
+      transform: scale(0.5);
+    }
+    100% {
+      transform: scale(1);
     }
   }
 
@@ -181,7 +262,10 @@
   }
 </style>
 
-<div class='diff-picker' bind:this={component}>
+<div class='diff-picker initial'
+  tabIndex='0'
+  bind:this={component}
+  >
 
   <div class='description'>
     {description}

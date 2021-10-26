@@ -42,8 +42,8 @@ $card-h-padding: 16px;
     .feature-difficulty {
       border-radius: 50%;
       // background-color: $gray-200;
-      width: 1.4em;
-      height: 1.4em;
+      width: 1.6em;
+      height: 1.6em;
       display: flex;
       cursor: pointer;
       border: 1px solid $gray-200;
@@ -185,7 +185,9 @@ $card-h-padding: 16px;
     padding: 0px;
     left: 0px;
     display: flex;
-    transform-origin: left center;
+    opacity: 0;
+    transform: scale(1);
+    transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
 
     .svg-icon {
       fill: $gray-300;
@@ -196,6 +198,10 @@ $card-h-padding: 16px;
         width: 1.2em;
         height: 1.2em;
       }
+    }
+
+    &.show {
+      opacity: 1;
     }
   }
 

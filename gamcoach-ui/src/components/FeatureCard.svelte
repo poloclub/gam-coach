@@ -1,7 +1,7 @@
 <script>
   import d3 from '../utils/d3-import';
   import { onMount } from 'svelte';
-  import { tooltipConfigStore } from '../store';
+  import { tooltipConfigStore, diffPickerConfigStore } from '../store';
 
   import {initSlider, initHist} from './FeatureCard';
 
@@ -14,12 +14,14 @@
   import neutralIcon from '../img/icon-neutral.svg';
   import hardIcon from '../img/icon-hard.svg';
   import veryHardIcon from '../img/icon-very-hard.svg';
+  import lockIcon from '../img/icon-lock.svg';
   import infoIcon from '../img/icon-info.svg';
 
   export let featureInfo = null;
   export let requiresInt = false;
   export let originalValue = null;
   export let featureID = null;
+  export let windowLoaded = false;
 
   let state = {};
 
@@ -33,12 +35,12 @@
 
   // Binding variables, which will be initialized after window is loaded
   let component = null;
-  let windowLoaded = false;
 
   state.tickXScale = null;
   state.histSVG = null;
   state.densityClip = null;
   state.showingAnnotation = null;
+  state.difficulty = 'neutral';
 
   state.feature = {
     name: '',
@@ -55,6 +57,33 @@
     histCount: null,
     id: 0,
   };
+
+  const difficultyIconMap = {
+    'neutral': neutralIcon,
+    'easy': easyIcon,
+    'very-easy': veryEasyIcon,
+    'hard': hardIcon,
+    'very-hard': veryHardIcon,
+    'lock': lockIcon,
+  };
+
+  let diffPickerConfig = null;
+  diffPickerConfigStore.subscribe(value => {
+
+    // Listen to the picked event
+    if (value.action === 'picked') {
+      // Update the icon
+      state.difficulty = value.difficulty;
+
+      // Update the SVG
+      d3.select(component)
+        .select('.feature-difficulty')
+        .select('.svg-icon')
+        .html(difficultyIconMap[state.difficulty]);
+    }
+
+    diffPickerConfig = value;
+  });
 
   let tooltipConfig = null;
   tooltipConfigStore.subscribe(value => {
@@ -146,11 +175,32 @@
     initHist(component, state);
   };
 
+  /**
+   * Handler for clicking the difficulty picker
+   * @param e Event
+   */
+  const diffClickedHandler = () => {
+    // Trigger the difficulty picker
+    // Figure out the location to put the picker
+    let bbox = d3.select(component)
+      .select('.feature-difficulty')
+      .node()
+      .getBoundingClientRect();
+
+    let newX = bbox.x + bbox.width / 2 - diffPickerConfig.width / 4 - 2;
+    let newY = bbox.y - diffPickerConfig.height - 8;
+
+    diffPickerConfig.x = newX;
+    diffPickerConfig.y = newY;
+    diffPickerConfig.action = 'to-show';
+    diffPickerConfig.feature = state.feature.name;
+
+    diffPickerConfigStore.set(diffPickerConfig);
+  };
+
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
-
-    windowLoaded = true;
   });
 
   $: featureInfo && windowLoaded && initFeatureCard();
@@ -164,12 +214,14 @@
 <div class='feature-card' bind:this={component}>
 
   <div class='feature-header'>
+
     <div class='feature-info'>
       <span class='feature-name'>
         FICO Score
       </span>
-      <div class='feature-difficulty'>
-        <div class='svg-icon icon-neutral'></div>
+
+      <div class='feature-difficulty' on:click={diffClickedHandler}>
+        <div class={`svg-icon icon-${state.difficulty}`}></div>
       </div>
     </div>
 

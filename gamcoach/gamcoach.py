@@ -10,6 +10,7 @@ import re
 import pulp
 
 from tqdm import tqdm
+from scipy.stats import gaussian_kde
 from interpret.glassbox import ExplainableBoostingClassifier, ExplainableBoostingRegressor
 from collections import Counter
 from typing import Union
@@ -1098,6 +1099,18 @@ def _init_feature_descriptions(ebm, label_encoder):
     return feature_descriptions
 
 
+def _get_kde_sample(xs, n_sample=200):
+    """
+    Compute kernel density estimation.
+    """
+    kernel = gaussian_kde(xs.astype(float))
+
+    sample_x = np.linspace(np.min(xs), np.max(xs), n_sample)
+    sample_y = kernel(sample_x)
+
+    return sample_x, sample_y
+
+
 def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                    feature_level_info=None):
     """
@@ -1187,9 +1200,8 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                     ebm.preprocessor_._get_hist_counts(cur_id[0]), ROUND
                 ).tolist()
             else:
-                # For continuous features, we use np.histogram() to generate
-                # better histograms (better bin width)
-                counts, edges = np.histogram(x_train[:, cur_id[0]], bins='auto')
+                # Use KDE to draw density plots for cont features
+                edges, counts = _get_kde_sample(x_train[:, cur_id[0]])
                 cur_feature['histEdge1'] = edges.tolist()
                 cur_feature['histCount1'] = counts.tolist()
 
@@ -1202,9 +1214,8 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                     ebm.preprocessor_._get_hist_counts(cur_id[1]), ROUND
                 ).tolist()
             else:
-                # For continuous features, we use np.histogram() to generate
-                # better histograms (better bin width)
-                counts, edges = np.histogram(x_train[:, cur_id[1]], bins='auto')
+                # Use KDE to draw density plots for cont features
+                edges, counts = _get_kde_sample(x_train[:, cur_id[1]])
                 cur_feature['histEdge2'] = edges.tolist()
                 cur_feature['histCount2'] = counts.tolist()
 
@@ -1227,9 +1238,8 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                 # Add the bin information
                 cur_feature['binEdge'] = ebm.preprocessor_._get_bin_labels(cur_id)
 
-                # For continuous features, we use np.histogram() to generate
-                # better histograms (better bin width)
-                counts, edges = np.histogram(x_train[:, cur_id], bins='auto')
+                # Use KDE to draw density plots for cont features
+                edges, counts = _get_kde_sample(x_train[:, cur_id])
 
                 cur_feature['histEdge'] = edges.tolist()
                 cur_feature['histCount'] = counts.tolist()
@@ -1335,6 +1345,11 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
                 feature_descriptions[feature]['level_description'][
                     level]['description'] = description
 
+    # Put descriptions under the 'features' key
+    for feature in features:
+        if (feature['name'] in feature_descriptions):
+            feature['description'] = feature_descriptions[feature['name']]
+
     data = {
         'intercept': ebm.intercept_[0] if hasattr(ebm, 'classes_') else ebm.intercept_,
         'isClassifier': hasattr(ebm, 'classes_'),
@@ -1345,7 +1360,6 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
         'featureTypes': feature_types,
         'contMads': contMads,
         'catDistances': catDistances,
-        'featureDescriptions': feature_descriptions
     }
 
     return data

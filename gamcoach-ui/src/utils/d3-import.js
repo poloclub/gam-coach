@@ -50,7 +50,9 @@ import {
 import {
   line,
   curveStepAfter,
-  curveMonotoneX
+  curveBasis,
+  curveMonotoneX,
+  curveMonotoneY,
 } from 'd3-shape';
 
 import {
@@ -100,5 +102,7 @@ export default {
   zoomIdentity,
   drag,
   format,
-  curveMonotoneX
+  curveMonotoneX,
+  curveMonotoneY,
+  curveBasis,
 };

@@ -45,11 +45,12 @@ $card-h-padding: 16px;
       width: 1.6em;
       height: 1.6em;
       display: flex;
+      justify-content: center;
+      align-items: center;
       cursor: pointer;
       border: 1px solid $gray-200;
 
       .svg-icon {
-        margin: auto;
         :global(svg) {
           width: 1.2em;
           height: 1.2em;

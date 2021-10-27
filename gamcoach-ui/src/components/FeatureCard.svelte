@@ -140,11 +140,13 @@
    * which is only accurate after content is loaded
    */
   const initFeatureCard = () => {
+    console.log(featureInfo);
+
     // Initialize the feature data from the prop
     state.feature = {
       // TODO: Export a feature description name in the model extract function from
       // python
-      name: 'FICO Score',
+      name: featureInfo.description.displayName,
       featureName: featureInfo.name,
       valueMin: featureInfo.binEdge[0],
       valueMax: featureInfo.binEdge[featureInfo.binEdge.length - 1],
@@ -217,7 +219,7 @@
 
     <div class='feature-info'>
       <span class='feature-name'>
-        FICO Score
+        {state.feature.name}
       </span>
 
       <div class='feature-difficulty' on:click={diffClickedHandler}>

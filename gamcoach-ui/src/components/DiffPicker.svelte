@@ -157,6 +157,7 @@
     border: 1px solid $gray-border;
     box-shadow: $shadow-border-large;
     position: absolute;
+    z-index: 1;
     top: 100px;
     left: 100px;
 

@@ -381,7 +381,8 @@ export const initHist = (component, state) => {
     top: 35,
     left: thumbWidth,
     right: thumbWidth,
-    bottom: 0
+    bottom: 0,
+    histTop: 2
   };
 
   const totalWidth = width - padding.left - padding.right;
@@ -423,10 +424,10 @@ export const initHist = (component, state) => {
 
   let yScale = d3.scaleLinear()
     .domain([0, d3.max(curDensity, d => d[1])])
-    .range([histHeight - padding.bottom - padding.top, 0]);
+    .range([histHeight - padding.bottom - padding.top, padding.histTop]);
 
   let curve = d3.line()
-    .curve(d3.curveMonotoneX)
+    .curve(d3.curveBasis)
     .x(d => state.tickXScale(d[0]))
     .y(d => yScale(d[1]));
 

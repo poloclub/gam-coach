@@ -20,6 +20,8 @@ $card-h-padding: 16px;
 
 .feature-header {
   width: calc(100% + #{2 * $card-h-padding});
+  height: 40px;
+  flex: 0 0 auto;
   margin: #{-$card-v-padding} #{-$card-h-padding} 0px #{-$card-h-padding};
   padding: $card-v-padding $card-h-padding 5px $card-h-padding;
   border-top-left-radius: 10px;
@@ -29,6 +31,7 @@ $card-h-padding: 16px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 
   .feature-info {
     display: flex;

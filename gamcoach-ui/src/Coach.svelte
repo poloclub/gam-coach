@@ -1,5 +1,6 @@
 <script>
   import FeatureCard from './components/FeatureCard.svelte';
+  import FeatureCardCat from './components/FeatureCardCat.svelte';
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
 
@@ -68,14 +69,21 @@
 
   <div class='content'>
 
-    <FeatureCard featureInfo={data == null ? null : data.features[17]}
-      featureID={17}
+    <DiffPicker/>
+
+    <FeatureCard featureInfo={data == null ? null : data.features[19]}
+      featureID={19}
       requiresInt={true}
       originalValue={728}
       windowLoaded={windowLoaded}
     />
 
-    <DiffPicker/>
+    <FeatureCardCat featureInfo={data == null ? null : data.features[2]}
+      featureID={2}
+      labelEncoder={data == null ? null : data.labelEncoder}
+      originalValue={2}
+      windowLoaded={windowLoaded}
+    />
 
   </div>
 

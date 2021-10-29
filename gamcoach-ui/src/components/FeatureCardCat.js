@@ -53,29 +53,37 @@ const mouseDownHandler = (e, component, state) => {
   thumb.focus();
 
   let localHideAnnotation = () => { };
-  if (thumb.id.includes('middle')) {
-    showAnnotation(component, state, 'user');
-    localHideAnnotation = () => hideAnnotation(component, state, 'user');
-  } else {
-    showAnnotation(component, state, 'range');
-    localHideAnnotation = () => hideAnnotation(component, state, 'range');
-  }
+  // if (thumb.id.includes('middle')) {
+  //   showAnnotation(component, state, 'user');
+  //   localHideAnnotation = () => hideAnnotation(component, state, 'user');
+  // } else {
+  //   showAnnotation(component, state, 'range');
+  //   localHideAnnotation = () => hideAnnotation(component, state, 'range');
+  // }
 
   const mouseMoveHandler = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     const deltaX = e.pageX - track.getBoundingClientRect().x;
-    let newValue;
 
-    // Handle integer value if it is required
-    if (state.feature.requiresInt) {
-      newValue = state.feature.valueMin + parseInt((state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth);
-    } else {
-      newValue = state.feature.valueMin + parseFloat((state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth);
-    }
+    // Figure out which level the current x is closest to
+    let newValue = state.feature.curValue;
+    let minDistance = Infinity;
 
-    moveThumb(component, state, thumb.id, newValue);
+    state.xCenters.forEach((x, i) => {
+      // Level starts at 1
+      if (i > 0) {
+        let curDistance = Math.abs(deltaX - x);
+
+        if (curDistance < minDistance) {
+          minDistance = curDistance;
+          newValue = i;
+        }
+      }
+    });
+
+    moveThumb(component, state, newValue);
   };
 
   const mouseUpHandler = () => {
@@ -97,28 +105,13 @@ const mouseDownHandler = (e, component, state) => {
  * Initialize the slider.
  */
 export const initSlider = (component, state) => {
-  const leftThumbID = 'slider-left-thumb';
-  const rightThumbID = 'slider-right-thumb';
-  const middleThumbID = 'slider-middle-thumb';
-
-  // Move two range thumbs to the left and right ends
-  moveThumb(component, state, leftThumbID, state.feature.valueMin);
-  moveThumb(component, state, rightThumbID, state.feature.valueMax);
-
-  // Register event listeners
-  d3.select(component)
-    .select(`#${leftThumbID}`)
-    .on('mousedown', e => mouseDownHandler(e, component, state));
-
-  d3.select(component)
-    .select(`#${rightThumbID}`)
-    .on('mousedown', e => mouseDownHandler(e, component, state));
 
   // Move the curValue thumb to the original value
-  moveThumb(component, state, middleThumbID, state.feature.originalValue);
+  moveThumb(component, state, state.feature.originalValue);
 
+  // Register the interaction handler
   d3.select(component)
-    .select(`#${middleThumbID}`)
+    .select('#slider-level-thumb')
     .on('mousedown', e => mouseDownHandler(e, component, state));
 };
 

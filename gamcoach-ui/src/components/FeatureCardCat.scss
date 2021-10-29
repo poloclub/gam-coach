@@ -120,3 +120,14 @@ $card-h-padding: 16px;
     font-size: 0.8rem;
   }
 }
+
+.track-point {
+  border: 100%;
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  z-index: 1;
+  top: 0px;
+  left: 0px;
+  background-color: $gray-400;
+}

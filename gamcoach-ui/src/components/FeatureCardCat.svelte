@@ -149,10 +149,14 @@
       d3.select(component)
         .select(`#track-label-${d}`)
         .style('left', `${curX}px`);
+
+      d3.select(component)
+        .select(`#track-point-${d}`)
+        .style('left', `${state.xCenters[d] - 1}px`);
     });
 
-    // Move the thumb to the original value
-    moveThumb(component, state, state.feature.originalValue);
+    // Initialize the slider
+    initSlider(component, state);
   };
 
   /**
@@ -247,7 +251,7 @@
 
     if (toCenterLabels) {
       recenterSliderLabels();
-      toCenterLabels = true;
+      toCenterLabels = false;
     }
   });
 
@@ -345,6 +349,9 @@
           <div class='value-label'>
             {categoryLabels[level]}
           </div>
+        </div>
+
+        <div class='track-point' id={`track-point-${level}`}>
         </div>
       {/each}
 

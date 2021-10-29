@@ -178,7 +178,7 @@ export const moveThumb = (component, state, value) => {
   //   state.annotationUser.style('left', `${labelLeft}px`);
   // }
 
-  // syncTooltips(component, state);
+  syncTooltips(component, state);
 
   thumb.style('left', `${xPos}px`);
   state.stateUpdated();
@@ -211,19 +211,9 @@ const syncTicks = (state) => {
 
 const syncTooltips = (component, state) => {
   d3.select(component)
-    .select('#slider-left-thumb')
+    .select('#slider-level-thumb')
     .select('.thumb-label span')
-    .text(state.feature.curMin);
-
-  d3.select(component)
-    .select('#slider-right-thumb')
-    .select('.thumb-label span')
-    .text(state.feature.curMax);
-
-  d3.select(component)
-    .select('#slider-middle-thumb')
-    .select('.thumb-label span')
-    .text(state.feature.curValue);
+    .text(state.feature.labelEncoder[state.feature.curValue]);
 };
 
 /**
@@ -239,7 +229,7 @@ export const initHist = (component, state) => {
 
   const width = parentBBox.width;
   const histHeight = 90;
-  const tickHeight = 30;
+  const tickHeight = 40;
   const vGap = 15;
   const height = histHeight + tickHeight + vGap;
 
@@ -256,7 +246,8 @@ export const initHist = (component, state) => {
     left: thumbWidth,
     right: thumbWidth,
     bottom: 0,
-    histTop: 2
+    histTop: 2,
+    hBar: 1
   };
 
   const totalWidth = width - padding.left - padding.right;
@@ -272,8 +263,8 @@ export const initHist = (component, state) => {
     .style('stroke', colors['gray-200']);
 
   // Add density plot
-  let histGroupLower = state.histSVG.append('g')
-    .attr('class', 'hist-group hist-group-lower')
+  let histGroupBot = state.histSVG.append('g')
+    .attr('class', 'hist-group hist-group-bot')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   let histGroupTop = state.histSVG.append('g')
@@ -298,7 +289,6 @@ export const initHist = (component, state) => {
     density: state.feature.histCount[i] / totalSampleNum,
   }));
 
-
   // Create the axis scales
   // histEdge, histCount, histDensity
   let xScale = d3.scaleBand()
@@ -312,16 +302,25 @@ export const initHist = (component, state) => {
     .domain([0, d3.max(curData, d => d.density)])
     .range([yLow, padding.histTop]);
 
-  // Draw the global histogram
-  let densityBars = histGroupLower.selectAll('rect.density-bar')
+  // Draw the background bar (some levels might have very low density)
+  let levelBars = histGroupBot.selectAll('rect.level-bar')
     .data(curData)
     .join('rect')
-    .attr('class', 'global-bar')
+    .attr('class', 'level-bar')
     .attr('x', d => xScale(d.edge))
-    .attr('y', d => yScale(d.density))
+    .attr('y', padding.histTop)
     .attr('width', xScale.bandwidth())
-    .attr('height', d => yLow - yScale(d.density));
+    .attr('height',yLow - padding.histTop);
 
+  // Draw the density histogram
+  let densityBars = histGroupTop.selectAll('rect.density-bar')
+    .data(curData)
+    .join('rect')
+    .attr('class', 'density-bar')
+    .attr('x', d => xScale(d.edge) + padding.hBar)
+    .attr('y', d => yScale(d.density))
+    .attr('width', xScale.bandwidth() - 2 * padding.hBar)
+    .attr('height', d => yLow - yScale(d.density));
 
   // Export the x center values for each bar
   let xValues = [];

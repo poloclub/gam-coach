@@ -42,6 +42,7 @@
   state.showingAnnotation = null;
   state.difficulty = 'neutral';
   state.xCenters = [];
+  state.tickOpacityTimeout = null;
 
   state.feature = {
     name: '',
@@ -52,7 +53,8 @@
     histEdge: [0],
     histCount: null,
     id: 0,
-    labelEncoder: {}
+    labelEncoder: {},
+    searchValues: [],
   };
 
   const difficultyIconMap = {
@@ -179,6 +181,7 @@
       id: featureID,
       stateUpdated: stateUpdated,
       labelEncoder: labelEncoder[featureInfo.name],
+      searchValues: featureInfo.histEdge
     };
 
     toFitSize = true;
@@ -208,8 +211,20 @@
 
     if (state.dragging) return;
 
+    // Cancel the previous opacity -> 1 callback if it was set
+    if (state.tickOpacityTimeout !== null) {
+      clearTimeout(state.tickOpacityTimeout);
+      state.tickOpacityTimeout = null;
+    }
+
     d3.select(e.target)
       .classed('hover', true);
+
+    d3.select(component)
+      .select('.svg-hist')
+      .select('.x-label-group')
+      .interrupt('restore')
+      .style('opacity', 0.3);
   };
 
   const trackLabelMouseLeaveHandler = (e) => {
@@ -220,6 +235,15 @@
 
     d3.select(e.target)
       .classed('hover', false);
+
+    state.tickOpacityTimeout = setTimeout(() => {
+      d3.select(component)
+        .select('.svg-hist')
+        .select('.x-label-group')
+        .transition('restore')
+        .duration(200)
+        .style('opacity', 1);
+    }, 300);
   };
 
   /**

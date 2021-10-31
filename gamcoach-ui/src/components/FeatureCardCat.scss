@@ -151,10 +151,14 @@ $card-h-padding: 16px;
   }
 
   :global(.level-bar) {
-    fill: $orange-100;
+    fill: $gray-200;
     // stroke: $blue-500;
     // stroke-dasharray: 4 2;
     // stroke-width: 1;
+  }
+
+  :global(.level-bar.selected) {
+    fill: $orange-100;
   }
 
   :global(.density-bar) {

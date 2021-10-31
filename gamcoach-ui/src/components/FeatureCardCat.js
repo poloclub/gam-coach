@@ -233,11 +233,22 @@ const barMouseEnterHandler = (e, d, component, state) => {
 
   if (state.dragging) return;
 
+  // Cancel the previous opacity -> 1 callback if it was set
+  if (state.tickOpacityTimeout !== null) {
+    clearTimeout(state.tickOpacityTimeout);
+    state.tickOpacityTimeout = null;
+  }
+
   // Trigger hover on the x label element
   d3.select(component)
     .select(`#track-label-${d.edge}`)
     .classed('hover', true);
 
+  d3.select(component)
+    .select('.svg-hist')
+    .select('.x-label-group')
+    .interrupt('restore')
+    .style('opacity', 0.3);
 };
 
 /**
@@ -257,6 +268,15 @@ const barMouseLeaveHandler = (e, d, component, state) => {
   d3.select(component)
     .select(`#track-label-${d.edge}`)
     .classed('hover', false);
+
+  state.tickOpacityTimeout = setTimeout(() => {
+    d3.select(component)
+      .select('.svg-hist')
+      .select('.x-label-group')
+      .transition('restore')
+      .duration(200)
+      .style('opacity', 1);
+  }, 300);
 };
 
 /**
@@ -401,6 +421,7 @@ export const initHist = (component, state) => {
 
   barGroups.append('rect')
     .attr('class', 'level-bar')
+    .classed('selected', d => state.feature.searchValues.includes(d.edge))
     .attr('width', xScale.bandwidth())
     .attr('height', yLow - padding.histTop);
 

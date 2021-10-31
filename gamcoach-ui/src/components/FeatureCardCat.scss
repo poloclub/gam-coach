@@ -81,7 +81,6 @@ $card-h-padding: 16px;
     }
   }
 
-
   .svg-icon.icon-level-thumb {
     fill: $gray-400;
     color: $gray-400;
@@ -119,7 +118,19 @@ $card-h-padding: 16px;
     width: 15px;
     height: 15px;
     font-size: 0.8rem;
+    cursor: pointer;
     background: $gray-500;
+  }
+
+  .thumb-label {
+    top: 0px;
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  }
+
+  &:global(.hover) {
+    .thumb-label {
+      transform: translateX(-50%) translateY(100%) scale(1);
+    }
   }
 }
 
@@ -135,8 +146,12 @@ $card-h-padding: 16px;
 }
 
 .svg-hist {
+  :global(.bar) {
+    cursor: pointer;
+  }
+
   :global(.level-bar) {
-    fill: $gray-200;
+    fill: $orange-100;
     // stroke: $blue-500;
     // stroke-dasharray: 4 2;
     // stroke-width: 1;

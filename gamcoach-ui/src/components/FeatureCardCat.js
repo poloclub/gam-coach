@@ -51,6 +51,7 @@ const mouseDownHandler = (e, component, state) => {
   let track = thumb.parentNode;
   let trackWidth = track.getBoundingClientRect().width;
   thumb.focus();
+  state.dragging = true;
 
   let localHideAnnotation = () => { };
   // if (thumb.id.includes('middle')) {
@@ -91,6 +92,7 @@ const mouseDownHandler = (e, component, state) => {
     document.removeEventListener('mouseup', mouseUpHandler);
     document.body.style.cursor = 'default';
     thumb.blur();
+    state.dragging = false;
     localHideAnnotation();
   };
 
@@ -217,6 +219,47 @@ const syncTooltips = (component, state) => {
 };
 
 /**
+ * When user hover a bar, we should the x label in tooltip. If the bar has a
+ * special value (cur value/ original value/ coach value), we also call out
+ * the annotation.
+ * @param {event} e Event
+ * @param {object} d Datum
+ * @param {element} component Component
+ * @param {object} state Current states
+ */
+const barMouseEnterHandler = (e, d, component, state) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (state.dragging) return;
+
+  // Trigger hover on the x label element
+  d3.select(component)
+    .select(`#track-label-${d.edge}`)
+    .classed('hover', true);
+
+};
+
+/**
+ * Revoke the hovering effect.
+ * @param {event} e Event
+ * @param {object} d Datum
+ * @param {element} component Component
+ * @param {object} state Current states
+ */
+const barMouseLeaveHandler = (e, d, component, state) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (state.dragging) return;
+
+  // Stop the hovering on the x label element
+  d3.select(component)
+    .select(`#track-label-${d.edge}`)
+    .classed('hover', false);
+};
+
+/**
  * Initialize the density plot.
  */
 export const initHist = (component, state) => {
@@ -253,12 +296,8 @@ export const initHist = (component, state) => {
   const totalWidth = width - padding.left - padding.right;
 
   // Add density plot groups
-  let histGroupBot = state.histSVG.append('g')
+  let histGroup = state.histSVG.append('g')
     .attr('class', 'hist-group hist-group-bot')
-    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
-
-  let histGroupTop = state.histSVG.append('g')
-    .attr('class', 'hist-group hist-group-top')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   // Compute the frequency of each level
@@ -350,28 +389,30 @@ export const initHist = (component, state) => {
     .domain([0, d3.max(curData, d => d.density)])
     .range([yLow, padding.histTop]);
 
-  // Draw the background bar (some levels might have very low density)
-  let levelBars = histGroupBot.selectAll('rect.level-bar')
+  // Draw the background bar (some levels might have very low density, so we
+  // need a uni-height bar in the back)
+  let barGroups = histGroup.selectAll('g.bar')
     .data(curData)
-    .join('rect')
+    .join('g')
+    .attr('class', 'bar')
+    .attr('transform', d => `translate(${xScale(d.edge)}, ${padding.histTop})`)
+    .on('mouseenter', (e, d) => barMouseEnterHandler(e, d, component, state))
+    .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state));
+
+  barGroups.append('rect')
     .attr('class', 'level-bar')
-    .attr('x', d => xScale(d.edge))
-    .attr('y', padding.histTop)
     .attr('width', xScale.bandwidth())
-    .attr('height',yLow - padding.histTop);
+    .attr('height', yLow - padding.histTop);
 
   // Draw the density histogram
-  let densityBars = histGroupTop.selectAll('rect.density-bar')
-    .data(curData)
-    .join('rect')
+  let densityBars = barGroups.append('rect')
     .attr('class', 'density-bar')
-    .attr('x', d => xScale(d.edge) + padding.hBar)
-    .attr('y', d => yScale(d.density))
-    .attr('width', xScale.bandwidth() - 2 * padding.hBar)
+    .attr('y', d => yScale(d.density) - padding.histTop)
+    .attr('width', xScale.bandwidth())
     .attr('height', d => yLow - yScale(d.density));
 
   // Draw the labels on the x-axis
-  let xLabelGroup = histGroupTop.append('g')
+  let xLabelGroup = histGroup.append('g')
     .attr('class', 'x-label-group');
 
   xLabelGroup.selectAll('g.x-label')
@@ -385,7 +426,8 @@ export const initHist = (component, state) => {
     .attr('transform', isVertical ? `rotate(${-90} 0 0)` : 'translate(0, 10)')
     .text(d => isVertical ? d.trimmedLabel : d.label);
 
-  // --- Final --- Export the x center values for each bar
+  // --- Final ---
+  // Export the x center values for each bar
   let xValues = [];
 
   densityBars.each((d, i, g) => {

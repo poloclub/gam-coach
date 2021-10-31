@@ -52,6 +52,7 @@
     histEdge: [0],
     histCount: null,
     id: 0,
+    labelEncoder: {}
   };
 
   const difficultyIconMap = {
@@ -201,6 +202,26 @@
     toCenterLabels = true;
   };
 
+  const trackLabelMouseEnterHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (state.dragging) return;
+
+    d3.select(e.target)
+      .classed('hover', true);
+  };
+
+  const trackLabelMouseLeaveHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (state.dragging) return;
+
+    d3.select(e.target)
+      .classed('hover', false);
+  };
+
   /**
    * Handler for clicking the difficulty picker
    * @param e Event
@@ -345,9 +366,17 @@
     <div class='track'>
 
       {#each state.feature.histEdge as level}
-        <div class='track-label' id={`track-label-${level}`}>
+        <div class='track-label'
+          id={`track-label-${level}`}
+          on:mouseenter={trackLabelMouseEnterHandler}
+          on:mouseleave={trackLabelMouseLeaveHandler}
+        >
           <div class='value-label'>
             {categoryLabels[level]}
+          </div>
+
+          <div class='thumb-label thumb-label-x-tick'>
+            <span class='thumb-label-span'>{state.feature.labelEncoder[level]}</span>
           </div>
         </div>
 

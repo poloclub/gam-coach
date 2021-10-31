@@ -57,7 +57,8 @@ $card-h-padding: 16px;
 
 .feature-slider {
   position: absolute;
-  top: 132px;
+  // Header + top padding + hist height + padding
+  top: calc(40px + 35px + 56px + 2px);
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -143,6 +144,11 @@ $card-h-padding: 16px;
 
   :global(.density-bar) {
     fill: $orange-300;
+  }
+
+  :global(.x-label text) {
+    font-size: 0.8em;
+    fill: $gray-400;
   }
 }
 

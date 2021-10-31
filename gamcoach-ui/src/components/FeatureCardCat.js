@@ -228,10 +228,10 @@ export const initHist = (component, state) => {
   let parentBBox = parentDiv.node().getBoundingClientRect();
 
   const width = parentBBox.width;
-  const histHeight = 90;
-  const tickHeight = 40;
-  const vGap = 15;
-  const height = histHeight + tickHeight + vGap;
+  const height = 145;
+  let histHeight = 56;
+  const minHistHeight = 35;
+  let vGap = 27;
 
   state.histSVG = d3.select(component)
     .select('.svg-hist')
@@ -252,32 +252,13 @@ export const initHist = (component, state) => {
 
   const totalWidth = width - padding.left - padding.right;
 
-  // Draw a bounding box for this density plot
-  state.histSVG.append('g')
-    .attr('class', 'border')
-    .attr('transform', `translate(${0}, ${padding.top})`)
-    .append('rect')
-    .attr('width', totalWidth + 2 * thumbWidth)
-    .attr('height', histHeight - padding.top)
-    .style('fill', 'none')
-    .style('stroke', colors['gray-200']);
-
-  // Add density plot
+  // Add density plot groups
   let histGroupBot = state.histSVG.append('g')
     .attr('class', 'hist-group hist-group-bot')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   let histGroupTop = state.histSVG.append('g')
     .attr('class', 'hist-group hist-group-top')
-    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
-
-  let tickGroup = state.histSVG.append('g')
-    .attr('class', 'tick-group')
-    .attr('transform', `translate(${thumbWidth}, ${histHeight + vGap})`);
-
-  // The top layer to show vertical marks
-  let markGroup = state.histSVG.append('g')
-    .attr('class', 'mark-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   // Compute the frequency of each level
@@ -293,11 +274,78 @@ export const initHist = (component, state) => {
   // histEdge, histCount, histDensity
   let xScale = d3.scaleBand()
     .domain(curData.map(d => d.edge))
-    .paddingInner(0.2)
+    .padding(0.25)
     .range([0, width - padding.left - padding.right]);
 
-  const yLow = histHeight - padding.bottom - padding.top;
+  // First figure out whether we should put the x label vertically or horizontally
+  // Compare the max label width with the bandwidth + innerPadding
+  const maxAvailWidth = xScale.bandwidth() + xScale.step() * xScale.paddingInner();
 
+  let tempGroup = state.histSVG.append('g')
+    .attr('class', 'temp-group x-label')
+    .style('visibility', 'hidden');
+
+  let maxLabelWidth = -1;
+  curData.forEach(d => {
+    let curLabel = tempGroup.append('text')
+      .text(d.label);
+    let bbox = curLabel.node().getBoundingClientRect();
+    if (bbox.width > maxLabelWidth) maxLabelWidth = bbox.width;
+  });
+
+  let isVertical = maxLabelWidth > maxAvailWidth;
+
+  // Need to re-layout the plot if we are using vertical layout
+  if (isVertical) {
+    // Resize the histogram plot
+    histHeight = Math.max(height - padding.top - maxLabelWidth - vGap, minHistHeight);
+
+    // Need to update the CSS as well
+    d3.select(component)
+      .select('.feature-slider')
+      .style('top', `${40 + padding.top + histHeight + 2}px`);
+
+    const maxVerticalLabelHeight = height - padding.top - histHeight - vGap;
+
+    // Trim the label and add '...' for vertical layout
+    curData.forEach(d => {
+      let curLabelText = d.label;
+      let curLabel = tempGroup.append('text')
+        .text(curLabelText);
+      let bbox = curLabel.node().getBoundingClientRect();
+      if (bbox.width > maxLabelWidth) maxLabelWidth = bbox.width;
+
+      if (bbox.width > maxVerticalLabelHeight) {
+        const resizeLabel = () => {
+          curLabelText = curLabelText.slice(0, -1);
+          curLabel.text(curLabelText.concat('...'));
+          bbox = curLabel.node().getBoundingClientRect();
+
+          // Recursive call to keep trimming the label until it fits
+          if (bbox.width > maxVerticalLabelHeight) resizeLabel();
+        };
+
+        resizeLabel();
+
+        // Now the text label is trimmed
+        d.trimmedLabel = curLabelText.concat('...');
+      } else {
+        d.trimmedLabel = curLabelText;
+      }
+    });
+  }
+
+  // Draw a bounding box for this density plot
+  state.histSVG.append('g')
+    .attr('class', 'border')
+    .attr('transform', `translate(${0}, ${padding.top})`)
+    .append('rect')
+    .attr('width', totalWidth + 2 * thumbWidth)
+    .attr('height', histHeight)
+    .style('fill', 'none')
+    .style('stroke', colors['gray-200']);
+
+  const yLow = padding.top + histHeight - padding.bottom - padding.top;
   let yScale = d3.scaleLinear()
     .domain([0, d3.max(curData, d => d.density)])
     .range([yLow, padding.histTop]);
@@ -322,7 +370,22 @@ export const initHist = (component, state) => {
     .attr('width', xScale.bandwidth() - 2 * padding.hBar)
     .attr('height', d => yLow - yScale(d.density));
 
-  // Export the x center values for each bar
+  // Draw the labels on the x-axis
+  let xLabelGroup = histGroupTop.append('g')
+    .attr('class', 'x-label-group');
+
+  xLabelGroup.selectAll('g.x-label')
+    .data(curData)
+    .join('g')
+    .attr('class', 'x-label')
+    .attr('transform', d => `translate(${xScale(d.edge) + xScale.bandwidth() * 5 / 10}, ${histHeight + vGap})`)
+    .append('text')
+    .style('text-anchor', isVertical ? 'end' : 'middle')
+    .style('dominant-baseline', 'middle')
+    .attr('transform', isVertical ? `rotate(${-90} 0 0)` : 'translate(0, 10)')
+    .text(d => isVertical ? d.trimmedLabel : d.label);
+
+  // --- Final --- Export the x center values for each bar
   let xValues = [];
 
   densityBars.each((d, i, g) => {

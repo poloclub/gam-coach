@@ -85,6 +85,13 @@
       windowLoaded={windowLoaded}
     />
 
+    <FeatureCardCat featureInfo={data == null ? null : data.features[1]}
+      featureID={1}
+      labelEncoder={data == null ? null : data.labelEncoder}
+      originalValue={2}
+      windowLoaded={windowLoaded}
+    />
+
   </div>
 
 

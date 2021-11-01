@@ -49,7 +49,7 @@ const mouseDownHandler = (e, component, state) => {
   if (!thumb.id.includes('thumb')) { return; }
 
   let track = thumb.parentNode;
-  let trackWidth = track.getBoundingClientRect().width;
+
   thumb.focus();
   state.dragging = true;
 
@@ -92,6 +92,15 @@ const mouseDownHandler = (e, component, state) => {
     document.removeEventListener('mouseup', mouseUpHandler);
     document.body.style.cursor = 'default';
     thumb.blur();
+
+    // Restore the opacity
+    d3.select(component)
+      .select('.svg-hist')
+      .select('.x-label-group')
+      .transition('restore')
+      .duration(200)
+      .style('opacity', 1);
+
     state.dragging = false;
     localHideAnnotation();
   };
@@ -114,7 +123,32 @@ export const initSlider = (component, state) => {
   // Register the interaction handler
   d3.select(component)
     .select('#slider-level-thumb')
-    .on('mousedown', e => mouseDownHandler(e, component, state));
+    .on('mousedown', e => mouseDownHandler(e, component, state))
+    .on('mouseenter', () => {
+      // Cancel the previous opacity -> 1 callback if it was set
+      if (state.tickOpacityTimeout !== null) {
+        clearTimeout(state.tickOpacityTimeout);
+        state.tickOpacityTimeout = null;
+      }
+
+      // Dehighlight the x labels
+      d3.select(component)
+        .select('.svg-hist')
+        .select('.x-label-group')
+        .interrupt('restore')
+        .style('opacity', 0.3);
+    })
+    .on('mouseleave', () => {
+      if (state.dragging) return;
+
+      // Restore the opacity
+      d3.select(component)
+        .select('.svg-hist')
+        .select('.x-label-group')
+        .transition('restore')
+        .duration(200)
+        .style('opacity', 1);
+    });
 };
 
 /**
@@ -181,6 +215,7 @@ export const moveThumb = (component, state, value) => {
   // }
 
   syncTooltips(component, state);
+  syncBars(component, state);
 
   thumb.style('left', `${xPos}px`);
   state.stateUpdated();
@@ -279,6 +314,23 @@ const barMouseLeaveHandler = (e, d, component, state) => {
   }, 300);
 };
 
+const syncBars = (component, state) => {
+  // Iterate all level bars and check if they match the special values one-by-one
+  let bars = d3.select(component)
+    .select('.svg-hist')
+    .select('g.hist-group')
+    .selectAll('.bar');
+
+  bars.each((d, i, g) => {
+    let curBar = d3.select(g[i]);
+
+    curBar.classed('selected', state.feature.searchValues.includes(d.edge))
+      .classed('user', d.edge === state.feature.curValue)
+      .classed('original', d.edge === state.feature.originalValue)
+      .classed('coach', d.edge === state.feature.coachValue);
+  });
+};
+
 /**
  * Initialize the density plot.
  */
@@ -317,7 +369,7 @@ export const initHist = (component, state) => {
 
   // Add density plot groups
   let histGroup = state.histSVG.append('g')
-    .attr('class', 'hist-group hist-group-bot')
+    .attr('class', 'hist-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   // Compute the frequency of each level
@@ -398,6 +450,7 @@ export const initHist = (component, state) => {
   state.histSVG.append('g')
     .attr('class', 'border')
     .attr('transform', `translate(${0}, ${padding.top})`)
+    .lower()
     .append('rect')
     .attr('width', totalWidth + 2 * thumbWidth)
     .attr('height', histHeight)
@@ -420,17 +473,23 @@ export const initHist = (component, state) => {
     .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state));
 
   barGroups.append('rect')
-    .attr('class', 'level-bar')
-    .classed('selected', d => state.feature.searchValues.includes(d.edge))
+    .attr('class', 'back-bar')
     .attr('width', xScale.bandwidth())
     .attr('height', yLow - padding.histTop);
 
   // Draw the density histogram
   let densityBars = barGroups.append('rect')
     .attr('class', 'density-bar')
-    .attr('y', d => yScale(d.density) - padding.histTop)
+    .attr('x', padding.hBar)
+    .attr('y', d => yScale(d.density) - padding.histTop + padding.hBar)
+    .attr('width', xScale.bandwidth() - 2 * padding.hBar)
+    .attr('height', d => yLow - yScale(d.density) - 2 * padding.hBar);
+
+  barGroups.append('rect')
+    .attr('class', 'level-bar')
+    .attr('id', d => `level-bar-${d.edge}`)
     .attr('width', xScale.bandwidth())
-    .attr('height', d => yLow - yScale(d.density));
+    .attr('height', yLow - padding.histTop);
 
   // Draw the labels on the x-axis
   let xLabelGroup = histGroup.append('g')
@@ -446,6 +505,9 @@ export const initHist = (component, state) => {
     .style('dominant-baseline', 'middle')
     .attr('transform', isVertical ? `rotate(${-90} 0 0)` : 'translate(0, 10)')
     .text(d => isVertical ? d.trimmedLabel : d.label);
+
+  // Highlight bars with special values (original, user, and coach)
+  syncBars(component, state);
 
   // --- Final ---
   // Export the x center values for each bar

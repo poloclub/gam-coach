@@ -215,7 +215,7 @@ $card-h-padding: 16px;
   }
 
   .annotation-coach {
-    background-color: $orange-500;
+    background-color: $green-600;
     left: 20px;
   }
 
@@ -226,7 +226,7 @@ $card-h-padding: 16px;
 
   .annotation-range {
     background-color: $orange-50;
-    color: $orange-500;
+    color: $green-600;
     left: 20px;
   }
 }
@@ -333,9 +333,9 @@ $card-h-padding: 16px;
   }
 
   :global(.svg-icon.icon-range-thumb-middle.coach) {
-    fill: $orange-400;
-    color: $orange-400;
-    stroke: $orange-100;
+    fill: $green-500;
+    color: $green-500;
+    stroke: $green-100;
   }
 }
 
@@ -403,7 +403,7 @@ $card-h-padding: 16px;
 
   :global(.density-coach-mark line) {
     stroke-width: 2;
-    stroke: $orange-500;
+    stroke: $green-600;
   }
 
   :global(.tick line) {
@@ -429,7 +429,7 @@ $card-h-padding: 16px;
 
   :global(.coach-mark line) {
     stroke-width: 2;
-    stroke: $orange-500;
+    stroke: $green-600;
   }
 }
 
@@ -457,7 +457,6 @@ $card-h-padding: 16px;
 .svg-hist {
   :global(.area-path) {
     fill: $gray-300;
-
     &.selected {
       fill: pink;
     }

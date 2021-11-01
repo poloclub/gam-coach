@@ -102,9 +102,9 @@ $card-h-padding: 16px;
   }
 
   :global(.svg-icon.icon-level-thumb.coach) {
-    fill: $orange-400;
-    color: $orange-400;
-    stroke: $orange-100;
+    fill: $green-500;
+    color: $green-500;
+    stroke: $green-100;
   }
 }
 
@@ -146,19 +146,38 @@ $card-h-padding: 16px;
 }
 
 .svg-hist {
+  $highlight-stroke-width: 3;
+
   :global(.bar) {
     cursor: pointer;
   }
 
   :global(.level-bar) {
-    fill: $gray-200;
-    // stroke: $blue-500;
-    // stroke-dasharray: 4 2;
-    // stroke-width: 1;
+    fill: none;
+    stroke: none;
   }
 
-  :global(.level-bar.selected) {
+  :global(.back-bar) {
+    fill: $gray-200;
+  }
+
+  :global(.bar.selected .back-bar) {
     fill: $orange-100;
+  }
+
+  :global(.bar.user .level-bar) {
+    stroke: $blue-500;
+    stroke-width: $highlight-stroke-width;
+  }
+
+  :global(.bar.original .level-bar) {
+    stroke: $gray-600;
+    stroke-width: $highlight-stroke-width;
+  }
+
+  :global(.bar.coach .level-bar) {
+    stroke: $green-600;
+    stroke-width: $highlight-stroke-width;
   }
 
   :global(.density-bar) {

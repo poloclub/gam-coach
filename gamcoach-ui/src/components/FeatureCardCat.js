@@ -487,13 +487,13 @@ export const initHist = (component, state) => {
     .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state))
     .on('click', (e, d) => barClickedHandler(e, d, component, state));
 
-  barGroups.append('rect')
+  let backBars = barGroups.append('rect')
     .attr('class', 'back-bar')
     .attr('width', xScale.bandwidth())
     .attr('height', yLow - padding.histTop);
 
   // Draw the density histogram
-  let densityBars = barGroups.append('rect')
+  barGroups.append('rect')
     .attr('class', 'density-bar')
     .attr('x', padding.hBar)
     .attr('y', d => yScale(d.density) - padding.histTop + padding.hBar)
@@ -528,7 +528,7 @@ export const initHist = (component, state) => {
   // Export the x center values for each bar
   let xValues = [];
 
-  densityBars.each((d, i, g) => {
+  backBars.each((d, i, g) => {
     let bbox = d3.select(g[i]).node().getBoundingClientRect();
     let curX = bbox.x + bbox.width / 2;
     xValues.push(curX);

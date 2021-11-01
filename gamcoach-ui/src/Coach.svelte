@@ -1,6 +1,7 @@
 <script>
   import FeatureCard from './components/FeatureCard.svelte';
   import FeatureCardCat from './components/FeatureCardCat.svelte';
+  import FeaturePanel from './components/FeaturePanel.svelte';
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
 
@@ -54,7 +55,7 @@
     width: 100vw;
     box-sizing: border-box;
     border: 1px solid $gray-border;
-    background: $coolGray-200;
+    background: $coolGray-50;
   }
 
 
@@ -71,7 +72,11 @@
 
     <DiffPicker/>
 
-    <FeatureCard featureInfo={data == null ? null : data.features[19]}
+    <FeaturePanel data={data}
+      windowLoaded={windowLoaded}
+    />
+
+    <!-- <FeatureCard featureInfo={data == null ? null : data.features[19]}
       featureID={19}
       requiresInt={true}
       originalValue={728}
@@ -90,7 +95,7 @@
       labelEncoder={data == null ? null : data.labelEncoder}
       originalValue={2}
       windowLoaded={windowLoaded}
-    />
+    /> -->
 
   </div>
 

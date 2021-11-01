@@ -1,6 +1,6 @@
 <script>
   import d3 from '../utils/d3-import';
-  import { onMount, afterUpdate } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { tooltipConfigStore, diffPickerConfigStore } from '../store';
 
   import {initSlider, moveThumb, initHist} from './FeatureCardCat';
@@ -19,10 +19,8 @@
   export let labelEncoder = null;
   export let originalValue = null;
   export let featureID = null;
-  export let windowLoaded = false;
 
-  let toFitSize = false;
-  let toCenterLabels = false;
+  let mounted = false;
 
   let state = {};
 
@@ -166,8 +164,7 @@
    * Init the states of different elements. Some functions require bbox,
    * which is only accurate after content is loaded
    */
-  const initFeatureCard = () => {
-    console.log(featureInfo);
+  const initFeatureCard = async () => {
 
     // Initialize the feature data from the prop
     state.feature = {
@@ -180,14 +177,9 @@
       histCount: featureInfo.histCount,
       id: featureID,
       stateUpdated: stateUpdated,
-      labelEncoder: labelEncoder[featureInfo.name],
+      labelEncoder: labelEncoder,
       searchValues: new Set(featureInfo.histEdge)
     };
-
-    toFitSize = true;
-
-    // Init the slider
-    // initSlider(component, state);
 
     // Init the histogram
     // Record the x center values for each bar. The original return value is
@@ -196,13 +188,19 @@
 
     const trackX = d3.select(component).select('.track').node().getBoundingClientRect().x;
 
+    console.log(tempXCenters, trackX);
+
     // Level label starts from 1, we add a placeholder to index 0
     state.xCenters = [0];
-    tempXCenters.forEach(x => {state.xCenters.push(x - trackX);});
-
+    tempXCenters.forEach(x => {
+      state.xCenters.push(x - trackX);
+    });
 
     // Need to wait the view is updated so we can recenter labels
-    toCenterLabels = true;
+    await tick();
+
+    fitFeatureName();
+    recenterSliderLabels();
   };
 
   const trackLabelMouseEnterHandler = (e) => {
@@ -298,24 +296,13 @@
     }
   };
 
-  afterUpdate(() => {
-    if (toFitSize) {
-      fitFeatureName();
-      toFitSize = false;
-    }
-
-    if (toCenterLabels) {
-      recenterSliderLabels();
-      toCenterLabels = false;
-    }
-  });
-
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
+    mounted = true;
   });
 
-  $: featureInfo && labelEncoder && windowLoaded && initFeatureCard();
+  $: featureInfo && labelEncoder && mounted && initFeatureCard();
 
 </script>
 

@@ -21,8 +21,8 @@
   export let requiresInt = false;
   export let originalValue = null;
   export let featureID = null;
-  export let windowLoaded = false;
 
+  let mounted = false;
   let state = {};
 
   // Constants
@@ -203,9 +203,10 @@
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
+    mounted = true;
   });
 
-  $: featureInfo && windowLoaded && initFeatureCard();
+  $: featureInfo && mounted && initFeatureCard();
 
 </script>
 

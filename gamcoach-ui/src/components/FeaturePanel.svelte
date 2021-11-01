@@ -64,7 +64,7 @@
       tempFeatures.push(curFeature);
     }
 
-    features = tempFeatures.slice(0, 5);
+    features = tempFeatures.slice(0, 12);
     console.log(features);
   };
 
@@ -90,38 +90,23 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: 20px;
-    padding: 30px 30px;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+
+    padding: 20px 30px;
     box-sizing: border-box;
     border-radius: 10px;
     background: hsl(220, 13%, 88%);
+
+    width: 1000px;
+    max-height: 600px;
+
+    overflow-y: scroll;
   }
 
 </style>
 
 <div class='feature-panel' bind:this={component}>
-
-  <!-- <FeatureCard featureInfo={data == null ? null : data.features[19]}
-    featureID={19}
-    requiresInt={true}
-    originalValue={728}
-    windowLoaded={windowLoaded}
-  />
-
-  <FeatureCardCat featureInfo={data == null ? null : data.features[2]}
-    featureID={2}
-    labelEncoder={data == null ? null : data.labelEncoder}
-    originalValue={2}
-    windowLoaded={windowLoaded}
-  />
-
-  <FeatureCardCat featureInfo={data == null ? null : data.features[1]}
-    featureID={1}
-    labelEncoder={data == null ? null : data.labelEncoder}
-    originalValue={2}
-    windowLoaded={windowLoaded}
-  /> -->
 
   {#key features}
     {#each features as feature}

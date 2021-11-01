@@ -43,10 +43,9 @@
 
   .content {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 50px;
-    padding: 30px 0 30px 0;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0 10px 0;
     justify-content: center;
     align-items: center;
     height: calc(100vh - 50px);
@@ -55,9 +54,23 @@
     width: 100vw;
     box-sizing: border-box;
     border: 1px solid $gray-border;
-    background: $coolGray-50;
+    background: $gray-50;
   }
 
+  .coach-panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    width: 1000px;
+    height: 240px;
+    border-radius: 10px;
+    // background-color: $coolGray-200;
+    font-size: 2em;
+    font-weight: 600;
+    border: 1px solid $gray-border;
+  }
 
 </style>
 
@@ -69,6 +82,10 @@
   <Tooltip bind:this={tooltip}/>
 
   <div class='content'>
+
+    <div class='coach-panel'>
+      Coach Panel
+    </div>
 
     <DiffPicker/>
 

@@ -159,7 +159,6 @@
    * which is only accurate after content is loaded
    */
   const initFeatureCard = async () => {
-    console.log(featureInfo);
 
     // Initialize the feature data from the prop
     state.feature = {

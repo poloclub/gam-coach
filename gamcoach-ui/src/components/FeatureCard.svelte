@@ -1,6 +1,6 @@
 <script>
   import d3 from '../utils/d3-import';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { tooltipConfigStore, diffPickerConfigStore } from '../store';
 
   import {initSlider, initHist} from './FeatureCard';
@@ -136,10 +136,29 @@
   state.stateUpdated = stateUpdated;
 
   /**
+   * Dynamically change the font size for the feature name to make it fit the
+   * size of the header
+   */
+  const fitFeatureName = () => {
+    let featureNameElem = d3.select(component)
+      .select('.feature-name');
+
+    let fontSize = parseFloat(window.getComputedStyle(featureNameElem.node()).fontSize);
+    let nameHeight = featureNameElem.node().clientHeight;
+    let parentHeight = featureNameElem.node().parentNode.clientHeight;
+
+    if(nameHeight > parentHeight) {
+      fontSize -= 0.5;
+      featureNameElem.style('font-size', `${fontSize}px`);
+      fitFeatureName();
+    }
+  };
+
+  /**
    * Init the states of different elements. Some functions require bbox,
    * which is only accurate after content is loaded
    */
-  const initFeatureCard = () => {
+  const initFeatureCard = async () => {
     console.log(featureInfo);
 
     // Initialize the feature data from the prop
@@ -175,6 +194,10 @@
 
     // Init the density plot and ticks
     initHist(component, state);
+
+    // Wait until the view is updated then automatically resize the feature name
+    await tick();
+    fitFeatureName();
   };
 
   /**
@@ -230,7 +253,7 @@
 
     <div class='values'>
       <span class='value-old'>
-        {state.feature.originalValue}
+        {d3.format(',.2~f')(state.feature.originalValue)}
       </span>
 
       <div class='feature-arrow'>
@@ -243,7 +266,7 @@
       </div>
 
       <span class='value-new'>
-        {state.feature.curValue}
+        {d3.format(',.2~f')(state.feature.curValue)}
       </span>
     </div>
 

@@ -188,8 +188,6 @@
 
     const trackX = d3.select(component).select('.track').node().getBoundingClientRect().x;
 
-    console.log(tempXCenters, trackX);
-
     // Level label starts from 1, we add a placeholder to index 0
     state.xCenters = [0];
     tempXCenters.forEach(x => {

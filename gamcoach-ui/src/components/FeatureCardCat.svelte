@@ -181,7 +181,7 @@
       id: featureID,
       stateUpdated: stateUpdated,
       labelEncoder: labelEncoder[featureInfo.name],
-      searchValues: featureInfo.histEdge
+      searchValues: new Set(featureInfo.histEdge)
     };
 
     toFitSize = true;
@@ -244,6 +244,16 @@
         .duration(200)
         .style('opacity', 1);
     }, 300);
+  };
+
+  const trackLabelClickHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let newValue = +d3.select(e.target)
+      .attr('data-edge');
+
+    moveThumb(component, state, newValue);
   };
 
   /**
@@ -394,8 +404,9 @@
           id={`track-label-${level}`}
           on:mouseenter={trackLabelMouseEnterHandler}
           on:mouseleave={trackLabelMouseLeaveHandler}
+          on:click={trackLabelClickHandler}
         >
-          <div class='value-label'>
+          <div class='value-label' data-edge={level}>
             {categoryLabels[level]}
           </div>
 

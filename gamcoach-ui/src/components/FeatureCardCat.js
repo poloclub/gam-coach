@@ -314,6 +314,20 @@ const barMouseLeaveHandler = (e, d, component, state) => {
   }, 300);
 };
 
+const barClickedHandler = (e, d, component, state) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  // Deselect the bar if it has been selected
+  if (state.feature.searchValues.has(d.edge)) {
+    state.feature.searchValues.delete(d.edge);
+  } else {
+    state.feature.searchValues.add(d.edge);
+  }
+
+  syncBars(component, state);
+};
+
 const syncBars = (component, state) => {
   // Iterate all level bars and check if they match the special values one-by-one
   let bars = d3.select(component)
@@ -324,7 +338,7 @@ const syncBars = (component, state) => {
   bars.each((d, i, g) => {
     let curBar = d3.select(g[i]);
 
-    curBar.classed('selected', state.feature.searchValues.includes(d.edge))
+    curBar.classed('selected', state.feature.searchValues.has(d.edge))
       .classed('user', d.edge === state.feature.curValue)
       .classed('original', d.edge === state.feature.originalValue)
       .classed('coach', d.edge === state.feature.coachValue);
@@ -470,7 +484,8 @@ export const initHist = (component, state) => {
     .attr('class', 'bar')
     .attr('transform', d => `translate(${xScale(d.edge)}, ${padding.histTop})`)
     .on('mouseenter', (e, d) => barMouseEnterHandler(e, d, component, state))
-    .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state));
+    .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state))
+    .on('click', (e, d) => barClickedHandler(e, d, component, state));
 
   barGroups.append('rect')
     .attr('class', 'back-bar')

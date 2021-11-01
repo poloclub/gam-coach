@@ -157,8 +157,16 @@ $card-h-padding: 16px;
     stroke: none;
   }
 
+  :global(.density-bar) {
+    fill: $gray-500;
+  }
+
   :global(.back-bar) {
     fill: $gray-200;
+  }
+
+  :global(.bar.selected .density-bar) {
+    fill: $orange-300;
   }
 
   :global(.bar.selected .back-bar) {
@@ -178,10 +186,6 @@ $card-h-padding: 16px;
   :global(.bar.coach .level-bar) {
     stroke: $green-600;
     stroke-width: $highlight-stroke-width;
-  }
-
-  :global(.density-bar) {
-    fill: $orange-300;
   }
 
   :global(.x-label text) {

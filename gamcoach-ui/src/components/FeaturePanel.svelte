@@ -51,6 +51,7 @@
           requiresInt: false,
           originalValue: curExample[i]
         };
+        tempFeatures.push(curFeature);
       } else if (curType === 'categorical') {
         curFeature = {
           data: data.features[i],
@@ -59,12 +60,12 @@
           labelEncoder: data.labelEncoder[data.features[i].name],
           originalValue: labelDecoder[data.features[i].name][curExample[i]]
         };
+        tempFeatures.push(curFeature);
       }
 
-      tempFeatures.push(curFeature);
     }
 
-    features = tempFeatures.slice(0, 12);
+    features = tempFeatures;
     console.log(features);
   };
 

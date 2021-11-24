@@ -54,7 +54,7 @@
     width: 100vw;
     box-sizing: border-box;
     border: 1px solid $gray-border;
-    background: $gray-50;
+    background: $grey-50;
   }
 
   .coach-panel {

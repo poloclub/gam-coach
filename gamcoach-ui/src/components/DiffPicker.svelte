@@ -229,7 +229,7 @@
     cursor: pointer;
     padding: 5px 10px;
     font-size: 0.9em;
-    color: $gray-500;
+    color: $grey-500;
   }
 
   .icons {

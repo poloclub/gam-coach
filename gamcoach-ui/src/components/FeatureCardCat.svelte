@@ -187,7 +187,8 @@
     // at the global absolute coordinate. Convert it to local coordinate here.
     const tempXCenters = initHist(component, state);
 
-    const trackX = d3.select(component).select('.track').node().getBoundingClientRect().x;
+    const trackX = d3.select(component).select('.track')
+      .node().getBoundingClientRect().x;
 
     // Level label starts from 1, we add a placeholder to index 0
     state.xCenters = [0];

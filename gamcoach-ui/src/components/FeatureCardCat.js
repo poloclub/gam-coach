@@ -406,7 +406,8 @@ export const initHist = (component, state) => {
   // First figure out whether we should put the x label vertically or
   // horizontally
   // Compare the max label width with the bandwidth + innerPadding
-  const maxAvailWidth = xScale.bandwidth() + xScale.step() * xScale.paddingInner();
+  const maxAvailWidth = xScale.bandwidth() + xScale.step() *
+    xScale.paddingInner();
 
   const tempGroup = state.histSVG.append('g')
     .attr('class', 'temp-group x-label')
@@ -425,7 +426,9 @@ export const initHist = (component, state) => {
   // Need to re-layout the plot if we are using vertical layout
   if (isVertical) {
     // Resize the histogram plot
-    histHeight = Math.max(height - padding.top - maxLabelWidth - vGap, minHistHeight);
+    histHeight = Math.max(
+      height - padding.top - maxLabelWidth - vGap, minHistHeight
+    );
 
     // Need to update the CSS as well
     d3.select(component)

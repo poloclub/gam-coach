@@ -1,6 +1,7 @@
 <script>
   import FeatureCard from './FeatureCard.svelte';
   import FeatureCardCat from './FeatureCardCat.svelte';
+  import ListPanel from './ListPanel.svelte';
 
   import d3 from '../utils/d3-import';
   import { onMount } from 'svelte';
@@ -18,7 +19,7 @@
   let component = null;
   let features = [];
 
-  let curExample = [
+  const curExample = [
     17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
     'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
     '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
@@ -26,12 +27,10 @@
 
   // Set up the GAM Coach feature cards
   const initFeatureCards = () => {
-    console.log(data);
-
-    let tempFeatures = [];
+    const tempFeatures = [];
 
     // Convert categorical label to level ID
-    let labelDecoder = {};
+    const labelDecoder = {};
     Object.keys(data.labelEncoder).forEach(f => {
       labelDecoder[f] = {};
       Object.keys(data.labelEncoder[f]).forEach(l => {
@@ -40,7 +39,7 @@
     });
 
     for (let i = 0; i < data.features.length; i++) {
-      let curType = data.features[i].type;
+      const curType = data.features[i].type;
       let curFeature;
 
       if (curType === 'continuous') {
@@ -109,7 +108,7 @@
 
 <div class='feature-panel' bind:this={component}>
 
-  {#key features}
+  <!-- {#key features}
     {#each features as feature}
       {#if feature.isCont}
         <FeatureCard featureInfo={feature.data}
@@ -125,6 +124,8 @@
         />
       {/if}
     {/each}
-  {/key}
+  {/key} -->
+
+  <ListPanel />
 
 </div>

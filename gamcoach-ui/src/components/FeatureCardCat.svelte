@@ -88,8 +88,9 @@
   });
 
   // Translate category index to alphabetic
-  const categoryLabels = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',  'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+  const categoryLabels = [
+    '', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+    'O', 'P', 'Q', 'R',  'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
   const preProcessSVG = (svgString) => {
     return svgString.replaceAll('black', 'currentcolor')
@@ -116,7 +117,7 @@
       d3.select(component)
         .selectAll(`.svg-icon.${d.class}`)
         .each((_, i, g) => {
-          let ele = d3.select(g[i]);
+          const ele = d3.select(g[i]);
           let html = ele.html();
           html = html.concat(' ', preProcessSVG(d.svg));
           ele.html(html);
@@ -145,7 +146,7 @@
 
     // Re-position the track labels
     state.feature.histEdge.forEach((d) => {
-      let curX = state.xCenters[d] - labelWidth / 2;
+      const curX = state.xCenters[d] - labelWidth / 2;
 
       d3.select(component)
         .select(`#track-label-${d}`)
@@ -184,7 +185,7 @@
     // Init the histogram
     // Record the x center values for each bar. The original return value is
     // at the global absolute coordinate. Convert it to local coordinate here.
-    let tempXCenters = initHist(component, state);
+    const tempXCenters = initHist(component, state);
 
     const trackX = d3.select(component).select('.track').node().getBoundingClientRect().x;
 
@@ -246,7 +247,7 @@
     e.preventDefault();
     e.stopPropagation();
 
-    let newValue = +d3.select(e.target)
+    const newValue = +d3.select(e.target)
       .attr('data-edge');
 
     moveThumb(component, state, newValue);
@@ -259,13 +260,13 @@
   const diffClickedHandler = () => {
     // Trigger the difficulty picker
     // Figure out the location to put the picker
-    let bbox = d3.select(component)
+    const bbox = d3.select(component)
       .select('.feature-difficulty')
       .node()
       .getBoundingClientRect();
 
-    let newX = bbox.x + bbox.width / 2 - diffPickerConfig.width / 4 - 2;
-    let newY = bbox.y - diffPickerConfig.height - 8;
+    const newX = bbox.x + bbox.width / 2 - diffPickerConfig.width / 4 - 2;
+    const newY = bbox.y - diffPickerConfig.height - 8;
 
     diffPickerConfig.x = newX;
     diffPickerConfig.y = newY;
@@ -280,12 +281,14 @@
    * size of the header
    */
   const fitFeatureName = () => {
-    let featureNameElem = d3.select(component)
+    const featureNameElem = d3.select(component)
       .select('.feature-name');
 
-    let fontSize = parseFloat(window.getComputedStyle(featureNameElem.node()).fontSize);
-    let nameHeight = featureNameElem.node().clientHeight;
-    let parentHeight = featureNameElem.node().parentNode.clientHeight;
+    let fontSize = parseFloat(
+      window.getComputedStyle(featureNameElem.node()).fontSize
+    );
+    const nameHeight = featureNameElem.node().clientHeight;
+    const parentHeight = featureNameElem.node().parentNode.clientHeight;
 
     if(nameHeight > parentHeight) {
       fontSize -= 0.5;

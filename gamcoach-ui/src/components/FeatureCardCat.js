@@ -1,7 +1,7 @@
 import d3 from '../utils/d3-import';
 import { config } from '../config';
 
-let colors = config.colors;
+const colors = config.colors;
 
 /**
  * Helper function to show the annotation.
@@ -45,15 +45,15 @@ const mouseDownHandler = (e, component, state) => {
   e.preventDefault();
   e.stopPropagation();
 
-  let thumb = e.target;
+  const thumb = e.target;
   if (!thumb.id.includes('thumb')) { return; }
 
-  let track = thumb.parentNode;
+  const track = thumb.parentNode;
 
   thumb.focus();
   state.dragging = true;
 
-  let localHideAnnotation = () => { };
+  const localHideAnnotation = () => { };
   // if (thumb.id.includes('middle')) {
   //   showAnnotation(component, state, 'user');
   //   localHideAnnotation = () => hideAnnotation(component, state, 'user');
@@ -75,7 +75,7 @@ const mouseDownHandler = (e, component, state) => {
     state.xCenters.forEach((x, i) => {
       // Level starts at 1
       if (i > 0) {
-        let curDistance = Math.abs(deltaX - x);
+        const curDistance = Math.abs(deltaX - x);
 
         if (curDistance < minDistance) {
           minDistance = curDistance;
@@ -329,14 +329,15 @@ const barClickedHandler = (e, d, component, state) => {
 };
 
 const syncBars = (component, state) => {
-  // Iterate all level bars and check if they match the special values one-by-one
-  let bars = d3.select(component)
+  // Iterate all level bars and check if they match the special values
+  // one-by-one
+  const bars = d3.select(component)
     .select('.svg-hist')
     .select('g.hist-group')
     .selectAll('.bar');
 
   bars.each((d, i, g) => {
-    let curBar = d3.select(g[i]);
+    const curBar = d3.select(g[i]);
 
     curBar.classed('selected', state.feature.searchValues.has(d.edge))
       .classed('user', d.edge === state.feature.curValue)
@@ -352,15 +353,15 @@ export const initHist = (component, state) => {
   console.log(state.feature);
 
   // Use the parent size to initialize the SVG size
-  let parentDiv = d3.select(component)
+  const parentDiv = d3.select(component)
     .select('.feature-hist');
-  let parentBBox = parentDiv.node().getBoundingClientRect();
+  const parentBBox = parentDiv.node().getBoundingClientRect();
 
   const width = parentBBox.width;
   const height = 145;
   let histHeight = 56;
   const minHistHeight = 35;
-  let vGap = 27;
+  const vGap = 27;
 
   state.histSVG = d3.select(component)
     .select('.svg-hist')
@@ -382,13 +383,13 @@ export const initHist = (component, state) => {
   const totalWidth = width - padding.left - padding.right;
 
   // Add density plot groups
-  let histGroup = state.histSVG.append('g')
+  const histGroup = state.histSVG.append('g')
     .attr('class', 'hist-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   // Compute the frequency of each level
   const totalSampleNum = state.feature.histCount.reduce((a, b) => a + b);
-  let curData = state.feature.histEdge.map((d, i) => ({
+  const curData = state.feature.histEdge.map((d, i) => ({
     edge: state.feature.histEdge[i],
     label: state.feature.labelEncoder[state.feature.histEdge[i]],
     count: state.feature.histCount[i],
@@ -397,28 +398,29 @@ export const initHist = (component, state) => {
 
   // Create the axis scales
   // histEdge, histCount, histDensity
-  let xScale = d3.scaleBand()
+  const xScale = d3.scaleBand()
     .domain(curData.map(d => d.edge))
     .padding(0.25)
     .range([0, width - padding.left - padding.right]);
 
-  // First figure out whether we should put the x label vertically or horizontally
+  // First figure out whether we should put the x label vertically or
+  // horizontally
   // Compare the max label width with the bandwidth + innerPadding
   const maxAvailWidth = xScale.bandwidth() + xScale.step() * xScale.paddingInner();
 
-  let tempGroup = state.histSVG.append('g')
+  const tempGroup = state.histSVG.append('g')
     .attr('class', 'temp-group x-label')
     .style('visibility', 'hidden');
 
   let maxLabelWidth = -1;
   curData.forEach(d => {
-    let curLabel = tempGroup.append('text')
+    const curLabel = tempGroup.append('text')
       .text(d.label);
-    let bbox = curLabel.node().getBoundingClientRect();
+    const bbox = curLabel.node().getBoundingClientRect();
     if (bbox.width > maxLabelWidth) maxLabelWidth = bbox.width;
   });
 
-  let isVertical = maxLabelWidth > maxAvailWidth;
+  const isVertical = maxLabelWidth > maxAvailWidth;
 
   // Need to re-layout the plot if we are using vertical layout
   if (isVertical) {
@@ -435,7 +437,7 @@ export const initHist = (component, state) => {
     // Trim the label and add '...' for vertical layout
     curData.forEach(d => {
       let curLabelText = d.label;
-      let curLabel = tempGroup.append('text')
+      const curLabel = tempGroup.append('text')
         .text(curLabelText);
       let bbox = curLabel.node().getBoundingClientRect();
       if (bbox.width > maxLabelWidth) maxLabelWidth = bbox.width;
@@ -472,13 +474,13 @@ export const initHist = (component, state) => {
     .style('stroke', colors['gray-200']);
 
   const yLow = padding.top + histHeight - padding.bottom - padding.top;
-  let yScale = d3.scaleLinear()
+  const yScale = d3.scaleLinear()
     .domain([0, d3.max(curData, d => d.density)])
     .range([yLow, padding.histTop]);
 
   // Draw the background bar (some levels might have very low density, so we
   // need a uni-height bar in the back)
-  let barGroups = histGroup.selectAll('g.bar')
+  const barGroups = histGroup.selectAll('g.bar')
     .data(curData)
     .join('g')
     .attr('class', 'bar')
@@ -487,7 +489,7 @@ export const initHist = (component, state) => {
     .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state))
     .on('click', (e, d) => barClickedHandler(e, d, component, state));
 
-  let backBars = barGroups.append('rect')
+  const backBars = barGroups.append('rect')
     .attr('class', 'back-bar')
     .attr('width', xScale.bandwidth())
     .attr('height', yLow - padding.histTop);
@@ -507,14 +509,17 @@ export const initHist = (component, state) => {
     .attr('height', yLow - padding.histTop);
 
   // Draw the labels on the x-axis
-  let xLabelGroup = histGroup.append('g')
+  const xLabelGroup = histGroup.append('g')
     .attr('class', 'x-label-group');
 
   xLabelGroup.selectAll('g.x-label')
     .data(curData)
     .join('g')
     .attr('class', 'x-label')
-    .attr('transform', d => `translate(${xScale(d.edge) + xScale.bandwidth() * 5 / 10}, ${histHeight + vGap})`)
+    .attr('transform',
+      d => `translate(${xScale(d.edge) + xScale.bandwidth() * 5 / 10},
+      ${histHeight + vGap})`
+    )
     .append('text')
     .style('text-anchor', isVertical ? 'end' : 'middle')
     .style('dominant-baseline', 'middle')
@@ -526,11 +531,11 @@ export const initHist = (component, state) => {
 
   // --- Final ---
   // Export the x center values for each bar
-  let xValues = [];
+  const xValues = [];
 
   backBars.each((d, i, g) => {
-    let bbox = d3.select(g[i]).node().getBoundingClientRect();
-    let curX = bbox.x + bbox.width / 2;
+    const bbox = d3.select(g[i]).node().getBoundingClientRect();
+    const curX = bbox.x + bbox.width / 2;
     xValues.push(curX);
   });
 

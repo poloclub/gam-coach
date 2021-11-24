@@ -1,7 +1,7 @@
 import d3 from '../utils/d3-import';
 import { config } from '../config';
 
-let colors = config.colors;
+const colors = config.colors;
 
 /**
  * Helper function to show the annotation.
@@ -45,11 +45,11 @@ const mouseDownHandler = (e, component, state) => {
   e.preventDefault();
   e.stopPropagation();
 
-  let thumb = e.target;
+  const thumb = e.target;
   if (!thumb.id.includes('thumb')) { return; }
 
-  let track = thumb.parentNode;
-  let trackWidth = track.getBoundingClientRect().width;
+  const track = thumb.parentNode;
+  const trackWidth = track.getBoundingClientRect().width;
   thumb.focus();
 
   let localHideAnnotation = () => {};
@@ -70,9 +70,13 @@ const mouseDownHandler = (e, component, state) => {
 
     // Handle integer value if it is required
     if (state.feature.requiresInt) {
-      newValue = state.feature.valueMin + parseInt((state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth);
+      newValue = state.feature.valueMin + parseInt(
+        (state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth
+      );
     } else {
-      newValue = state.feature.valueMin + parseFloat((state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth);
+      newValue = state.feature.valueMin + parseFloat(
+        (state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth
+      );
     }
 
     moveThumb(component, state, thumb.id, newValue);
@@ -176,19 +180,20 @@ export const moveThumb = (component, state, thumbID, value) => {
   const thumbBBox = thumb.node().getBoundingClientRect();
   const trackBBox = thumb.node().parentNode.getBoundingClientRect();
 
-  let xPos = (value - state.feature.valueMin) / (state.feature.valueMax - state.feature.valueMin)
-    * trackBBox.width;
+  let xPos = (value - state.feature.valueMin) /
+    (state.feature.valueMax - state.feature.valueMin) * trackBBox.width;
 
   const updateRangeAnnotation = () => {
 
     if (state.histSVG === null) { return; }
 
-    let rangeTrackBBox = d3.select(component)
+    const rangeTrackBBox = d3.select(component)
       .select('.range-track')
       .node()
       .getBoundingClientRect();
 
-    let labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 - state.annotationRangeXOffset;
+    let labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 -
+      state.annotationRangeXOffset;
 
     // Handle out of bounds
     if (labelLeft < 0) {
@@ -325,16 +330,16 @@ const syncTooltips = (component, state) => {
  * Sync the background range track with teh current min & max range
  */
 const syncRangeTrack = (component, state) => {
-  let leftThumb = d3.select(component)
+  const leftThumb = d3.select(component)
     .select('#slider-left-thumb');
 
-  let rightThumb = d3.select(component)
+  const rightThumb = d3.select(component)
     .select('#slider-right-thumb');
 
-  let thumbWidth = leftThumb.node().getBoundingClientRect().width;
-  let leftThumbLeft = parseFloat(leftThumb.style('left'));
-  let rightThumbLeft = parseFloat(rightThumb.style('left'));
-  let rangeWidth = rightThumbLeft - leftThumbLeft;
+  const thumbWidth = leftThumb.node().getBoundingClientRect().width;
+  const leftThumbLeft = parseFloat(leftThumb.style('left'));
+  const rightThumbLeft = parseFloat(rightThumb.style('left'));
+  const rangeWidth = rightThumbLeft - leftThumbLeft;
 
   d3.select(component)
     .select('.track .range-track')
@@ -345,7 +350,9 @@ const syncRangeTrack = (component, state) => {
   if (state.densityClip !== null) {
     state.densityClip
       .attr('x', state.tickXScale(state.feature.curMin))
-      .attr('width', state.tickXScale(state.feature.curMax) - state.tickXScale(state.feature.curMin));
+      .attr('width', state.tickXScale(state.feature.curMax) -
+        state.tickXScale(state.feature.curMin)
+      );
   }
 };
 
@@ -356,9 +363,9 @@ export const initHist = (component, state) => {
   console.log(state.feature);
 
   // Use the parent size to initialize the SVG size
-  let parentDiv = d3.select(component)
+  const parentDiv = d3.select(component)
     .select('.feature-hist');
-  let parentBBox = parentDiv.node().getBoundingClientRect();
+  const parentBBox = parentDiv.node().getBoundingClientRect();
 
   const width = parentBBox.width;
   const histHeight = 90;
@@ -398,46 +405,50 @@ export const initHist = (component, state) => {
     .style('stroke', colors['gray-200']);
 
   // Add density plot
-  let histGroup = state.histSVG.append('g')
+  const histGroup = state.histSVG.append('g')
     .attr('class', 'hist-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
-  let tickGroup = state.histSVG.append('g')
+  const tickGroup = state.histSVG.append('g')
     .attr('class', 'tick-group')
     .attr('transform', `translate(${thumbWidth}, ${histHeight + vGap})`);
 
   // The top layer to show vertical marks
-  let markGroup = state.histSVG.append('g')
+  const markGroup = state.histSVG.append('g')
     .attr('class', 'mark-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   // Compute the frequency
   const totalSampleNum = state.feature.histCount.reduce((a, b) => a + b);
-  let curDensity = state.feature.histCount.map((d, i) => [state.feature.histEdge[i], d / totalSampleNum]);
+  const curDensity = state.feature.histCount.map((d, i) =>
+    [state.feature.histEdge[i], d / totalSampleNum]
+  );
   curDensity.unshift([state.feature.histEdge[0], 0]);
-  curDensity.push([state.feature.histEdge[state.feature.histEdge.length - 1], 0]);
+  curDensity.push(
+    [state.feature.histEdge[state.feature.histEdge.length - 1], 0]
+  );
 
   // Create the axis scales
   state.tickXScale = d3.scaleLinear()
     .domain([state.feature.valueMin, state.feature.valueMax])
     .range([0, totalWidth]);
 
-  let yScale = d3.scaleLinear()
+  const yScale = d3.scaleLinear()
     .domain([0, d3.max(curDensity, d => d[1])])
     .range([histHeight - padding.bottom - padding.top, padding.histTop]);
 
-  let curve = d3.line()
+  const curve = d3.line()
     .curve(d3.curveBasis)
     .x(d => state.tickXScale(d[0]))
     .y(d => yScale(d[1]));
 
   // Draw the area curve
-  let underArea = histGroup.append('path')
+  const underArea = histGroup.append('path')
     .attr('class', 'area-path')
     .datum(curDensity)
     .attr('d', curve);
 
-  let upperArea = underArea.clone(true)
+  const upperArea = underArea.clone(true)
     .classed('selected', true);
 
   // Create a clip path
@@ -445,18 +456,21 @@ export const initHist = (component, state) => {
     .attr('id', `${state.feature.id}-area-clip`)
     .append('rect')
     .attr('x', state.tickXScale(state.feature.curMin))
-    .attr('width', state.tickXScale(state.feature.curMax) - state.tickXScale(state.feature.curMin))
+    .attr('width', state.tickXScale(state.feature.curMax) -
+      state.tickXScale(state.feature.curMin))
     .attr('height', histHeight);
 
   upperArea.attr('clip-path', `url(#${state.feature.id}-area-clip)`);
 
   // Add vertical marks on the plot
-  const lineHeight = histHeight - padding.top + vGap + state.tickHeights.original;
+  const lineHeight = histHeight - padding.top + vGap +
+    state.tickHeights.original;
 
   // --- Original ---
   state.densityOriginalMark = markGroup.append('g')
     .attr('class', 'mark density-original-mark')
-    .attr('transform',`translate(${state.tickXScale(state.feature.originalValue)}, ${0})`)
+    .attr('transform',
+      `translate(${state.tickXScale(state.feature.originalValue)}, ${0})`)
     .on('mouseenter', () => showAnnotation(component, state, 'original'))
     .on('mouseleave', () => hideAnnotation(component, state, 'original'));
 
@@ -481,7 +495,8 @@ export const initHist = (component, state) => {
   // --- User ---
   state.densityUserMark = markGroup.append('g')
     .attr('class', 'mark density-user-mark')
-    .attr('transform', `translate(${state.tickXScale(state.feature.curValue)}, ${0})`)
+    .attr('transform',
+      `translate(${state.tickXScale(state.feature.curValue)}, ${0})`)
     .on('mouseenter', () => showAnnotation(component, state, 'user'))
     .on('mouseleave', () => hideAnnotation(component, state, 'user'));
 
@@ -506,7 +521,8 @@ export const initHist = (component, state) => {
   // --- Coach ---
   state.densityCoachMark = markGroup.append('g')
     .attr('class', 'mark density-coach-mark')
-    .attr('transform',`translate(${state.tickXScale(state.feature.coachValue)}, ${0})`)
+    .attr('transform',
+      `translate(${state.tickXScale(state.feature.coachValue)}, ${0})`)
     .on('mouseenter', () => showAnnotation(component, state, 'coach'))
     .on('mouseleave', () => hideAnnotation(component, state, 'coach'));
 
@@ -528,16 +544,17 @@ export const initHist = (component, state) => {
     .lower();
 
   // Initialize the ticks below the slider
-  let tickBackGroup = tickGroup.append('g')
+  const tickBackGroup = tickGroup.append('g')
     .attr('class', 'tick-back-group');
 
-  let tickTopGroup = tickGroup.append('g')
+  const tickTopGroup = tickGroup.append('g')
     .attr('class', 'tick-top-group');
 
-  let tickCount = 30;
-  let tickArray = [];
+  const tickCount = 30;
+  const tickArray = [];
   for (let i = 0; i <= tickCount; i++) {
-    tickArray.push(state.feature.valueMin + (state.feature.valueMax - state.feature.valueMin) * i / tickCount);
+    tickArray.push(state.feature.valueMin +
+      (state.feature.valueMax - state.feature.valueMin) * i / tickCount);
   }
 
   tickTopGroup.selectAll('g.tick')
@@ -667,7 +684,7 @@ export const initHist = (component, state) => {
   labelWidth = tempClone.node().getBoundingClientRect().width;
   tempClone.remove();
 
-  let rangeTrackBBox = d3.select(component)
+  const rangeTrackBBox = d3.select(component)
     .select('.range-track')
     .node()
     .getBoundingClientRect();
@@ -676,7 +693,8 @@ export const initHist = (component, state) => {
   state.annotationRangeXOffset = xOffset + labelWidth / 2;
   state.annotationRangeXBound = xBound - labelWidth;
 
-  labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 - xOffset - labelWidth / 2;
+  labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 -
+    xOffset - labelWidth / 2;
 
   // Handle out of bounds
   labelLeft = handleOutOfBound(state.annotationRange, labelLeft);

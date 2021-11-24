@@ -68,7 +68,7 @@
       d3.select(component)
         .selectAll(`.svg-icon.${d.class}`)
         .each((_, i, g) => {
-          let ele = d3.select(g[i]);
+          const ele = d3.select(g[i]);
           let html = ele.html();
           html = html.concat(' ', preProcessSVG(d.svg));
           ele.html(html);
@@ -77,7 +77,7 @@
   };
 
   const iconMouseenterHandler = (e) => {
-    let curIcon = d3.select(e.target);
+    const curIcon = d3.select(e.target);
     switch(curIcon.attr('data-diff')) {
     case 'very-easy':
       description = 'Easy peasy!';
@@ -121,7 +121,7 @@
 
     // Fix the width of this component so that hovering doesn't change it
     // Also register the focusout event
-    let bbox = component.getBoundingClientRect();
+    const bbox = component.getBoundingClientRect();
     d3.select(component)
       .style('width', `${bbox.width}px`)
       .on('focusout', (e) => {

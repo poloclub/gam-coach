@@ -117,7 +117,7 @@
       d3.select(component)
         .selectAll(`.svg-icon.${d.class}`)
         .each((_, i, g) => {
-          let ele = d3.select(g[i]);
+          const ele = d3.select(g[i]);
           let html = ele.html();
           html = html.concat(' ', preProcessSVG(d.svg));
           ele.html(html);
@@ -140,12 +140,14 @@
    * size of the header
    */
   const fitFeatureName = () => {
-    let featureNameElem = d3.select(component)
+    const featureNameElem = d3.select(component)
       .select('.feature-name');
 
-    let fontSize = parseFloat(window.getComputedStyle(featureNameElem.node()).fontSize);
-    let nameHeight = featureNameElem.node().clientHeight;
-    let parentHeight = featureNameElem.node().parentNode.clientHeight;
+    let fontSize = parseFloat(
+      window.getComputedStyle(featureNameElem.node()).fontSize
+    );
+    const nameHeight = featureNameElem.node().clientHeight;
+    const parentHeight = featureNameElem.node().parentNode.clientHeight;
 
     if(nameHeight > parentHeight) {
       fontSize -= 0.5;
@@ -162,8 +164,8 @@
 
     // Initialize the feature data from the prop
     state.feature = {
-      // TODO: Export a feature description name in the model extract function from
-      // python
+      // TODO: Export a feature description name in the model extract
+      // function from python
       name: featureInfo.description.displayName,
       featureName: featureInfo.name,
       valueMin: featureInfo.binEdge[0],
@@ -206,13 +208,13 @@
   const diffClickedHandler = () => {
     // Trigger the difficulty picker
     // Figure out the location to put the picker
-    let bbox = d3.select(component)
+    const bbox = d3.select(component)
       .select('.feature-difficulty')
       .node()
       .getBoundingClientRect();
 
-    let newX = bbox.x + bbox.width / 2 - diffPickerConfig.width / 4 - 2;
-    let newY = bbox.y - diffPickerConfig.height - 8;
+    const newX = bbox.x + bbox.width / 2 - diffPickerConfig.width / 4 - 2;
+    const newY = bbox.y - diffPickerConfig.height - 8;
 
     diffPickerConfig.x = newX;
     diffPickerConfig.y = newY;

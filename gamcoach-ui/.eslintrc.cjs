@@ -4,7 +4,9 @@ module.exports = {
     'commonjs': true,
     'es6': true
   },
-  'extends': 'eslint:recommended',
+  'extends': [
+    'eslint:recommended',
+  ],
   'parser': '@babel/eslint-parser',
   'parserOptions': {
     'requireConfigFile': false,
@@ -34,6 +36,12 @@ module.exports = {
     'semi': [
       'error',
       'always'
+    ],
+    'prefer-const': 'error',
+    'max-len': [
+      'warn', {
+        'code': 80
+      }
     ]
   },
   'settings': {

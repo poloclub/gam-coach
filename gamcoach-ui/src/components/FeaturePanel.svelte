@@ -4,20 +4,33 @@
   import ListPanel from './ListPanel.svelte';
 
   import d3 from '../utils/d3-import';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { writable } from 'svelte/store';
 
   import { tooltipConfigStore } from '../store';
 
   export let data = null;
   export let windowLoaded = false;
 
+  const unsubscribes = [];
+
   // Set up tooltip
   let tooltipConfig = null;
-  tooltipConfigStore.subscribe(value => {tooltipConfig = value;});
+  unsubscribes.push(
+    tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
+  );
 
   // Component variables
   let component = null;
   let features = [];
+
+  // Bind features to a store
+  const featuresStore = writable([]);
+  unsubscribes.push(
+    featuresStore.subscribe(value => {
+      features = value;
+    })
+  );
 
   const curExample = [
     17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
@@ -42,20 +55,35 @@
       const curType = data.features[i].type;
       let curFeature;
 
+      // Define the feature type
+      /**
+       * @typedef {Object} Feature
+       * @property {Object} data
+       * @property {number} featureID
+       * @property {boolean} isCont
+       * @property {boolean} requiresInt
+       * @property {Object | null}  labelEncoder
+       * @property {number | string} originalValue
+      */
+
       if (curType === 'continuous') {
+        /** @type {Feature} */
         curFeature = {
           data: data.features[i],
           featureID: i,
           isCont: true,
           requiresInt: false,
+          labelEncoder: null,
           originalValue: curExample[i]
         };
         tempFeatures.push(curFeature);
       } else if (curType === 'categorical') {
+        /** @type {Feature} */
         curFeature = {
           data: data.features[i],
           featureID: i,
           isCont: false,
+          requiresInt: false,
           labelEncoder: data.labelEncoder[data.features[i].name],
           originalValue: labelDecoder[data.features[i].name][curExample[i]]
         };
@@ -65,11 +93,16 @@
     }
 
     features = tempFeatures;
+    featuresStore.set(features);
     console.log(features);
   };
 
   onMount(() => {
     //
+  });
+
+  onDestroy(() => {
+    unsubscribes.forEach(unsub => unsub());
   });
 
   $: windowLoaded && data && initFeatureCards();
@@ -80,12 +113,19 @@
 
   @import '../define';
 
-  .main-standalone {
+  .feature-panel {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex: 1 0 auto;
+
+    width: 1000px;
+    max-height: 600px;
+    background: $grey-50;
   }
 
-  .feature-panel {
+  .card-panel {
+    flex: 1 0 auto;
+
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -96,10 +136,7 @@
     padding: 20px 30px;
     box-sizing: border-box;
     border-radius: 10px;
-    background: hsl(220, 13%, 88%);
-
-    width: 1000px;
-    max-height: 600px;
+    background: $grey-200;
 
     overflow-y: scroll;
   }
@@ -107,6 +144,12 @@
 </style>
 
 <div class='feature-panel' bind:this={component}>
+
+  <ListPanel featuresStore={featuresStore} windowLoaded={windowLoaded}/>
+
+  <div class='card-panel'>
+
+  </div>
 
   <!-- {#key features}
     {#each features as feature}
@@ -125,7 +168,5 @@
       {/if}
     {/each}
   {/key} -->
-
-  <ListPanel />
 
 </div>

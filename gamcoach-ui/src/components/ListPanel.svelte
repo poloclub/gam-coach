@@ -1,32 +1,62 @@
 <script>
   import d3 from '../utils/d3-import';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
 
   import { tooltipConfigStore } from '../store';
 
-  export let features = [];
-  export let windowLoaded = false;
+  /**
+   * @typedef Feature
+   * @type {Object}
+   * @property {Object} data
+   * @property {number} featureID
+   * @property {boolean} isCont
+   * @property {boolean} requiresInt
+   * @property {Object | null}  labelEncoder
+   * @property {number | string} originalValue
+  */
 
-  // Set up tooltip
-  let tooltipConfig = null;
-  tooltipConfigStore.subscribe(value => {tooltipConfig = value;});
+  export let featuresStore = null;
+  export let windowLoaded = false;
 
   // Component variables
   let component = null;
-  const curExample = [
-    17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
-    'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
-    '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
-  ];
+  let tooltipConfig = null;
+  let features = [];
+  const unsubscribes = [];
 
+  // Set up tooltip
+  unsubscribes.push(
+    tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
+  );
+
+  /**
+   * Bind the features variable when the store is passed to the child here
+   */
+  const initFeatures = () => {
+    unsubscribes.push(
+      featuresStore.subscribe(value => {
+        features = value;
+      })
+    );
+  };
+
+  /**
+   * Initialize the lists panel
+   */
   const initList = () => {
-    console.log('initializing the list!');
+    console.log('received features!');
+    console.log(features);
   };
 
   onMount(() => {
     //
   });
 
+  onDestroy(() => {
+    unsubscribes(unsub => unsub());
+  });
+
+  $: windowLoaded && featuresStore && initFeatures();
   $: windowLoaded && features.length !== 0 && initList();
 
 </script>
@@ -39,11 +69,36 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: gray;
+    max-width: 400px;
+
+    box-sizing: border-box;
+    border-radius: 10px;
+    background: $grey-300;
   }
 
 </style>
 
 <div class='list-panel' bind:this={component}>
+
+  <!-- We split the categories into four different divs in the list -->
+  <div class='list-changed'>
+
+    <div class='list-changed-coach'>
+
+    </div>
+
+    <div class='list-changed-me'>
+
+    </div>
+
+  </div>
+
+  <div class='list-constrained'>
+
+  </div>
+
+  <div class='list-other'>
+
+  </div>
 
 </div>

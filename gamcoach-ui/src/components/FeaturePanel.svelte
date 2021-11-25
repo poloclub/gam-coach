@@ -107,6 +107,9 @@
 
     }
 
+    // Sort the features based on the importance
+    tempFeatures.sort((a, b) => b.data.importance - a.data.importance);
+
     features = tempFeatures;
     featuresStore.set(features);
     console.log(features);

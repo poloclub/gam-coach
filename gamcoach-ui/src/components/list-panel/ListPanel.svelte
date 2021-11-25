@@ -2,8 +2,9 @@
   import d3 from '../../utils/d3-import';
   import { onMount, onDestroy } from 'svelte';
   import ListItem from '../list-item/ListItem.svelte';
-
   import { tooltipConfigStore } from '../../store';
+  import { flip } from 'svelte/animate';
+  import { crossfade } from 'svelte/transition';
 
   /**
    * @typedef {Object} Feature
@@ -28,11 +29,28 @@
   let tooltipConfig = null;
   let features = [];
   const unsubscribes = [];
+  let initialized = false;
+
+  const DURATION = 800;
 
   // Set up tooltip
   unsubscribes.push(
-    tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
+    tooltipConfigStore.subscribe(value => {
+      console.log('store updated');
+      tooltipConfig = value;
+    })
   );
+
+  // Set up animations
+  const [send, receive] = crossfade({
+    duration: DURATION,
+
+    // Called when there is no counter part (node creations)
+    // We don't need to apply animation here
+    fallback() {
+      // pass
+    }
+  });
 
   /**
    * Bind the features variable when the store is passed to the child here
@@ -70,6 +88,8 @@
     features[7].acceptableRange = [5.28, 10.55];
     features[8].isConstrained = true;
     features[8].acceptableRange = [1, 2, 3, 4, 5];
+
+    initialized = true;
   };
 
   /**
@@ -81,8 +101,16 @@
     // console.log(feature.featureID, e.detail);
   };
 
+  const shuffleOrder = () => {
+    console.log('shuffling!');
+    features[1].isChanged = 2;
+    featuresStore.set(features);
+  };
+
   onMount(() => {
-    //
+    setTimeout(() => {
+      shuffleOrder();
+    }, 2000);
   });
 
   onDestroy(() => {
@@ -90,77 +118,12 @@
   });
 
   $: windowLoaded && featuresStore && initFeatures();
-  $: windowLoaded && features.length !== 0 && initList();
+  $: windowLoaded && features.length !== 0 && !initialized && initList();
 
 </script>
 
 <style lang='scss'>
-
-  @import '../../define';
-
-  .list-panel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    max-width: 300px;
-
-    box-sizing: border-box;
-    border-radius: 10px;
-    background: $gray-100;
-    overflow-y: auto;
-  }
-
-  .list {
-    padding: 10px 15px 20px 15px;
-    border-bottom: 1px solid $gray-border;
-
-    display: flex;
-    flex-direction: column;
-
-    &:last-of-type {
-      border-bottom: none;
-    }
-  }
-
-  .sub-list {
-    display: flex;
-    flex-direction: column;
-    margin-top: 10px;
-
-    .list-title {
-      font-size: 1.1rem;
-      font-weight: 400;
-      font-variant: small-caps;
-      color: $gray-700;
-      margin-bottom: 5px;
-    }
-
-    &:first-of-type {
-      margin-top: 2px;
-    }
-  }
-
-  .list-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 0 0 10px 0;
-  }
-
-  .list-subtitle {
-    font-size: 0.9rem;
-    color: $gray-700;
-  }
-
-  .list-items {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .no-margin {
-    margin: 0;
-  }
-
+  @import './ListPanel.scss';
 </style>
 
 <div class='list-panel' bind:this={component}>
@@ -175,7 +138,16 @@
 
       <div class='list-items'>
         {#each features.filter(f => f.isChanged === 1) as f (f.featureID)}
-          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
+          <div class='list-item-wrapper'
+            animate:flip='{{duration: DURATION}}'
+            in:receive='{{key: f.featureID}}'
+            out:send='{{key: f.featureID}}'
+          >
+            <ListItem
+              feature={f}
+              on:itemClicked={(e) => itemClickHandler(e, f)}
+            />
+          </div>
         {/each}
       </div>
     </div>
@@ -185,7 +157,16 @@
 
       <div class='list-items'>
         {#each features.filter(f => f.isChanged === 2) as f (f.featureID)}
-          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
+          <div class='list-item-wrapper'
+            animate:flip='{{duration: DURATION}}'
+            in:receive='{{key: f.featureID}}'
+            out:send='{{key: f.featureID}}'
+          >
+            <ListItem
+              feature={f}
+              on:itemClicked={(e) => itemClickHandler(e, f)}
+            />
+          </div>
         {/each}
       </div>
     </div>
@@ -197,7 +178,16 @@
 
     <div class='list-items'>
       {#each features.filter(f => f.isChanged === 0 && f.isConstrained) as f (f.featureID)}
-          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
+        <div class='list-item-wrapper'
+          animate:flip='{{duration: DURATION}}'
+          in:receive='{{key: f.featureID}}'
+          out:send='{{key: f.featureID}}'
+        >
+          <ListItem
+            feature={f}
+            on:itemClicked={(e) => itemClickHandler(e, f)}
+          />
+        </div>
       {/each}
     </div>
   </div>
@@ -207,7 +197,16 @@
 
     <div class='list-items'>
       {#each features.filter(f => f.isChanged === 0 && !f.isConstrained) as f (f.featureID)}
-          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
+        <div class='list-item-wrapper'
+          animate:flip='{{duration: DURATION}}'
+          in:receive='{{key: f.featureID}}'
+          out:send='{{key: f.featureID}}'
+        >
+          <ListItem
+            feature={f}
+            on:itemClicked={(e) => itemClickHandler(e, f)}
+          />
+        </div>
       {/each}
     </div>
   </div>

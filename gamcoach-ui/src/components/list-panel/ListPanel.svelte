@@ -1,9 +1,9 @@
 <script>
-  import d3 from '../utils/d3-import';
+  import d3 from '../../utils/d3-import';
   import { onMount, onDestroy } from 'svelte';
-  import ListItem from './ListItem.svelte';
+  import ListItem from '../list-item/ListItem.svelte';
 
-  import { tooltipConfigStore } from '../store';
+  import { tooltipConfigStore } from '../../store';
 
   /**
    * @typedef {Object} Feature
@@ -84,7 +84,7 @@
 
 <style lang='scss'>
 
-  @import '../define';
+  @import '../../define';
 
   .list-panel {
     display: flex;

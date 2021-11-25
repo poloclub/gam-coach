@@ -1,6 +1,7 @@
 <script>
-  import FeatureCard from './components/FeatureCard.svelte';
-  import FeatureCardCat from './components/FeatureCardCat.svelte';
+  import FeatureCard from './components/feature-card/FeatureCard.svelte';
+  import FeatureCardCat
+    from './components/feature-card-cat/FeatureCardCat.svelte';
   import FeaturePanel from './components/FeaturePanel.svelte';
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';

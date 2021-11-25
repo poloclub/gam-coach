@@ -1,19 +1,19 @@
 <script>
-  import d3 from '../utils/d3-import';
+  import d3 from '../../utils/d3-import';
   import { onMount, tick } from 'svelte';
-  import { tooltipConfigStore, diffPickerConfigStore } from '../store';
+  import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
   import {initSlider, moveThumb, initHist} from './FeatureCardCat';
 
-  import rightArrowIcon from '../img/icon-right-arrow.svg';
-  import levelThumbIcon from '../img/icon-level-thumb.svg';
-  import easyIcon from '../img/icon-easy.svg';
-  import veryEasyIcon from '../img/icon-very-easy.svg';
-  import neutralIcon from '../img/icon-neutral.svg';
-  import hardIcon from '../img/icon-hard.svg';
-  import veryHardIcon from '../img/icon-very-hard.svg';
-  import lockIcon from '../img/icon-lock.svg';
-  import infoIcon from '../img/icon-info.svg';
+  import rightArrowIcon from '../../img/icon-right-arrow.svg';
+  import levelThumbIcon from '../../img/icon-level-thumb.svg';
+  import easyIcon from '../../img/icon-easy.svg';
+  import veryEasyIcon from '../../img/icon-very-easy.svg';
+  import neutralIcon from '../../img/icon-neutral.svg';
+  import hardIcon from '../../img/icon-hard.svg';
+  import veryHardIcon from '../../img/icon-very-hard.svg';
+  import lockIcon from '../../img/icon-lock.svg';
+  import infoIcon from '../../img/icon-info.svg';
 
   export let featureInfo = null;
   export let labelEncoder = null;
@@ -309,7 +309,7 @@
 </script>
 
 <style lang="scss">
-  @import './FeatureCard.scss';
+  @import '../feature-card/FeatureCard.scss';
   @import './FeatureCardCat.scss';
 </style>
 

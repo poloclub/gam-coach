@@ -1,8 +1,8 @@
 <script>
   // @ts-check
-  import FeatureCard from './FeatureCard.svelte';
-  import FeatureCardCat from './FeatureCardCat.svelte';
-  import ListPanel from './ListPanel.svelte';
+  import FeatureCard from './feature-card/FeatureCard.svelte';
+  import FeatureCardCat from './feature-card-cat/FeatureCardCat.svelte';
+  import ListPanel from './list-panel/ListPanel.svelte';
 
   import d3 from '../utils/d3-import';
   import { onMount, onDestroy } from 'svelte';

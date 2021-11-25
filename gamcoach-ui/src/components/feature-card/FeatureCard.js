@@ -1,5 +1,5 @@
-import d3 from '../utils/d3-import';
-import { config } from '../config';
+import d3 from '../../utils/d3-import';
+import { config } from '../../config';
 
 const colors = config.colors;
 

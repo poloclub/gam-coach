@@ -1,5 +1,5 @@
 <script>
-  import d3 from '../utils/d3-import';
+  import d3 from '../../utils/d3-import';
   import { onMount } from 'svelte';
 
   export let feature = null;
@@ -23,7 +23,7 @@
 
 <style lang='scss'>
 
-  @import '../define';
+  @import '../../define';
 
   .list-item {
     display: flex;

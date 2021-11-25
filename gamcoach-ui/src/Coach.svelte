@@ -44,17 +44,17 @@
   .content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 20px 0 10px 0;
+    gap: 10px;
+    padding: 20px 0 20px 0;
     justify-content: center;
     align-items: center;
     height: calc(100vh - 50px);
     max-height: 800px;
-    overflow-y: scroll;
+    overflow-y: hidden;
     width: 100vw;
     box-sizing: border-box;
     border: 1px solid $gray-border;
-    background: $grey-50;
+    background: white;
   }
 
   .coach-panel {
@@ -64,12 +64,13 @@
     align-items: center;
 
     width: 1000px;
-    height: 240px;
+    height: 160px;
+    flex-shrink: 0;
     border-radius: 10px;
-    // background-color: $coolGray-200;
+    background-color: $grey-100;
     font-size: 2em;
     font-weight: 600;
-    border: 1px solid $gray-border;
+    // border: 1px solid $gray-border;
   }
 
 </style>

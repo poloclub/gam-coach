@@ -53,7 +53,6 @@
 
     for (let i = 0; i < data.features.length; i++) {
       const curType = data.features[i].type;
-      let curFeature;
 
       // Define the feature type
       /**
@@ -64,29 +63,37 @@
        * @property {boolean} requiresInt
        * @property {Object | null}  labelEncoder
        * @property {number | string} originalValue
+       * @property {number | string} coachValue
+       * @property {number | string} myValue
+       * @property {number} isChanged 0: no change, 1: changed by gam coach,
+       *  3: changed by the user
+       * @property {boolean} isConstrained
       */
 
-      if (curType === 'continuous') {
-        /** @type {Feature} */
-        curFeature = {
+      if (curType !== 'interaction') {
+        const curFeature = {
           data: data.features[i],
           featureID: i,
           isCont: true,
           requiresInt: false,
           labelEncoder: null,
-          originalValue: curExample[i]
+          originalValue: curExample[i],
+          coachValue: curExample[i],
+          myValue: curExample[i],
+          isChanged: 0,
+          isConstrained: false
         };
-        tempFeatures.push(curFeature);
-      } else if (curType === 'categorical') {
-        /** @type {Feature} */
-        curFeature = {
-          data: data.features[i],
-          featureID: i,
-          isCont: false,
-          requiresInt: false,
-          labelEncoder: data.labelEncoder[data.features[i].name],
-          originalValue: labelDecoder[data.features[i].name][curExample[i]]
-        };
+
+        if (curType === 'categorical') {
+          curFeature.isCont = false;
+          curFeature.requiresInt = false;
+          curFeature.labelEncoder = data.labelEncoder[data.features[i].name];
+          curFeature.originalValue =
+            labelDecoder[data.features[i].name][curExample[i]];
+          curFeature.coachValue = curFeature.originalValue;
+          curFeature.myValue = curFeature.originalValue;
+        }
+
         tempFeatures.push(curFeature);
       }
 
@@ -116,11 +123,12 @@
   .feature-panel {
     display: flex;
     flex-direction: row;
+    gap: 20px;
+
     flex: 1 0 auto;
 
     width: 1000px;
     max-height: 600px;
-    background: $grey-50;
   }
 
   .card-panel {
@@ -136,7 +144,7 @@
     padding: 20px 30px;
     box-sizing: border-box;
     border-radius: 10px;
-    background: $grey-200;
+    background: $grey-100;
 
     overflow-y: scroll;
   }

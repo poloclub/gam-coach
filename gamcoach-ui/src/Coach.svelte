@@ -67,7 +67,7 @@
     height: 160px;
     flex-shrink: 0;
     border-radius: 10px;
-    background-color: $grey-100;
+    background-color: $gray-100;
     font-size: 2em;
     font-weight: 600;
     // border: 1px solid $gray-border;

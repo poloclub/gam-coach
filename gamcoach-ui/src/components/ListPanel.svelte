@@ -1,6 +1,7 @@
 <script>
   import d3 from '../utils/d3-import';
   import { onMount, onDestroy } from 'svelte';
+  import ListItem from './ListItem.svelte';
 
   import { tooltipConfigStore } from '../store';
 
@@ -89,7 +90,7 @@
 
     box-sizing: border-box;
     border-radius: 10px;
-    background: $grey-100;
+    background: $gray-100;
     overflow-y: auto;
   }
 
@@ -109,7 +110,7 @@
       font-size: 1.1rem;
       font-weight: 400;
       font-variant: small-caps;
-      color: $grey-700;
+      color: $gray-700;
       margin: 5px 0;
     }
   }
@@ -123,7 +124,7 @@
 
   .list-subtitle {
     font-size: 0.9rem;
-    color: $grey-700;
+    color: $gray-700;
   }
 
   .no-margin {
@@ -144,7 +145,7 @@
 
       {#each features.filter(f => f.isChanged === 1) as f (f.featureID)}
         <div class='feature-item'>
-          {f.data.name}
+          <ListItem feature={f} />
         </div>
       {/each}
     </div>
@@ -154,7 +155,7 @@
 
       {#each features.filter(f => f.isChanged === 1) as f (f.featureID)}
         <div class='feature-item'>
-          {f.data.name}
+          <ListItem feature={f} />
         </div>
       {/each}
     </div>
@@ -166,7 +167,7 @@
 
     {#each features.filter(f => f.isChanged === 0 && f.isConstrained) as f (f.featureID)}
       <div class='feature-item'>
-        {f.data.name}
+        <ListItem feature={f} />
       </div>
     {/each}
   </div>
@@ -176,7 +177,7 @@
 
     {#each features.filter(f => f.isChanged === 0 && !f.isConstrained) as f (f.featureID)}
       <div class='feature-item'>
-        {f.data.name}
+        <ListItem feature={f} />
       </div>
     {/each}
   </div>

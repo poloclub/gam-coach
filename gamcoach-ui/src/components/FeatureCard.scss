@@ -27,7 +27,7 @@ $card-h-padding: 16px;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 
-  background: $grey-100;
+  background: $gray-100;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -45,14 +45,14 @@ $card-h-padding: 16px;
 
     .feature-difficulty {
       border-radius: 50%;
-      // background-color: $grey-200;
+      // background-color: $gray-200;
       width: 1.6em;
       height: 1.6em;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      border: 1px solid $grey-200;
+      border: 1px solid $gray-200;
 
       .svg-icon {
         :global(svg) {
@@ -84,7 +84,7 @@ $card-h-padding: 16px;
   margin: 0 5px;
 
   .svg-icon {
-    color: $grey-800;
+    color: $gray-800;
 
     :global(svg) {
       width: 10px;
@@ -94,8 +94,8 @@ $card-h-padding: 16px;
 }
 
 .svg-icon {
-  color: $grey-800;
-  fill: $grey-800;
+  color: $gray-800;
+  fill: $gray-800;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,8 +125,8 @@ $card-h-padding: 16px;
   &::after {
     width: 8px;
     height: 8px;
-    border-top: 2px solid $grey-400;
-    border-right: 2px solid $grey-400;
+    border-top: 2px solid $gray-400;
+    border-right: 2px solid $gray-400;
     transform: rotate(45deg);
     bottom: 7px;
   }
@@ -135,7 +135,7 @@ $card-h-padding: 16px;
     width: calc(100% - 4px);
     height: 2px;
     bottom: 10px;
-    background: $grey-400;
+    background: $gray-400;
   }
 }
 
@@ -186,7 +186,7 @@ $card-h-padding: 16px;
   }
 
   .annotation-name {
-    color: $grey-400;
+    color: $gray-400;
     padding: 0px;
     left: 0px;
     display: flex;
@@ -195,8 +195,8 @@ $card-h-padding: 16px;
     transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
 
     .svg-icon {
-      fill: $grey-300;
-      color: $grey-300;
+      fill: $gray-300;
+      color: $gray-300;
       margin-right: 4px;
 
       :global(svg) {
@@ -221,7 +221,7 @@ $card-h-padding: 16px;
   }
 
   .annotation-original {
-    background-color: $grey-400;
+    background-color: $gray-400;
     left: 20px;
   }
 
@@ -241,7 +241,7 @@ $card-h-padding: 16px;
 
   .track {
     width: calc(100% - #{2 * $range-thumb-width + 2 * $card-h-padding});
-    background-color: $grey-200;
+    background-color: $gray-200;
     // Only use top and bottom border here to avoid offsetting the left and right
     // with artifacts => cause misalignment with svg dimension
     border-top: 1px solid white;
@@ -315,9 +315,9 @@ $card-h-padding: 16px;
   }
 
   .svg-icon.icon-range-thumb-middle {
-    fill: $grey-400;
-    color: $grey-400;
-    stroke: $grey-100;
+    fill: $gray-400;
+    color: $gray-400;
+    stroke: $gray-100;
     stroke-width: 10;
     top: -10px;
 
@@ -349,7 +349,7 @@ $card-h-padding: 16px;
   border-radius: 2px;
   line-height: 1.2;
   white-space: nowrap;
-  background-color: $grey-500;
+  background-color: $gray-500;
   color: white;
 
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
@@ -394,7 +394,7 @@ $card-h-padding: 16px;
 
   :global(.density-original-mark line) {
     stroke-width: 2;
-    stroke: $grey-600;
+    stroke: $gray-600;
   }
 
   :global(.density-user-mark line) {
@@ -414,13 +414,13 @@ $card-h-padding: 16px;
   }
 
   :global(.tick.out-range line) {
-    stroke: $grey-200;
+    stroke: $gray-200;
     transform: scaleY(1);
   }
 
   :global(.original-mark line) {
     stroke-width: 2;
-    stroke: $grey-600;
+    stroke: $gray-600;
   }
 
   :global(.user-mark line) {
@@ -457,7 +457,7 @@ $card-h-padding: 16px;
 
 .svg-hist {
   :global(.area-path) {
-    fill: $grey-300;
+    fill: $gray-300;
     &.selected {
       fill: pink;
     }

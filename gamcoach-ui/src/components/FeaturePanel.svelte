@@ -144,7 +144,7 @@
     padding: 20px 30px;
     box-sizing: border-box;
     border-radius: 10px;
-    background: $grey-100;
+    background: $gray-100;
 
     overflow-y: scroll;
   }

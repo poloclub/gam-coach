@@ -72,6 +72,15 @@
     features[8].acceptableRange = [1, 2, 3, 4, 5];
   };
 
+  /**
+   * Event handler for the mouse click event on the list items.
+   * @param e Event
+   * @param feature The feature object associated with the clicked item
+   */
+  const itemClickHandler = (e, feature) => {
+    // console.log(feature.featureID, e.detail);
+  };
+
   onMount(() => {
     //
   });
@@ -107,6 +116,10 @@
 
     display: flex;
     flex-direction: column;
+
+    &:last-of-type {
+      border-bottom: none;
+    }
   }
 
   .sub-list {
@@ -162,9 +175,7 @@
 
       <div class='list-items'>
         {#each features.filter(f => f.isChanged === 1) as f (f.featureID)}
-          <div class='feature-item'>
-            <ListItem feature={f} />
-          </div>
+          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
         {/each}
       </div>
     </div>
@@ -174,9 +185,7 @@
 
       <div class='list-items'>
         {#each features.filter(f => f.isChanged === 2) as f (f.featureID)}
-          <div class='feature-item'>
-            <ListItem feature={f} />
-          </div>
+          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
         {/each}
       </div>
     </div>
@@ -188,9 +197,7 @@
 
     <div class='list-items'>
       {#each features.filter(f => f.isChanged === 0 && f.isConstrained) as f (f.featureID)}
-        <div class='feature-item'>
-          <ListItem feature={f} />
-        </div>
+          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
       {/each}
     </div>
   </div>
@@ -200,9 +207,7 @@
 
     <div class='list-items'>
       {#each features.filter(f => f.isChanged === 0 && !f.isConstrained) as f (f.featureID)}
-        <div class='feature-item'>
-          <ListItem feature={f} />
-        </div>
+          <ListItem feature={f} on:itemClicked={(e) => itemClickHandler(e, f)}/>
       {/each}
     </div>
   </div>

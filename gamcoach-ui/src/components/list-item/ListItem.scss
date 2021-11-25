@@ -53,7 +53,13 @@ $list-item-border-color: $gray-300;
 }
 
 .list-item:active {
-  border: 1px solid adjust-color($color: $list-item-border-color, $lightness: -25%);
+  // border: 1px solid adjust-color($color: $list-item-border-color, $lightness: -15%);
+  background: adjust-color($color: $list-item-color, $lightness: -2%);
+}
+
+.list-item:global(.selected) {
+  margin-right: -2px;
+  border-right: 3px solid $orange-400;
 }
 
 .item-header {

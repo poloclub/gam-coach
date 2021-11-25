@@ -1,12 +1,14 @@
 <script>
   import d3 from '../../utils/d3-import';
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
 
   export let feature = null;
 
   // Component variables
   let component = null;
+  let isSelected = false;
   const contFormatter = d3.format(',.2~f');
+  const dispatch = createEventDispatcher();
 
   /**
    * Display the feature's value.
@@ -67,6 +69,22 @@
     return rangeText;
   };
 
+  /**
+   * Event handler for mouse click on the list item
+  */
+  const clickHandler = () => {
+    console.log('clicked');
+    isSelected = !isSelected;
+
+    d3.select(component)
+      .classed('selected', isSelected);
+
+    // Dispatch the event to the list component
+    dispatch('itemClicked', {
+      selected: isSelected
+    });
+  };
+
   onMount(() => {
     //
   });
@@ -77,7 +95,7 @@
   @import './ListItem.scss';
 </style>
 
-<div class='list-item' bind:this={component}>
+<div class='list-item' bind:this={component} on:click={clickHandler}>
 
   <div class='item-header'>
     {feature.data.description.displayName}

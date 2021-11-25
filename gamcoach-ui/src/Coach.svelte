@@ -48,9 +48,9 @@
     padding: 20px 0 20px 0;
     justify-content: center;
     align-items: center;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 20px);
     max-height: 800px;
-    overflow-y: hidden;
+    overflow-y: scroll;
     width: 100vw;
     box-sizing: border-box;
     border: 1px solid $gray-border;

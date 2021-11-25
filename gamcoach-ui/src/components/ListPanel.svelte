@@ -59,9 +59,13 @@
     features[3].isChanged = 2;
     features[4].isChanged = 2;
     features[4].isConstrained = true;
+    features[4].difficulty = 6;
     features[5].isConstrained = true;
+    features[5].difficulty = 2;
+    features[5].acceptableRange = [1, 2];
     features[6].isConstrained = true;
     features[7].isConstrained = true;
+    features[7].acceptableRange = [5.28, 10.55];
     features[8].isConstrained = true;
   };
 
@@ -95,7 +99,7 @@
   }
 
   .list {
-    padding: 10px;
+    padding: 10px 15px 20px 15px;
     border-bottom: 1px solid $gray-border;
 
     display: flex;
@@ -118,13 +122,18 @@
   .list-title {
     font-size: 1.2rem;
     font-weight: 600;
-    margin: 3px 0;
-
+    margin: 0 0 5px 0;
   }
 
   .list-subtitle {
     font-size: 0.9rem;
     color: $gray-700;
+  }
+
+  .list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
   }
 
   .no-margin {
@@ -143,21 +152,25 @@
     <div class='sub-list list-changed-coach'>
       <span class='list-title'>suggested changes</span>
 
-      {#each features.filter(f => f.isChanged === 1) as f (f.featureID)}
-        <div class='feature-item'>
-          <ListItem feature={f} />
-        </div>
-      {/each}
+      <div class='list-items'>
+        {#each features.filter(f => f.isChanged === 1) as f (f.featureID)}
+          <div class='feature-item'>
+            <ListItem feature={f} />
+          </div>
+        {/each}
+      </div>
     </div>
 
     <div class='sub-list list-changed-me'>
       <span class='list-title'>my changes</span>
 
-      {#each features.filter(f => f.isChanged === 1) as f (f.featureID)}
-        <div class='feature-item'>
-          <ListItem feature={f} />
-        </div>
-      {/each}
+      <div class='list-items'>
+        {#each features.filter(f => f.isChanged === 2) as f (f.featureID)}
+          <div class='feature-item'>
+            <ListItem feature={f} />
+          </div>
+        {/each}
+      </div>
     </div>
 
   </div>
@@ -165,21 +178,25 @@
   <div class='list list-constrained'>
     <span class='list-title'>Configured Features</span>
 
-    {#each features.filter(f => f.isChanged === 0 && f.isConstrained) as f (f.featureID)}
-      <div class='feature-item'>
-        <ListItem feature={f} />
-      </div>
-    {/each}
+    <div class='list-items'>
+      {#each features.filter(f => f.isChanged === 0 && f.isConstrained) as f (f.featureID)}
+        <div class='feature-item'>
+          <ListItem feature={f} />
+        </div>
+      {/each}
+    </div>
   </div>
 
   <div class='list list-other'>
     <span class='list-title'>Other Features</span>
 
-    {#each features.filter(f => f.isChanged === 0 && !f.isConstrained) as f (f.featureID)}
-      <div class='feature-item'>
-        <ListItem feature={f} />
-      </div>
-    {/each}
+    <div class='list-items'>
+      {#each features.filter(f => f.isChanged === 0 && !f.isConstrained) as f (f.featureID)}
+        <div class='feature-item'>
+          <ListItem feature={f} />
+        </div>
+      {/each}
+    </div>
   </div>
 
 </div>

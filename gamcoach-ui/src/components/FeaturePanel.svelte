@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   import FeatureCard from './FeatureCard.svelte';
   import FeatureCardCat from './FeatureCardCat.svelte';
   import ListPanel from './ListPanel.svelte';
@@ -68,9 +69,14 @@
        * @property {number} isChanged 0: no change, 1: changed by gam coach,
        *  3: changed by the user
        * @property {boolean} isConstrained
+       * @property {number} difficulty 1-5: increasing levels of difficulty, 6
+       *  means impossible
+       * @property {number[] | null} acceptableRange acceptable
+       *  ranges of values
       */
 
       if (curType !== 'interaction') {
+        /** @type {Feature} */
         const curFeature = {
           data: data.features[i],
           featureID: i,
@@ -81,7 +87,9 @@
           coachValue: curExample[i],
           myValue: curExample[i],
           isChanged: 0,
-          isConstrained: false
+          isConstrained: false,
+          difficulty: 3,
+          acceptableRange: null
         };
 
         if (curType === 'categorical') {

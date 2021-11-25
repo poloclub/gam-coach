@@ -56,6 +56,8 @@
     features[0].isChanged = 1;
     features[1].isChanged = 1;
     features[2].isChanged = 1;
+    features[2].isConstrained = true;
+    features[2].acceptableRange = [1, 2, 3, 4, 5, 6, 7, 8];
     features[3].isChanged = 2;
     features[4].isChanged = 2;
     features[4].isConstrained = true;
@@ -67,6 +69,7 @@
     features[7].isConstrained = true;
     features[7].acceptableRange = [5.28, 10.55];
     features[8].isConstrained = true;
+    features[8].acceptableRange = [1, 2, 3, 4, 5];
   };
 
   onMount(() => {
@@ -90,7 +93,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    max-width: 400px;
+    max-width: 300px;
 
     box-sizing: border-box;
     border-radius: 10px;
@@ -109,20 +112,25 @@
   .sub-list {
     display: flex;
     flex-direction: column;
+    margin-top: 10px;
 
     .list-title {
       font-size: 1.1rem;
       font-weight: 400;
       font-variant: small-caps;
       color: $gray-700;
-      margin: 5px 0;
+      margin-bottom: 5px;
+    }
+
+    &:first-of-type {
+      margin-top: 2px;
     }
   }
 
   .list-title {
     font-size: 1.2rem;
     font-weight: 600;
-    margin: 0 0 5px 0;
+    margin: 0 0 10px 0;
   }
 
   .list-subtitle {
@@ -133,7 +141,7 @@
   .list-items {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
   }
 
   .no-margin {

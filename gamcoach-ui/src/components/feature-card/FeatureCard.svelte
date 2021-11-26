@@ -17,12 +17,10 @@
   import lockIcon from '../../img/icon-lock.svg';
   import infoIcon from '../../img/icon-info.svg';
 
-  export let featureInfo = null;
-  export let requiresInt = false;
-  export let originalValue = null;
-  export let featureID = null;
+  export let feature = null;
 
   let mounted = false;
+  let initialized = false;
   let state = {};
 
   // Constants
@@ -161,29 +159,29 @@
    * which is only accurate after content is loaded
    */
   const initFeatureCard = async () => {
+    const featureInfo = feature.data;
+    console.log(featureInfo);
 
     // Initialize the feature data from the prop
     state.feature = {
-      // TODO: Export a feature description name in the model extract
-      // function from python
       name: featureInfo.description.displayName,
       featureName: featureInfo.name,
       valueMin: featureInfo.binEdge[0],
       valueMax: featureInfo.binEdge[featureInfo.binEdge.length - 1],
-      requiresInt: requiresInt,
-      originalValue: originalValue,
-      curValue: originalValue,
+      requiresInt: feature.requiresInt,
+      originalValue: feature.originalValue,
+      curValue: feature.originalValue,
       coachValue: 755,
       curMin: featureInfo.binEdge[0],
       curMax: featureInfo.binEdge[featureInfo.binEdge.length - 1],
       histEdge: featureInfo.histEdge,
       histCount: featureInfo.histCount,
-      id: featureID,
+      id: feature.featureID,
       densityClip: null,
       stateUpdated: stateUpdated,
     };
 
-    if (requiresInt) {
+    if (feature.requiresInt) {
       state.feature.valueMin = Math.floor(state.feature.valueMin);
       state.feature.curMin = Math.floor(state.feature.curMin);
       state.feature.valueMax = Math.ceil(state.feature.valueMax);
@@ -199,6 +197,8 @@
     // Wait until the view is updated then automatically resize the feature name
     await tick();
     fitFeatureName();
+
+    initialized = true;
   };
 
   /**
@@ -230,7 +230,7 @@
     mounted = true;
   });
 
-  $: featureInfo && mounted && initFeatureCard();
+  $: feature && mounted && !initialized && initFeatureCard();
 
 </script>
 

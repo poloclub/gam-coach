@@ -143,21 +143,25 @@
   }
 
   .card-panel {
-    flex: 1 0 auto;
-
+    flex: 1 1 auto;
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     gap: 20px;
-    justify-content: flex-start;
-    align-items: center;
+    padding: 20px 0px 10px 0px;
+    justify-content: center;
+    align-items: flex-start;
 
-    padding: 20px 30px;
     box-sizing: border-box;
-    border-top-right-radius: border-radius;
-    border-bottom-right-radius: border-radius;
-
+    border-bottom-right-radius: $border-radius;
+    background: hsla(0, 0%, 99.5%, 1);
     overflow-y: scroll;
+  }
+
+  .sub-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
   }
 
 </style>
@@ -168,7 +172,41 @@
 
   <div class='card-panel'>
 
+    <div class='sub-panel left-panel'>
+
+      <div class='feature-card'>
+        <FeatureCard feature={features[1]}>
+        </FeatureCard>
+      </div>
+
+      <div class='feature-card'>
+        <FeatureCard feature={features[1]}>
+        </FeatureCard>
+      </div>
+
+      <div class='feature-card'>
+        <FeatureCard feature={features[1]}>
+        </FeatureCard>
+      </div>
+
+    </div>
+
+    <div class='sub-panel right-panel'>
+
+      <div class='feature-card'>
+        <FeatureCard feature={features[1]}>
+        </FeatureCard>
+      </div>
+
+      <div class='feature-card'>
+        <FeatureCard feature={features[1]}>
+        </FeatureCard>
+      </div>
+
+    </div>
+
   </div>
+
 
   <!-- {#key features}
     {#each features as feature}

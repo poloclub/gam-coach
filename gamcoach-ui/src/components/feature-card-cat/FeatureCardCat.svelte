@@ -15,10 +15,7 @@
   import lockIcon from '../../img/icon-lock.svg';
   import infoIcon from '../../img/icon-info.svg';
 
-  export let featureInfo = null;
-  export let labelEncoder = null;
-  export let originalValue = null;
-  export let featureID = null;
+  export let feature = null;
 
   let mounted = false;
 
@@ -167,18 +164,20 @@
    */
   const initFeatureCard = async () => {
 
+    const featureInfo = feature.data;
+
     // Initialize the feature data from the prop
     state.feature = {
       name: featureInfo.description.displayName,
       featureName: featureInfo.name,
-      originalValue: originalValue,
-      curValue: originalValue,
+      originalValue: feature.originalValue,
+      curValue: feature.originalValue,
       coachValue: 1,
       histEdge: featureInfo.histEdge,
       histCount: featureInfo.histCount,
-      id: featureID,
+      id: feature.featureID,
       stateUpdated: stateUpdated,
-      labelEncoder: labelEncoder,
+      labelEncoder: feature.labelEncoder,
       searchValues: new Set(featureInfo.histEdge)
     };
 
@@ -304,7 +303,7 @@
     mounted = true;
   });
 
-  $: featureInfo && labelEncoder && mounted && initFeatureCard();
+  $: feature && mounted && initFeatureCard();
 
 </script>
 

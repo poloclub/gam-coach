@@ -9,13 +9,14 @@ $card-h-padding: 16px;
 .feature-card {
   display: flex;
   flex-direction: column;
-  height: 190px;
+  height: auto;
   width: 300px;
   border-radius: 10px;
   padding: $card-v-padding $card-h-padding;
-  box-shadow: $shadow-border-light;
+  box-shadow: $shadow-border-card;
   background: white;
   position: relative;
+  border: 1px solid $gray-300;
 }
 
 .feature-header {

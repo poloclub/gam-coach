@@ -184,7 +184,7 @@ $card-h-padding: 16px;
     stroke-width: $highlight-stroke-width;
   }
 
-  :global(.x-label text) {
+  :global(.y-label text) {
     font-size: 0.8em;
     fill: $gray-400;
   }

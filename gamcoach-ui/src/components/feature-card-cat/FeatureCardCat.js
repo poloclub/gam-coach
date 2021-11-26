@@ -259,7 +259,7 @@ const syncTooltips = (component, state) => {
  * the annotation.
  * @param {event} e Event
  * @param {object} d Datum
- * @param {element} component Component
+ * @param {HTMLElement} component Component
  * @param {object} state Current states
  */
 const barMouseEnterHandler = (e, d, component, state) => {
@@ -290,7 +290,7 @@ const barMouseEnterHandler = (e, d, component, state) => {
  * Revoke the hovering effect.
  * @param {event} e Event
  * @param {object} d Datum
- * @param {element} component Component
+ * @param {HTMLElement} component Component
  * @param {object} state Current states
  */
 const barMouseLeaveHandler = (e, d, component, state) => {
@@ -355,37 +355,38 @@ export const initHist = (component, state) => {
   // Use the parent size to initialize the SVG size
   const parentDiv = d3.select(component)
     .select('.feature-hist');
+  // @ts-ignore
   const parentBBox = parentDiv.node().getBoundingClientRect();
 
+  // Offset the range thumb to align with the track
+  const padding = {
+    top: 35,
+    left: 2,
+    right: 0,
+    histTopBottom: 8,
+    histRight: 6,
+    textHGap: 8,
+    barHGap: 0
+  };
+
   const width = parentBBox.width;
-  const height = 145;
-  let histHeight = 56;
-  const minHistHeight = 35;
-  const vGap = 27;
+
+  const rectHeight = 20;
+  const rectPadding = 5;
+  const edgeCount = state.feature.histEdge.length;
+  const histHeight = edgeCount * rectHeight + (edgeCount - 1) * rectPadding +
+    2 * padding.histTopBottom;
+  const height = histHeight + padding.top;
 
   state.histSVG = d3.select(component)
     .select('.svg-hist')
     .attr('width', width)
     .attr('height', height);
 
-  // Offset the range thumb to align with the track
-  const thumbWidth = 8;
-
-  const padding = {
-    top: 35,
-    left: thumbWidth,
-    right: thumbWidth,
-    bottom: 0,
-    histTop: 2,
-    hBar: 1
-  };
-
-  const totalWidth = width - padding.left - padding.right;
-
   // Add density plot groups
   const histGroup = state.histSVG.append('g')
     .attr('class', 'hist-group')
-    .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
+    .attr('transform', `translate(${padding.left}, ${padding.top})`);
 
   // Compute the frequency of each level
   const totalSampleNum = state.feature.histCount.reduce((a, b) => a + b);
@@ -396,90 +397,63 @@ export const initHist = (component, state) => {
     density: state.feature.histCount[i] / totalSampleNum,
   }));
 
-  // Create the axis scales
-  // histEdge, histCount, histDensity
-  const xScale = d3.scaleBand()
-    .domain(curData.map(d => d.edge))
-    .padding(0.25)
-    .range([0, width - padding.left - padding.right]);
-
-  // First figure out whether we should put the x label vertically or
-  // horizontally
-  // Compare the max label width with the bandwidth + innerPadding
-  const maxAvailWidth = xScale.bandwidth() + xScale.step() *
-    xScale.paddingInner();
+  // curData[2].label = 'South Africa Vaccine Rate Change';
 
   const tempGroup = state.histSVG.append('g')
-    .attr('class', 'temp-group x-label')
+    .attr('class', 'temp-group y-label')
     .style('visibility', 'hidden');
 
-  let maxLabelWidth = -1;
+  // TODO: Fine tune this value after adding checkboxes
+  const maxLabelWidth = 160;
+  let longestLabelWidth = -1;
+
+  // Need to shorten some labels if they are too long
+  // Trim the label and add '...' for vertical layout
   curData.forEach(d => {
+    let curLabelText = d.label;
     const curLabel = tempGroup.append('text')
-      .text(d.label);
-    const bbox = curLabel.node().getBoundingClientRect();
-    if (bbox.width > maxLabelWidth) maxLabelWidth = bbox.width;
+      .text(curLabelText);
+    let bbox = curLabel.node().getBoundingClientRect();
+
+    if (bbox.width > maxLabelWidth) {
+      const resizeLabel = () => {
+        curLabelText = curLabelText.slice(0, -1);
+        curLabel.text(curLabelText.concat('...'));
+        bbox = curLabel.node().getBoundingClientRect();
+
+        // Recursive call to keep trimming the label until it fits
+        if (bbox.width > maxLabelWidth) resizeLabel();
+      };
+
+      resizeLabel();
+
+      // Now the text label is trimmed
+      d.trimmedLabel = curLabelText.concat('...');
+    } else {
+      d.trimmedLabel = curLabelText;
+    }
+
+    bbox = curLabel.node().getBoundingClientRect();
+    if (bbox.width > longestLabelWidth) {
+      longestLabelWidth = bbox.width;
+    }
   });
 
-  const isVertical = maxLabelWidth > maxAvailWidth;
-
-  // Need to re-layout the plot if we are using vertical layout
-  if (isVertical) {
-    // Resize the histogram plot
-    histHeight = Math.max(
-      height - padding.top - maxLabelWidth - vGap, minHistHeight
-    );
-
-    // Need to update the CSS as well
-    d3.select(component)
-      .select('.feature-slider')
-      .style('top', `${40 + padding.top + histHeight + 2}px`);
-
-    const maxVerticalLabelHeight = height - padding.top - histHeight - vGap;
-
-    // Trim the label and add '...' for vertical layout
-    curData.forEach(d => {
-      let curLabelText = d.label;
-      const curLabel = tempGroup.append('text')
-        .text(curLabelText);
-      let bbox = curLabel.node().getBoundingClientRect();
-      if (bbox.width > maxLabelWidth) maxLabelWidth = bbox.width;
-
-      if (bbox.width > maxVerticalLabelHeight) {
-        const resizeLabel = () => {
-          curLabelText = curLabelText.slice(0, -1);
-          curLabel.text(curLabelText.concat('...'));
-          bbox = curLabel.node().getBoundingClientRect();
-
-          // Recursive call to keep trimming the label until it fits
-          if (bbox.width > maxVerticalLabelHeight) resizeLabel();
-        };
-
-        resizeLabel();
-
-        // Now the text label is trimmed
-        d.trimmedLabel = curLabelText.concat('...');
-      } else {
-        d.trimmedLabel = curLabelText;
-      }
-    });
-  }
-
   // Draw a bounding box for this density plot
+  const rectWidth = width - padding.left - padding.right - longestLabelWidth
+    - padding.histRight - padding.textHGap - padding.barHGap;
+
   state.histSVG.append('g')
     .attr('class', 'border')
-    .attr('transform', `translate(${0}, ${padding.top})`)
+    .attr('transform', `translate(
+      ${padding.left + longestLabelWidth + padding.textHGap},
+      ${padding.top + 1})`)
     .lower()
     .append('rect')
-    .attr('width', totalWidth + 2 * thumbWidth)
-    .attr('height', histHeight)
+    .attr('width', rectWidth + padding.barHGap + padding.histRight)
+    .attr('height', histHeight - 2)
     .style('fill', 'none')
     .style('stroke', colors['gray-200']);
-
-  const yLow = padding.top + histHeight - padding.bottom - padding.top;
-  const yScale = d3.scaleLinear()
-    .domain([0, d3.max(curData, d => d.density)])
-    .range([yLow, padding.histTop]);
 
   // Draw the background bar (some levels might have very low density, so we
   // need a uni-height bar in the back)
@@ -487,47 +461,52 @@ export const initHist = (component, state) => {
     .data(curData)
     .join('g')
     .attr('class', 'bar')
-    .attr('transform', d => `translate(${xScale(d.edge)}, ${padding.histTop})`)
+    .attr('transform', (d, i) => `translate(
+      ${longestLabelWidth + padding.textHGap + padding.barHGap},
+      ${i * (rectHeight + rectPadding) + padding.histTopBottom})`)
     .on('mouseenter', (e, d) => barMouseEnterHandler(e, d, component, state))
     .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state))
     .on('click', (e, d) => barClickedHandler(e, d, component, state));
 
+  const xScale = d3.scaleLinear()
+    // @ts-ignore
+    .domain([0, d3.max(curData, d => d.density)])
+    .range([0, rectWidth]);
+
   const backBars = barGroups.append('rect')
     .attr('class', 'back-bar')
-    .attr('width', xScale.bandwidth())
-    .attr('height', yLow - padding.histTop);
+    .attr('width', rectWidth)
+    .attr('height', rectHeight);
 
   // Draw the density histogram
   barGroups.append('rect')
     .attr('class', 'density-bar')
-    .attr('x', padding.hBar)
-    .attr('y', d => yScale(d.density) - padding.histTop + padding.hBar)
-    .attr('width', xScale.bandwidth() - 2 * padding.hBar)
-    .attr('height', d => yLow - yScale(d.density) - 2 * padding.hBar);
+    // @ts-ignore
+    .attr('width', d => xScale(d.density))
+    .attr('height', rectHeight);
 
   barGroups.append('rect')
     .attr('class', 'level-bar')
     .attr('id', d => `level-bar-${d.edge}`)
-    .attr('width', xScale.bandwidth())
-    .attr('height', yLow - padding.histTop);
+    .attr('width', rectWidth)
+    .attr('height', rectHeight);
 
-  // Draw the labels on the x-axis
-  const xLabelGroup = histGroup.append('g')
-    .attr('class', 'x-label-group');
+  // Draw the labels on the y-axis
+  const yLabelGroup = histGroup.append('g')
+    .attr('class', 'y-label-group');
 
-  xLabelGroup.selectAll('g.x-label')
+  yLabelGroup.selectAll('g.y-label')
     .data(curData)
     .join('g')
-    .attr('class', 'x-label')
-    .attr('transform',
-      d => `translate(${xScale(d.edge) + xScale.bandwidth() * 5 / 10},
-      ${histHeight + vGap})`
+    .attr('class', 'y-label')
+    .attr('transform', (d, i) => `translate(${longestLabelWidth},
+      ${i * (rectHeight + rectPadding) + padding.histTopBottom})`
     )
     .append('text')
-    .style('text-anchor', isVertical ? 'end' : 'middle')
+    .style('text-anchor', 'end')
     .style('dominant-baseline', 'middle')
-    .attr('transform', isVertical ? `rotate(${-90} 0 0)` : 'translate(0, 10)')
-    .text(d => isVertical ? d.trimmedLabel : d.label);
+    .attr('transform', 'translate(0, 10)')
+    .text(d => d.trimmedLabel);
 
   // Highlight bars with special values (original, user, and coach)
   syncBars(component, state);

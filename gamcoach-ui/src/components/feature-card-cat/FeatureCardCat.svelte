@@ -18,6 +18,7 @@
   export let feature = null;
 
   let mounted = false;
+  let initialized = false;
 
   let state = {};
 
@@ -181,25 +182,27 @@
       searchValues: new Set(featureInfo.histEdge)
     };
 
-    // Init the histogram
+    // Draw the histogram
     // Record the x center values for each bar. The original return value is
     // at the global absolute coordinate. Convert it to local coordinate here.
     const tempXCenters = initHist(component, state);
 
-    const trackX = d3.select(component).select('.track')
-      .node().getBoundingClientRect().x;
+    // const trackX = d3.select(component).select('.track')
+    //   .node().getBoundingClientRect().x;
 
-    // Level label starts from 1, we add a placeholder to index 0
-    state.xCenters = [0];
-    tempXCenters.forEach(x => {
-      state.xCenters.push(x - trackX);
-    });
+    // // Level label starts from 1, we add a placeholder to index 0
+    // state.xCenters = [0];
+    // tempXCenters.forEach(x => {
+    //   state.xCenters.push(x - trackX);
+    // });
 
-    // Need to wait the view is updated so we can recenter labels
-    await tick();
+    // // Need to wait the view is updated so we can recenter labels
+    // await tick();
 
-    fitFeatureName();
-    recenterSliderLabels();
+    // fitFeatureName();
+    // recenterSliderLabels();
+
+    initialized = true;
   };
 
   const trackLabelMouseEnterHandler = (e) => {
@@ -303,7 +306,7 @@
     mounted = true;
   });
 
-  $: feature && mounted && initFeatureCard();
+  $: feature && mounted && !initialized && initFeatureCard();
 
 </script>
 
@@ -383,7 +386,7 @@
     </div>
   </div>
 
-  <div class='feature-slider'>
+  <!-- <div class='feature-slider'>
 
     <div class='track'>
 
@@ -417,7 +420,7 @@
 
     </div>
 
-  </div>
+  </div> -->
 
 
 </div>

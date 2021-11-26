@@ -184,23 +184,13 @@
         </FeatureCard>
       </div>
 
-      <div class='feature-card'>
-        <FeatureCard feature={features[1]}>
-        </FeatureCard>
-      </div>
-
     </div>
 
     <div class='sub-panel right-panel'>
 
       <div class='feature-card'>
-        <FeatureCard feature={features[1]}>
-        </FeatureCard>
-      </div>
-
-      <div class='feature-card'>
-        <FeatureCard feature={features[1]}>
-        </FeatureCard>
+        <FeatureCardCat feature={features[15]}>
+        </FeatureCardCat>
       </div>
 
     </div>

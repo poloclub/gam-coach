@@ -1,20 +1,22 @@
 @import '../../define';
 
 .list-panel {
+  flex: 1 0 auto;
+
   display: flex;
   flex-direction: column;
-  height: 100%;
   max-width: 300px;
 
   box-sizing: border-box;
-  border-radius: 10px;
-  background: $gray-100;
+  border-top-left-radius: $border-radius;
+  border-bottom-left-radius: $border-radius;
+  border-right: 1px solid $gray-light-border;
   overflow-y: auto;
 }
 
 .list {
   padding: 10px 15px 20px 15px;
-  border-bottom: 1px solid $gray-border;
+  border-bottom: 1px solid $gray-light-border;
 
   display: flex;
   flex-direction: column;

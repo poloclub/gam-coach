@@ -12,6 +12,7 @@ $green-dark: hsl(176, 47%, 17%);
 $gray-light: hsl(26, 10%, 65%);
 $gray-background: hsl(210, 25%, 98%);
 $gray-border: hsla(0, 0%, 0%, 0.2);
+$gray-light-border: hsla(0, 0%, 0%, 0.12);
 
 $brown-50: hsl(20, 16%, 99%);
 
@@ -31,6 +32,9 @@ $pastel1-red: hsl(329, 90%, 92%);
 // Shadows
 $shadow-border-light: 0px 0px 5px hsla(0, 0%, 0%, 0.05);
 $shadow-border-large: 0 8px 24px hsla(212, 9%, 59%, 0.2);
+
+// Layouts
+$border-radius: 8px;
 
 // Material design color
 $red-50: hsl(350, 100.0%, 96.08%);

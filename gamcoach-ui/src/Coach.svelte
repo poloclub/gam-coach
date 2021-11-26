@@ -46,16 +46,24 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+
     padding: 20px 0 20px 0;
     justify-content: center;
     align-items: center;
+
     height: calc(100vh - 20px);
     max-height: 800px;
     overflow-y: scroll;
     width: 100vw;
     box-sizing: border-box;
-    border: 1px solid $gray-border;
-    background: white;
+  }
+
+  .coach-wrapper {
+    border: 1px solid $gray-light-border;
+    background: $gray-50;
+    border-radius: $border-radius;
+    box-shadow: 0px 2px 15px hsla(0, 0%, 0%, 0.07),
+      0px 0px 5px hsla(0, 0%, 0%, 0.12);
   }
 
   .coach-panel {
@@ -66,12 +74,14 @@
 
     width: 1000px;
     height: 160px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    background-color: $gray-100;
+    flex: 1 0 auto;
+
     font-size: 2em;
     font-weight: 600;
-    // border: 1px solid $gray-border;
+
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+    border-bottom: 1px solid $gray-light-border;
   }
 
 </style>
@@ -85,36 +95,19 @@
 
   <div class='content'>
 
-    <div class='coach-panel'>
-      Coach Panel
+    <div class='coach-wrapper'>
+      <div class='coach-panel'>
+        Coach Panel
+      </div>
+
+      <FeaturePanel data={data}
+        windowLoaded={windowLoaded}
+      />
+
+      <DiffPicker/>
     </div>
 
-    <DiffPicker/>
 
-    <FeaturePanel data={data}
-      windowLoaded={windowLoaded}
-    />
-
-    <!-- <FeatureCard featureInfo={data == null ? null : data.features[19]}
-      featureID={19}
-      requiresInt={true}
-      originalValue={728}
-      windowLoaded={windowLoaded}
-    />
-
-    <FeatureCardCat featureInfo={data == null ? null : data.features[2]}
-      featureID={2}
-      labelEncoder={data == null ? null : data.labelEncoder}
-      originalValue={2}
-      windowLoaded={windowLoaded}
-    />
-
-    <FeatureCardCat featureInfo={data == null ? null : data.features[1]}
-      featureID={1}
-      labelEncoder={data == null ? null : data.labelEncoder}
-      originalValue={2}
-      windowLoaded={windowLoaded}
-    /> -->
 
   </div>
 

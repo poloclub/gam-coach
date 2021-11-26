@@ -132,14 +132,14 @@
   @import '../define';
 
   .feature-panel {
+    flex: 1 0 auto;
+
     display: flex;
     flex-direction: row;
-    gap: 20px;
-
-    flex: 1 0 auto;
 
     width: 1000px;
     max-height: 600px;
+    border-radius: $border-radius;
   }
 
   .card-panel {
@@ -154,8 +154,8 @@
 
     padding: 20px 30px;
     box-sizing: border-box;
-    border-radius: 10px;
-    background: $gray-100;
+    border-top-right-radius: border-radius;
+    border-bottom-right-radius: border-radius;
 
     overflow-y: scroll;
   }

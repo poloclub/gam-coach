@@ -255,6 +255,29 @@ const syncTooltips = (component, state) => {
 };
 
 /**
+ * When users hover over any bar, we change the helper message.
+ * @param {object} state Current states
+ */
+const barGroupMouseEnterHandler = (state) => {
+  if (state.dragging) return;
+
+  state.helperMessage = `Click to Mark
+    <span class="orange">Acceptable</span> Values`;
+  state.stateUpdated();
+};
+
+/**
+ * Revoke the hovering effect.
+ * @param {object} state Current states
+ */
+const barGroupMouseLeaveHandler = (state) => {
+  if (state.dragging) return;
+
+  state.helperMessage = state.helperMessageDefault;
+  state.stateUpdated();
+};
+
+/**
  * When user hover a bar, we should the x label in tooltip. If the bar has a
  * special value (cur value/ original value/ coach value), we also call out
  * the annotation.
@@ -336,7 +359,8 @@ const barClickedHandler = (e, d, component, state) => {
 const textGroupMouseEnterHandler = (state) => {
   if (state.dragging) return;
 
-  state.helperMessage = 'Click Text to Try a Different Value';
+  state.helperMessage = `Click Text to Try a
+    <span class="blue">Different Value</span>`;
   state.stateUpdated();
 };
 
@@ -373,6 +397,20 @@ const textMouseEnterHandler = (e, d, component, state) => {
     .select(`.y-label-${d.edge}`)
     .select('.text-background')
     .classed('hover', true);
+
+  // Change annotation if the current text label has a special value
+  if (d.edge === state.feature.originalValue) {
+    state.helperMessage = '<span class="gray-inverse">My Original Value</span>';
+    state.stateUpdated();
+  } else if (d.edge === state.feature.curValue) {
+    state.helperMessage = `<span class="blue-inverse">
+      My Hypothetical Value</span>`;
+    state.stateUpdated();
+  } else if (d.edge === state.feature.coachValue) {
+    state.helperMessage = `<span class="green-inverse">
+      GAM Coach Suggestion</span>`;
+    state.stateUpdated();
+  }
 };
 
 /**
@@ -395,6 +433,16 @@ const textMouseLeaveHandler = (e, d, component, state) => {
     .select(`.y-label-${d.edge}`)
     .select('.text-background')
     .classed('hover', false);
+
+  // Change back the helper message if necessary
+  if (d.edge === state.feature.originalValue ||
+    d.edge === state.feature.curValue ||
+    d.edge === state.feature.coachValue)
+  {
+    state.helperMessage = `Click Text to Try a
+      <span class="blue">Different Value</span>`;
+    state.stateUpdated();
+  }
 };
 
 /**
@@ -465,8 +513,6 @@ const syncBars = (component, state) => {
     .select('.svg-hist')
     .select('g.y-label-group')
     .selectAll('.y-label');
-
-  console.log(yLabels);
 
   yLabels.each((d, i, g) => {
     const label = d3.select(g[i]);
@@ -591,7 +637,12 @@ export const initHist = (component, state) => {
     .range([0, rectWidth]);
 
   // Draw the bars
-  const barGroups = histGroup.selectAll('g.bar')
+  const barGroup = histGroup.append('g')
+    .attr('class', 'bar-group')
+    .on('mouseenter', () => barGroupMouseEnterHandler(state))
+    .on('mouseleave', () => barGroupMouseLeaveHandler(state));
+
+  const barGroups = barGroup.selectAll('g.bar')
     .data(curData)
     .join('g')
     .attr('class', 'bar')

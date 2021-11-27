@@ -239,3 +239,47 @@ $card-h-padding: 16px;
     transform: translate(-50%, -220%) rotate(45deg);
   }
 }
+
+span :global(.blue) {
+  color: $blue-700;
+}
+
+span :global(.green) {
+  color: $green-600;
+}
+
+span :global(.orange) {
+  color: $orange-700;
+}
+
+span :global(.gray) {
+  color: $gray-600;
+}
+
+span :global(.blue-inverse) {
+  background-color: $blue-500;
+  color: white;
+  border-radius: 5px;
+  padding: 3px 5px;
+}
+
+span :global(.green-inverse) {
+  background-color: $green-600;
+  color: white;
+  border-radius: 5px;
+  padding: 3px 5px;
+}
+
+span :global(.orange-inverse) {
+  background-color: $orange-700;
+  color: white;
+  border-radius: 5px;
+  padding: 3px 5px;
+}
+
+span :global(.gray-inverse) {
+  background-color: $gray-500;
+  color: white;
+  border-radius: 5px;
+  padding: 3px 5px;
+}

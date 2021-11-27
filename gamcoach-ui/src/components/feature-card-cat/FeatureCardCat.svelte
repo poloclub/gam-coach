@@ -378,7 +378,7 @@
         <div class='svg-icon icon-info'></div>
         {#key state.helperMessage}
           <span in:fade={{duration: 200, easing: cubicInOut}}>
-            {state.helperMessage}
+            {@html state.helperMessage}
           </span>
         {/key}
       </div>

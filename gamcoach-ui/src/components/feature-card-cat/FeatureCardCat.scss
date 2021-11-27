@@ -184,9 +184,28 @@ $card-h-padding: 16px;
     stroke-width: $highlight-stroke-width;
   }
 
-  :global(.y-label text) {
+  :global(.y-label) {
+    cursor: pointer;
     font-size: 0.8em;
-    fill: $gray-400;
+    fill: $gray-500;
+  }
+
+  :global(.y-label.original) {
+    font-size: 0.8em;
+    fill: $gray-500;
+  }
+
+  :global(.y-label.user) {
+    font-size: 0.8em;
+    fill: $gray-500;
+  }
+
+  :global(.text-background) {
+    fill: hsla(0, 0%, 100%, 0);
+  }
+
+  :global(.text-background.hover) {
+    fill: $gray-100;
   }
 }
 

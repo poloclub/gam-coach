@@ -165,6 +165,7 @@ export const moveThumb = (component, state, value) => {
     .attr('data-curValue', value);
 
   // Compute the position to move the thumb to
+  // @ts-ignore
   const thumbBBox = thumb.node().getBoundingClientRect();
 
   let xPos = state.xCenters[value];
@@ -328,6 +329,68 @@ const barClickedHandler = (e, d, component, state) => {
   syncBars(component, state);
 };
 
+/**
+ * When users hover over a text, we display a helper message to tell users to
+ * click a text to try out hypothetical value. If the value is a special value,
+ * then we show annotation for the special value.
+ * @param {event} e Event
+ * @param {object} d Datum
+ * @param {HTMLElement} component Component
+ * @param {object} state Current states
+ */
+const textMouseEnterHandler = (e, d, component, state) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (state.dragging) return;
+
+  // Trigger hover on the x label element
+  d3.select(component)
+    .select('.svg-hist')
+    .select('.y-label-group')
+    .select(`.y-label-${d.edge}`)
+    .select('.text-background')
+    .classed('hover', true);
+
+  state.helperMessage = 'Click Text to Try a Different Value';
+  state.stateUpdated();
+};
+
+/**
+ * Revoke the hovering effect.
+ * @param {event} e Event
+ * @param {object} d Datum
+ * @param {HTMLElement} component Component
+ * @param {object} state Current states
+ */
+const textMouseLeaveHandler = (e, d, component, state) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (state.dragging) return;
+
+  // Stop the hovering on the x label element
+  d3.select(component)
+    .select('.svg-hist')
+    .select('.y-label-group')
+    .select(`.y-label-${d.edge}`)
+    .select('.text-background')
+    .classed('hover', false);
+
+  state.helperMessage = state.helperMessageDefault;
+  state.stateUpdated();
+};
+
+const textClickedHandler = (e, d, component, state) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  console.log(d.edge);
+};
+
+/**
+ *  Iterate all level bars and style them based on the special values
+ */
 const syncBars = (component, state) => {
   // Iterate all level bars and check if they match the special values
   // one-by-one
@@ -398,12 +461,10 @@ export const initHist = (component, state) => {
   }));
 
   // curData[2].label = 'South Africa Vaccine Rate Change';
-
   const tempGroup = state.histSVG.append('g')
     .attr('class', 'temp-group y-label')
     .style('visibility', 'hidden');
 
-  // TODO: Fine tune this value after adding checkboxes
   const maxLabelWidth = 160;
   let longestLabelWidth = -1;
 
@@ -452,11 +513,15 @@ export const initHist = (component, state) => {
     .append('rect')
     .attr('width', rectWidth + padding.barHGap + padding.histRight)
     .attr('height', histHeight - 2)
-    .style('fill', 'none')
+    .style('fill', 'white')
     .style('stroke', colors['gray-200']);
 
-  // Draw the background bar (some levels might have very low density, so we
-  // need a uni-height bar in the back)
+  const xScale = d3.scaleLinear()
+    // @ts-ignore
+    .domain([0, d3.max(curData, d => d.density)])
+    .range([0, rectWidth]);
+
+  // Draw the bars
   const barGroups = histGroup.selectAll('g.bar')
     .data(curData)
     .join('g')
@@ -468,11 +533,16 @@ export const initHist = (component, state) => {
     .on('mouseleave', (e, d) => barMouseLeaveHandler(e, d, component, state))
     .on('click', (e, d) => barClickedHandler(e, d, component, state));
 
-  const xScale = d3.scaleLinear()
-    // @ts-ignore
-    .domain([0, d3.max(curData, d => d.density)])
-    .range([0, rectWidth]);
+  // Draw the back-background bar to better listen to mouse events
+  barGroups.append('rect')
+    .attr('class', 'back-back-bar')
+    .attr('y', -rectPadding / 2)
+    .attr('width', rectWidth)
+    .attr('height', rectHeight + rectPadding)
+    .style('fill', 'hsla(0, 0%, 100%, 0)');
 
+  // Draw the background bar (some levels might have very low density, so we
+  // need a uni-height bar in the back)
   const backBars = barGroups.append('rect')
     .attr('class', 'back-bar')
     .attr('width', rectWidth)
@@ -481,10 +551,10 @@ export const initHist = (component, state) => {
   // Draw the density histogram
   barGroups.append('rect')
     .attr('class', 'density-bar')
-    // @ts-ignore
     .attr('width', d => xScale(d.density))
     .attr('height', rectHeight);
 
+  // Draw the selection level bars
   barGroups.append('rect')
     .attr('class', 'level-bar')
     .attr('id', d => `level-bar-${d.edge}`)
@@ -495,14 +565,30 @@ export const initHist = (component, state) => {
   const yLabelGroup = histGroup.append('g')
     .attr('class', 'y-label-group');
 
-  yLabelGroup.selectAll('g.y-label')
+  const yLabels = yLabelGroup.selectAll('g.y-label')
     .data(curData)
     .join('g')
-    .attr('class', 'y-label')
-    .attr('transform', (d, i) => `translate(${longestLabelWidth},
+    .attr('class', d => `y-label y-label-${d.edge}`)
+    .attr('transform', (d, i) => `translate(${longestLabelWidth}
       ${i * (rectHeight + rectPadding) + padding.histTopBottom})`
     )
-    .append('text')
+    .on('mouseenter', (e, d) => textMouseEnterHandler(e, d, component, state))
+    .on('mouseleave', (e, d) => textMouseLeaveHandler(e, d, component, state))
+    .on('click', (e, d) => textClickedHandler(e, d, component, state));
+
+  // Add a background rect behind the text so we can better listen to mouse
+  // events
+  yLabels.append('rect')
+    .attr('class', 'text-background')
+    .attr('x', -longestLabelWidth - 2)
+    .attr('y', -rectPadding / 2)
+    .attr('width', longestLabelWidth + 5)
+    .attr('height', rectHeight + rectPadding)
+    .attr('rx', 5)
+    .attr('ry', 5);
+
+  // Add texts
+  yLabels.append('text')
     .style('text-anchor', 'end')
     .style('dominant-baseline', 'middle')
     .attr('transform', 'translate(0, 10)')

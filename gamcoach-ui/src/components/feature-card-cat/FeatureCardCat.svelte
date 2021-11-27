@@ -39,6 +39,8 @@
   state.difficulty = 'neutral';
   state.xCenters = [];
   state.tickOpacityTimeout = null;
+  state.helperMessageDefault = 'Value Distribution of All Users';
+  state.helperMessage = state.helperMessageDefault;
 
   state.feature = {
     name: '',
@@ -50,7 +52,7 @@
     histCount: null,
     id: 0,
     labelEncoder: {},
-    searchValues: [],
+    searchValues: []
   };
 
   const difficultyIconMap = {
@@ -364,7 +366,7 @@
     <div class='feature-annotations'>
       <div class='annotation annotation-name show'>
         <div class='svg-icon icon-info'></div>
-        <span>Value Distribution of All Users</span>
+        <span>{state.helperMessage}</span>
       </div>
 
       <div class='annotation annotation-user'>

@@ -180,8 +180,16 @@ $card-h-padding: 16px;
   }
 
   :global(.bar.coach .level-bar) {
-    stroke: $green-600;
+    stroke: $green-500;
     stroke-width: $highlight-stroke-width;
+  }
+
+  :global(.text-background) {
+    fill: hsla(0, 0%, 100%, 0);
+  }
+
+  :global(.text-background.hover) {
+    fill: change-color($blue-50, $alpha: 0.7);
   }
 
   :global(.y-label) {
@@ -191,21 +199,34 @@ $card-h-padding: 16px;
   }
 
   :global(.y-label.original) {
-    font-size: 0.9rem;
     fill: $gray-600;
+
+    :global(.text-background) {
+      fill: $gray-200;
+    }
+  }
+
+  :global(.y-label.original.user) {
+    fill: $gray-600;
+    :global(.text-background) {
+      fill: $gray-200;
+    }
   }
 
   :global(.y-label.user) {
-    font-size: 0.9rem;
-    fill: $gray-600;
+    fill: $blue-800;
+
+    :global(.text-background) {
+      fill: $blue-50;
+    }
   }
 
-  :global(.text-background) {
-    fill: hsla(0, 0%, 100%, 0);
-  }
+  :global(.y-label.coach) {
+    fill: $green-700;
 
-  :global(.text-background.hover) {
-    fill: $gray-100;
+    :global(.text-background) {
+      fill: $green-50;
+    }
   }
 }
 

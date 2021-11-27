@@ -397,15 +397,38 @@ const textMouseLeaveHandler = (e, d, component, state) => {
     .classed('hover', false);
 };
 
+/**
+ * Select the current bar as the current value.
+ * @param {*} e Event
+ * @param {*} d Datum
+ * @param {*} component Component
+ * @param {*} state Current state
+ */
 const textClickedHandler = (e, d, component, state) => {
   e.preventDefault();
   e.stopPropagation();
 
-  console.log(d.edge);
+  state.feature.curValue = d.edge;
+
+  const yLabelGroup = d3.select(component)
+    .select('.svg-hist')
+    .select('.y-label-group');
+
+  const yLabel = yLabelGroup.select(`.y-label-${d.edge}`);
+
+  // Change the user class
+  yLabelGroup.selectAll('.y-label').classed('user', false);
+
+  if (state.feature.curValue !== state.feature.originalValue &&
+    state.feature.curValue !== state.feature.coachValue
+  ) {
+    yLabel.classed('user', true);
+  }
 };
 
 /**
- *  Iterate all level bars and style them based on the special values
+ * Iterate all level bars and y-label texts and then style them based on
+ * on their values
  */
 const syncBars = (component, state) => {
   // Iterate all level bars and check if they match the special values
@@ -419,6 +442,23 @@ const syncBars = (component, state) => {
     const curBar = d3.select(g[i]);
 
     curBar.classed('selected', state.feature.searchValues.has(d.edge))
+      .classed('user', d.edge === state.feature.curValue)
+      .classed('original', d.edge === state.feature.originalValue)
+      .classed('coach', d.edge === state.feature.coachValue);
+  });
+
+  // Iterate through all y-label texts
+  const yLabels = d3.select(component)
+    .select('.svg-hist')
+    .select('g.y-label-group')
+    .selectAll('.y-label');
+
+  console.log(yLabels);
+
+  yLabels.each((d, i, g) => {
+    const label = d3.select(g[i]);
+
+    label.classed('selected', state.feature.searchValues.has(d.edge))
       .classed('user', d.edge === state.feature.curValue)
       .classed('original', d.edge === state.feature.originalValue)
       .classed('coach', d.edge === state.feature.coachValue);

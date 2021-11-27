@@ -416,7 +416,7 @@ const textClickedHandler = (e, d, component, state) => {
 
   const yLabel = yLabelGroup.select(`.y-label-${d.edge}`);
 
-  // Change the user class
+  // Change the user class on the y labels
   yLabelGroup.selectAll('.y-label').classed('user', false);
 
   if (state.feature.curValue !== state.feature.originalValue &&
@@ -424,6 +424,19 @@ const textClickedHandler = (e, d, component, state) => {
   ) {
     yLabel.classed('user', true);
   }
+
+  // Change the user class on the bars
+  const bars = d3.select(component)
+    .select('.svg-hist g.hist-group')
+    .selectAll('.bar');
+
+  bars.classed('user', false);
+  bars.filter(
+    d => d.edge === state.feature.curValue &&
+    d.edge !== state.feature.coachValue &&
+    d.edge !== state.feature.originalValue
+  )
+    .classed('user', true);
 };
 
 /**

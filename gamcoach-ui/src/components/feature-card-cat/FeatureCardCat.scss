@@ -170,7 +170,7 @@ $card-h-padding: 16px;
   }
 
   :global(.bar.user .level-bar) {
-    stroke: $blue-500;
+    stroke: $blue-400;
     stroke-width: $highlight-stroke-width;
   }
 
@@ -189,7 +189,7 @@ $card-h-padding: 16px;
   }
 
   :global(.text-background.hover) {
-    fill: change-color($blue-50, $alpha: 0.7);
+    fill: change-color($blue-50, $alpha: 1);
   }
 
   :global(.y-label) {

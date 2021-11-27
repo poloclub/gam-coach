@@ -16,6 +16,9 @@
   import veryHardIcon from '../../img/icon-very-hard.svg';
   import lockIcon from '../../img/icon-lock.svg';
   import infoIcon from '../../img/icon-info.svg';
+  import closeIcon from '../../img/icon-close.svg';
+  import refreshIcon from '../../img/icon-refresh.svg';
+
 
   export let feature = null;
 
@@ -33,6 +36,7 @@
 
   // Binding variables, which will be initialized after window is loaded
   let component = null;
+  const formatter = d3.format(',.2~f');
 
   state.tickXScale = null;
   state.histSVG = null;
@@ -109,6 +113,8 @@
       { class: 'icon-hard', svg: hardIcon },
       { class: 'icon-very-hard', svg: veryHardIcon },
       { class: 'icon-info', svg: infoIcon },
+      { class: 'icon-close', svg: closeIcon },
+      { class: 'icon-refresh', svg: refreshIcon },
     ];
 
     iconList.forEach(d => {
@@ -242,33 +248,79 @@
 
   <div class='feature-header'>
 
-    <div class='feature-info'>
-      <span class='feature-name'>
-        {state.feature.name}
-      </span>
+    <div class='top-row'>
+      <div class='feature-info'>
+        <span class='feature-name'>
+          {state.feature.name}
+        </span>
+      </div>
 
-      <div class='feature-difficulty' on:click={diffClickedHandler}>
-        <div class={`svg-icon icon-${state.difficulty}`}></div>
+      <div class='card-icons'>
+        <div class='svg-icon icon-refresh'>
+          <div class='icon-label'>
+            <span class='thumb-label-span'>Reset</span>
+          </div>
+        </div>
+
+        <div class='svg-icon icon-close'>
+          <div class='icon-label'>
+            <span class='thumb-label-span'>Close</span>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class='values'>
       <span class='value-old'>
-        {d3.format(',.2~f')(state.feature.originalValue)}
+        {formatter(state.feature.originalValue)}
       </span>
 
       <div class='feature-arrow'>
         <span class='value-change'>
           {`${(state.feature.curValue - state.feature.originalValue) < 0 ? '' :
-            '+'}${state.feature.curValue - state.feature.originalValue}`}
+            '+'}${formatter(
+              state.feature.curValue - state.feature.originalValue
+              )}`}
         </span>
 
         <div class='arrow-right'></div>
       </div>
 
       <span class='value-new'>
-        {d3.format(',.2~f')(state.feature.curValue)}
+        {formatter(state.feature.curValue)}
       </span>
+    </div>
+
+    <div class='feature-slider'>
+
+      <div class='track'>
+        <div class='range-track'></div>
+
+        <div id='slider-left-thumb'
+          tabindex='-1'
+          class='svg-icon icon-range-thumb-left thumb'>
+          <div class='thumb-label thumb-label-left'>
+            <span class='thumb-label-span'>{formatter(state.feature.curMin)}</span>
+          </div>
+        </div>
+
+        <div id='slider-right-thumb'
+          tabindex='-1'
+          class='svg-icon icon-range-thumb-right thumb'>
+          <div class='thumb-label thumb-label-right'>
+            <span class='thumb-label-span'>{formatter(state.feature.curMax)}</span>
+          </div>
+        </div>
+
+        <div id='slider-middle-thumb'
+          tabindex='-1'
+          class='svg-icon icon-range-thumb-middle thumb'>
+          <div class='thumb-label thumb-label-middle'>
+            <span class='thumb-label-span'>{formatter(state.feature.curValue)}</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -280,6 +332,9 @@
       <div class='annotation annotation-name show'>
         <div class='svg-icon icon-info'></div>
         <span>Value Distribution of All Users</span>
+        <div class='feature-difficulty' on:click={diffClickedHandler}>
+          <div class={`svg-icon icon-${state.difficulty}`}></div>
+        </div>
       </div>
 
       <div class='annotation annotation-user'>
@@ -299,38 +354,6 @@
       </div>
 
     </div>
-  </div>
-
-  <div class='feature-slider'>
-
-    <div class='track'>
-      <div class='range-track'></div>
-
-      <div id='slider-left-thumb'
-        tabindex='-1'
-        class='svg-icon icon-range-thumb-left thumb'>
-        <div class='thumb-label thumb-label-left'>
-          <span class='thumb-label-span'>{state.feature.curMin}</span>
-        </div>
-      </div>
-
-      <div id='slider-right-thumb'
-        tabindex='-1'
-        class='svg-icon icon-range-thumb-right thumb'>
-        <div class='thumb-label thumb-label-right'>
-          <span class='thumb-label-span'>{state.feature.curMax}</span>
-        </div>
-      </div>
-
-      <div id='slider-middle-thumb'
-        tabindex='-1'
-        class='svg-icon icon-range-thumb-middle thumb'>
-        <div class='thumb-label thumb-label-middle'>
-          <span class='thumb-label-span'>{state.feature.curValue}</span>
-        </div>
-      </div>
-    </div>
-
   </div>
 
 </div>

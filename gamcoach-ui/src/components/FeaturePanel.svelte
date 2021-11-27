@@ -193,6 +193,18 @@
         </FeatureCardCat>
       </div>
 
+      <!-- {#key features}
+        {#each features as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
+      {/key} -->
+
     </div>
 
   </div>
@@ -201,17 +213,11 @@
   <!-- {#key features}
     {#each features as feature}
       {#if feature.isCont}
-        <FeatureCard featureInfo={feature.data}
-          featureID={feature.featureID}
-          requiresInt={feature.requiresInt}
-          originalValue={feature.originalValue}
-        />
+        <FeatureCard feature={feature}>
+        </FeatureCard>
       {:else}
-        <FeatureCardCat featureInfo={feature.data}
-          featureID={feature.featureID}
-          labelEncoder={feature.labelEncoder}
-          originalValue={feature.originalValue}
-        />
+        <FeatureCardCat feature={feature}>
+        </FeatureCardCat>
       {/if}
     {/each}
   {/key} -->

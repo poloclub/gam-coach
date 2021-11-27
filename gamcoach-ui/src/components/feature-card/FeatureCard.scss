@@ -3,7 +3,7 @@
 
 $range-thumb-width: 8px;
 $base-circle-radius: 5px;
-$card-v-padding: 8px;
+$card-v-padding: 6px;
 $card-h-padding: 16px;
 
 .feature-card {
@@ -21,18 +21,26 @@ $card-h-padding: 16px;
 
 .feature-header {
   width: calc(100% + #{2 * $card-h-padding});
-  height: 40px;
   flex: 0 0 auto;
   margin: #{-$card-v-padding} #{-$card-h-padding} 0px #{-$card-h-padding};
   padding: $card-v-padding $card-h-padding 5px $card-h-padding;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+  border-bottom: 1px solid $gray-light-border;
 
   background: $gray-100;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  gap: 2px;
+  flex-direction: column;
+  align-items: flex-start;
+
+  .top-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
 
   .feature-info {
     display: flex;
@@ -41,25 +49,73 @@ $card-h-padding: 16px;
     height: 24px;
 
     .feature-name {
-      // font-weight: 800;
+      font-weight: 600;
     }
+  }
 
-    .feature-difficulty {
-      border-radius: 50%;
-      // background-color: $gray-200;
-      width: 1.6rem;
-      height: 1.6rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+  .card-icons {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+
+    .svg-icon {
+      fill: $gray-400;
       cursor: pointer;
-      border: 1px solid $gray-200;
+      position: relative;
 
-      .svg-icon {
-        :global(svg) {
-          width: 1.2rem;
-          height: 1.2rem;
+      :global(svg) {
+        width: 1.3rem;
+        height: 1.3rem;
+      }
+
+      .icon-label {
+        position:absolute;
+        bottom: 13px;
+        left: 50%;
+
+        font-size: 0.8rem;
+        border-radius: 2px;
+        line-height: 1.2;
+        white-space: nowrap;
+        background-color: white;
+        border: 1px solid $gray-border;
+        color: $gray-700;
+
+        transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        transform-origin: bottom center;
+        transform: translateX(-50%) translateY(-60%) scale(0);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 4px;
+
+        &::before {
+          position: absolute;
+          content: '';
+          width: 8px;
+          height: 8px;
+          top: 0;
+          left: 50%;
+          border-bottom: 1px solid $gray-border;
+          border-right: 1px solid $gray-border;
+          transform: translate(-50%, 200%) rotate(45deg);
+          background-color: inherit;
         }
+
+      }
+
+      &:hover {
+        fill: adjust-color($color: $gray-400, $lightness: -5%);
+
+        .icon-label{
+          transition-delay: 100ms;
+          transform: translateX(-50%) translateY(-60%) scale(1);
+        }
+      }
+
+      &:active {
+        fill: adjust-color($color: $gray-400, $lightness: -10%);
       }
     }
   }
@@ -69,6 +125,7 @@ $card-h-padding: 16px;
   display: flex;
   flex-direction: row;
   align-items: center;
+  font-size: 0.9rem;
 
   .value-change {
     font-size: 0.8rem;
@@ -83,15 +140,7 @@ $card-h-padding: 16px;
   flex-direction: column;
   align-items: center;
   margin: 0 5px;
-
-  .svg-icon {
-    color: $gray-800;
-
-    :global(svg) {
-      width: 10px;
-      height: 5px;
-    }
-  }
+  color: $gray-500;
 }
 
 .svg-icon {
@@ -126,8 +175,8 @@ $card-h-padding: 16px;
   &::after {
     width: 8px;
     height: 8px;
-    border-top: 2px solid $gray-400;
-    border-right: 2px solid $gray-400;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
     transform: rotate(45deg);
     bottom: 7px;
   }
@@ -136,7 +185,7 @@ $card-h-padding: 16px;
     width: calc(100% - 4px);
     height: 2px;
     bottom: 10px;
-    background: $gray-400;
+    background: currentColor;
   }
 }
 
@@ -190,7 +239,9 @@ $card-h-padding: 16px;
     color: $gray-600;
     padding: 0px;
     left: 0px;
+    width: 100%;
     display: flex;
+    align-items: center;
     opacity: 0;
     transform: scale(1);
     transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
@@ -208,6 +259,27 @@ $card-h-padding: 16px;
 
     &.show {
       opacity: 1;
+    }
+
+    .feature-difficulty {
+      margin-left: auto;
+      border-radius: 50%;
+      // background-color: $gray-200;
+      width: 1.6rem;
+      height: 1.6rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid $gray-200;
+
+      .svg-icon {
+        :global(svg) {
+          width: 1.2rem;
+          height: 1.2rem;
+        }
+        margin: 0;
+      }
     }
   }
 
@@ -228,17 +300,18 @@ $card-h-padding: 16px;
 
   .annotation-range {
     background-color: $orange-50;
-    color: $green-600;
+    color: $orange-600;
     left: 20px;
   }
 }
 
 .feature-slider {
   position: absolute;
-  top: 135px;
+  bottom: 55px;
   width: 100%;
   display: flex;
   flex-direction: column;
+  z-index: 1;
 
   .track {
     width: calc(100% - #{2 * $range-thumb-width + 2 * $card-h-padding});
@@ -298,6 +371,7 @@ $card-h-padding: 16px;
     }
 
     .thumb-label {
+      transition-delay: 100ms;
       transform: translateX(-50%) translateY(100%) scale(1);
     }
   }

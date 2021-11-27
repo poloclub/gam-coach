@@ -2,6 +2,7 @@ import d3 from '../../utils/d3-import';
 import { config } from '../../config';
 
 const colors = config.colors;
+const formatter = d3.format(',.2~f');
 
 /**
  * Helper function to show the annotation.
@@ -313,17 +314,17 @@ const syncTooltips = (component, state) => {
   d3.select(component)
     .select('#slider-left-thumb')
     .select('.thumb-label span')
-    .text(state.feature.curMin);
+    .text(formatter(state.feature.curMin));
 
   d3.select(component)
     .select('#slider-right-thumb')
     .select('.thumb-label span')
-    .text(state.feature.curMax);
+    .text(formatter(state.feature.curMax));
 
   d3.select(component)
     .select('#slider-middle-thumb')
     .select('.thumb-label span')
-    .text(state.feature.curValue);
+    .text(formatter(state.feature.curValue));
 };
 
 /**

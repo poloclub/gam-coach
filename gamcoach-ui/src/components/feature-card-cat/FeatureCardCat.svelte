@@ -164,6 +164,10 @@
     // at the global absolute coordinate. Convert it to local coordinate here.
     initHist(component, state);
 
+    // Need to wait the view is updated so we can recenter labels
+    await tick();
+    fitFeatureName();
+
     initialized = true;
   };
 
@@ -240,17 +244,15 @@
       </div>
     </div>
 
-    {#if state.feature.originalValue === state.feature.curValue}
+    <div class='values'>
+      {#if state.feature.originalValue === state.feature.curValue}
 
-      <div class='values'>
         <span class='value-label'>
           {categoryLabels[state.feature.originalValue]}
         </span>
-      </div>
 
-    {:else}
+      {:else}
 
-      <div class='values'>
         <span class='value-label'>
           {categoryLabels[state.feature.originalValue]}
         </span>
@@ -262,9 +264,9 @@
         <span class='value-label'>
           {categoryLabels[state.feature.curValue]}
         </span>
-      </div>
 
-    {/if}
+      {/if}
+    </div>
 
   </div>
 

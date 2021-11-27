@@ -1,11 +1,11 @@
 <script>
   import d3 from '../../utils/d3-import';
   import { onMount, tick } from 'svelte';
-  import { fade, fly, scale, draw, slide, blur, crossfade } from 'svelte/transition';
+  import { fade, fly, scale } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import {initSlider, moveThumb, initHist} from './FeatureCardCat';
+  import {initHist} from './FeatureCardCat';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import levelThumbIcon from '../../img/icon-level-thumb.svg';
@@ -89,14 +89,6 @@
     tooltipConfig = value;
   });
 
-  // Animation
-  const [send, receive] = crossfade({
-    duration: 300,
-    fallback() {
-      //pass
-    }
-  });
-
   // Translate category index to alphabetic
   const categoryLabels = [
     '', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -145,33 +137,6 @@
   state.stateUpdated = stateUpdated;
 
   /**
-   * Put labels to the right positions on the slider
-   */
-  const recenterSliderLabels = () => {
-    // Get the label width
-    const labelWidth = d3.select(component)
-      .select('.track-label')
-      .node()
-      .getBoundingClientRect().width;
-
-    // Re-position the track labels
-    state.feature.histEdge.forEach((d) => {
-      const curX = state.xCenters[d] - labelWidth / 2;
-
-      d3.select(component)
-        .select(`#track-label-${d}`)
-        .style('left', `${curX}px`);
-
-      d3.select(component)
-        .select(`#track-point-${d}`)
-        .style('left', `${state.xCenters[d] - 1}px`);
-    });
-
-    // Initialize the slider
-    initSlider(component, state);
-  };
-
-  /**
    * Init the states of different elements. Some functions require bbox,
    * which is only accurate after content is loaded
    */
@@ -197,75 +162,9 @@
     // Draw the histogram
     // Record the x center values for each bar. The original return value is
     // at the global absolute coordinate. Convert it to local coordinate here.
-    const tempXCenters = initHist(component, state);
-
-    // const trackX = d3.select(component).select('.track')
-    //   .node().getBoundingClientRect().x;
-
-    // // Level label starts from 1, we add a placeholder to index 0
-    // state.xCenters = [0];
-    // tempXCenters.forEach(x => {
-    //   state.xCenters.push(x - trackX);
-    // });
-
-    // // Need to wait the view is updated so we can recenter labels
-    // await tick();
-
-    // fitFeatureName();
-    // recenterSliderLabels();
+    initHist(component, state);
 
     initialized = true;
-  };
-
-  const trackLabelMouseEnterHandler = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (state.dragging) return;
-
-    // Cancel the previous opacity -> 1 callback if it was set
-    if (state.tickOpacityTimeout !== null) {
-      clearTimeout(state.tickOpacityTimeout);
-      state.tickOpacityTimeout = null;
-    }
-
-    d3.select(e.target)
-      .classed('hover', true);
-
-    d3.select(component)
-      .select('.svg-hist')
-      .select('.x-label-group')
-      .interrupt('restore')
-      .style('opacity', 0.3);
-  };
-
-  const trackLabelMouseLeaveHandler = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (state.dragging) return;
-
-    d3.select(e.target)
-      .classed('hover', false);
-
-    state.tickOpacityTimeout = setTimeout(() => {
-      d3.select(component)
-        .select('.svg-hist')
-        .select('.x-label-group')
-        .transition('restore')
-        .duration(200)
-        .style('opacity', 1);
-    }, 300);
-  };
-
-  const trackLabelClickHandler = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const newValue = +d3.select(e.target)
-      .attr('data-edge');
-
-    moveThumb(component, state, newValue);
   };
 
   /**
@@ -383,60 +282,7 @@
         {/key}
       </div>
 
-      <div class='annotation annotation-user'>
-        My Hypothetical Value
-      </div>
-
-      <div class='annotation annotation-original'>
-        My Original Value
-      </div>
-
-      <div class='annotation annotation-coach'>
-        GAM Coach Suggestion
-      </div>
-
-      <div class='annotation annotation-range'>
-        My Actionable Range
-      </div>
-
     </div>
   </div>
-
-  <!-- <div class='feature-slider'>
-
-    <div class='track'>
-
-      {#each state.feature.histEdge as level}
-        <div class='track-label'
-          id={`track-label-${level}`}
-          on:mouseenter={trackLabelMouseEnterHandler}
-          on:mouseleave={trackLabelMouseLeaveHandler}
-          on:click={trackLabelClickHandler}
-        >
-          <div class='value-label' data-edge={level}>
-            {categoryLabels[level]}
-          </div>
-
-          <div class='thumb-label thumb-label-x-tick'>
-            <span class='thumb-label-span'>{state.feature.labelEncoder[level]}</span>
-          </div>
-        </div>
-
-        <div class='track-point' id={`track-point-${level}`}>
-        </div>
-      {/each}
-
-      <div id='slider-level-thumb'
-        tabindex='-1'
-        class='svg-icon icon-level-thumb thumb'>
-        <div class='thumb-label thumb-label-middle'>
-          <span class='thumb-label-span'>{state.feature.curValue}</span>
-        </div>
-      </div>
-
-    </div>
-
-  </div> -->
-
 
 </div>

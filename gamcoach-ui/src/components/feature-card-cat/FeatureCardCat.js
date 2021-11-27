@@ -330,6 +330,28 @@ const barClickedHandler = (e, d, component, state) => {
 };
 
 /**
+ * When users hover over any text, we change the helper message.
+ * @param {object} state Current states
+ */
+const textGroupMouseEnterHandler = (state) => {
+  if (state.dragging) return;
+
+  state.helperMessage = 'Click Text to Try a Different Value';
+  state.stateUpdated();
+};
+
+/**
+ * Revoke the hovering effect.
+ * @param {object} state Current states
+ */
+const textGroupMouseLeaveHandler = (state) => {
+  if (state.dragging) return;
+
+  state.helperMessage = state.helperMessageDefault;
+  state.stateUpdated();
+};
+
+/**
  * When users hover over a text, we display a helper message to tell users to
  * click a text to try out hypothetical value. If the value is a special value,
  * then we show annotation for the special value.
@@ -351,9 +373,6 @@ const textMouseEnterHandler = (e, d, component, state) => {
     .select(`.y-label-${d.edge}`)
     .select('.text-background')
     .classed('hover', true);
-
-  state.helperMessage = 'Click Text to Try a Different Value';
-  state.stateUpdated();
 };
 
 /**
@@ -376,9 +395,6 @@ const textMouseLeaveHandler = (e, d, component, state) => {
     .select(`.y-label-${d.edge}`)
     .select('.text-background')
     .classed('hover', false);
-
-  state.helperMessage = state.helperMessageDefault;
-  state.stateUpdated();
 };
 
 const textClickedHandler = (e, d, component, state) => {
@@ -465,7 +481,7 @@ export const initHist = (component, state) => {
     .attr('class', 'temp-group y-label')
     .style('visibility', 'hidden');
 
-  const maxLabelWidth = 160;
+  const maxLabelWidth = 170;
   let longestLabelWidth = -1;
 
   // Need to shorten some labels if they are too long
@@ -563,7 +579,18 @@ export const initHist = (component, state) => {
 
   // Draw the labels on the y-axis
   const yLabelGroup = histGroup.append('g')
-    .attr('class', 'y-label-group');
+    .attr('class', 'y-label-group')
+    .on('mouseenter', () => textGroupMouseEnterHandler(state))
+    .on('mouseleave', () => textGroupMouseLeaveHandler(state));
+
+  // Add a back-background rect behind the background behind the text so that
+  // we can listen to the mouseenter events without interruption
+  yLabelGroup.append('rect')
+    .attr('y', padding.histTopBottom)
+    .attr('width', longestLabelWidth + 5)
+    .attr('height', curData.length * rectHeight +
+      (curData.length - 1) * rectPadding)
+    .style('fill', 'hsla(0, 0%, 100%, 0');
 
   const yLabels = yLabelGroup.selectAll('g.y-label')
     .data(curData)

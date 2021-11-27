@@ -576,7 +576,7 @@ export const initHist = (component, state) => {
     .style('text-anchor', 'start')
     .style('dominant-baseline', 'hanging')
     .style('font-size', '0.9em')
-    .style('fill', colors['gray-400'])
+    .style('fill', colors['gray-500'])
     .text(d3.format('.2~f')(state.feature.valueMin));
 
   tickBackGroup.append('text')
@@ -586,7 +586,7 @@ export const initHist = (component, state) => {
     .style('text-anchor', 'end')
     .style('dominant-baseline', 'hanging')
     .style('font-size', '0.9em')
-    .style('fill', colors['gray-400'])
+    .style('fill', colors['gray-500'])
     .text(d3.format('.2~f')(state.feature.valueMax));
 
   // Initialize the positions for the annotation labels

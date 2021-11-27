@@ -1,6 +1,8 @@
 <script>
   import d3 from '../../utils/d3-import';
   import { onMount, tick } from 'svelte';
+  import { fade, fly, scale, draw, slide, blur, crossfade } from 'svelte/transition';
+  import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
   import {initSlider, moveThumb, initHist} from './FeatureCardCat';
@@ -85,6 +87,14 @@
   let tooltipConfig = null;
   tooltipConfigStore.subscribe(value => {
     tooltipConfig = value;
+  });
+
+  // Animation
+  const [send, receive] = crossfade({
+    duration: 300,
+    fallback() {
+      //pass
+    }
   });
 
   // Translate category index to alphabetic
@@ -366,7 +376,11 @@
     <div class='feature-annotations'>
       <div class='annotation annotation-name show'>
         <div class='svg-icon icon-info'></div>
-        <span>{state.helperMessage}</span>
+        {#key state.helperMessage}
+          <span in:fade={{duration: 200, easing: cubicInOut}}>
+            {state.helperMessage}
+          </span>
+        {/key}
       </div>
 
       <div class='annotation annotation-user'>

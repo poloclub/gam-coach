@@ -1,10 +1,8 @@
 <script>
-  import FeatureCard from './components/feature-card/FeatureCard.svelte';
-  import FeatureCardCat
-    from './components/feature-card-cat/FeatureCardCat.svelte';
   import FeaturePanel from './components/FeaturePanel.svelte';
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
+  import CoachPanel from './components/coach-panel/CoachPanel.svelte';
 
   import d3 from './utils/d3-import';
   import { onMount } from 'svelte';
@@ -59,6 +57,7 @@
   }
 
   .coach-wrapper {
+    max-width: 1000px;
     border: 1px solid $gray-light-border;
     background: $gray-50;
     border-radius: $border-radius;
@@ -66,39 +65,16 @@
       0px 0px 5px hsla(0, 0%, 0%, 0.12);
   }
 
-  .coach-panel {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-
-    width: 1000px;
-    height: 160px;
-    flex: 1 0 auto;
-
-    font-size: 2em;
-    font-weight: 600;
-
-    border-top-left-radius: $border-radius;
-    border-top-right-radius: $border-radius;
-    border-bottom: 1px solid $gray-light-border;
-  }
-
 </style>
 
 <div class='main-standalone'>
-  <div class='header'>
-    <!-- <Header /> -->
-  </div>
 
   <Tooltip bind:this={tooltip}/>
 
   <div class='content'>
 
     <div class='coach-wrapper'>
-      <div class='coach-panel'>
-        Coach Panel
-      </div>
+      <CoachPanel></CoachPanel>
 
       <FeaturePanel data={data}
         windowLoaded={windowLoaded}

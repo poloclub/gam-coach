@@ -16,6 +16,8 @@
   import veryHardIcon from '../../img/icon-very-hard.svg';
   import lockIcon from '../../img/icon-lock.svg';
   import infoIcon from '../../img/icon-info.svg';
+  import closeIcon from '../../img/icon-close.svg';
+  import refreshIcon from '../../img/icon-refresh.svg';
 
   export let feature = null;
 
@@ -89,11 +91,6 @@
     tooltipConfig = value;
   });
 
-  // Translate category index to alphabetic
-  const categoryLabels = [
-    '', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-    'O', 'P', 'Q', 'R',  'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-
   const preProcessSVG = (svgString) => {
     return svgString.replaceAll('black', 'currentcolor')
       .replaceAll('fill:none', 'fill:currentcolor')
@@ -113,6 +110,8 @@
       { class: 'icon-hard', svg: hardIcon },
       { class: 'icon-very-hard', svg: veryHardIcon },
       { class: 'icon-info', svg: infoIcon },
+      { class: 'icon-close', svg: closeIcon },
+      { class: 'icon-refresh', svg: refreshIcon },
     ];
 
     iconList.forEach(d => {
@@ -234,27 +233,42 @@
 
   <div class='feature-header'>
 
-    <div class='feature-info'>
-      <span class='feature-name'>
-        {state.feature.name}
-      </span>
+    <div class='top-row'>
 
-      <div class='feature-difficulty' on:click={diffClickedHandler}>
-        <div class={`svg-icon icon-${state.difficulty}`}></div>
+      <div class='feature-info'>
+        <span class='feature-name'>
+          {state.feature.name}
+        </span>
       </div>
+
+      <div class='card-icons'>
+
+        <div class='svg-icon icon-refresh'>
+          <div class='icon-label'>
+            <span class='thumb-label-span'>Reset</span>
+          </div>
+        </div>
+
+        <div class='svg-icon icon-close'>
+          <div class='icon-label'>
+            <span class='thumb-label-span'>Close</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class='values'>
       {#if state.feature.originalValue === state.feature.curValue}
 
         <span class='value-label'>
-          {categoryLabels[state.feature.originalValue]}
+          {state.feature.labelEncoder[state.feature.originalValue]}
         </span>
 
       {:else}
 
         <span class='value-label'>
-          {categoryLabels[state.feature.originalValue]}
+          {state.feature.labelEncoder[state.feature.originalValue]}
         </span>
 
         <div class='feature-arrow'>
@@ -262,7 +276,7 @@
         </div>
 
         <span class='value-label'>
-          {categoryLabels[state.feature.curValue]}
+          {state.feature.labelEncoder[state.feature.curValue]}
         </span>
 
       {/if}
@@ -276,12 +290,21 @@
 
     <div class='feature-annotations'>
       <div class='annotation annotation-name show'>
+
         <div class='svg-icon icon-info'></div>
+
         {#key state.helperMessage}
           <span in:fade={{duration: 200, easing: cubicInOut}}>
             {@html state.helperMessage}
           </span>
         {/key}
+
+        <div class='feature-difficulty'
+          on:click={diffClickedHandler}
+        >
+          <div class={`svg-icon icon-${state.difficulty}`}></div>
+        </div>
+
       </div>
 
     </div>

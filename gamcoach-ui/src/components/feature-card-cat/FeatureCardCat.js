@@ -108,7 +108,7 @@ const barClickedHandler = (e, d, component, state) => {
 const textGroupMouseEnterHandler = (state) => {
   if (state.dragging) return;
 
-  state.helperMessage = `Click Text to Try a
+  state.helperMessage = `Click to Try a
     <span class="blue">Different Value</span>`;
   state.stateUpdated();
 };
@@ -188,7 +188,7 @@ const textMouseLeaveHandler = (e, d, component, state) => {
     d.edge === state.feature.curValue ||
     d.edge === state.feature.coachValue)
   {
-    state.helperMessage = `Click Text to Try a
+    state.helperMessage = `Click to Try a
       <span class="blue">Different Value</span>`;
     state.stateUpdated();
   }
@@ -206,6 +206,7 @@ const textClickedHandler = (e, d, component, state) => {
   e.stopPropagation();
 
   state.feature.curValue = d.edge;
+  state.stateUpdated();
 
   const yLabelGroup = d3.select(component)
     .select('.svg-hist')
@@ -464,8 +465,8 @@ export const initHist = (component, state) => {
     .attr('y', -rectPadding / 2)
     .attr('width', longestLabelWidth + 5)
     .attr('height', rectHeight + rectPadding)
-    .attr('rx', 5)
-    .attr('ry', 5);
+    .attr('rx', 1)
+    .attr('ry', 1);
 
   // Add texts
   yLabels.append('text')

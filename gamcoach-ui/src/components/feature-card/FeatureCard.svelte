@@ -271,24 +271,30 @@
     </div>
 
     <div class='values'>
-      <span class='value-old'>
-        {formatter(state.feature.originalValue)}
-      </span>
 
-      <div class='feature-arrow'>
-        <span class='value-change'>
-          {`${(state.feature.curValue - state.feature.originalValue) < 0 ? '' :
-            '+'}${formatter(
-              state.feature.curValue - state.feature.originalValue
-              )}`}
+        <span class='value-old'>
+          {formatter(state.feature.originalValue)}
         </span>
 
-        <div class='arrow-right'></div>
-      </div>
+        <div class='feature-arrow'
+          class:hidden={state.feature.originalValue === state.feature.curValue}
+        >
+          <span class='value-change'>
+            {`${(state.feature.curValue - state.feature.originalValue) < 0 ? '' :
+              '+'}${formatter(
+                state.feature.curValue - state.feature.originalValue
+                )}`}
+          </span>
 
-      <span class='value-new'>
-        {formatter(state.feature.curValue)}
-      </span>
+          <div class='arrow-right'></div>
+        </div>
+
+        <span class='value-new'
+          class:hidden={state.feature.originalValue === state.feature.curValue}
+        >
+          {formatter(state.feature.curValue)}
+        </span>
+
     </div>
 
     <div class='feature-slider'>

@@ -3,8 +3,12 @@
 
 $range-thumb-width: 8px;
 $base-circle-radius: 5px;
-$card-v-padding: 8px;
+$card-v-padding: 6px;
 $card-h-padding: 16px;
+
+.feature-header {
+  padding: $card-v-padding $card-h-padding 5px $card-h-padding;
+}
 
 .arrow-right {
   box-sizing: border-box;
@@ -39,106 +43,12 @@ $card-h-padding: 16px;
   }
 }
 
+.values {
+  gap: 2px;
+}
+
 .value-label {
-  color: white;
-  background-color: $gray-500;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  line-height: 1;
-  border-radius: 3px;
-}
-
-.feature-slider {
-  position: absolute;
-  // Header + top padding + hist height + padding
-  top: calc(40px + 35px + 56px + 2px);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-
-  .track {
-    width: calc(100% - #{2 * $card-h-padding});
-    background-color: $gray-200;
-    // Only use top and bottom border here to avoid offsetting the left and right
-    // with artifacts => cause misalignment with svg dimension
-    border-top: 1px solid white;
-    border-bottom: 1px solid white;
-    position: absolute;
-    left: 0px;
-    height: 4px;
-
-    .range-track {
-      position: absolute;
-      height: 6px;
-      background-color: $orange-100;
-    }
-  }
-
-  .svg-icon.icon-level-thumb {
-    fill: $gray-400;
-    color: $gray-400;
-    stroke: $gray-100;
-    stroke-width: 6;
-    top: -10px;
-    z-index: 1;
-
-    :global(svg) {
-      width: 1rem;
-      height: 1rem;
-    }
-  }
-
-  :global(.svg-icon.icon-level-thumb.user) {
-    fill: $blue-400;
-    color: $blue-400;
-    stroke: $blue-100;
-  }
-
-  :global(.svg-icon.icon-level-thumb.coach) {
-    fill: $green-500;
-    color: $green-500;
-    stroke: $green-100;
-  }
-}
-
-.track-label {
-  position: absolute;
-  z-index: 2;
-  top: 5px;
-  left : 0px;
-
-  .value-label {
-    width: 15px;
-    height: 15px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    background: $gray-500;
-  }
-
-  .thumb-label {
-    top: 0px;
-    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-  }
-
-  &:global(.hover) {
-    .thumb-label {
-      transform: translateX(-50%) translateY(100%) scale(1);
-    }
-  }
-}
-
-.track-point {
-  border: 100%;
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  z-index: 1;
-  top: 0px;
-  left: 0px;
-  background-color: $gray-400;
 }
 
 .svg-hist {

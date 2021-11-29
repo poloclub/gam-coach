@@ -3,7 +3,9 @@
   import { onMount, onDestroy } from 'svelte';
   import { tooltipConfigStore } from '../../store';
 
-  import refreshIcon from '../../img/icon-refresh.svg';
+  import refreshIcon from '../../img/icon-refresh2.svg';
+  import starIconSolid from '../../img/icon-star-solid.svg';
+  import starIconOutline from '../../img/icon-star-outline.svg';
 
   export let featuresStore = null;
   export let windowLoaded = false;
@@ -29,7 +31,7 @@
   const preProcessSVG = (svgString) => {
     return svgString.replaceAll('black', 'currentcolor')
       .replaceAll('fill:none', 'fill:currentcolor')
-      .replaceAll('stroke:none', 'fill:currentcolor');
+      .replaceAll('stroke:none', 'stroke:currentcolor');
   };
 
   /**
@@ -38,6 +40,8 @@
   export const bindInlineSVG = (component) => {
     const iconList = [
       { class: 'icon-refresh', svg: refreshIcon },
+      { class: 'icon-star-solid', svg: starIconSolid },
+      { class: 'icon-star-outline', svg: starIconOutline },
     ];
 
     iconList.forEach(d => {
@@ -137,15 +141,41 @@
   <div class='coach-nav-bar'>
 
     <div class='tabs'>
-      <div class='tab'>Plan 1</div>
-      <div class='tab'>Plan 2</div>
-      <div class='tab'>Plan 3</div>
-      <div class='tab'>Plan 4</div>
-      <div class='tab'>Plan 5</div>
+
+      <div class='tab'>
+        <span class='tab-name' data-text={'Plan 1'}>Plan 1</span>
+        <div class='svg-icon tab-icon icon-star-outline'></div>
+      </div>
+
+
+      <div class='tab'>
+        <span class='tab-name' data-text={'Plan 2'}>Plan 2</span>
+        <div class='svg-icon tab-icon icon-star-outline'></div>
+      </div>
+
+
+      <div class='tab selected'>
+        <span class='tab-name' data-text={'Plan 3'}>Plan 3</span>
+        <div class='svg-icon tab-icon icon-star-outline'></div>
+      </div>
+
+
+      <div class='tab'>
+        <span class='tab-name' data-text={'Plan 4'}>Plan 4</span>
+        <div class='svg-icon tab-icon icon-star-outline'></div>
+      </div>
+
+
+      <div class='tab'>
+        <span class='tab-name' data-text={'Plan 5'}>Plan 5</span>
+        <div class='svg-icon tab-icon icon-star-outline'></div>
+      </div>
+
     </div>
 
     <div class='nav-controls'>
-      <div class='svg-icon icon-refresh'></div>
+      <div class='svg-icon rect-icon icon-star-solid'></div>
+      <div class='svg-icon rect-icon icon-refresh'></div>
     </div>
   </div>
 

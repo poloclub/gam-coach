@@ -164,7 +164,7 @@
   align-items: center;
   gap: 10px;
 
-  height: 36px;
+  height: 38px;
   border-top: 1px solid $gray-light-border;
   border-bottom: 1px solid $gray-light-border;
   background-color: $gray-200;
@@ -177,20 +177,112 @@
   display: flex;
   flex-direction: row;
   gap: 2px;
+  overflow: hidden;
 
   .tab {
     border: 1px solid $gray-300;
     border-radius: 7px;
-    padding: 0 10px;
+    padding: 2px 5px 2px 10px;
     flex: 1 1 auto;
-    background-color: white;
+    background: white;
     cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    overflow: hidden;
+
+    &:hover {
+      border: 1px solid $gray-400;
+    }
+
+    &:global(.selected) {
+      border: 1px solid $gray-500;
+      // font-weight: 600;
+    }
+  }
+
+  .tab-name {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &::after {
+      content: attr(data-text);
+      content: attr(data-text) / "";
+      height: 0;
+      visibility: hidden;
+      overflow: hidden;
+      user-select: none;
+      pointer-events: none;
+      font-weight: 600;
+    }
+  }
+
+  .tab-icon {
+    color: $gray-400;
+    padding: 4px;
+    flex: 0 0 auto;
+    border-radius: 100%;
+
+    :global(svg) {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    &:hover {
+      color: adjust-color($color: $gray-400, $lightness: -10%);
+      background: $gray-200;
+    }
+
+    &:active {
+      background: adjust-color($color: $gray-200, $lightness: -4%);
+    }
   }
 }
+
 
 .nav-controls {
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 3px;
+
+  .rect-icon {
+    background: white;
+    border-radius: 6px;
+    border: 1px solid $gray-light-border;
+    padding: 4px 5px;
+    color: $gray-500;
+
+    :global(svg) {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    &:hover {
+      color: $gray-600;
+      background: adjust-color($color: white, $lightness: -2%);
+    }
+
+    &:active {
+      background: adjust-color($color: white, $lightness: -5%);
+    }
+  }
+
+  .icon-refresh {
+    :global(svg) {
+      fill: none;
+      stroke-width: 32;
+    }
+  }
+
 }
 

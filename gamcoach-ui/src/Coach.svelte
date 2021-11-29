@@ -6,7 +6,6 @@
 
   import d3 from './utils/d3-import';
   import { onMount } from 'svelte';
-
   import { tooltipConfigStore } from './store';
 
   // Set up tooltip

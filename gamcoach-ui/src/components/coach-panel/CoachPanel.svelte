@@ -3,6 +3,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { tooltipConfigStore } from '../../store';
 
+  import refreshIcon from '../../img/icon-refresh.svg';
+
   export let featuresStore = null;
   export let windowLoaded = false;
 
@@ -24,6 +26,32 @@
     })
   );
 
+  const preProcessSVG = (svgString) => {
+    return svgString.replaceAll('black', 'currentcolor')
+      .replaceAll('fill:none', 'fill:currentcolor')
+      .replaceAll('stroke:none', 'fill:currentcolor');
+  };
+
+  /**
+   * Dynamically bind SVG files as inline SVG strings in this component
+   */
+  export const bindInlineSVG = (component) => {
+    const iconList = [
+      { class: 'icon-refresh', svg: refreshIcon },
+    ];
+
+    iconList.forEach(d => {
+      d3.select(component)
+        .selectAll(`.svg-icon.${d.class}`)
+        .each((_, i, g) => {
+          const ele = d3.select(g[i]);
+          let html = ele.html();
+          html = html.concat(' ', preProcessSVG(d.svg));
+          ele.html(html);
+        });
+    });
+  };
+
   const initPanel = () => {
     // Set the SVG width and height to fit its container
     const coachBar = d3.select(component).select('.coach-bar');
@@ -38,6 +66,7 @@
   onMount(() => {
     // Pass
     // initPanel();
+    bindInlineSVG(component);
   });
 
   onDestroy(() => {
@@ -106,6 +135,18 @@
   </div>
 
   <div class='coach-nav-bar'>
+
+    <div class='tabs'>
+      <div class='tab'>Plan 1</div>
+      <div class='tab'>Plan 2</div>
+      <div class='tab'>Plan 3</div>
+      <div class='tab'>Plan 4</div>
+      <div class='tab'>Plan 5</div>
+    </div>
+
+    <div class='nav-controls'>
+      <div class='svg-icon icon-refresh'></div>
+    </div>
   </div>
 
 </div>

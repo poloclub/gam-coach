@@ -140,6 +140,8 @@
 
   <div class='coach-nav-bar'>
 
+    <!-- <span>Suggestions to achieve approval</span> -->
+
     <div class='tabs'>
 
       <div class='tab'>

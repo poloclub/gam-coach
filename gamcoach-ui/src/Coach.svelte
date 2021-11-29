@@ -56,7 +56,6 @@
   }
 
   .coach-wrapper {
-    max-width: 1000px;
     border: 1px solid $gray-light-border;
     background: $gray-50;
     border-radius: $border-radius;

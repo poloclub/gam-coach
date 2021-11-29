@@ -176,7 +176,7 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: row;
-  gap: 2px;
+  gap: 4px;
   overflow: hidden;
 
   .tab {
@@ -263,8 +263,8 @@
     color: $gray-500;
 
     :global(svg) {
-      width: 1rem;
-      height: 1rem;
+      width: 0.9rem;
+      height: 0.9rem;
     }
 
     &:hover {

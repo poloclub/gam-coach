@@ -5,7 +5,7 @@
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import {initHist} from './FeatureCardCat';
+  import { initHist } from './FeatureCardCat';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import levelThumbIcon from '../../img/icon-level-thumb.svg';
@@ -140,6 +140,8 @@
    * which is only accurate after content is loaded
    */
   const initFeatureCard = async () => {
+
+    initialized = true;
 
     const featureInfo = feature.data;
 

@@ -1,25 +1,11 @@
 <script>
   import d3 from '../../utils/d3-import';
+  import '../../typedef';
   import { onMount, onDestroy } from 'svelte';
   import ListItem from '../list-item/ListItem.svelte';
   import { tooltipConfigStore } from '../../store';
   import { flip } from 'svelte/animate';
   import { crossfade } from 'svelte/transition';
-
-  /**
-   * @typedef {Object} Feature
-   * @property {Object} data
-   * @property {number} featureID
-   * @property {boolean} isCont
-   * @property {boolean} requiresInt
-   * @property {Object | null}  labelEncoder
-   * @property {number | string} originalValue
-   * @property {number | string} coachValue
-   * @property {number | string} myValue
-   * @property {number} isChanged 0: no change, 1: changed by gam coach,
-   *  3: changed by the user
-   * @property {boolean} isConstrained
-  */
 
   export let featuresStore = null;
   export let windowLoaded = false;
@@ -27,6 +13,7 @@
   // Component variables
   let component = null;
   let tooltipConfig = null;
+  /** @type {Feature[]} */
   let features = [];
   const unsubscribes = [];
   let initialized = false;
@@ -88,6 +75,16 @@
     features[7].acceptableRange = [5.28, 10.55];
     features[8].isConstrained = true;
     features[8].acceptableRange = [1, 2, 3, 4, 5];
+    features[15].isChanged = 1;
+
+    // Tell feature panel to display features that are changed
+    features.forEach(f => {
+      if (f.isChanged === 1) {
+        f.display = 1;
+      }
+    });
+
+    featuresStore.set(features);
 
     initialized = true;
   };
@@ -98,19 +95,30 @@
    * @param feature The feature object associated with the clicked item
    */
   const itemClickHandler = (e, feature) => {
-    // console.log(feature.featureID, e.detail);
+    // Schedule to show/hide a card
+    if (e.detail.selected) {
+      if (feature.display === 0) {
+        feature.display = 1;
+        featuresStore.set(features);
+      }
+    } else {
+      if (feature.display !== 0) {
+        feature.display = 0;
+        featuresStore.set(features);
+      }
+    }
   };
 
   const shuffleOrder = () => {
     console.log('shuffling!');
-    features[1].isChanged = 2;
+    features[10].isConstrained = true;
     featuresStore.set(features);
   };
 
   onMount(() => {
-    setTimeout(() => {
-      shuffleOrder();
-    }, 2000);
+    // setTimeout(() => {
+    //   shuffleOrder();
+    // }, 2000);
   });
 
   onDestroy(() => {

@@ -5,7 +5,8 @@
   import ListPanel from './list-panel/ListPanel.svelte';
 
   import d3 from '../utils/d3-import';
-  import { onMount, onDestroy } from 'svelte';
+  import '../typedef';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { writable } from 'svelte/store';
 
   import { tooltipConfigStore } from '../store';
@@ -22,22 +23,68 @@
   );
 
   // Component variables
+  /** @type {HTMLElement}*/
   let component = null;
+
+  /** @type {HTMLElement}*/
+  let leftPanel = null;
+
+  /** @type {HTMLElement}*/
+  let rightPanel = null;
+
+  /** @type {Feature[]} */
   let features = [];
 
-  // Bind features to a store
-  const featuresStore = writable([]);
-  unsubscribes.push(
-    featuresStore.subscribe(value => {
-      features = value;
-    })
-  );
+  /** @type {Feature[]} */
+  let displayFeatures = [];
 
   const curExample = [
     17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
     'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
     '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
   ];
+
+  /**
+   * Run this function every time there is a new value of features form the store
+   */
+  const featureUpdatedFromStore = async () => {
+    // Check if we should schedule card to be displayed
+    let updateStoreAgain = false;
+    for (let i = 0; i < features.length; i ++) {
+      const f = features[i];
+      if (f.display === 1) {
+        // Push the feature card to the shorter panel
+        const leftBBox = leftPanel.getBoundingClientRect();
+        const rightBBox = rightPanel.getBoundingClientRect();
+
+        f.display = leftBBox.height <= rightBBox.height ? 2 : 3;
+        displayFeatures.push(f);
+        displayFeatures = displayFeatures;
+        await tick();
+        updateStoreAgain = true;
+      } else if (f.display === 0) {
+        // Remove if from the display list
+        const target = displayFeatures.indexOf(f);
+        if (target !== -1) {
+          displayFeatures.splice(target, 1);
+          displayFeatures = displayFeatures;
+        }
+      }
+    }
+
+    if (updateStoreAgain) {
+      featuresStore.set(features);
+    }
+  };
+
+  // Bind features to a store
+  const featuresStore = writable([]);
+  unsubscribes.push(
+    featuresStore.subscribe(value => {
+      features = value;
+      featureUpdatedFromStore();
+    })
+  );
 
   // Set up the GAM Coach feature cards
   const initFeatureCards = () => {
@@ -73,6 +120,8 @@
        *  means impossible
        * @property {number[] | null} acceptableRange acceptable
        *  ranges of values
+       * @property {number} display 0: no display, 1: to display, 2: scheduled to
+       *  display on the left panel, 3: scheduled to display on the right panel
       */
 
       if (curType !== 'interaction') {
@@ -89,7 +138,8 @@
           isChanged: 0,
           isConstrained: false,
           difficulty: 3,
-          acceptableRange: null
+          acceptableRange: null,
+          display: 0
         };
 
         if (curType === 'categorical') {
@@ -104,7 +154,6 @@
 
         tempFeatures.push(curFeature);
       }
-
     }
 
     // Sort the features based on the importance
@@ -172,29 +221,11 @@
 
   <div class='card-panel'>
 
-    <div class='sub-panel left-panel'>
+    <div class='sub-panel left-panel' bind:this={leftPanel}>
 
-      <div class='feature-card'>
-        <FeatureCard feature={features[1]}>
-        </FeatureCard>
-      </div>
 
-      <div class='feature-card'>
-        <FeatureCard feature={features[1]}>
-        </FeatureCard>
-      </div>
-
-    </div>
-
-    <div class='sub-panel right-panel'>
-
-      <div class='feature-card'>
-        <FeatureCardCat feature={features[15]}>
-        </FeatureCardCat>
-      </div>
-
-      <!-- {#key features}
-        {#each features as feature}
+      {#each displayFeatures as feature}
+        {#if feature.display === 2}
           {#if feature.isCont}
             <FeatureCard feature={feature}>
             </FeatureCard>
@@ -202,8 +233,39 @@
             <FeatureCardCat feature={feature}>
             </FeatureCardCat>
           {/if}
-        {/each}
-      {/key} -->
+        {/if}
+      {/each}
+
+      <!-- <div class='feature-card'>
+        <FeatureCard feature={features[1]}>
+        </FeatureCard>
+      </div>
+
+      <div class='feature-card'>
+        <FeatureCard feature={features[1]}>
+        </FeatureCard>
+      </div> -->
+
+    </div>
+
+    <div class='sub-panel right-panel' bind:this={rightPanel}>
+
+      {#each displayFeatures as feature}
+        {#if feature.display === 3}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/if}
+      {/each}
+
+      <!-- <div class='feature-card'>
+        <FeatureCardCat feature={features[15]}>
+        </FeatureCardCat>
+      </div> -->
 
     </div>
 

@@ -1,5 +1,6 @@
 <script>
   import d3 from '../../utils/d3-import';
+  import '../../typedef';
   import { onMount, tick } from 'svelte';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
@@ -165,8 +166,8 @@
    * which is only accurate after content is loaded
    */
   const initFeatureCard = async () => {
+    initialized = true;
     const featureInfo = feature.data;
-    console.log(featureInfo);
 
     // Initialize the feature data from the prop
     state.feature = {
@@ -203,8 +204,6 @@
     // Wait until the view is updated then automatically resize the feature name
     await tick();
     fitFeatureName();
-
-    initialized = true;
   };
 
   /**

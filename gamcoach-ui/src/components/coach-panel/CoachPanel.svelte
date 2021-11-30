@@ -93,7 +93,7 @@
       GAM Coach
     </div>
 
-    <div class='coach-labels'>
+    <!-- <div class='coach-labels'>
 
       <div class='coach-label name'>
         Original
@@ -112,7 +112,7 @@
           <option>Approval</option>
           <option>Rejection</option>
         </select>
-      </div>
+      </div> -->
 
       <!-- <div class='coach-label value coach-input'>
         <span>From</span>
@@ -122,7 +122,7 @@
         <input type='number' id='goal-to'>
       </div> -->
 
-      <div class='coach-label name'>
+      <!-- <div class='coach-label name'>
         Current
       </div>
 
@@ -130,7 +130,7 @@
         Approval
       </div>
 
-    </div>
+    </div> -->
 
     <div class='coach-bar'>
       <svg class='coach-bar-svg'></svg>
@@ -140,7 +140,7 @@
 
   <div class='coach-nav-bar'>
 
-    <!-- <span>Suggestions to achieve approval</span> -->
+    <span>Strategies to get between 0.21 and 0.35</span>
 
     <div class='tabs'>
 

@@ -1,5 +1,5 @@
 <script>
-  import FeaturePanel from './components/FeaturePanel.svelte';
+  import FeaturePanel from './components/feature-panel/FeaturePanel.svelte';
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
   import CoachPanel from './components/coach-panel/CoachPanel.svelte';

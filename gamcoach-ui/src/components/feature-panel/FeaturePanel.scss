@@ -1,0 +1,34 @@
+@import '../../define';
+
+.feature-panel {
+  flex: 1 0 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 1000px;
+  max-height: 600px;
+  border-radius: $border-radius;
+}
+
+.card-row {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 20px 0px 10px 0px;
+  justify-content: center;
+  align-items: flex-start;
+
+  box-sizing: border-box;
+  border-bottom-right-radius: $border-radius;
+  background: hsla(0, 0%, 99.5%, 1);
+  overflow-y: scroll;
+}
+
+.card-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}

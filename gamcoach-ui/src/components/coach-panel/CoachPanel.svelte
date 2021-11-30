@@ -18,7 +18,27 @@
   const unsubscribes = [];
   let initialized = false;
 
-  const DURATION = 800;
+  const isRegression = true;
+  const regressionName = 'interest rate';
+  const classes = ['loan approval'];
+
+  let classesPairs = [];
+  classes.forEach((d, i) => {
+    classesPairs.push({
+      name: d,
+      value: i
+    });
+  });
+
+  let tabInputLabel = 'Strategies to get ';
+  const vowels = ['a', 'e', 'i', 'o', 'u'];
+  if (isRegression && vowels.includes(regressionName.substring(0, 1))) {
+    tabInputLabel = tabInputLabel.concat('an');
+  } else if (!isRegression && vowels.includes(classes[0].substring(0, 1))) {
+    tabInputLabel = tabInputLabel.concat('an');
+  } else {
+    tabInputLabel = tabInputLabel.concat('a');
+  }
 
   // Set up tooltip
   unsubscribes.push(
@@ -93,45 +113,6 @@
       GAM Coach
     </div>
 
-    <!-- <div class='coach-labels'>
-
-      <div class='coach-label name'>
-        Original
-      </div>
-
-      <div class='coach-label value'>
-        Rejection
-      </div>
-
-      <div class='coach-label name'>
-        Goal
-      </div>
-
-      <div class='coach-label value'>
-        <select>
-          <option>Approval</option>
-          <option>Rejection</option>
-        </select>
-      </div> -->
-
-      <!-- <div class='coach-label value coach-input'>
-        <span>From</span>
-        <input type='number' id='goal-from'>
-
-        <span>To</span>
-        <input type='number' id='goal-to'>
-      </div> -->
-
-      <!-- <div class='coach-label name'>
-        Current
-      </div>
-
-      <div class='coach-label value'>
-        Approval
-      </div>
-
-    </div> -->
-
     <div class='coach-bar'>
       <svg class='coach-bar-svg'></svg>
     </div>
@@ -141,13 +122,25 @@
   <div class='coach-tab-bar'>
 
     <div class='tab-input'>
-      <span>Strategies to get a</span>
-      <div class='select'>
-        <select>
-          <option>loan approval</option>
-          <option>loan rejection</option>
-        </select>
-      </div>
+      <span>{tabInputLabel}</span>
+
+      {#if isRegression}
+        <span class='tab-keyword'>{regressionName}</span>
+        <span>from</span>
+        <input type='number' step='any' id='goal-from'>
+
+        <span>to</span>
+        <input type='number' step='any' id='goal-to'>
+      {:else}
+        <div class='select'>
+          <select>
+            {#each classesPairs as classesPair}
+              <option value={classesPair.value}>{classesPair.name}</option>
+            {/each}
+          </select>
+        </div>
+      {/if}
+
     </div>
 
     <div class='tabs'>

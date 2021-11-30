@@ -127,15 +127,6 @@
   &.value {
     justify-self: start;
   }
-
-  &.coach-input {
-    gap: 5px;
-    input {
-      width: 70px;
-      padding: 1px;
-      margin: 0;
-    }
-  }
 }
 
 .coach-bar {
@@ -284,6 +275,16 @@
   justify-content: flex-start;
   align-items: center;
   gap: 4px;
+
+  input {
+    width: 70px;
+    padding: 1px;
+    margin: 0;
+  }
+
+  .tab-keyword {
+    font-weight: 600;
+  }
 }
 
 .select {

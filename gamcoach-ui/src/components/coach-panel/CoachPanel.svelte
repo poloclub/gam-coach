@@ -138,9 +138,17 @@
 
   </div>
 
-  <div class='coach-nav-bar'>
+  <div class='coach-tab-bar'>
 
-    <span>Strategies to get between 0.21 and 0.35</span>
+    <div class='tab-input'>
+      <span>Strategies to get a</span>
+      <div class='select'>
+        <select>
+          <option>loan approval</option>
+          <option>loan rejection</option>
+        </select>
+      </div>
+    </div>
 
     <div class='tabs'>
 

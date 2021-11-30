@@ -126,12 +126,6 @@
 
   &.value {
     justify-self: start;
-
-    select {
-      padding: 1px;
-      margin: 0;
-      background: $gray-200;
-    }
   }
 
   &.coach-input {
@@ -157,7 +151,7 @@
   }
 }
 
-.coach-nav-bar {
+.coach-tab-bar {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -248,7 +242,6 @@
   }
 }
 
-
 .nav-controls {
   display: flex;
   flex-direction: row;
@@ -283,6 +276,47 @@
       stroke-width: 32;
     }
   }
-
 }
 
+.tab-input {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 4px;
+}
+
+.select {
+  position: relative;
+  border-radius: 4px;
+  border: 1px solid $gray-light-border;
+
+  select {
+    padding: 0;
+    margin: 0 16px 0 5px;
+    background: $gray-200;
+    border: none;
+    position: relative;
+
+    -moz-appearance: none;
+    -webkit-appearance: none;
+  }
+}
+
+.select::after {
+  right: 6px;
+
+  $select-border-color: $gray-600;
+  border-right: 2px solid $select-border-color;
+  border-top: 2px solid $select-border-color;
+
+  content: '';
+  display: block;
+  height: 6px;
+  width: 6px;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) rotate(135deg);
+  transform-origin: center;
+}

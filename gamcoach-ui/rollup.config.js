@@ -41,7 +41,7 @@ export default {
   plugins: [
     inlineSvg({
       removeTags: false,
-      removingTags: ['title', 'desc', 'defs', 'style']
+      removeSVGTagAttrs: false,
     }),
     svelte({
       compilerOptions: {

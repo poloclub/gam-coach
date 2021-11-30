@@ -18,11 +18,12 @@
   const unsubscribes = [];
   let initialized = false;
 
-  const isRegression = true;
+  // Set up the model goal labels
+  const isRegression = false;
   const regressionName = 'interest rate';
   const classes = ['loan approval'];
 
-  let classesPairs = [];
+  const classesPairs = [];
   classes.forEach((d, i) => {
     classesPairs.push({
       name: d,
@@ -39,6 +40,20 @@
   } else {
     tabInputLabel = tabInputLabel.concat('a');
   }
+
+  // Set up the plans
+  let nextPlanIndex = 1;
+  let savedPlanIndex = new Set();
+  const plans = [];
+  for (let i = 0; i < 5; i++) {
+    plans.push({
+      name: `Plan ${nextPlanIndex}`,
+      planIndex: nextPlanIndex
+    });
+    nextPlanIndex ++;
+  }
+  const curPlans = plans.slice();
+  let activePlanIndex = 2;
 
   // Set up tooltip
   unsubscribes.push(
@@ -64,6 +79,8 @@
       { class: 'icon-star-outline', svg: starIconOutline },
     ];
 
+    console.log(starIconSolid);
+
     iconList.forEach(d => {
       d3.select(component)
         .selectAll(`.svg-icon.${d.class}`)
@@ -87,6 +104,19 @@
     svg.style('height', `${bbox.height}px`);
   };
 
+  const starClicked = (e, plan) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Add the clicked plan to the saved set
+    if (savedPlanIndex.has(plan.planIndex)) {
+      savedPlanIndex.delete(plan.planIndex);
+    } else {
+      savedPlanIndex.add(plan.planIndex);
+    }
+    savedPlanIndex = savedPlanIndex;
+  };
+
   onMount(() => {
     // Pass
     // initPanel();
@@ -107,7 +137,7 @@
 
 <div class='coach-panel' bind:this={component}>
 
-  <div class='coach-content'>
+  <div class='coach-header'>
 
     <div class='coach-logo'>
       GAM Coach
@@ -145,41 +175,33 @@
 
     <div class='tabs'>
 
-      <div class='tab'>
-        <span class='tab-name' data-text={'Plan 1'}>Plan 1</span>
-        <div class='svg-icon tab-icon icon-star-outline'></div>
-      </div>
+      {#each curPlans as plan, i}
+        <div class='tab' class:selected={i === activePlanIndex}
+          on:click={() => {activePlanIndex = i;}}
+          title='Generated plan to achieve your desired outcome'
+        >
+          <div class='star-wrapper'
+            on:click={e => starClicked(e, plan)}
+            title='Click to save this plan'
+          >
+            <div class='svg-icon tab-icon icon-star-solid'
+              class:no-display={!savedPlanIndex.has(plan.planIndex)}>
+            </div>
+            <div class='svg-icon tab-icon icon-star-outline'
+              class:no-display={savedPlanIndex.has(plan.planIndex)}>
+            </div>
+          </div>
 
-
-      <div class='tab'>
-        <span class='tab-name' data-text={'Plan 2'}>Plan 2</span>
-        <div class='svg-icon tab-icon icon-star-outline'></div>
-      </div>
-
-
-      <div class='tab selected'>
-        <span class='tab-name' data-text={'Plan 3'}>Plan 3</span>
-        <div class='svg-icon tab-icon icon-star-outline'></div>
-      </div>
-
-
-      <div class='tab'>
-        <span class='tab-name' data-text={'Plan 4'}>Plan 4</span>
-        <div class='svg-icon tab-icon icon-star-outline'></div>
-      </div>
-
-
-      <div class='tab'>
-        <span class='tab-name' data-text={'Plan 5'}>Plan 5</span>
-        <div class='svg-icon tab-icon icon-star-outline'></div>
-      </div>
+          <span class='tab-name' data-text={plan.name}>{plan.name}</span>
+        </div>
+      {/each}
 
     </div>
 
-    <div class='nav-controls'>
+    <!-- <div class='nav-controls'>
       <div class='svg-icon rect-icon icon-star-solid'></div>
       <div class='svg-icon rect-icon icon-refresh'></div>
-    </div>
+    </div> -->
   </div>
 
 </div>

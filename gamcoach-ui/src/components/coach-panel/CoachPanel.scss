@@ -73,15 +73,21 @@
 
   border-top-left-radius: $border-radius;
   border-top-right-radius: $border-radius;
+
+  overflow: hidden;
 }
 
-.coach-content {
+.coach-header {
   flex: 1 0 auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 
   padding: 10px 15px;
+
+  border-bottom: 1px solid $gray-light-border;
+  z-index: 1;
+  box-shadow: 0px 1px 4px hsla(0, 0%, 0%, 0.07);
 }
 
 .coach-logo {
@@ -147,30 +153,84 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
 
   height: 38px;
-  border-top: 1px solid $gray-light-border;
   border-bottom: 1px solid $gray-light-border;
   background-color: $gray-200;
 
-  padding: 2px 15px;
+  padding: 0px 0px 0px 15px;
+}
+
+.tab-input {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 4px;
+  padding: 0 15px 0 0;
+  border-right: 1px solid $gray-light-border;
+  height: 100%;
+
+  input {
+    width: 70px;
+    padding: 1px;
+    margin: 0;
+  }
+
+  .tab-keyword {
+    font-weight: 600;
+  }
+}
+
+.select {
+  position: relative;
+  border-radius: 4px;
+  border: 1px solid $gray-light-border;
+  background: $gray-50;
+
+  select {
+    padding: 0;
+    margin: 0 16px 0 5px;
+    border: none;
+    position: relative;
+    background-color: transparent;
+
+    -moz-appearance: none;
+    -webkit-appearance: none;
+  }
+}
+
+.select::after {
+  right: 6px;
+
+  $select-border-color: $gray-600;
+  border-right: 2px solid $select-border-color;
+  border-top: 2px solid $select-border-color;
+
+  content: '';
+  display: block;
+  height: 6px;
+  width: 6px;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) rotate(135deg);
+  transform-origin: center;
 }
 
 .tabs {
   flex: 1 1 auto;
   display: flex;
   flex-direction: row;
-  gap: 4px;
-  overflow: hidden;
+  overflow: visible;
+  height: 100%;
 
   .tab {
-    border: 1px solid $gray-300;
-    border-radius: 7px;
-    padding: 2px 5px 2px 10px;
+    border-right: 1px solid $gray-light-border;
+    background-color: $gray-200;
+    padding: 0px 5px 0px 5px;
     flex: 1 1 auto;
-    background: white;
-    cursor: pointer;
+    position: relative;
 
     display: flex;
     flex-direction: row;
@@ -179,13 +239,31 @@
 
     overflow: hidden;
 
+    transition: background-color ease-in-out 100ms;
+
     &:hover {
-      border: 1px solid $gray-400;
+      background-color: adjust-color($color: $gray-200, $lightness: -3%);
+
+      .tab-icon {
+        opacity: 1;
+      }
     }
 
     &:global(.selected) {
-      border: 1px solid $gray-500;
-      // font-weight: 600;
+      height: calc(100% + 1px);
+      transform: translateY(-1px);
+      z-index: 2;
+      background: $gray-50;
+
+      :global(.star-wrapper) {
+        &:hover {
+          background-color: adjust-color($color: $gray-200, $lightness: -4%);
+        }
+      }
+    }
+
+    &:last-of-type {
+      border-right: 0;
     }
   }
 
@@ -194,10 +272,12 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
 
     display: inline-flex;
     flex-direction: column;
     justify-content: space-between;
+    cursor: default;
 
     &::after {
       content: attr(data-text);
@@ -211,24 +291,27 @@
     }
   }
 
-  .tab-icon {
-    color: $gray-400;
+  .star-wrapper {
+    position: absolute;
+    left: 5px;
+    border-radius: 5px;
     padding: 4px;
+    transition: opacity ease-in-out 100ms, background-color ease-in-out 100ms;
+
+    &:hover {
+      background-color: adjust-color($color: $gray-200, $lightness: -10%);
+    }
+  }
+
+  .tab-icon {
+    color: $gray-700;
+    opacity: 0;
     flex: 0 0 auto;
-    border-radius: 100%;
+    cursor: default;
 
     :global(svg) {
       width: 1rem;
       height: 1rem;
-    }
-
-    &:hover {
-      color: adjust-color($color: $gray-400, $lightness: -10%);
-      background: $gray-200;
-    }
-
-    &:active {
-      background: adjust-color($color: $gray-200, $lightness: -4%);
     }
   }
 }
@@ -269,55 +352,6 @@
   }
 }
 
-.tab-input {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 4px;
-
-  input {
-    width: 70px;
-    padding: 1px;
-    margin: 0;
-  }
-
-  .tab-keyword {
-    font-weight: 600;
-  }
-}
-
-.select {
-  position: relative;
-  border-radius: 4px;
-  border: 1px solid $gray-light-border;
-
-  select {
-    padding: 0;
-    margin: 0 16px 0 5px;
-    background: $gray-200;
-    border: none;
-    position: relative;
-
-    -moz-appearance: none;
-    -webkit-appearance: none;
-  }
-}
-
-.select::after {
-  right: 6px;
-
-  $select-border-color: $gray-600;
-  border-right: 2px solid $select-border-color;
-  border-top: 2px solid $select-border-color;
-
-  content: '';
-  display: block;
-  height: 6px;
-  width: 6px;
-  pointer-events: none;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%) rotate(135deg);
-  transform-origin: center;
+.no-display {
+  display: none;
 }

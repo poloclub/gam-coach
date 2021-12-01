@@ -185,10 +185,12 @@
             title='Click to save this plan'
           >
             <div class='svg-icon tab-icon icon-star-solid'
-              class:no-display={!savedPlanIndex.has(plan.planIndex)}>
+              class:no-display={!savedPlanIndex.has(plan.planIndex)}
+            >
             </div>
             <div class='svg-icon tab-icon icon-star-outline'
-              class:no-display={savedPlanIndex.has(plan.planIndex)}>
+              class:no-display={savedPlanIndex.has(plan.planIndex)}
+            >
             </div>
           </div>
 

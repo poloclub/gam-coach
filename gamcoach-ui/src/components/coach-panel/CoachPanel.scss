@@ -68,7 +68,7 @@
   flex-direction: column;
   align-items: stretch;
 
-  height: 160px;
+  // height: 160px;
   flex: 1 0 auto;
 
   border-top-left-radius: $border-radius;
@@ -82,8 +82,9 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: baseline;
 
-  padding: 10px 15px;
+  padding: 7px 15px;
 
   border-bottom: 1px solid $gray-light-border;
   z-index: 1;
@@ -93,10 +94,22 @@
 .coach-logo {
   flex: 1 1 auto;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  font-weight: 600;
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 10px;
+  line-height: 1;
+  cursor: default;
+
+  .coach-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .coach-tagline {
+    font-size: 1rem;
+    font-weight: 400;
+    color: $gray-600;
+  }
 }
 
 .coach-labels {
@@ -171,6 +184,7 @@
   padding: 0 15px 0 0;
   border-right: 1px solid $gray-light-border;
   height: 100%;
+  cursor: default;
 
   input {
     width: 70px;
@@ -307,16 +321,19 @@
 
   .tab-icon {
     color: $gray-700;
+    fill: $gray-700;
     opacity: 0;
     flex: 0 0 auto;
     cursor: default;
+
+    transition: opacity ease-in-out 100ms;
 
     animation: thumbup 100ms linear;
     -webkit-animation: thumbup 100ms linear;
 
     :global(svg) {
-      width: 1rem;
-      height: 1rem;
+      width: 0.9rem;
+      height: 0.9rem;
     }
   }
 }
@@ -336,38 +353,46 @@
   }
 }
 
-.nav-controls {
+.coach-controls {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
 
-  .rect-icon {
-    background: white;
+  .icon-wrapper {
+    background-color: $gray-50;
     border-radius: 6px;
-    border: 1px solid $gray-light-border;
-    padding: 4px 5px;
-    color: $gray-500;
+    padding: 5px 8px;
+    color: $gray-800;
+    font-size: 0.9rem;
+    line-height: 1;
+    gap: 4px;
+    cursor: default;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    transition: background-color 100ms ease-in-out;
+
+    .svg-icon {
+      cursor: default;
+    }
 
     :global(svg) {
+      color: currentColor;
+      fill: currentColor;
       width: 0.9rem;
       height: 0.9rem;
     }
 
     &:hover {
-      color: $gray-600;
-      background: adjust-color($color: white, $lightness: -2%);
+      background-color: adjust-color($color: white, $lightness: -7%);
     }
 
     &:active {
-      background: adjust-color($color: white, $lightness: -5%);
-    }
-  }
-
-  .icon-refresh {
-    :global(svg) {
-      fill: none;
-      stroke-width: 32;
+      background-color: adjust-color($color: white, $lightness: -11%);
     }
   }
 }

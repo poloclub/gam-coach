@@ -9,6 +9,8 @@
   width: 1000px;
   height: 600px;
   border-radius: $border-radius;
+
+  cursor: default;
 }
 
 .card-row {
@@ -22,6 +24,7 @@
 
   box-sizing: border-box;
   border-bottom-right-radius: $border-radius;
+  border-bottom-left-radius: $border-radius;
   background: hsla(0, 0%, 99.5%, 1);
   overflow-y: scroll;
 }

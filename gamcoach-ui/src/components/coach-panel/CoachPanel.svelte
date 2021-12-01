@@ -140,12 +140,34 @@
   <div class='coach-header'>
 
     <div class='coach-logo'>
-      GAM Coach
+      <span class='coach-name'>
+        GAM Coach
+      </span>
+      <span class='coach-tagline'>
+        Personal coach to help you obtain desired AI decisions
+      </span>
     </div>
 
-    <div class='coach-bar'>
-      <svg class='coach-bar-svg'></svg>
+    <div class='coach-controls'>
+      <div class='icon-wrapper'
+        title='Saved plans'
+      >
+        <div class='svg-icon icon-star-outline'></div>
+        <span class='icon-label'>Bookmark</span>
+      </div>
+
+      <div class='icon-wrapper'
+        title='Generate new plans based on my configurations'
+      >
+        <div class='svg-icon icon-refresh'></div>
+        <span class='icon-label'>Regenerate</span>
+      </div>
+
     </div>
+
+    <!-- <div class='coach-bar'>
+      <svg class='coach-bar-svg'></svg>
+    </div> -->
 
   </div>
 
@@ -200,10 +222,6 @@
 
     </div>
 
-    <!-- <div class='nav-controls'>
-      <div class='svg-icon rect-icon icon-star-solid'></div>
-      <div class='svg-icon rect-icon icon-refresh'></div>
-    </div> -->
   </div>
 
 </div>

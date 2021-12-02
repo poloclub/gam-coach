@@ -84,7 +84,7 @@
   justify-content: space-between;
   align-items: baseline;
 
-  padding: 7px 15px;
+  padding: 10px 15px 10px 15px;
 
   border-bottom: 1px solid $gray-light-border;
   z-index: 1;
@@ -103,6 +103,7 @@
   .coach-name {
     font-size: 1.2rem;
     font-weight: 600;
+    // font-variant: small-caps;
   }
 
   .coach-tagline {
@@ -363,7 +364,8 @@
     background-color: $gray-50;
     border-radius: 6px;
     padding: 5px 8px;
-    color: $gray-800;
+    color: $gray-700;
+    border: 1px solid $gray-300;
     font-size: 0.9rem;
     line-height: 1;
     gap: 4px;

@@ -53,7 +53,7 @@
     nextPlanIndex ++;
   }
   const curPlans = plans.slice();
-  let activePlanIndex = 2;
+  let activePlanIndex = 0;
 
   // Set up tooltip
   unsubscribes.push(
@@ -153,7 +153,7 @@
         title='Saved plans'
       >
         <div class='svg-icon icon-star-outline'></div>
-        <span class='icon-label'>Bookmark</span>
+        <span class='icon-label'>Bookmarks</span>
       </div>
 
       <div class='icon-wrapper'

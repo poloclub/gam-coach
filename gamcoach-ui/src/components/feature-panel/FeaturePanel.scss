@@ -1,16 +1,31 @@
 @import '../../define';
 
+// $width: 980px;
+$card-width: 300px;
+$card-gap: 15px;
+// $h-padding: ($width - 3 * $card-width - 2 * $card-gap) / 2;
+$h-padding: 25px;
+
 .feature-panel {
   flex: 1 0 auto;
 
   display: flex;
   flex-direction: column;
 
-  width: 1000px;
+  // width: $width;
   height: 600px;
-  border-radius: $border-radius;
 
+  border-radius: $border-radius;
+  background-color: white;
   cursor: default;
+
+  overflow-y: scroll;
+}
+
+.card-block {
+  &:last-of-type {
+    margin-bottom: 20px;
+  }
 }
 
 .card-row {
@@ -18,7 +33,7 @@
   display: flex;
   flex-direction: row;
   gap: 20px;
-  padding: 20px 0px 10px 0px;
+  padding: 15px $h-padding 10px $h-padding;
   justify-content: center;
   align-items: flex-start;
 
@@ -26,7 +41,6 @@
   border-bottom-right-radius: $border-radius;
   border-bottom-left-radius: $border-radius;
   background: hsla(0, 0%, 99.5%, 1);
-  overflow-y: scroll;
 }
 
 .card-column {
@@ -34,4 +48,29 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
+}
+
+.row-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: baseline;
+  background-color: white;
+  opacity: 0.95;
+  border-bottom: 1px solid $gray-200;
+
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .label {
+    padding: 10px $h-padding 5px $h-padding;
+    font-size: 1rem;
+    font-weight: 400;
+    color: $gray-600;
+  }
 }

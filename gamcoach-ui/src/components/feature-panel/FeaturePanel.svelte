@@ -204,54 +204,130 @@
 
 <div class='feature-panel' bind:this={component}>
 
-  <div class='card-row'>
+  <div class='card-block'>
+    <div class='row-header'>
+      <span class='label'>Suggested Changes</span>
+    </div>
 
-    <div class='card-column left-column' bind:this={leftColumn}>
+    <div class='card-row'>
 
+      <div class='card-column left-column' bind:this={leftColumn}>
 
-      <!-- {#each displayFeatures as feature}
-        {#if feature.display === 2}
-          {#if feature.isCont}
-            <FeatureCard feature={feature}>
-            </FeatureCard>
-          {:else}
-            <FeatureCardCat feature={feature}>
-            </FeatureCardCat>
-          {/if}
-        {/if}
-      {/each} -->
+        <div class='feature-card'>
+          <FeatureCard feature={features[1]}>
+          </FeatureCard>
+        </div>
 
-      <div class='feature-card'>
-        <FeatureCard feature={features[1]}>
-        </FeatureCard>
+        <div class='feature-card'>
+          <FeatureCard feature={features[2]}>
+          </FeatureCard>
+        </div>
+
       </div>
 
-      <div class='feature-card'>
-        <FeatureCard feature={features[2]}>
-        </FeatureCard>
+      <div class='card-column mid-column' bind:this={midColumn}>
+
+        <div class='feature-card'>
+          <FeatureCardCat feature={features[15]}>
+          </FeatureCardCat>
+        </div>
+
+      </div>
+
+      <div class='card-column right-column' bind:this={rightColumn}>
+
+        <div class='feature-card'>
+          <FeatureCardCat feature={features[16]}>
+          </FeatureCardCat>
+        </div>
+
       </div>
 
     </div>
+  </div>
 
-    <div class='card-column mid-column' bind:this={midColumn}>
+  <div class='card-block'>
+    <div class='row-header'>
+      <span class='label'>Configured Features</span>
+    </div>
 
-      <div class='feature-card'>
-        <FeatureCardCat feature={features[15]}>
-        </FeatureCardCat>
+    <div class='card-row'>
+
+      <div class='card-column left-column' bind:this={leftColumn}>
+
+        <div class='feature-card'>
+          <FeatureCard feature={features[1]}>
+          </FeatureCard>
+        </div>
+
+        <div class='feature-card'>
+          <FeatureCard feature={features[2]}>
+          </FeatureCard>
+        </div>
+
+      </div>
+
+      <div class='card-column mid-column' bind:this={midColumn}>
+
+        <div class='feature-card'>
+          <FeatureCardCat feature={features[15]}>
+          </FeatureCardCat>
+        </div>
+
+      </div>
+
+      <div class='card-column right-column' bind:this={rightColumn}>
+
+        <div class='feature-card'>
+          <FeatureCardCat feature={features[16]}>
+          </FeatureCardCat>
+        </div>
+
       </div>
 
     </div>
+  </div>
 
+  <div class='card-block'>
+    <div class='row-header'>
+      <span class='label'>Other Features</span>
+    </div>
 
-    <div class='card-column right-column' bind:this={rightColumn}>
+    <div class='card-row'>
 
-      <div class='feature-card'>
-        <FeatureCardCat feature={features[16]}>
-        </FeatureCardCat>
+      <div class='card-column left-column' bind:this={leftColumn}>
+
+        <div class='feature-card'>
+          <FeatureCard feature={features[1]}>
+          </FeatureCard>
+        </div>
+
+        <div class='feature-card'>
+          <FeatureCard feature={features[2]}>
+          </FeatureCard>
+        </div>
+
+      </div>
+
+      <div class='card-column mid-column' bind:this={midColumn}>
+
+        <div class='feature-card'>
+          <FeatureCardCat feature={features[15]}>
+          </FeatureCardCat>
+        </div>
+
+      </div>
+
+      <div class='card-column right-column' bind:this={rightColumn}>
+
+        <div class='feature-card'>
+          <FeatureCardCat feature={features[16]}>
+          </FeatureCardCat>
+        </div>
+
       </div>
 
     </div>
-
   </div>
 
 
@@ -266,5 +342,17 @@
       {/if}
     {/each}
   {/key} -->
+
+        <!-- {#each displayFeatures as feature}
+        {#if feature.display === 2}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/if}
+      {/each} -->
 
 </div>

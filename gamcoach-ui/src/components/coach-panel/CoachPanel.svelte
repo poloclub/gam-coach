@@ -79,8 +79,6 @@
       { class: 'icon-star-outline', svg: starIconOutline },
     ];
 
-    console.log(starIconSolid);
-
     iconList.forEach(d => {
       d3.select(component)
         .selectAll(`.svg-icon.${d.class}`)

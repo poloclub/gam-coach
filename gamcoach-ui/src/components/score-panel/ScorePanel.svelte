@@ -4,7 +4,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { tooltipConfigStore } from '../../store';
-  import { initScoreSVG } from './ScorePanel';
+  import { ScorePanel } from './ScorePanel';
 
   export let windowLoaded = false;
 
@@ -20,8 +20,13 @@
   /** @type {HTMLElement}*/
   let component = null;
 
+  /** @type {ScorePanel}*/
+  let scorePanel = null;
+
   onMount(() => {
-    initScoreSVG(component);
+    // Init the svg
+    scorePanel = new ScorePanel(component);
+    scorePanel.initSVG();
   });
 
   onDestroy(() => {
@@ -37,5 +42,19 @@
 </style>
 
 <div class='score-panel' bind:this={component}>
+
+  <div class='decision'>
+
+    <span class='decision-label'>
+      Decision
+    </span>
+
+    <span class='decision-result'>
+      loan approval
+    </span>
+
+  </div>
+
   <svg class='score-svg'></svg>
+
 </div>

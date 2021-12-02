@@ -26,6 +26,8 @@
   /** @type {HTMLElement}*/
   let component = null;
 
+  let svg = null;
+
   /** @type {HTMLElement}*/
   let leftColumn = null;
 
@@ -187,7 +189,7 @@
   };
 
   onMount(() => {
-    //
+    // initScoreBar();
   });
 
   onDestroy(() => {
@@ -203,6 +205,10 @@
 </style>
 
 <div class='feature-panel' bind:this={component}>
+
+  <!-- <div class='score-bar'>
+    <svg class='score-bar-svg'></svg>
+  </div> -->
 
   <div class='card-block'>
     <div class='row-header'>

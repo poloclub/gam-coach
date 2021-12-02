@@ -3,6 +3,7 @@
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
   import CoachPanel from './components/coach-panel/CoachPanel.svelte';
+  import ScorePanel from './components/score-panel/ScorePanel.svelte';
 
   import d3 from './utils/d3-import';
   import { onMount } from 'svelte';
@@ -63,6 +64,23 @@
       0px 0px 5px hsla(0, 0%, 0%, 0.12);
   }
 
+  .coach-panel-wrapper {
+    position: relative;
+    z-index: 2;
+  }
+
+  .feature-panel-wrapper {
+    position: relative;
+    z-index: 1;
+  }
+
+  .score-bar-wrapper {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    transform: translateY(100%);
+  }
+
 </style>
 
 <div class='main-standalone'>
@@ -72,11 +90,17 @@
   <div class='content'>
 
     <div class='coach-wrapper'>
-      <CoachPanel></CoachPanel>
 
-      <FeaturePanel data={data}
-        windowLoaded={windowLoaded}
-      />
+      <div class='coach-panel-wrapper'>
+        <CoachPanel />
+        <div class='score-bar-wrapper'>
+          <ScorePanel windowLoaded={windowLoaded} />
+        </div>
+      </div>
+
+      <div class='feature-panel-wrapper'>
+        <FeaturePanel data={data} windowLoaded={windowLoaded} />
+      </div>
 
       <DiffPicker/>
     </div>

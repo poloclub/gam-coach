@@ -91,17 +91,6 @@
     });
   };
 
-  const initPanel = () => {
-    // Set the SVG width and height to fit its container
-    const coachBar = d3.select(component).select('.coach-bar');
-    svg = coachBar.select('svg');
-
-    const bbox = coachBar.node().getBoundingClientRect();
-    console.log(bbox);
-    svg.style('width', `${bbox.width}px`);
-    svg.style('height', `${bbox.height}px`);
-  };
-
   const starClicked = (e, plan) => {
     e.preventDefault();
     e.stopPropagation();

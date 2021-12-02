@@ -1,21 +1,17 @@
 @import '../../define';
 
-// $width: 980px;
-$card-width: 300px;
-$card-gap: 15px;
-// $h-padding: ($width - 3 * $card-width - 2 * $card-gap) / 2;
-$h-padding: 25px;
-
 .feature-panel {
   flex: 1 0 auto;
 
   display: flex;
   flex-direction: column;
+  position: relative;
 
   // width: $width;
   height: 600px;
 
-  border-radius: $border-radius;
+  border-bottom-left-radius: $border-radius;
+  border-bottom-right-radius: $border-radius;
   background-color: white;
   cursor: default;
 
@@ -33,7 +29,7 @@ $h-padding: 25px;
   display: flex;
   flex-direction: row;
   gap: 20px;
-  padding: 15px $h-padding 10px $h-padding;
+  padding: 15px $panel-h-padding 10px $panel-h-padding;
   justify-content: center;
   align-items: flex-start;
 
@@ -68,7 +64,7 @@ $h-padding: 25px;
   }
 
   .label {
-    padding: 10px $h-padding 5px $h-padding;
+    padding: 10px $panel-h-padding 5px $panel-h-padding;
     font-size: 1rem;
     font-weight: 400;
     color: $gray-600;

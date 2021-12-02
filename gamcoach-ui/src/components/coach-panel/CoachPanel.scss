@@ -149,19 +149,6 @@
   }
 }
 
-.coach-bar {
-  flex: 7 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: $pink-50;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
 .coach-tab-bar {
   display: flex;
   flex-direction: row;

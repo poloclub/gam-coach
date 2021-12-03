@@ -2,11 +2,14 @@
 
 .score-panel {
   display: flex;
-  flex-direction: row;
+  flex-direction: row-reverse;
   justify-content: flex-start;
   align-items: center;
   gap: 10px;
   cursor: default;
+
+  // width: 770px;
+  // border-left: 1px solid $gray-200;
 
   margin: 0 $panel-h-padding 0 0;
 }
@@ -26,16 +29,34 @@
     border-radius: 8px;
     padding: 1px 10px;
     background-color: $gray-200;
+
+    &:global(.in-range) {
+      background-color: $green-100;
+      color: $green-900;
+    }
   }
 }
 
 .score-svg {
-
   :global(.back-rect) {
     fill: $gray-300;
   }
 
   :global(.top-rect) {
-    fill: $gray-500;
+    fill: $gray-400;
+  }
+
+  :global(.in-range) {
+    fill: $green-200;
+  }
+
+  :global(.min-threshold), :global(.max-threshold) {
+    fill: $green-600;
+    stroke-linejoin: round;
+  }
+
+  :global(.original-value) {
+    fill: $gray-600;
+    stroke-linejoin: round;
   }
 }

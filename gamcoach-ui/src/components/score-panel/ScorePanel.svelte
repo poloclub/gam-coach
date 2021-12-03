@@ -2,7 +2,6 @@
   // @ts-check
   import '../../typedef';
   import { onMount, onDestroy } from 'svelte';
-  import { writable } from 'svelte/store';
   import { tooltipConfigStore } from '../../store';
   import { ScorePanel } from './ScorePanel';
 
@@ -13,7 +12,9 @@
   // Set up tooltip
   let tooltipConfig = null;
   unsubscribes.push(
-    tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
+    tooltipConfigStore.subscribe((value) => {
+      tooltipConfig = value;
+    })
   );
 
   // Component variables
@@ -30,31 +31,20 @@
   });
 
   onDestroy(() => {
-    unsubscribes.forEach(unsub => unsub());
+    unsubscribes.forEach((unsub) => unsub());
   });
 
   // $: windowLoaded;
-
 </script>
 
-<style lang='scss'>
-  @import './ScorePanel.scss';
-</style>
-
-<div class='score-panel' bind:this={component}>
-
-  <div class='decision'>
-
-    <span class='decision-label'>
-      Decision
-    </span>
-
-    <span class='decision-result'>
-      loan approval
-    </span>
-
+<div class="score-panel" bind:this={component}>
+  <div class="decision">
+    <span class="decision-result in-range">loan approval</span>
   </div>
 
-  <svg class='score-svg'></svg>
-
+  <svg class="score-svg" />
 </div>
+
+<style lang="scss">
+  @import './ScorePanel.scss';
+</style>

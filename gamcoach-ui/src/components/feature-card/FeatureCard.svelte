@@ -25,6 +25,7 @@
 
   let mounted = false;
   let initialized = false;
+  let isCollapsed = true;
   let state = {};
 
   // Constants
@@ -256,14 +257,8 @@
 
       <div class='card-icons'>
         <div class='svg-icon icon-refresh'>
-          <div class='icon-label'>
-            <span class='thumb-label-span'>Reset</span>
-          </div>
-        </div>
-
-        <div class='svg-icon icon-close'>
-          <div class='icon-label'>
-            <span class='thumb-label-span'>Close</span>
+          <div class='local-tooltip'>
+            <span>Reset</span>
           </div>
         </div>
       </div>
@@ -359,6 +354,23 @@
       </div>
 
     </div>
+  </div>
+
+  <div class='configuration'>
+    <span class='tag acceptable-tag'>
+      Acceptable between 400 and 500
+      <div class='local-tooltip'>
+        <span>New strategies will only search within this range</span>
+      </div>
+    </span>
+
+    <span class='tag difficulty-tag'>
+      Easy to change
+      <div class='local-tooltip'>
+        <span>New strategies will prioritize features that are easy to change</span>
+      </div>
+    </span>
+
   </div>
 
 </div>

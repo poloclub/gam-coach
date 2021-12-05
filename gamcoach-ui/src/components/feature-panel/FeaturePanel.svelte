@@ -8,8 +8,9 @@
   import '../../typedef';
   import { onMount, onDestroy, tick } from 'svelte';
   import { writable } from 'svelte/store';
-
   import { tooltipConfigStore } from '../../store';
+
+  import caretDownIcon from '../../img/icon-caret-down.svg';
 
   export let data = null;
   export let windowLoaded = false;
@@ -50,6 +51,32 @@
     'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
     '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
   ];
+
+  const preProcessSVG = (svgString) => {
+    return svgString.replaceAll('black', 'currentcolor')
+      .replaceAll('fill:none', 'fill:currentcolor')
+      .replaceAll('stroke:none', 'stroke:currentcolor');
+  };
+
+  /**
+   * Dynamically bind SVG files as inline SVG strings in this component
+   */
+  export const bindInlineSVG = (component) => {
+    const iconList = [
+      { class: 'icon-caret-down', svg: caretDownIcon },
+    ];
+
+    iconList.forEach(d => {
+      d3.select(component)
+        .selectAll(`.svg-icon.${d.class}`)
+        .each((_, i, g) => {
+          const ele = d3.select(g[i]);
+          let html = ele.html();
+          html = html.concat(' ', preProcessSVG(d.svg));
+          ele.html(html);
+        });
+    });
+  };
 
   /**
    * Run this function every time there is a new value of features form the store
@@ -190,6 +217,7 @@
 
   onMount(() => {
     // initScoreBar();
+    bindInlineSVG(component);
   });
 
   onDestroy(() => {
@@ -213,6 +241,7 @@
   <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Suggested Changes</span>
+      <span class='svg-icon icon-caret-down'></span>
     </div>
 
     <div class='card-row'>
@@ -231,7 +260,7 @@
 
       </div>
 
-      <div class='card-column mid-column' bind:this={midColumn}>
+      <!-- <div class='card-column mid-column' bind:this={midColumn}>
 
         <div class='feature-card'>
           <FeatureCardCat feature={features[15]}>
@@ -247,12 +276,12 @@
           </FeatureCardCat>
         </div>
 
-      </div>
+      </div> -->
 
     </div>
   </div>
 
-  <div class='card-block'>
+  <!-- <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Configured Features</span>
     </div>
@@ -334,7 +363,7 @@
       </div>
 
     </div>
-  </div>
+  </div> -->
 
 
   <!-- {#key features}

@@ -248,12 +248,12 @@
 
       <div class='card-column left-column' bind:this={leftColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCard feature={features[1]}>
           </FeatureCard>
         </div>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCard feature={features[2]}>
           </FeatureCard>
         </div>
@@ -262,7 +262,7 @@
 
       <!-- <div class='card-column mid-column' bind:this={midColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCardCat feature={features[15]}>
           </FeatureCardCat>
         </div>
@@ -271,7 +271,7 @@
 
       <div class='card-column right-column' bind:this={rightColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCardCat feature={features[16]}>
           </FeatureCardCat>
         </div>
@@ -290,12 +290,12 @@
 
       <div class='card-column left-column' bind:this={leftColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCard feature={features[1]}>
           </FeatureCard>
         </div>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCard feature={features[2]}>
           </FeatureCard>
         </div>
@@ -304,7 +304,7 @@
 
       <div class='card-column mid-column' bind:this={midColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCardCat feature={features[15]}>
           </FeatureCardCat>
         </div>
@@ -313,7 +313,7 @@
 
       <div class='card-column right-column' bind:this={rightColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCardCat feature={features[16]}>
           </FeatureCardCat>
         </div>
@@ -332,12 +332,12 @@
 
       <div class='card-column left-column' bind:this={leftColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCard feature={features[1]}>
           </FeatureCard>
         </div>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCard feature={features[2]}>
           </FeatureCard>
         </div>
@@ -346,7 +346,7 @@
 
       <div class='card-column mid-column' bind:this={midColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCardCat feature={features[15]}>
           </FeatureCardCat>
         </div>
@@ -355,7 +355,7 @@
 
       <div class='card-column right-column' bind:this={rightColumn}>
 
-        <div class='feature-card'>
+        <div class='feature-card-wrapper'>
           <FeatureCardCat feature={features[16]}>
           </FeatureCardCat>
         </div>

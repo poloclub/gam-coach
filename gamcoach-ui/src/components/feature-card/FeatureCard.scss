@@ -17,6 +17,14 @@ $card-h-padding: 16px;
   background: white;
   position: relative;
   border: 1px solid $gray-300;
+
+  &.collapsed {
+    background: $gray-100;
+  }
+
+  &:hover {
+    box-shadow: 0px 0px 5px hsla(0, 0%, 0%, 0.06), 0px 0px 10px hsla(0, 0%, 0%, 0.1);
+  }
 }
 
 .feature-header {
@@ -53,6 +61,10 @@ $card-h-padding: 16px;
     }
   }
 
+  &.collapsed {
+    border-bottom: none;
+  }
+
   .card-icons {
     display: flex;
     flex-direction: row;
@@ -84,6 +96,10 @@ $card-h-padding: 16px;
       &:active {
         fill: adjust-color($color: $gray-400, $lightness: -10%);
       }
+    }
+
+    &.collapsed {
+      display: none;
     }
   }
 }
@@ -159,6 +175,15 @@ $card-h-padding: 16px;
 .feature-hist {
   position: relative;
   width: 100%;
+  visibility: hidden;
+
+  &.collapsed {
+    display: none;
+  }
+
+  &.expanded {
+    visibility: visible;
+  }
 }
 
 .feature-annotations {
@@ -285,6 +310,7 @@ $card-h-padding: 16px;
   display: flex;
   flex-direction: column;
   z-index: 1;
+  visibility: hidden;
 
   .track {
     width: calc(100% - #{2 * $range-thumb-width + 2 * $card-h-padding});
@@ -385,6 +411,14 @@ $card-h-padding: 16px;
     fill: $green-500;
     color: $green-500;
     stroke: $green-100;
+  }
+
+  &.collapsed {
+    display: none;
+  }
+
+  &.expanded {
+    visibility: visible;
   }
 }
 
@@ -531,6 +565,8 @@ $card-h-padding: 16px;
   justify-content: flex-start;
   align-items: flex-start;
 
+  visibility: hidden;
+
   .tag {
     font-size: 0.9rem;
     display: inline-block;
@@ -558,12 +594,21 @@ $card-h-padding: 16px;
     background: $indigo-50;
     color: $indigo-600;
   }
+
+  &.collapsed {
+    display: none;
+  }
+
+  &.expanded {
+    visibility: visible;
+  }
 }
 
 .local-tooltip {
   position:absolute;
   bottom: 13px;
   left: 50%;
+  z-index: 1;
 
   font-size: 0.8rem;
   border-radius: 2px;
@@ -596,8 +641,16 @@ $card-h-padding: 16px;
     background-color: inherit;
   }
 
+  .content {
+    z-index: 2;
+  }
+
 }
 
 .hidden {
   visibility: hidden;
+}
+
+.no-display {
+  display: none;
 }

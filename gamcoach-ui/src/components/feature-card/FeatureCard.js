@@ -178,7 +178,9 @@ export const moveThumb = (component, state, thumbID, value) => {
     .attr('data-curValue', value);
 
   // Compute the position to move the thumb to
+  //@ts-ignore
   const thumbBBox = thumb.node().getBoundingClientRect();
+  //@ts-ignore
   const trackBBox = thumb.node().parentNode.getBoundingClientRect();
 
   let xPos = (value - state.feature.valueMin) /
@@ -191,6 +193,7 @@ export const moveThumb = (component, state, thumbID, value) => {
     const rangeTrackBBox = d3.select(component)
       .select('.range-track')
       .node()
+      //@ts-ignore
       .getBoundingClientRect();
 
     let labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 -
@@ -337,6 +340,7 @@ const syncRangeTrack = (component, state) => {
   const rightThumb = d3.select(component)
     .select('#slider-right-thumb');
 
+  //@ts-ignore
   const thumbWidth = leftThumb.node().getBoundingClientRect().width;
   const leftThumbLeft = parseFloat(leftThumb.style('left'));
   const rightThumbLeft = parseFloat(rightThumb.style('left'));
@@ -357,6 +361,19 @@ const syncRangeTrack = (component, state) => {
   }
 };
 
+export const initHistSize = (component, state) => {
+  const histHeight = 90;
+  const tickHeight = 30;
+  const vGap = 15;
+  const height = histHeight + tickHeight + vGap;
+
+  state.histSVG = d3
+    .select(component)
+    .select('.svg-hist')
+    .attr('width', 0)
+    .attr('height', height);
+};
+
 /**
  * Initialize the density plot.
  */
@@ -366,6 +383,7 @@ export const initHist = (component, state) => {
   // Use the parent size to initialize the SVG size
   const parentDiv = d3.select(component)
     .select('.feature-hist');
+    //@ts-ignore
   const parentBBox = parentDiv.node().getBoundingClientRect();
 
   const width = parentBBox.width;
@@ -383,6 +401,7 @@ export const initHist = (component, state) => {
   const thumbWidth = d3.select(component)
     .select('#slider-left-thumb')
     .node()
+    //@ts-ignore
     .offsetWidth;
 
   const padding = {
@@ -435,7 +454,8 @@ export const initHist = (component, state) => {
     .range([0, totalWidth]);
 
   const yScale = d3.scaleLinear()
-    .domain([0, d3.max(curDensity, d => d[1])])
+    //@ts-ignore
+    .domain([0, d3.max(curDensity, (d) => d[1])])
     .range([histHeight - padding.bottom - padding.top, padding.histTop]);
 
   const curve = d3.line()
@@ -594,11 +614,13 @@ export const initHist = (component, state) => {
   const xOffset = d3.select(component)
     .select('.feature-hist')
     .node()
+    //@ts-ignore
     .getBoundingClientRect().x;
 
   const xBound = d3.select(component)
     .select('.feature-hist')
     .node()
+    //@ts-ignore
     .getBoundingClientRect().width;
 
   // --- Original ---
@@ -685,9 +707,11 @@ export const initHist = (component, state) => {
   labelWidth = tempClone.node().getBoundingClientRect().width;
   tempClone.remove();
 
-  const rangeTrackBBox = d3.select(component)
+  const rangeTrackBBox = d3
+    .select(component)
     .select('.range-track')
     .node()
+    //@ts-ignore
     .getBoundingClientRect();
 
   // Record the offset so we don't need to compute it later

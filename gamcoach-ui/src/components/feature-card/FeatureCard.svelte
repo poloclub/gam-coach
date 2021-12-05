@@ -4,7 +4,7 @@
   import { onMount, tick } from 'svelte';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import {initSlider, initHist} from './FeatureCard';
+  import {initSlider, initHist, initHistSize} from './FeatureCard';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import rangeThumbLeftIcon from '../../img/icon-range-thumb-left.svg';
@@ -20,12 +20,14 @@
   import closeIcon from '../../img/icon-close.svg';
   import refreshIcon from '../../img/icon-refresh.svg';
 
-
+  /** @type {Feature} */
   export let feature = null;
 
   let mounted = false;
   let initialized = false;
+  let histDrawn = false;
   let isCollapsed = true;
+  let isExpanded = false;
   let state = {};
 
   // Constants
@@ -196,11 +198,9 @@
       state.feature.curMax = Math.ceil(state.feature.curMax);
     }
 
-    // Init the slider
-    initSlider(component, state);
-
-    // Init the density plot and ticks
-    initHist(component, state);
+    // We only init the svg size here so we can animate the height when user
+    // clicks the header
+    initHistSize(component, state);
 
     // Wait until the view is updated then automatically resize the feature name
     await tick();
@@ -230,6 +230,50 @@
     diffPickerConfigStore.set(diffPickerConfig);
   };
 
+  /**
+   * Handler for the header click event
+   * @param {MouseEvent} e Mouse event
+   */
+  export const headerClicked = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Register the initial size
+    const initBBox = component.getBoundingClientRect();
+
+    isCollapsed = !isCollapsed;
+    await tick();
+
+    // Register the final state
+    const finalBBox = component.getBoundingClientRect();
+
+    const animation = component.animate(
+      [
+        { height: `${initBBox.height}px` },
+        { height: `${finalBBox.height}px` }
+      ],
+      {
+        duration: 250,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        fill: 'none'
+      }
+    );
+
+    animation.onfinish = () => {
+      if (!histDrawn) {
+        // Init the density plot and ticks
+        initHist(component, state);
+
+        // Init the slider
+        initSlider(component, state);
+
+        histDrawn = true;
+      }
+
+      isExpanded = !isExpanded;
+    };
+  };
+
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
@@ -244,9 +288,12 @@
   @import './FeatureCard.scss';
 </style>
 
-<div class='feature-card' bind:this={component}>
+<div class='feature-card' bind:this={component} class:collapsed={isCollapsed}>
 
-  <div class='feature-header'>
+  <div class='feature-header'
+    class:collapsed={isCollapsed}
+    on:click={headerClicked}
+  >
 
     <div class='top-row'>
       <div class='feature-info'>
@@ -255,7 +302,7 @@
         </span>
       </div>
 
-      <div class='card-icons'>
+      <div class='card-icons' class:collapsed={isCollapsed}>
         <div class='svg-icon icon-refresh'>
           <div class='local-tooltip'>
             <span>Reset</span>
@@ -291,7 +338,10 @@
 
     </div>
 
-    <div class='feature-slider'>
+    <div class='feature-slider'
+      class:collapsed={isCollapsed}
+      class:expanded={isExpanded}
+    >
 
       <div class='track'>
         <div class='range-track'></div>
@@ -325,7 +375,10 @@
 
   </div>
 
-  <div class='feature-hist'>
+  <div class='feature-hist'
+    class:collapsed={isCollapsed}
+    class:expanded={isExpanded}
+  >
     <svg class='svg-hist'></svg>
 
     <div class='feature-annotations'>
@@ -356,18 +409,21 @@
     </div>
   </div>
 
-  <div class='configuration'>
+  <div class='configuration'
+    class:collapsed={isCollapsed}
+    class:expanded={isExpanded}
+  >
     <span class='tag acceptable-tag'>
       Acceptable between 400 and 500
       <div class='local-tooltip'>
-        <span>New strategies will only search within this range</span>
+        <span class='content'>New strategies will only search within this range</span>
       </div>
     </span>
 
     <span class='tag difficulty-tag'>
       Easy to change
       <div class='local-tooltip'>
-        <span>New strategies will prioritize features that are easy to change</span>
+        <span class='content'>New strategies will prioritize features that are easy to change</span>
       </div>
     </span>
 

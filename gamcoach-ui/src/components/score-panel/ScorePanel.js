@@ -8,6 +8,7 @@ export class ScorePanel {
   height = 40;
   rectHeight = 10;
   rectRadius = 5;
+  lineWidth = 2;
 
   curValue = 0.62;
   originalValue = 0.4;
@@ -42,21 +43,26 @@ export class ScorePanel {
       return this.curValue >= this.minThreshold;
     } else {
       // Regression
-      return this.curValue >= this.minThreshold &&
-        this.curValue <= this.maxThreshold;
+      return (
+        this.curValue >= this.minThreshold && this.curValue <= this.maxThreshold
+      );
     }
   }
 
   initSVG = () => {
     // Set the SVG height to fit its container
-    const svg = d3.select(this.component)
+    const svg = d3
+      .select(this.component)
       .select('.score-svg')
       .attr('height', this.height)
       .attr('width', this.width);
 
-    const content = svg.append('g')
+    const content = svg
+      .append('g')
       .attr('class', 'content')
-      .attr('transform', `translate(${this.padding.left},
+      .attr(
+        'transform',
+        `translate(${this.padding.left},
         ${this.padding.top})`
       );
 
@@ -91,29 +97,37 @@ export class ScorePanel {
       .attr('width', this.xScale(this.curValue))
       .attr('height', this.rectHeight)
       .attr('clip-path', 'url(#score-bar-clip)')
-      .classed('in-range', this.isInRange);
+      .classed('in-range', this.isInRange)
+      .append('title')
+      .text('Current score to make the decision');
 
     // Draw the bottom lines
     topLayer
       .append('rect')
       .attr('class', 'original-value')
-      .attr('x', this.xScale(this.originalValue))
-      .attr('width', 2)
+      .attr('x', this.xScale(this.originalValue) - this.lineWidth / 2)
+      .attr('width', this.lineWidth)
       .attr('y', 5)
-      .attr('height', contentHeight - 5);
+      .attr('height', contentHeight - 5)
+      .append('title')
+      .text('Your original score');
 
     topLayer
       .append('rect')
       .attr('class', 'min-threshold')
-      .attr('x', this.xScale(this.minThreshold))
-      .attr('width', 2)
-      .attr('height', contentHeight);
+      .attr('x', this.xScale(this.minThreshold) - this.lineWidth / 2)
+      .attr('width', this.lineWidth)
+      .attr('height', contentHeight)
+      .append('title')
+      .text('Threshold to obtain your desired decision');
 
     topLayer
       .append('rect')
       .attr('class', 'max-threshold')
-      .attr('x', this.xScale(this.maxThreshold))
-      .attr('width', 2)
-      .attr('height', contentHeight);
+      .attr('x', this.xScale(this.maxThreshold) - this.lineWidth / 2)
+      .attr('width', this.lineWidth)
+      .attr('height', contentHeight)
+      .append('title')
+      .text('Threshold to obtain your desired decision');
   };
 }

@@ -53,10 +53,26 @@
   :global(.min-threshold), :global(.max-threshold) {
     fill: $green-600;
     stroke-linejoin: round;
+    stroke-width: 10;
+    stroke-opacity: 0;
+    stroke: white;
+
+    &:hover {
+      transform: scaleY(2);
+      transform-origin: center;
+    }
   }
 
   :global(.original-value) {
     fill: $gray-600;
     stroke-linejoin: round;
+    stroke-width: 10;
+    stroke-opacity: 0;
+    stroke: white;
+
+    &:hover {
+      transform: scaleY(2);
+      transform-origin: center;
+    }
   }
 }

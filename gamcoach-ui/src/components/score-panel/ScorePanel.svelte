@@ -8,6 +8,7 @@
   export let windowLoaded = false;
 
   const unsubscribes = [];
+  const inRange = true;
 
   // Set up tooltip
   let tooltipConfig = null;
@@ -39,7 +40,12 @@
 
 <div class="score-panel" bind:this={component}>
   <div class="decision">
-    <span class="decision-result in-range">loan approval</span>
+    <span class="decision-result"
+      class:in-range={inRange}
+      title='Current decision'
+    >
+      {inRange ? 'loan approval' : 'loan rejection'}
+    </span>
   </div>
 
   <svg class="score-svg" />

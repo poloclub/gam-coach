@@ -107,8 +107,8 @@ export const initSlider = (component, state) => {
   const middleThumbID = 'slider-middle-thumb';
 
   // Move two range thumbs to the left and right ends
-  moveThumb(component, state, leftThumbID, state.feature.valueMin);
-  moveThumb(component, state, rightThumbID, state.feature.valueMax);
+  moveThumb(component, state, leftThumbID, state.feature.curMin);
+  moveThumb(component, state, rightThumbID, state.feature.curMax);
 
   // Register event listeners
   d3.select(component)
@@ -224,6 +224,7 @@ export const moveThumb = (component, state, thumbID, value) => {
     syncTicks(state);
     syncRangeTrack(component, state);
     updateRangeAnnotation();
+    syncFeature(state);
     break;
 
   case 'slider-right-thumb':
@@ -231,6 +232,7 @@ export const moveThumb = (component, state, thumbID, value) => {
     syncTicks(state);
     syncRangeTrack(component, state);
     updateRangeAnnotation();
+    syncFeature(state);
     break;
 
   case 'slider-middle-thumb':
@@ -359,6 +361,32 @@ const syncRangeTrack = (component, state) => {
         state.tickXScale(state.feature.curMin)
       );
   }
+};
+
+const syncFeature = (state) => {
+  // Update the feature for range selections
+  // Feature's `acceptableRange` is null if all are selected
+  if (state.feature.curMin !== state.feature.valueMin ||
+    state.feature.curMax !== state.feature.valueMax
+  ) {
+    state.featurePtr.acceptableRange = [
+      state.feature.curMin,
+      state.feature.curMax
+    ];
+  } else {
+    state.featurePtr.acceptableRange = null;
+  }
+
+  if (
+    state.featurePtr.difficulty === 'neutral' &&
+    state.featurePtr.acceptableRange === null
+  ) {
+    state.featurePtr.isConstrained = false;
+  } else {
+    state.featurePtr.isConstrained = true;
+  }
+
+  state.featureUpdated();
 };
 
 export const initHistSize = (component, state) => {

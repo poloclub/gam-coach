@@ -134,7 +134,7 @@
     features[1].isChanged = 1;
     features[2].isChanged = 1;
     features[2].isConstrained = true;
-    features[2].acceptableRange = [1, 2, 3, 4, 5, 6, 7, 8];
+    features[2].acceptableRange = [5.28, 20.55];
     features[3].isChanged = 2;
     features[4].isChanged = 2;
     features[4].isConstrained = true;
@@ -143,9 +143,9 @@
     features[5].difficulty = 'easy';
     features[5].acceptableRange = [1, 2, 3];
     features[7].isConstrained = true;
-    features[7].acceptableRange = [5.28, 10.55];
+    features[7].acceptableRange = [2, 10];
     features[8].isConstrained = true;
-    features[8].acceptableRange = [1, 2, 3, 4, 5];
+    features[8].acceptableRange = [3.5, 5.5];
     features[15].isChanged = 1;
 
     // Tell feature panel to display features that are changed

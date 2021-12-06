@@ -84,7 +84,7 @@
   };
 
   let diffPickerConfig = null;
-  diffPickerConfigStore.subscribe(async value => {
+  diffPickerConfigStore.subscribe(value => {
 
     // Listen to the picked event
     if (value.action === 'picked' && value.feature === state.feature.name) {
@@ -438,7 +438,9 @@
         <div class='feature-difficulty'
           on:click={diffClickedHandler}
         >
-          <div class={`icon icon-${feature.difficulty}`}>
+          <div class={`icon icon-${feature.difficulty}`}
+            title='Specify the difficulty for me to change this feature'
+          >
             {@html difficultyIconMap[feature.difficulty]}
           </div>
         </div>

@@ -260,7 +260,7 @@
 
       </div>
 
-      <!-- <div class='card-column mid-column' bind:this={midColumn}>
+      <div class='card-column mid-column' bind:this={midColumn}>
 
         <div class='feature-card-wrapper'>
           <FeatureCardCat feature={features[15]}>
@@ -269,6 +269,7 @@
 
       </div>
 
+      <!--
       <div class='card-column right-column' bind:this={rightColumn}>
 
         <div class='feature-card-wrapper'>

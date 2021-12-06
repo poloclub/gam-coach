@@ -276,6 +276,39 @@ const syncBars = (component, state) => {
 };
 
 /**
+ * Initialize the SVG size so we can do animation for the card collapsing
+ * @param {HTMLElement} component
+ * @param {object} state
+ */
+export const initHistSize = (component, state) => {
+  // Offset the range thumb to align with the track
+  const padding = {
+    top: 35,
+    left: 2,
+    right: 0,
+    histTopBottom: 8,
+    histRight: 6,
+    textHGap: 8,
+    barHGap: 0
+  };
+
+  const rectHeight = 20;
+  const rectPadding = 5;
+  const edgeCount = state.feature.histEdge.length;
+  const histHeight =
+    edgeCount * rectHeight +
+    (edgeCount - 1) * rectPadding +
+    2 * padding.histTopBottom;
+  const height = histHeight + padding.top;
+
+  state.histSVG = d3
+    .select(component)
+    .select('.svg-hist')
+    .attr('width', 0)
+    .attr('height', height);
+};
+
+/**
  * Initialize the density plot.
  */
 export const initHist = (component, state) => {

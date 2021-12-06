@@ -18,6 +18,8 @@ $card-h-padding: 16px;
   position: relative;
   border: 1px solid $gray-300;
 
+  transition: box-shadow 100ms cubic-bezier(0.645, 0.045, 0.355, 1);
+
   &.collapsed {
     background: $gray-100;
   }

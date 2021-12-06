@@ -5,7 +5,7 @@
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import { initHist } from './FeatureCardCat';
+  import { initHist, initHistSize } from './FeatureCardCat';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import levelThumbIcon from '../../img/icon-level-thumb.svg';
@@ -23,7 +23,9 @@
 
   let mounted = false;
   let initialized = false;
-
+  let histDrawn = false;
+  let isCollapsed = true;
+  let isExpanded = false;
   let state = {};
 
   // Constants
@@ -35,6 +37,7 @@
   };
 
   // Binding variables, which will be initialized after window is loaded
+  /** @type {HTMLElement} */
   let component = null;
 
   state.tickXScale = null;
@@ -163,7 +166,7 @@
     // Draw the histogram
     // Record the x center values for each bar. The original return value is
     // at the global absolute coordinate. Convert it to local coordinate here.
-    initHist(component, state);
+    initHistSize(component, state);
 
     // Need to wait the view is updated so we can recenter labels
     await tick();
@@ -216,6 +219,69 @@
     }
   };
 
+  /**
+   * Handler when header is clicked
+   * @param {MouseEvent} e Mouse event
+   */
+  export const headerClicked = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Register the initial size
+    const initBBox = component.getBoundingClientRect();
+
+    // Also animate the configuration bar if it is always shown
+    /** @type {HTMLElement} */
+    const configDIV = component.querySelector('.configuration');
+    const initConfigBBox = configDIV.getBoundingClientRect();
+
+    isCollapsed = !isCollapsed;
+    await tick();
+
+    // Register the final state
+    const finalBBox = component.getBoundingClientRect();
+    const finalConfigBBox = configDIV.getBoundingClientRect();
+
+    const animation = component.animate(
+      [
+        { height: `${initBBox.height}px` },
+        { height: `${finalBBox.height}px` }
+      ],
+      {
+        duration: 250,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        fill: 'none'
+      }
+    );
+
+    animation.onfinish = () => {
+      if (!histDrawn) {
+        // Init the density plot and ticks
+        initHist(component, state);
+
+        histDrawn = true;
+      }
+
+      isExpanded = !isExpanded;
+    };
+
+    // Use FLIP to animate the configuration bar
+    if (feature.isConstrained) {
+      configDIV.animate(
+        [
+          { transform: `translate(0, ${initConfigBBox.y -
+            finalConfigBBox.y}px)` },
+          { transform: 'none' }
+        ],
+        {
+          duration: 250,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both'
+        }
+      );
+    }
+  };
+
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
@@ -231,9 +297,14 @@
   @import './FeatureCardCat.scss';
 </style>
 
-<div class='feature-card' bind:this={component}>
+<div class='feature-card' bind:this={component}
+  class:collapsed={isCollapsed}
+>
 
-  <div class='feature-header'>
+  <div class='feature-header'
+    class:collapsed={isCollapsed}
+    on:click={headerClicked}
+  >
 
     <div class='top-row'>
 
@@ -243,19 +314,14 @@
         </span>
       </div>
 
-      <div class='card-icons'>
+      <div class='card-icons' class:collapsed={isCollapsed}>
 
         <div class='svg-icon icon-refresh'>
-          <div class='icon-label'>
-            <span class='thumb-label-span'>Reset</span>
+          <div class='local-tooltip'>
+            <span class='content'>Reset</span>
           </div>
         </div>
 
-        <div class='svg-icon icon-close'>
-          <div class='icon-label'>
-            <span class='thumb-label-span'>Close</span>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -286,8 +352,10 @@
 
   </div>
 
-
-<div class='feature-hist'>
+  <div class='feature-hist'
+    class:collapsed={isCollapsed}
+    class:expanded={isExpanded}
+  >
     <svg class='svg-hist'></svg>
 
     <div class='feature-annotations'>
@@ -310,6 +378,28 @@
       </div>
 
     </div>
+  </div>
+
+  <div class='configuration'
+    class:constrained={feature === null ? false : feature.isConstrained}
+    class:collapsed={isCollapsed}
+    class:expanded={isExpanded}
+    on:click={headerClicked}
+  >
+    <span class='tag acceptable-tag'>
+      Acceptable between 400 and 500
+      <div class='local-tooltip'>
+        <span class='content'>New strategies will only search within this range</span>
+      </div>
+    </span>
+
+    <span class='tag difficulty-tag'>
+      Easy to change
+      <div class='local-tooltip'>
+        <span class='content'>New strategies will prioritize features that are easy to change</span>
+      </div>
+    </span>
+
   </div>
 
 </div>

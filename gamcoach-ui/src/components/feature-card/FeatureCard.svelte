@@ -328,7 +328,7 @@
       <div class='card-icons' class:collapsed={isCollapsed}>
         <div class='svg-icon icon-refresh'>
           <div class='local-tooltip'>
-            <span>Reset</span>
+            <span class='content'>Reset</span>
           </div>
         </div>
       </div>

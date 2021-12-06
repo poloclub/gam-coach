@@ -393,8 +393,15 @@
 
         <div class='feature-arrow'
           class:hidden={state.feature.originalValue === state.feature.curValue}
+          class:user={state.feature.curValue !== state.feature.userValue &&
+            state.feature.curValue !== state.feature.coachValue
+          }
         >
-          <span class='value-change'>
+          <span class='value-change'
+            class:user={state.feature.curValue !== state.feature.userValue &&
+              state.feature.curValue !== state.feature.coachValue
+            }
+          >
             {`${(state.feature.curValue - state.feature.originalValue) < 0 ? '' :
               '+'}${formatter(
                 state.feature.curValue - state.feature.originalValue

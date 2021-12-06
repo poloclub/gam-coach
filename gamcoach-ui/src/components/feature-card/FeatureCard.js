@@ -119,8 +119,8 @@ export const initSlider = (component, state) => {
     .select(`#${rightThumbID}`)
     .on('mousedown', e => mouseDownHandler(e, component, state));
 
-  // Move the curValue thumb to the original value
-  moveThumb(component, state, middleThumbID, state.feature.originalValue);
+  // Move the curValue thumb to the coach value
+  moveThumb(component, state, middleThumbID, state.feature.coachValue);
 
   d3.select(component)
     .select(`#${middleThumbID}`)
@@ -515,32 +515,6 @@ export const initHist = (component, state) => {
   const lineHeight = histHeight - padding.top + vGap +
     state.tickHeights.original;
 
-  // --- Original ---
-  state.densityOriginalMark = markGroup.append('g')
-    .attr('class', 'mark density-original-mark')
-    .attr('transform',
-      `translate(${state.tickXScale(state.feature.originalValue)}, ${0})`)
-    .on('mouseenter', () => showAnnotation(component, state, 'original'))
-    .on('mouseleave', () => hideAnnotation(component, state, 'original'));
-
-  // Add an invisible region to make it easier to hover over
-  state.densityOriginalMark.append('rect')
-    .attr('class', '.hover-place')
-    .attr('x', -2)
-    .attr('width', 4)
-    .attr('height', lineHeight)
-    .style('fill', 'hsla(0, 100%, 100%, 0)')
-    .lower();
-
-  // Add the mark line
-  state.densityOriginalMark.append('line')
-    .attr('y2', lineHeight)
-    .clone(true)
-    .style('stroke-width', 3)
-    .style('stroke', 'white')
-    .style('stroke-dasharray', '0')
-    .lower();
-
   // --- User ---
   state.densityUserMark = markGroup.append('g')
     .attr('class', 'mark density-user-mark')
@@ -584,7 +558,34 @@ export const initHist = (component, state) => {
     .style('fill', 'hsla(0, 100%, 100%, 0)')
     .lower();
 
+  // Add the line and a second white line at the background to highlight it
   state.densityCoachMark.append('line')
+    .attr('y2', lineHeight)
+    .clone(true)
+    .style('stroke-width', 3)
+    .style('stroke', 'white')
+    .style('stroke-dasharray', '0')
+    .lower();
+
+  // --- Original ---
+  state.densityOriginalMark = markGroup.append('g')
+    .attr('class', 'mark density-original-mark')
+    .attr('transform',
+      `translate(${state.tickXScale(state.feature.originalValue)}, ${0})`)
+    .on('mouseenter', () => showAnnotation(component, state, 'original'))
+    .on('mouseleave', () => hideAnnotation(component, state, 'original'));
+
+  // Add an invisible region to make it easier to hover over
+  state.densityOriginalMark.append('rect')
+    .attr('class', '.hover-place')
+    .attr('x', -2)
+    .attr('width', 4)
+    .attr('height', lineHeight)
+    .style('fill', 'hsla(0, 100%, 100%, 0)')
+    .lower();
+
+  // Add the mark line
+  state.densityOriginalMark.append('line')
     .attr('y2', lineHeight)
     .clone(true)
     .style('stroke-width', 3)

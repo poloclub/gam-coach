@@ -131,14 +131,15 @@
 
     // Randomly assign different groups to a few features
     features[0].isChanged = 1;
-    features[1].isChanged = 1;
+    features[0].coachValue = 2;
     features[2].isChanged = 1;
+    features[2].coachValue = 5;
     features[2].isConstrained = true;
     features[2].acceptableRange = [5.28, 20.55];
-    features[3].isChanged = 2;
-    features[4].isChanged = 2;
+    features[4].isChanged = 1;
+    features[4].coachValue = 12445;
     features[4].isConstrained = true;
-    features[4].difficulty = 'lock';
+    features[4].difficulty = 'easy';
     features[5].isConstrained = true;
     features[5].difficulty = 'easy';
     features[5].acceptableRange = [1, 2, 3];
@@ -147,6 +148,7 @@
     features[8].isConstrained = true;
     features[8].acceptableRange = [3.5, 5.5];
     features[15].isChanged = 1;
+    features[15].coachValue = 6;
 
     // Tell feature panel to display features that are changed
     features.forEach(f => {

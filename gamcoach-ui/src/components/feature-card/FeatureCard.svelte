@@ -196,8 +196,8 @@
       featureName: featureInfo.name,
       requiresInt: feature.requiresInt,
       originalValue: feature.originalValue,
-      curValue: feature.originalValue,
-      coachValue: 755,
+      curValue: feature.coachValue,
+      coachValue: feature.coachValue,
       curMin: feature.acceptableRange === null ?
         featureInfo.binEdge[0] :
         feature.acceptableRange[0],

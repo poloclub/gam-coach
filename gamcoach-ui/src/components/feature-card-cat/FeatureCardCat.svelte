@@ -87,7 +87,7 @@
   diffPickerConfigStore.subscribe(async value => {
 
     // Listen to the picked event
-    if (value.action === 'picked') {
+    if (value.action === 'picked' && value.feature === state.feature.name) {
       // Update the icon
       feature.difficulty = value.difficulty;
 
@@ -201,6 +201,20 @@
    * @param e Event
    */
   const diffClickedHandler = () => {
+
+    // If the diff picker is shown for the current feature, we stop showing
+    if (diffPickerConfig.feature === state.feature.name &&
+      (Date.now() - diffPickerConfig.focusOutTime) < 200
+    ) {
+      diffPickerConfig.x = 0;
+      diffPickerConfig.y = 0;
+      diffPickerConfig.action = 'to-hide';
+      diffPickerConfig.feature = null;
+
+      diffPickerConfigStore.set(diffPickerConfig);
+      return;
+    }
+
     // Trigger the difficulty picker
     // Figure out the location to put the picker
     const bbox = d3.select(component)

@@ -280,6 +280,13 @@ $card-h-padding: 16px;
         opacity: 0;
         transition: none;
       }
+
+      &:hover {
+        .local-tooltip{
+          transition-delay: 200ms;
+          transform: translateX(-50%) translateY(-15px) scale(1);
+        }
+      }
     }
   }
 
@@ -300,7 +307,7 @@ $card-h-padding: 16px;
 
   .annotation-range {
     background-color: $orange-50;
-    color: $orange-600;
+    color: $orange-800;
     left: 20px;
   }
 }
@@ -568,7 +575,7 @@ $card-h-padding: 16px;
   justify-content: flex-start;
   align-items: flex-start;
 
-  background-color: $gray-50;
+  background-color: white;
 
   visibility: hidden;
 
@@ -589,15 +596,15 @@ $card-h-padding: 16px;
   .difficulty-tag {
     border-radius: 5px;
     padding: 0 5px;
-    background: $pink-50;
-    color: $pink-900;
+    background: $indigo-50;
+    color: $indigo-900;
   }
 
   .acceptable-tag {
     border-radius: 5px;
     padding: 0 5px;
-    background: $indigo-50;
-    color: $indigo-600;
+    background: $orange-50;
+    color: $orange-800;
   }
 
   &.collapsed {

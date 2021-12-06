@@ -17,6 +17,7 @@
 
   let diffPickerConfig = {
     feature: null,
+    focusOutTime: 0,
     difficulty: 'neutral',
     x: 0,
     y: 0,
@@ -39,6 +40,9 @@
         .classed('show', true)
         .node()
         .focus();
+    } else if (value.action === 'to-hide') {
+      d3.select(component)
+        .classed('show', false);
     }
 
     diffPickerConfig = value;
@@ -80,22 +84,22 @@
     const curIcon = d3.select(e.target);
     switch(curIcon.attr('data-diff')) {
     case 'very-easy':
-      description = 'Easy peasy!';
+      description = 'Very easy to change';
       break;
     case 'easy':
-      description = 'Fairly easy';
+      description = 'Fairly easy to change';
       break;
     case 'neutral':
       description = 'It\'s OK, I guess';
       break;
     case 'hard':
-      description = 'Kinda hard';
+      description = 'A bit hard to change';
       break;
     case 'very-hard':
       description = 'Very hard, but possible';
       break;
     case 'lock':
-      description = 'I can\'t change it';
+      description = 'Impossible to change';
       break;
     default:
       console.warn('Unknown cases for the icon!');
@@ -125,7 +129,12 @@
     d3.select(component)
       .style('width', `${bbox.width}px`)
       .on('focusout', (e) => {
-        d3.select(e.target).classed('show', false);
+        if (d3.select(e.target).classed('show')) {
+          d3.select(e.target).classed('show', false);
+          diffPickerConfig.action = '';
+          diffPickerConfig.focusOutTime = Date.now();
+          diffPickerConfigStore.set(diffPickerConfig);
+        }
       });
 
     // Record the size info
@@ -157,7 +166,7 @@
     border: 1px solid $gray-border;
     box-shadow: $shadow-border-large;
     position: absolute;
-    z-index: 1;
+    z-index: 3;
     top: 100px;
     left: 100px;
 

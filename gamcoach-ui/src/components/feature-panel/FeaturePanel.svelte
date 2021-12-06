@@ -269,7 +269,7 @@
 
       </div>
 
-      <!--
+
       <div class='card-column right-column' bind:this={rightColumn}>
 
         <div class='feature-card-wrapper'>
@@ -277,7 +277,7 @@
           </FeatureCardCat>
         </div>
 
-      </div> -->
+      </div>
 
     </div>
   </div>

@@ -74,11 +74,20 @@
     'lock': lockIcon,
   };
 
+  const difficultyTextMap = {
+    'neutral': 'Default difficulty',
+    'easy': 'Easy to change',
+    'very-easy': 'Very easy to change',
+    'hard': 'Hard to change',
+    'very-hard': 'Very hard to change',
+    'lock': 'Do not change this feature',
+  };
+
   let diffPickerConfig = null;
   diffPickerConfigStore.subscribe(value => {
 
     // Listen to the picked event
-    if (value.action === 'picked') {
+    if (value.action === 'picked' && value.feature === state.feature.name) {
       // Update the icon
       state.difficulty = value.difficulty;
 
@@ -212,7 +221,21 @@
    * Handler for clicking the difficulty picker
    * @param e Event
    */
-  const diffClickedHandler = () => {
+  const diffClickedHandler = (e) => {
+
+    // If the diff picker is shown for the current feature, we stop showing
+    if (diffPickerConfig.feature === state.feature.name &&
+      (Date.now() - diffPickerConfig.focusOutTime) < 200
+    ) {
+      diffPickerConfig.x = 0;
+      diffPickerConfig.y = 0;
+      diffPickerConfig.action = 'to-hide';
+      diffPickerConfig.feature = null;
+
+      diffPickerConfigStore.set(diffPickerConfig);
+      return;
+    }
+
     // Trigger the difficulty picker
     // Figure out the location to put the picker
     const bbox = d3.select(component)
@@ -364,6 +387,10 @@
     <div class='feature-slider'
       class:collapsed={isCollapsed}
       class:expanded={isExpanded}
+      on:click={e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
 
       <div class='track'>
@@ -408,8 +435,11 @@
       <div class='annotation annotation-name show'>
         <div class='svg-icon icon-info'></div>
         <span>Value Distribution of All Users</span>
-        <div class='feature-difficulty' on:click={diffClickedHandler}>
-          <div class={`svg-icon icon-${state.difficulty}`}></div>
+        <div class='feature-difficulty' on:click={e => diffClickedHandler(e)}>
+          <div class={`svg-icon icon-${state.difficulty}`}
+            title='Specify the difficulty for me to change this feature'
+          ></div>
+
         </div>
       </div>
 
@@ -426,7 +456,7 @@
       </div>
 
       <div class='annotation annotation-range'>
-        My Actionable Range
+        My Acceptable Range
       </div>
 
     </div>
@@ -438,14 +468,15 @@
     class:expanded={isExpanded}
   >
     <span class='tag acceptable-tag'>
-      Acceptable between 400 and 500
+      Acceptable between {formatter(state.feature.curMin)} and
+      {formatter(state.feature.curMax)}
       <div class='local-tooltip'>
         <span class='content'>New strategies will only search within this range</span>
       </div>
     </span>
 
     <span class='tag difficulty-tag'>
-      Easy to change
+      {difficultyTextMap[state.difficulty]}
       <div class='local-tooltip'>
         <span class='content'>New strategies will prioritize features that are easy to change</span>
       </div>

@@ -96,7 +96,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
   line-height: 1;
   cursor: default;
 
@@ -110,6 +110,10 @@
     font-size: 1rem;
     font-weight: 300;
     color: $gray-700;
+  }
+
+  img {
+    height: 19px;
   }
 }
 

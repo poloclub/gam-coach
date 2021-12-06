@@ -127,9 +127,8 @@
   <div class='coach-header'>
 
     <div class='coach-logo'>
-      <span class='coach-name'>
-        GAM Coach
-      </span>
+      <img src='/logo.svg' alt='GAM Coach'>
+      <!-- <span class='coach-name'>GAM Coach</span> -->
       <span class='coach-tagline'>
         Personal coach to help you obtain desired AI decisions
       </span>

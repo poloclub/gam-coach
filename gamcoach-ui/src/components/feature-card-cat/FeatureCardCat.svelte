@@ -19,6 +19,7 @@
   import closeIcon from '../../img/icon-close.svg';
   import refreshIcon from '../../img/icon-refresh.svg';
 
+  /** @type {Feature}*/
   export let feature = null;
 
   let mounted = false;
@@ -43,11 +44,13 @@
   state.tickXScale = null;
   state.histSVG = null;
   state.showingAnnotation = null;
-  state.difficulty = 'neutral';
   state.xCenters = [];
   state.tickOpacityTimeout = null;
   state.helperMessageDefault = 'Value Distribution of All Users';
   state.helperMessage = state.helperMessageDefault;
+
+  /** @type {Feature}*/
+  state.featurePtr = feature;
 
   state.feature = {
     name: '',
@@ -71,19 +74,29 @@
     'lock': lockIcon,
   };
 
+  const difficultyTextMap = {
+    'neutral': 'Default difficulty',
+    'easy': 'Easy to change',
+    'very-easy': 'Very easy to change',
+    'hard': 'Hard to change',
+    'very-hard': 'Very hard to change',
+    'lock': 'Do not change this feature',
+  };
+
   let diffPickerConfig = null;
-  diffPickerConfigStore.subscribe(value => {
+  diffPickerConfigStore.subscribe(async value => {
 
     // Listen to the picked event
     if (value.action === 'picked') {
       // Update the icon
-      state.difficulty = value.difficulty;
+      feature.difficulty = value.difficulty;
 
-      // Update the SVG
-      d3.select(component)
-        .select('.feature-difficulty')
-        .select('.svg-icon')
-        .html(difficultyIconMap[state.difficulty]);
+      // Change `isConstrained` if necessary
+      if(feature.difficulty === 'neutral' && feature.acceptableRange === null) {
+        feature.isConstrained = false;
+      } else {
+        feature.isConstrained = true;
+      }
     }
 
     diffPickerConfig = value;
@@ -138,6 +151,12 @@
   };
   state.stateUpdated = stateUpdated;
 
+  const featureUpdated = () => {
+    feature = state.featurePtr;
+    state = state;
+  };
+  state.featureUpdated = featureUpdated;
+
   /**
    * Init the states of different elements. Some functions require bbox,
    * which is only accurate after content is loaded
@@ -160,7 +179,9 @@
       id: feature.featureID,
       stateUpdated: stateUpdated,
       labelEncoder: feature.labelEncoder,
-      searchValues: new Set(featureInfo.histEdge)
+      searchValues: feature.acceptableRange === null ?
+        new Set(featureInfo.histEdge) :
+        new Set(feature.acceptableRange)
     };
 
     // Draw the histogram
@@ -282,6 +303,37 @@
     }
   };
 
+  /**
+   * Convert acceptable range to readable text
+   * @param acceptableRange
+   */
+  const displayAcceptableRange = (acceptableRange) => {
+    let text = '';
+
+    let acceptableRangeAll = acceptableRange;
+    if (acceptableRange === null) {
+      acceptableRangeAll = Object.keys(feature.labelEncoder);
+    }
+
+    text = `"${feature.labelEncoder[acceptableRangeAll[0]]}"`;
+
+    for (let i = 1; i < acceptableRangeAll.length - 1; i++) {
+      text = text.concat(', ', `"${
+        feature.labelEncoder[acceptableRangeAll[i]]
+      }"`);
+    }
+
+    if (acceptableRangeAll.length == 2) {
+      text = text.concat(` and "${feature.labelEncoder[acceptableRangeAll[1]]}"`);
+    } else if (acceptableRangeAll.length > 2) {
+      text = text.concat(`, and "${
+        feature.labelEncoder[acceptableRangeAll[acceptableRangeAll.length - 1]]
+      }"`);
+    }
+
+    return text;
+  };
+
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
@@ -372,7 +424,9 @@
         <div class='feature-difficulty'
           on:click={diffClickedHandler}
         >
-          <div class={`svg-icon icon-${state.difficulty}`}></div>
+          <div class={`icon icon-${feature.difficulty}`}>
+            {@html difficultyIconMap[feature.difficulty]}
+          </div>
         </div>
 
       </div>
@@ -386,15 +440,19 @@
     class:expanded={isExpanded}
     on:click={headerClicked}
   >
-    <span class='tag acceptable-tag'>
-      Acceptable between 400 and 500
+    <span class='tag acceptable-tag'
+      class:shown={feature.acceptableRange !== null}
+    >
+      Acceptable among {displayAcceptableRange(feature.acceptableRange)}
       <div class='local-tooltip'>
         <span class='content'>New strategies will only search within this range</span>
       </div>
     </span>
 
-    <span class='tag difficulty-tag'>
-      Easy to change
+    <span class='tag difficulty-tag'
+      class:shown={feature.difficulty !== 'neutral'}
+    >
+      {difficultyTextMap[feature.difficulty]}
       <div class='local-tooltip'>
         <span class='content'>New strategies will prioritize features that are easy to change</span>
       </div>

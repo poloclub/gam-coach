@@ -268,7 +268,11 @@ $card-h-padding: 16px;
       border: 1px solid $gray-200;
       transition: cubic-bezier(0.645, 0.045, 0.355, 1) 300ms opacity;
 
-      .svg-icon {
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
         :global(svg) {
           width: 1.2rem;
           height: 1.2rem;
@@ -591,6 +595,10 @@ $card-h-padding: 16px;
         transform: translateX(-50%) translateY(-15px) scale(1);
       }
     }
+
+    &.shown {
+      display: inline-block;
+    }
   }
 
   .difficulty-tag {
@@ -613,11 +621,29 @@ $card-h-padding: 16px;
 
   &.expanded {
     visibility: visible;
+
+    .tag {
+      display: inline-block;
+    }
   }
 
   &.constrained {
     display: flex;
     visibility: visible;
+
+    .tag {
+      display: none;
+
+      &.shown {
+        display: inline-block;
+      }
+    }
+  }
+
+  &.constrained:not(.collapsed) {
+    .tag {
+      display: inline-block;
+    }
   }
 }
 

@@ -100,6 +100,7 @@ const barClickedHandler = (e, d, component, state) => {
   }
 
   syncBars(component, state);
+  syncFeature(state);
 };
 
 /**
@@ -273,6 +274,26 @@ const syncBars = (component, state) => {
       .classed('original', d.edge === state.feature.originalValue)
       .classed('coach', d.edge === state.feature.coachValue);
   });
+};
+
+const syncFeature = (state) => {
+  // Update the feature for selections
+  // Feature's `acceptableRange` is null if all are selected
+  if (state.feature.searchValues.size !== state.feature.histEdge.length) {
+    state.featurePtr.acceptableRange = Array.from(state.feature.searchValues);
+  } else {
+    state.featurePtr.acceptableRange = null;
+  }
+
+  if(state.featurePtr.difficulty === 'neutral' &&
+    state.featurePtr.acceptableRange === null
+  ) {
+    state.featurePtr.isConstrained = false;
+  } else {
+    state.featurePtr.isConstrained = true;
+  }
+
+  state.featureUpdated();
 };
 
 /**

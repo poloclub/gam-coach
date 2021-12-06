@@ -44,6 +44,7 @@
   /** @type {Feature[]} */
   let displayFeatures = [];
 
+  /** @type {FeatureGrid} */
   let featureGrid = new FeatureGrid();
 
   const curExample = [
@@ -137,11 +138,10 @@
     features[3].isChanged = 2;
     features[4].isChanged = 2;
     features[4].isConstrained = true;
-    features[4].difficulty = 6;
+    features[4].difficulty = 'lock';
     features[5].isConstrained = true;
-    features[5].difficulty = 2;
-    features[5].acceptableRange = [1, 2];
-    features[6].isConstrained = true;
+    features[5].difficulty = 'easy';
+    features[5].acceptableRange = [1, 2, 3];
     features[7].isConstrained = true;
     features[7].acceptableRange = [5.28, 10.55];
     features[8].isConstrained = true;
@@ -185,7 +185,7 @@
           myValue: curExample[i],
           isChanged: 0,
           isConstrained: false,
-          difficulty: 3,
+          difficulty: 'neutral',
           acceptableRange: null,
           display: 0
         };
@@ -207,10 +207,18 @@
     // Sort the features based on the importance
     tempFeatures.sort((a, b) => b.data.importance - a.data.importance);
 
+    // Temp change the features
     features = tempFeatures;
     tempInit();
     features = features;
 
+    // Organize the features into corresponding sections
+    featureGrid.loadFeatures(features);
+    featureGrid = featureGrid;
+
+    console.log(featureGrid);
+
+    // Update the feature store
     featuresStore.set(features);
     console.log(features);
   };
@@ -248,76 +256,96 @@
 
       <div class='card-column left-column' bind:this={leftColumn}>
 
-        <div class='feature-card-wrapper'>
-          <FeatureCard feature={features[1]}>
-          </FeatureCard>
-        </div>
-
-        <div class='feature-card-wrapper'>
-          <FeatureCard feature={features[2]}>
-          </FeatureCard>
-        </div>
+        {#each featureGrid.changed.left as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
 
       </div>
 
       <div class='card-column mid-column' bind:this={midColumn}>
 
-        <div class='feature-card-wrapper'>
-          <FeatureCardCat feature={features[15]}>
-          </FeatureCardCat>
-        </div>
+        {#each featureGrid.changed.mid as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
 
       </div>
 
-
       <div class='card-column right-column' bind:this={rightColumn}>
 
-        <div class='feature-card-wrapper'>
-          <FeatureCardCat feature={features[16]}>
-          </FeatureCardCat>
-        </div>
+        {#each featureGrid.changed.right as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
 
       </div>
 
     </div>
   </div>
 
-  <!-- <div class='card-block'>
+  <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Configured Features</span>
+      <span class='svg-icon icon-caret-down'></span>
     </div>
 
     <div class='card-row'>
 
       <div class='card-column left-column' bind:this={leftColumn}>
 
-        <div class='feature-card-wrapper'>
-          <FeatureCard feature={features[1]}>
-          </FeatureCard>
-        </div>
-
-        <div class='feature-card-wrapper'>
-          <FeatureCard feature={features[2]}>
-          </FeatureCard>
-        </div>
+        {#each featureGrid.configured.left as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
 
       </div>
 
       <div class='card-column mid-column' bind:this={midColumn}>
 
-        <div class='feature-card-wrapper'>
-          <FeatureCardCat feature={features[15]}>
-          </FeatureCardCat>
-        </div>
+        {#each featureGrid.configured.mid as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
 
       </div>
 
       <div class='card-column right-column' bind:this={rightColumn}>
 
-        <div class='feature-card-wrapper'>
-          <FeatureCardCat feature={features[16]}>
-          </FeatureCardCat>
-        </div>
+        {#each featureGrid.configured.right as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
 
       </div>
 
@@ -327,60 +355,14 @@
   <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Other Features</span>
+      <span class='svg-icon icon-caret-down'></span>
     </div>
 
     <div class='card-row'>
 
       <div class='card-column left-column' bind:this={leftColumn}>
 
-        <div class='feature-card-wrapper'>
-          <FeatureCard feature={features[1]}>
-          </FeatureCard>
-        </div>
-
-        <div class='feature-card-wrapper'>
-          <FeatureCard feature={features[2]}>
-          </FeatureCard>
-        </div>
-
-      </div>
-
-      <div class='card-column mid-column' bind:this={midColumn}>
-
-        <div class='feature-card-wrapper'>
-          <FeatureCardCat feature={features[15]}>
-          </FeatureCardCat>
-        </div>
-
-      </div>
-
-      <div class='card-column right-column' bind:this={rightColumn}>
-
-        <div class='feature-card-wrapper'>
-          <FeatureCardCat feature={features[16]}>
-          </FeatureCardCat>
-        </div>
-
-      </div>
-
-    </div>
-  </div> -->
-
-
-  <!-- {#key features}
-    {#each features as feature}
-      {#if feature.isCont}
-        <FeatureCard feature={feature}>
-        </FeatureCard>
-      {:else}
-        <FeatureCardCat feature={feature}>
-        </FeatureCardCat>
-      {/if}
-    {/each}
-  {/key} -->
-
-        <!-- {#each displayFeatures as feature}
-        {#if feature.display === 2}
+        {#each featureGrid.other.left as feature}
           {#if feature.isCont}
             <FeatureCard feature={feature}>
             </FeatureCard>
@@ -388,7 +370,40 @@
             <FeatureCardCat feature={feature}>
             </FeatureCardCat>
           {/if}
-        {/if}
-      {/each} -->
+        {/each}
+
+      </div>
+
+      <div class='card-column mid-column' bind:this={midColumn}>
+
+        {#each featureGrid.other.mid as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
+
+      </div>
+
+      <div class='card-column right-column' bind:this={rightColumn}>
+
+        {#each featureGrid.other.right as feature}
+          {#if feature.isCont}
+            <FeatureCard feature={feature}>
+            </FeatureCard>
+          {:else}
+            <FeatureCardCat feature={feature}>
+            </FeatureCardCat>
+          {/if}
+        {/each}
+
+      </div>
+
+    </div>
+  </div>
+
 
 </div>

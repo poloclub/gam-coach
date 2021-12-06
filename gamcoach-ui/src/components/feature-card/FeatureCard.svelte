@@ -39,6 +39,7 @@
   };
 
   // Binding variables, which will be initialized after window is loaded
+  /** @type {HTMLElement} */
   let component = null;
   const formatter = d3.format(',.2~f');
 
@@ -241,11 +242,17 @@
     // Register the initial size
     const initBBox = component.getBoundingClientRect();
 
+    // Also animate the configuration bar if it is always shown
+    /** @type {HTMLElement} */
+    const configDIV = component.querySelector('.configuration');
+    const initConfigBBox = configDIV.getBoundingClientRect();
+
     isCollapsed = !isCollapsed;
     await tick();
 
     // Register the final state
     const finalBBox = component.getBoundingClientRect();
+    const finalConfigBBox = configDIV.getBoundingClientRect();
 
     const animation = component.animate(
       [
@@ -272,6 +279,22 @@
 
       isExpanded = !isExpanded;
     };
+
+    // Use FLIP to animate the configuration bar
+    if (feature.isConstrained) {
+      configDIV.animate(
+        [
+          { transform: `translate(0, ${initConfigBBox.y -
+            finalConfigBBox.y}px)` },
+          { transform: 'none' }
+        ],
+        {
+          duration: 250,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both'
+        }
+      );
+    }
   };
 
   onMount(() => {
@@ -410,6 +433,7 @@
   </div>
 
   <div class='configuration'
+    class:constrained={feature === null ? false : feature.isConstrained}
     class:collapsed={isCollapsed}
     class:expanded={isExpanded}
   >

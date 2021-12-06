@@ -34,7 +34,7 @@ $card-h-padding: 16px;
   padding: $card-v-padding $card-h-padding 2px $card-h-padding;
   border-top-left-radius: $border-radius;
   border-top-right-radius: $border-radius;
-  border-bottom: 1px solid $gray-light-border;
+  border-bottom: 1px solid adjust-color($gray-light-border, $alpha: -0.05);
 
   background: $gray-100;
   display: flex;
@@ -553,17 +553,20 @@ $card-h-padding: 16px;
 .configuration {
   width: calc(100% + #{2 * $card-h-padding});
   flex: 0 0 auto;
-  margin: 0px #{-$card-h-padding} 0px #{-$card-h-padding};
-  padding: 10px $card-h-padding 3px $card-h-padding;
-  border-top: 1px solid $gray-light-border;
+  margin: 0px #{-$card-h-padding} #{-$card-v-padding} #{-$card-h-padding};
+  padding: 10px $card-h-padding #{3px + $card-v-padding} $card-h-padding;
+  border-bottom-left-radius: $border-radius;
+  border-bottom-right-radius: $border-radius;
+  border-top: 1px solid adjust-color($gray-light-border, $alpha: -0.05);
 
-  // background: $gray-100;
   display: flex;
   gap: 5px;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-items: flex-start;
+
+  background-color: $gray-50;
 
   visibility: hidden;
 
@@ -600,6 +603,11 @@ $card-h-padding: 16px;
   }
 
   &.expanded {
+    visibility: visible;
+  }
+
+  &.constrained {
+    display: flex;
     visibility: visible;
   }
 }

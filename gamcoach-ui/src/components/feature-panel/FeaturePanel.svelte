@@ -251,7 +251,7 @@
   <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Suggested Changes</span>
-      <span class='svg-icon icon-caret-down'></span>
+      <!-- <span class='svg-icon icon-caret-down'></span> -->
     </div>
 
     <div class='card-row'>

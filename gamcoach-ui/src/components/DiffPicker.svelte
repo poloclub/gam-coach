@@ -182,6 +182,7 @@
       width: 100%;
       height: 100%;
       flex-grow: 1;
+      will-change: transform;
       transition: transform 150ms cubic-bezier(0.2, 0, 0.13, 2);
       transform: scale(1);
 

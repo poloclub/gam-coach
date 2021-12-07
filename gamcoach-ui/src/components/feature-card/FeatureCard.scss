@@ -18,6 +18,7 @@ $card-h-padding: 16px;
   position: relative;
   border: 1px solid $gray-300;
 
+  will-change: box-shadow;
   transition: box-shadow 100ms cubic-bezier(0.645, 0.045, 0.355, 1);
 
   &.collapsed {
@@ -210,6 +211,7 @@ $card-h-padding: 16px;
     cursor: default;
     color: white;
 
+    will-change: transform;
     transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     transform-origin: bottom center;
     transform: scale(0);
@@ -246,6 +248,7 @@ $card-h-padding: 16px;
     align-items: center;
     opacity: 0;
     transform: scale(1);
+    will-change: transform;
     transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
 
     .svg-icon {
@@ -274,7 +277,8 @@ $card-h-padding: 16px;
       align-items: center;
       cursor: pointer;
       border: 1px solid $gray-200;
-      transition: cubic-bezier(0.645, 0.045, 0.355, 1) 300ms opacity;
+      will-change: opacity;
+      transition: opacity 300ms cubic-bezier(0.645, 0.045, 0.355, 1);
 
       .icon {
         display: flex;
@@ -380,6 +384,7 @@ $card-h-padding: 16px;
       top: 50%;
       margin-top: -($base-circle-radius / 2);
       margin-left: -($base-circle-radius / 2);
+      will-change: transform;
       transform: scale(0.1);
       transition: transform 300ms ease-in-out;
     }
@@ -455,6 +460,7 @@ $card-h-padding: 16px;
   background-color: $gray-500;
   color: white;
 
+  will-change: transform;
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
   transform-origin: top center;
   transform: translateX(-50%) translateY(100%) scale(0);
@@ -512,6 +518,7 @@ $card-h-padding: 16px;
 
   :global(.tick line) {
     stroke: $orange-100;
+    will-change: transform;
     transform: scaleY(1.8);
     transition: transform 300ms ease-in-out;
   }
@@ -670,6 +677,7 @@ $card-h-padding: 16px;
   width: 220px;
   text-align: center;
 
+  will-change: transform;
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
   transform-origin: bottom center;
   transform: translateX(-50%) translateY(-15px) scale(0);

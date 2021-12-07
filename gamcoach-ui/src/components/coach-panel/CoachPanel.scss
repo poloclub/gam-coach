@@ -25,7 +25,8 @@
     border: 1px solid $gray-border;
     color: $gray-700;
 
-    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
     transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     transform-origin: bottom center;
     transform: translateX(-50%) translateY(-60%) scale(0);

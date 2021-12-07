@@ -10,8 +10,6 @@
   import { writable } from 'svelte/store';
   import { tooltipConfigStore } from '../../store';
 
-  import caretDownIcon from '../../img/icon-caret-down.svg';
-
   export let data = null;
   export let windowLoaded = false;
 
@@ -63,9 +61,7 @@
    * Dynamically bind SVG files as inline SVG strings in this component
    */
   export const bindInlineSVG = (component) => {
-    const iconList = [
-      { class: 'icon-caret-down', svg: caretDownIcon },
-    ];
+    const iconList = [];
 
     iconList.forEach(d => {
       d3.select(component)
@@ -251,7 +247,6 @@
   <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Suggested Changes</span>
-      <!-- <span class='svg-icon icon-caret-down'></span> -->
     </div>
 
     <div class='card-row'>
@@ -304,7 +299,6 @@
   <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Configured Features</span>
-      <span class='svg-icon icon-caret-down'></span>
     </div>
 
     <div class='card-row'>
@@ -357,7 +351,6 @@
   <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Other Features</span>
-      <span class='svg-icon icon-caret-down'></span>
     </div>
 
     <div class='card-row'>

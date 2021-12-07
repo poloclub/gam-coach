@@ -101,6 +101,7 @@
   gap: 8px;
   line-height: 1;
   cursor: default;
+  user-select: none;
 
   .coach-name {
     font-size: 1.2rem;
@@ -115,6 +116,7 @@
   }
 
   img {
+    pointer-events: none;
     height: 19px;
   }
 }
@@ -238,9 +240,10 @@
   .tab {
     border-right: 1px solid $gray-light-border;
     background-color: $gray-200;
-    padding: 0px 5px 0px 5px;
-    flex: 1 1 auto;
+    padding: 0px 8px 0px 10px;
+    flex: 0 1 70px;
     position: relative;
+    user-select: none;
 
     display: flex;
     flex-direction: row;
@@ -249,7 +252,7 @@
 
     overflow: hidden;
 
-    transition: background-color ease-in-out 100ms;
+    transition: background-color 100ms ease-in-out, flex-grow 150ms linear;
 
     &:hover {
       background-color: adjust-color($color: $gray-200, $lightness: -3%);
@@ -259,17 +262,24 @@
       }
     }
 
-    &:global(.selected) {
-      height: calc(100% + 1px);
-      transform: translateY(-1px);
+    &.selected {
+      height: calc(100% + 2px);
+      transform: translateY(-2px);
       z-index: 2;
       background: $gray-50;
+      flex: 1 0 70px;
 
-      :global(.star-wrapper) {
+      .star-wrapper {
+        display: flex;
         &:hover {
           background-color: adjust-color($color: $gray-200, $lightness: -4%);
         }
       }
+
+      .tab-score {
+        display: flex;
+      }
+
     }
 
     &:last-of-type {
@@ -277,12 +287,25 @@
     }
   }
 
+  .tab-score {
+    flex: 0 1 auto;
+    display: none;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+
+    &:global(.shown) {
+      opacity: 1;
+    }
+  }
+
   .tab-name {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: center;
+    // text-align: center;
 
     display: inline-flex;
     flex-direction: column;
@@ -302,11 +325,12 @@
   }
 
   .star-wrapper {
-    position: absolute;
-    left: 5px;
+    flex: 0 1 auto;
+    // margin-left: -6px;
+    display: none;
     border-radius: 5px;
     padding: 4px;
-    transition: opacity ease-in-out 100ms, background-color ease-in-out 100ms;
+    transition: opacity 100ms ease-in-out, background-color 100ms ease-in-out;
 
     &:hover {
       background-color: adjust-color($color: $gray-200, $lightness: -10%);
@@ -316,14 +340,14 @@
   .tab-icon {
     color: $gray-700;
     fill: $gray-700;
-    opacity: 0;
+    opacity: 1;
     flex: 0 0 auto;
     cursor: default;
 
-    transition: opacity ease-in-out 100ms;
+    transition: opacity 100ms ease-in-out;
 
-    animation: thumbup 100ms linear;
-    -webkit-animation: thumbup 100ms linear;
+    // animation: thumbup 100ms linear;
+    // -webkit-animation: thumbup 100ms linear;
 
     :global(svg) {
       width: 0.9rem;
@@ -390,6 +414,10 @@
       background-color: adjust-color($color: white, $lightness: -11%);
     }
   }
+}
+
+.score-bar-wrapper {
+  display: flex;
 }
 
 .no-display {

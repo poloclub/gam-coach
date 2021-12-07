@@ -5,10 +5,12 @@
   import { tooltipConfigStore } from '../../store';
   import { ScorePanel } from './ScorePanel';
 
-  export let windowLoaded = false;
+  export let scoreWidth = 0;
+  export let plan = null;
 
   const unsubscribes = [];
   const inRange = true;
+  let mounted = false;
 
   // Set up tooltip
   let tooltipConfig = null;
@@ -25,30 +27,43 @@
   /** @type {ScorePanel}*/
   let scorePanel = null;
 
-  onMount(() => {
-    // Init the svg
-    scorePanel = new ScorePanel(component);
+  const initScorePanel = () => {
+    console.log(scoreWidth);
+    scorePanel = new ScorePanel(component, scoreWidth, plan);
     scorePanel.initSVG();
+  };
+
+  onMount(() => {
+    mounted = true;
   });
 
   onDestroy(() => {
     unsubscribes.forEach((unsub) => unsub());
   });
 
-  // $: windowLoaded;
+  $: mounted && scoreWidth > 0 && initScorePanel();
 </script>
 
 <div class="score-panel" bind:this={component}>
-  <div class="decision">
+  <!-- <div class="decision">
     <span class="decision-result"
       class:in-range={inRange}
       title='Current decision'
     >
       {inRange ? 'loan approval' : 'loan rejection'}
     </span>
-  </div>
+  </div> -->
 
-  <svg class="score-svg" />
+  <svg class="score-svg" width="10" height="10"/>
+
+  <span class='decision' class:regression={plan.isRegression}>
+    {#if plan.isRegression}
+      {plan.score}
+    {:else}
+      {plan.classes[plan.score]}
+    {/if}
+  </span>
+
 </div>
 
 <style lang="scss">

@@ -4,11 +4,12 @@ import { config } from '../../config';
 const colors = config.colors;
 
 export class ScorePanel {
-  width = 200;
-  height = 40;
-  rectHeight = 10;
+  width;
+  height = 30;
+  rectHeight = 8;
   rectRadius = 5;
   lineWidth = 2;
+  plan;
 
   curValue = 0.62;
   originalValue = 0.4;
@@ -16,18 +17,29 @@ export class ScorePanel {
   maxThreshold = 0.5;
 
   padding = {
-    top: 8,
-    bottom: 10,
-    right: 1,
-    left: 1
+    top: 1,
+    bottom: 8,
+    right: 8,
+    left: 5
   };
 
   /** @type {HTMLElement} */
   component;
   xScale;
 
-  constructor(component) {
+  /**
+   * Initialize the score panel
+   * @param {HTMLElement} component
+   * @param {number} scoreWidth
+   * @param {object} plan
+   */
+  constructor(component, scoreWidth, plan) {
     this.component = component;
+    // this.width = scoreWidth - 50;
+    this.plan = plan;
+
+    // To figure out the svg width, we need to consider the width of the text
+    this.width = scoreWidth - plan.textWidth - 5;
 
     // Initialize scales
     this.xScale = d3
@@ -55,7 +67,9 @@ export class ScorePanel {
       .select(this.component)
       .select('.score-svg')
       .attr('height', this.height)
-      .attr('width', this.width);
+      .attr('width', this.width)
+      .attr('viewBox', `0 0 ${this.width} ${this.height}`)
+      .attr('preserveAspectRatio', 'none');
 
     const content = svg
       .append('g')
@@ -85,7 +99,8 @@ export class ScorePanel {
 
     // Draw the top score bar
     // Prepare for a clip path
-    const clip = content.append('clipPath').attr('id', 'score-bar-clip');
+    const clip = content.append('clipPath')
+      .attr('id', `score-bar-clip-${this.plan.planIndex}`);
 
     clip.node().appendChild(botRect.clone().classed('back-rect', false).node());
 
@@ -96,7 +111,7 @@ export class ScorePanel {
       .attr('y', contentHeight - this.rectHeight)
       .attr('width', this.xScale(this.curValue))
       .attr('height', this.rectHeight)
-      .attr('clip-path', 'url(#score-bar-clip)')
+      .attr('clip-path', `url(#score-bar-clip-${this.plan.planIndex})`)
       .classed('in-range', this.isInRange)
       .append('title')
       .text('Current score to make the decision');

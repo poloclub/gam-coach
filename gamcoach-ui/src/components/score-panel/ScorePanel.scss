@@ -2,42 +2,30 @@
 
 .score-panel {
   display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 10px;
-  cursor: default;
-
-  // width: 770px;
-  // border-left: 1px solid $gray-200;
-
-  margin: 0 $panel-h-padding 0 0;
-}
-
-.decision {
-  display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  align-items: baseline;
-  gap: 5px;
+  align-items: flex-end;
+  cursor: default;
+  width: 100%;
 
-  .decision-label {
-    color: $gray-600;
-  }
+  :global(.decision) {
+    flex: 0 1 auto;
+    font-size: 0.8rem;
+    border-radius: 2px;
+    padding: 0 3px;
+    border: 1px solid $green-300;
+    color: $green-700;
+    margin-bottom: 6px;
 
-  .decision-result {
-    border-radius: 8px;
-    padding: 1px 10px;
-    background-color: $gray-200;
-
-    &:global(.in-range) {
-      background-color: $green-100;
-      color: $green-900;
+    &:global(.regression) {
+      padding: 0 1px;
     }
   }
 }
 
 .score-svg {
+  flex: 0 1 auto;
+
   :global(.back-rect) {
     fill: $gray-300;
   }
@@ -56,10 +44,10 @@
     stroke-width: 10;
     stroke-opacity: 0;
     stroke: white;
+    transform-origin: center;
 
     &:hover {
-      transform: scaleY(2);
-      transform-origin: center;
+      transform: scaleY(3);
     }
   }
 
@@ -69,10 +57,10 @@
     stroke-width: 10;
     stroke-opacity: 0;
     stroke: white;
+    transform-origin: center;
 
     &:hover {
-      transform: scaleY(2);
-      transform-origin: center;
+      transform: scaleY(3);
     }
   }
 }

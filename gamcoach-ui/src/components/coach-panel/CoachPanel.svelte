@@ -1,7 +1,10 @@
 <script>
+  //@ts-check
   import d3 from '../../utils/d3-import';
   import { onMount, onDestroy } from 'svelte';
   import { tooltipConfigStore } from '../../store';
+
+  import ScorePanel from '../score-panel/ScorePanel.svelte';
 
   import refreshIcon from '../../img/icon-refresh2.svg';
   import starIconSolid from '../../img/icon-star-solid.svg';
@@ -14,22 +17,16 @@
   let component = null;
   let svg = null;
   let tooltipConfig = null;
+  let scorePanelWidth = 0;
 
   const unsubscribes = [];
   let initialized = false;
 
   // Set up the model goal labels
-  const isRegression = false;
+  const isRegression = true;
   const regressionName = 'interest rate';
-  const classes = ['loan approval'];
-
-  const classesPairs = [];
-  classes.forEach((d, i) => {
-    classesPairs.push({
-      name: d,
-      value: i
-    });
-  });
+  const classes = ['loan approval', 'loan rejection'];
+  const classTarget = [0];
 
   let tabInputLabel = 'Strategies to get ';
   const vowels = ['a', 'e', 'i', 'o', 'u'];
@@ -48,12 +45,15 @@
   for (let i = 0; i < 5; i++) {
     plans.push({
       name: `Plan ${nextPlanIndex}`,
-      planIndex: nextPlanIndex
+      planIndex: nextPlanIndex,
+      isRegression: isRegression,
+      score: isRegression ? 12.23 : classTarget,
+      classes: isRegression ? null : classes
     });
     nextPlanIndex ++;
   }
   const curPlans = plans.slice();
-  let activePlanIndex = 0;
+  let activePlanIndex = 1;
 
   // Set up tooltip
   unsubscribes.push(
@@ -104,14 +104,100 @@
     savedPlanIndex = savedPlanIndex;
   };
 
+  /**
+   * Handler for the transitionend event on tab element
+   * @param e {TransitionEvent} Transition event
+   * @param planIndex {number} Plan index
+   */
+  const tabTransitionEndHandler = (e, planIndex) => {
+    // Listen to the flex-grow event
+    if (e.propertyName === 'flex-grow' && planIndex === activePlanIndex) {
+      d3.select(e.target)
+        .select('.tab-score')
+        .classed('shown', true);
+    }
+  };
+
+  /**
+   * Handler for the mouse click event on tab element
+   * @param e {MouseEvent} Mouse event
+   * @param planIndex {number} Plan index
+   */
+  const tabClicked = (e, planIndex)  => {
+    // First hide all the scores on tab
+    d3.select(component)
+      .selectAll('.tab-score')
+      .classed('shown', false);
+
+    activePlanIndex = planIndex;
+  };
+
   onMount(() => {
     // Pass
     // initPanel();
     bindInlineSVG(component);
+
+    // Show the score for the first tab
+    const tab = d3.select(component)
+      .select(`.tab-${activePlanIndex}`);
+
+    tab.select('.tab-score')
+      .classed('shown', true);
+
+    // Figure out the max width that the score panel can take
+    // The way to do that is to use tab width - max plan text width - star width
+    const paddingL = parseInt(getComputedStyle(tab.node())
+      .getPropertyValue('padding-left'));
+    const paddingR = parseInt(getComputedStyle(tab.node())
+      .getPropertyValue('padding-right'));
+    const tabWidth = tab.node().getBoundingClientRect().width -
+      paddingL - paddingR;
+
+    const star = tab.select('.star-wrapper');
+    const starWidth = star.node().getBoundingClientRect().width;
+
+    let maxNameWidth = 0;
+
+    plans.forEach(p => {
+      const curTab = d3.select(component)
+        .select(`.tab-${p.planIndex}`);
+      const nameWidth = curTab.select('.tab-name')
+        .node()
+        .getBoundingClientRect().width;
+      if (nameWidth > maxNameWidth) {
+        maxNameWidth = nameWidth;
+      }
+    });
+
+    scorePanelWidth = Math.floor(tabWidth - maxNameWidth - starWidth) - 4;
+
+    // Set all score bars to have the same width
+    d3.select(component)
+      .selectAll('.score-bar-wrapper')
+      .style('width', `${scorePanelWidth}px`);
+
+    // Compute the text width and pass it to all score panels
+    const tempText = d3.select(component)
+      .select('.score-panel')
+      .append('span')
+      .classed('decision', true)
+      .classed('regression', isRegression)
+      .style('visibility', 'hidden')
+      .text(isRegression ?
+        plans[0].score :
+        classes[classTarget]
+      );
+    const textWidth = tempText.node().getBoundingClientRect().width;
+    tempText.remove();
+    plans.forEach(p => {
+      p.textWidth = textWidth;
+    });
+
+    console.log(scorePanelWidth);
   });
 
   onDestroy(() => {
-    unsubscribes(unsub => unsub());
+    unsubscribes.forEach(unsub => unsub());
   });
 
   // $: windowLoaded && features.length !== 0 && !initialized && initList();
@@ -127,7 +213,7 @@
   <div class='coach-header'>
 
     <div class='coach-logo'>
-      <img src='/logo.svg' alt='GAM Coach'>
+      <img src='/logo.svg' alt='GAM Coach' draggable='false'>
       <!-- <span class='coach-name'>GAM Coach</span> -->
       <span class='coach-tagline'>
         Personal coach to help you obtain desired AI decisions
@@ -172,8 +258,10 @@
       {:else}
         <div class='select'>
           <select>
-            {#each classesPairs as classesPair}
-              <option value={classesPair.value}>{classesPair.name}</option>
+            {#each classes as c, i}
+              {#if classTarget.includes(i)}
+                <option value={i}>{c}</option>
+              {/if}
             {/each}
           </select>
         </div>
@@ -183,11 +271,15 @@
 
     <div class='tabs'>
 
-      {#each curPlans as plan, i}
-        <div class='tab' class:selected={i === activePlanIndex}
-          on:click={() => {activePlanIndex = i;}}
+      {#each curPlans as plan}
+        <div class={`tab tab-${plan.planIndex}`} class:selected={plan.planIndex === activePlanIndex}
+          on:click={(e) => tabClicked(e, plan.planIndex)}
+          on:transitionend={(e) => tabTransitionEndHandler(e, plan.planIndex)}
           title='Generated plan to achieve your desired outcome'
         >
+
+          <span class='tab-name' data-text={plan.name}>{plan.name}</span>
+
           <div class='star-wrapper'
             on:click={e => starClicked(e, plan)}
             title='Click to save this plan'
@@ -202,7 +294,14 @@
             </div>
           </div>
 
-          <span class='tab-name' data-text={plan.name}>{plan.name}</span>
+          <div class='tab-score'>
+            <div class='score-bar-wrapper'>
+              <ScorePanel plan={plan}
+                scoreWidth={scorePanelWidth}
+              />
+            </div>
+          </div>
+
         </div>
       {/each}
 

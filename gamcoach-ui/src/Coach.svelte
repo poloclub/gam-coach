@@ -1,4 +1,5 @@
 <script>
+  //@ts-check
   import FeaturePanel from './components/feature-panel/FeaturePanel.svelte';
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
@@ -74,13 +75,6 @@
     z-index: 1;
   }
 
-  .score-bar-wrapper {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    transform: translateY(100%);
-  }
-
 </style>
 
 <div class='main-standalone'>
@@ -93,9 +87,6 @@
 
       <div class='coach-panel-wrapper'>
         <CoachPanel />
-        <div class='score-bar-wrapper'>
-          <ScorePanel windowLoaded={windowLoaded} />
-        </div>
       </div>
 
       <div class='feature-panel-wrapper'>

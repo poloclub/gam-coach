@@ -375,7 +375,8 @@ export const initHist = (component, state) => {
   const totalSampleNum = state.feature.histCount.reduce((a, b) => a + b);
   const curData = state.feature.histEdge.map((d, i) => ({
     edge: state.feature.histEdge[i],
-    label: state.feature.labelEncoder[state.feature.histEdge[i]],
+    label: state.feature.description.levelDescription[
+      state.feature.histEdge[i]].displayName,
     count: state.feature.histCount[i],
     density: state.feature.histCount[i] / totalSampleNum,
   }));

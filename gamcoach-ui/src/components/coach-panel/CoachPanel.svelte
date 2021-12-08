@@ -23,7 +23,7 @@
   let initialized = false;
 
   // Set up the model goal labels
-  const isRegression = true;
+  const isRegression = false;
   const regressionName = 'interest rate';
   const classes = ['loan approval', 'loan rejection'];
   const classTarget = [0];
@@ -185,15 +185,13 @@
       .style('visibility', 'hidden')
       .text(isRegression ?
         plans[0].score :
-        classes[classTarget]
+        classes[classTarget[0]]
       );
     const textWidth = tempText.node().getBoundingClientRect().width;
     tempText.remove();
     plans.forEach(p => {
       p.textWidth = textWidth;
     });
-
-    console.log(scorePanelWidth);
   });
 
   onDestroy(() => {

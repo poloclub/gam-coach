@@ -62,6 +62,7 @@
     histCount: null,
     id: 0,
     labelEncoder: {},
+    description: {},
     searchValues: []
   };
 
@@ -177,7 +178,7 @@
       histEdge: featureInfo.histEdge,
       histCount: featureInfo.histCount,
       id: feature.featureID,
-      stateUpdated: stateUpdated,
+      description: featureInfo.description,
       labelEncoder: feature.labelEncoder,
       searchValues: feature.acceptableRange === null ?
         new Set(featureInfo.histEdge) :
@@ -348,6 +349,13 @@
     return text;
   };
 
+  const displayLevel = (state, value) => {
+    if (state.feature.description.levelDescription === undefined) {
+      return '';
+    }
+    return state.feature.description.levelDescription[value].displayName;
+  };
+
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
@@ -396,13 +404,13 @@
       {#if state.feature.originalValue === state.feature.curValue}
 
         <span class='value-label'>
-          {state.feature.labelEncoder[state.feature.originalValue]}
+          {displayLevel(state, state.feature.originalValue)}
         </span>
 
       {:else}
 
         <span class='value-label'>
-          {state.feature.labelEncoder[state.feature.originalValue]}
+          {displayLevel(state, state.feature.originalValue)}
         </span>
 
         <div class='feature-arrow'>
@@ -410,7 +418,7 @@
         </div>
 
         <span class='value-label'>
-          {state.feature.labelEncoder[state.feature.curValue]}
+          {displayLevel(state, state.feature.curValue)}
         </span>
 
       {/if}

@@ -4,8 +4,8 @@
   import DiffPicker from './components/DiffPicker.svelte';
   import Tooltip from './components/Tooltip.svelte';
   import CoachPanel from './components/coach-panel/CoachPanel.svelte';
-  import ScorePanel from './components/score-panel/ScorePanel.svelte';
 
+  import { EBM } from './ebm/ebm';
   import d3 from './utils/d3-import';
   import { onMount } from 'svelte';
   import { tooltipConfigStore } from './store';
@@ -16,15 +16,28 @@
   tooltipConfigStore.subscribe(value => {tooltipConfig = value;});
 
   // Set up the GAM Coach object
-  let data = null;
+  let modelData = null;
   let windowLoaded = false;
 
-  const initData = async() => {
-    data = await d3.json('/data/lc-classifier.json');
-    console.log(data);
+  const initModel = async() => {
+    modelData = await d3.json('/data/lc-classifier.json');
+    console.log(modelData);
+
+    // Initialize an EBM model
+    const ebm = new EBM(modelData);
+    console.log(ebm);
+
+    const curExample = [
+      17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
+      'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
+      '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
+    ];
+
+    const pred = ebm.predictProb([curExample]);
+    console.log(pred);
   };
 
-  initData();
+  initModel();
 
   onMount(() => {
     window.onload = () => { windowLoaded = true; };
@@ -90,7 +103,7 @@
       </div>
 
       <div class='feature-panel-wrapper'>
-        <FeaturePanel data={data} windowLoaded={windowLoaded} />
+        <FeaturePanel modelData={modelData} windowLoaded={windowLoaded} />
       </div>
 
       <DiffPicker/>

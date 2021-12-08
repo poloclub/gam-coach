@@ -28,7 +28,6 @@
   let scorePanel = null;
 
   const initScorePanel = () => {
-    console.log(scoreWidth);
     scorePanel = new ScorePanel(component, scoreWidth, plan);
     scorePanel.initSVG();
   };

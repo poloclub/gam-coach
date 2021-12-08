@@ -10,7 +10,7 @@
   import { writable } from 'svelte/store';
   import { tooltipConfigStore } from '../../store';
 
-  export let data = null;
+  export let modelData = null;
   export let windowLoaded = false;
 
   const unsubscribes = [];
@@ -160,20 +160,20 @@
 
     // Convert categorical label to level ID
     const labelDecoder = {};
-    Object.keys(data.labelEncoder).forEach(f => {
+    Object.keys(modelData.labelEncoder).forEach(f => {
       labelDecoder[f] = {};
-      Object.keys(data.labelEncoder[f]).forEach(l => {
-        labelDecoder[f][data.labelEncoder[f][l]] = +l;
+      Object.keys(modelData.labelEncoder[f]).forEach(l => {
+        labelDecoder[f][modelData.labelEncoder[f][l]] = +l;
       });
     });
 
-    for (let i = 0; i < data.features.length; i++) {
-      const curType = data.features[i].type;
+    for (let i = 0; i < modelData.features.length; i++) {
+      const curType = modelData.features[i].type;
 
       if (curType !== 'interaction') {
         /** @type {Feature} */
         const curFeature = {
-          data: data.features[i],
+          data: modelData.features[i],
           featureID: i,
           isCont: true,
           requiresInt: false,
@@ -191,9 +191,10 @@
         if (curType === 'categorical') {
           curFeature.isCont = false;
           curFeature.requiresInt = false;
-          curFeature.labelEncoder = data.labelEncoder[data.features[i].name];
+          curFeature.labelEncoder = modelData.labelEncoder[
+            modelData.features[i].name];
           curFeature.originalValue =
-            labelDecoder[data.features[i].name][curExample[i]];
+            labelDecoder[modelData.features[i].name][curExample[i]];
           curFeature.coachValue = curFeature.originalValue;
           curFeature.myValue = curFeature.originalValue;
         }
@@ -230,7 +231,7 @@
     unsubscribes.forEach(unsub => unsub());
   });
 
-  $: windowLoaded && data && initFeatureCards();
+  $: windowLoaded && modelData && initFeatureCards();
 
 </script>
 

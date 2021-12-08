@@ -1090,7 +1090,7 @@ def _init_feature_descriptions(ebm, label_encoder):
             feature_descriptions[cur_name] = {
                 'displayName': cur_name,
                 'description': '',
-                'level_description': level_descriptions
+                'levelDescription': level_descriptions
             }
 
         else:
@@ -1340,9 +1340,9 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
             for level in feature_level_info[feature]:
                 display_name = feature_level_info[feature][level][0]
                 description = feature_level_info[feature][level][1]
-                feature_descriptions[feature]['level_description'][
+                feature_descriptions[feature]['levelDescription'][
                     level]['displayName'] = display_name
-                feature_descriptions[feature]['level_description'][
+                feature_descriptions[feature]['levelDescription'][
                     level]['description'] = description
 
     # Put descriptions under the 'features' key

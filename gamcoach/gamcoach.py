@@ -1099,6 +1099,37 @@ def _init_feature_descriptions(ebm, label_encoder):
     return feature_descriptions
 
 
+def _init_feature_configuration(ebm):
+    # Initialize the feature configuration dictionary
+    feature_configuration = {}
+
+    for i in range(len(ebm.feature_names)):
+        cur_name = ebm.feature_names[i]
+        cur_type = ebm.feature_types[i]
+
+        # Use the feature name as the default display name
+        if cur_type == 'continuous':
+            feature_configuration[cur_name] = {
+                'difficulty': 3,
+                'requiresInt': True,
+                'acceptableRange': None
+            }
+
+        # For categorical features, we can also give display name and description
+        # for different levels
+        elif cur_type == 'categorical':
+            feature_configuration[cur_name] = {
+                'difficulty': 3,
+                'requiresInt': False,
+                'acceptableRange': None
+            }
+
+        else:
+            continue
+
+    return feature_configuration
+
+
 def _get_kde_sample(xs, n_sample=200):
     """
     Compute kernel density estimation.
@@ -1112,7 +1143,7 @@ def _get_kde_sample(xs, n_sample=200):
 
 
 def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
-                   feature_level_info=None):
+                   feature_level_info=None, feature_config=None):
     """
     Get the model data for GAM Coach.
     Args:
@@ -1132,10 +1163,19 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
         feature_level_info: You can provide a dictionary to give separate display
             name and optional description for each level of categorical features.
             By default, the display name is the same as the level name, and the
-            description is an emtpy string. `feature_info` can be partial
+            description is an empty string. `feature_info` can be partial
             (e.g., only including some levels from some categorical features).
             It has format:
             `{'feature_name': {level_id: ['display_name', 'description']}}`
+        feature_config: You can provide a dictionary to configure the difficulty,
+            integer requirement, and acceptable range of individual features.
+            The difficulty is an integer between 1 and 6: 1 (very easy to change),
+            2 (easy), 3 (default), 4 (hard), 5 (very hard), 6 (impossible to change).
+            By default, difficulty is set to 3 for all features, requiresInt is
+            False for continuous variables, and acceptanceRange is None (search
+            all range).
+            The dictionary property has the following format:
+            `{'difficulty': 3, 'requiresInt': True, 'acceptableRange': None}`
     Returns:
         A Python dictionary of model data
     """
@@ -1349,6 +1389,21 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
     for feature in features:
         if (feature['name'] in feature_descriptions):
             feature['description'] = feature_descriptions[feature['name']]
+
+    # Set the feature configurations
+    feature_configurations = _init_feature_configuration(ebm)
+
+    if feature_config:
+        for feature in feature_config:
+            cur_config = feature_config[feature]
+            for k in ['requiresInt', 'difficulty', 'acceptableRange']:
+                if (k in cur_config):
+                    feature_configurations[feature][k] = cur_config[k]
+
+    # Attach the configuration to the feature field
+    for feature in features:
+        if (feature['name'] in feature_configurations):
+            feature['config'] = feature_configurations[feature['name']]
 
     data = {
         'intercept': ebm.intercept_[0] if hasattr(ebm, 'classes_') else ebm.intercept_,

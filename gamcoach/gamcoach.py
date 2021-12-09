@@ -1142,8 +1142,9 @@ def _get_kde_sample(xs, n_sample=200):
     return sample_x, sample_y
 
 
-def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
-                   feature_level_info=None, feature_config=None):
+def get_model_data(ebm, x_train, model_info, resort_categorical=False,
+                   feature_info=None, feature_level_info=None,
+                   feature_config=None):
     """
     Get the model data for GAM Coach.
     Args:
@@ -1152,6 +1153,13 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
         x_train: Training data. We use it to compute the mean absolute deviation
             score for continuous features, and frequency scores for categorical
             features.
+        model_info: Information about the model (class names, regression target
+            name). For classification, the order of classes matters. It should
+            be consistent with the class encoding index. For example, the first
+            element should be the name for class 0.
+            It has format:
+            `{'classes': ['loan rejection', 'loan approval']}` or
+            `{'regressionName': 'interest rate'}`
         resort_categorical: Whether to sort the levels in categorical variable
             by increasing order if all levels can be converted to numbers.
         feature_info: You can provide a dictionary to give a separate display
@@ -1408,6 +1416,7 @@ def get_model_data(ebm, x_train, resort_categorical=False, feature_info=None,
     data = {
         'intercept': ebm.intercept_[0] if hasattr(ebm, 'classes_') else ebm.intercept_,
         'isClassifier': hasattr(ebm, 'classes_'),
+        'modelInfo': model_info,
         'features': features,
         'labelEncoder': labelEncoder,
         'scoreRange': score_range,

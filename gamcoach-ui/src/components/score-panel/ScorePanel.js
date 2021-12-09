@@ -35,11 +35,10 @@ export class ScorePanel {
    */
   constructor(component, scoreWidth, plan) {
     this.component = component;
-    // this.width = scoreWidth - 50;
     this.plan = plan;
 
     // To figure out the svg width, we need to consider the width of the text
-    this.width = scoreWidth - plan.textWidth - 5;
+    this.width = scoreWidth - plan.textWidth - 1;
 
     // Initialize scales
     this.xScale = d3

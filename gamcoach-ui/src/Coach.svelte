@@ -19,7 +19,26 @@
   let modelData = null;
   let windowLoaded = false;
 
-  const initModel = async() => {
+  /** @type {Plans} */
+  let plans = null;
+
+  /**
+   * Populate the plans.
+   */
+  const initPlans = () => {
+    plans = {
+      isRegression: false,
+      regressionName: 'interest rate',
+      score: 12.342,
+      classes: ['loan approval', 'loan rejection'],
+      classTarget: [0],
+    };
+  };
+
+  /**
+   * Load the model and populate the plans.
+   */
+  const initModel = async () => {
     modelData = await d3.json('/data/lc-classifier.json');
     console.log(modelData);
 
@@ -35,6 +54,9 @@
 
     const pred = ebm.predictProb([curExample]);
     console.log(pred);
+
+    // Initialize the plans
+    initPlans();
   };
 
   initModel();
@@ -76,6 +98,7 @@
     border-radius: $border-radius;
     box-shadow: 0px 2px 15px hsla(0, 0%, 0%, 0.07),
       0px 0px 5px hsla(0, 0%, 0%, 0.12);
+    // max-width: 990px;
   }
 
   .coach-panel-wrapper {
@@ -99,7 +122,7 @@
     <div class='coach-wrapper'>
 
       <div class='coach-panel-wrapper'>
-        <CoachPanel />
+        <CoachPanel plans={plans} windowLoaded={windowLoaded}/>
       </div>
 
       <div class='feature-panel-wrapper'>

@@ -20,7 +20,7 @@ export class EBMLocal extends EBM {
   /**
    * Initialize the EBMLocal object.
    * @param {object} model Trained EBM model in JSON format
-   * @param {[object]} sample A single data point of interest
+   * @param {object[]} sample A single data point of interest
    */
   constructor(model, sample) {
     // Init the ancestor EBM class

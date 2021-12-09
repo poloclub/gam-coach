@@ -20,3 +20,16 @@
  * @property {number} display 0: no display, 1: to display, 2: scheduled to
  *  display on the left panel, 3: scheduled to display on the right panel
 */
+
+/**
+ * @typedef {Object} Plans
+ * @property {boolean} isRegression If the model is a regression model
+ * @property {number} score The current score output of the EBM model
+ * @property {string} regressionName Name of the regression model
+ * @property {string[]} classes Class names for the classification model
+ * @property {number[]} classTarget A list of indexes of target classes
+ * @property {boolean} isRegression
+ * @property {boolean} isRegression
+ * @property {boolean} isRegression
+ * @property {boolean} isRegression
+ */

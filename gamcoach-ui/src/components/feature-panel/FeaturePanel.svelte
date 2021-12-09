@@ -2,10 +2,12 @@
   // @ts-check
   import FeatureCard from '../feature-card/FeatureCard.svelte';
   import FeatureCardCat from '../feature-card-cat/FeatureCardCat.svelte';
-  import { FeatureGrid } from './FeaturePanel';
+  import { FeatureGrid, initFeatures } from './FeaturePanel';
 
   import d3 from '../../utils/d3-import';
   import '../../typedef';
+  import { EBMLocal } from '../../ebm/ebmLocal';
+
   import { onMount, onDestroy, tick } from 'svelte';
   import { writable } from 'svelte/store';
   import { tooltipConfigStore } from '../../store';
@@ -41,6 +43,9 @@
 
   /** @type {Feature[]} */
   let displayFeatures = [];
+
+  /** @type {EBMLocal} */
+  let ebmLocal = null;
 
   /** @type {FeatureGrid} */
   let featureGrid = new FeatureGrid();
@@ -156,58 +161,13 @@
 
   // Set up the GAM Coach feature cards
   const initFeatureCards = () => {
-    const tempFeatures = [];
+    // Initialize the features with model data
+    features = initFeatures(modelData, curExample);
 
-    // Convert categorical label to level ID
-    const labelDecoder = {};
-    Object.keys(modelData.labelEncoder).forEach(f => {
-      labelDecoder[f] = {};
-      Object.keys(modelData.labelEncoder[f]).forEach(l => {
-        labelDecoder[f][modelData.labelEncoder[f][l]] = +l;
-      });
-    });
-
-    for (let i = 0; i < modelData.features.length; i++) {
-      const curType = modelData.features[i].type;
-
-      if (curType !== 'interaction') {
-        /** @type {Feature} */
-        const curFeature = {
-          data: modelData.features[i],
-          featureID: i,
-          isCont: true,
-          requiresInt: false,
-          labelEncoder: null,
-          originalValue: curExample[i],
-          coachValue: curExample[i],
-          myValue: curExample[i],
-          isChanged: 0,
-          isConstrained: false,
-          difficulty: 'neutral',
-          acceptableRange: null,
-          display: 0
-        };
-
-        if (curType === 'categorical') {
-          curFeature.isCont = false;
-          curFeature.requiresInt = false;
-          curFeature.labelEncoder = modelData.labelEncoder[
-            modelData.features[i].name];
-          curFeature.originalValue =
-            labelDecoder[modelData.features[i].name][curExample[i]];
-          curFeature.coachValue = curFeature.originalValue;
-          curFeature.myValue = curFeature.originalValue;
-        }
-
-        tempFeatures.push(curFeature);
-      }
-    }
-
-    // Sort the features based on the importance
-    tempFeatures.sort((a, b) => b.data.importance - a.data.importance);
+    // Initialize the local ebm
+    ebmLocal = new EBMLocal(modelData, curExample);
 
     // Temp change the features
-    features = tempFeatures;
     tempInit();
     features = features;
 

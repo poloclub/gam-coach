@@ -172,6 +172,7 @@
 }
 
 .tab-input {
+  flex-shrink: 0;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -241,13 +242,14 @@
     border-right: 1px solid $gray-light-border;
     background-color: $gray-200;
     padding: 0px 8px 0px 10px;
-    flex: 0 1 70px;
+    flex: 0 1 75px;
+    min-width: 0px;
     position: relative;
     user-select: none;
 
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 
     overflow: hidden;
@@ -262,12 +264,17 @@
       }
     }
 
+    &.regression {
+      flex: 0 1 70px;
+    }
+
     &.selected {
       height: calc(100% + 2px);
       transform: translateY(-2px);
       z-index: 2;
       background: $gray-50;
-      flex: 1 0 70px;
+      justify-content: space-between;
+      flex: 1 0 75px;
 
       .star-wrapper {
         display: flex;
@@ -279,7 +286,6 @@
       .tab-score {
         display: flex;
       }
-
     }
 
     &:last-of-type {
@@ -288,7 +294,7 @@
   }
 
   .tab-score {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     display: none;
     overflow: hidden;
     white-space: nowrap;
@@ -418,6 +424,7 @@
 
 .score-bar-wrapper {
   display: flex;
+  width: 100%;
 }
 
 .no-display {

@@ -69,3 +69,63 @@ export class FeatureGrid {
     });
   };
 }
+
+/**
+ * Initialize the features in a feature panel with the given model data
+ * @param {any} modelData
+ * @param {any} curExample
+ */
+export const initFeatures = (modelData, curExample) => {
+
+  const tempFeatures = [];
+
+  // Convert categorical label to level ID
+  const labelDecoder = {};
+  Object.keys(modelData.labelEncoder).forEach((f) => {
+    labelDecoder[f] = {};
+    Object.keys(modelData.labelEncoder[f]).forEach((l) => {
+      labelDecoder[f][modelData.labelEncoder[f][l]] = +l;
+    });
+  });
+
+  for (let i = 0; i < modelData.features.length; i++) {
+    const curType = modelData.features[i].type;
+
+    if (curType !== 'interaction') {
+      /** @type {Feature} */
+      const curFeature = {
+        data: modelData.features[i],
+        featureID: i,
+        isCont: true,
+        requiresInt: false,
+        labelEncoder: null,
+        originalValue: curExample[i],
+        coachValue: curExample[i],
+        myValue: curExample[i],
+        isChanged: 0,
+        isConstrained: false,
+        difficulty: 'neutral',
+        acceptableRange: null,
+        display: 0
+      };
+
+      if (curType === 'categorical') {
+        curFeature.isCont = false;
+        curFeature.requiresInt = false;
+        curFeature.labelEncoder =
+          modelData.labelEncoder[modelData.features[i].name];
+        curFeature.originalValue =
+          labelDecoder[modelData.features[i].name][curExample[i]];
+        curFeature.coachValue = curFeature.originalValue;
+        curFeature.myValue = curFeature.originalValue;
+      }
+
+      tempFeatures.push(curFeature);
+    }
+  }
+
+  // Sort the features based on the importance
+  tempFeatures.sort((a, b) => b.data.importance - a.data.importance);
+
+  return tempFeatures;
+};

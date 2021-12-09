@@ -5,6 +5,7 @@
   import { tooltipConfigStore } from '../../store';
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
+  import '../../typedef';
 
   import refreshIcon from '../../img/icon-refresh2.svg';
   import starIconSolid from '../../img/icon-star-solid.svg';
@@ -33,7 +34,7 @@
   let activePlanIndex = 1;
   let planLabels = [];
   let nextPlanIndex = 1;
-  let tabInputLabel = 'Strategies to get ';
+  let tabInputLabel = 'Strategies to get a';
   let savedPlanIndex = new Set();
 
   /**
@@ -42,11 +43,9 @@
   const InitPlanLabels = () => {
     const vowels = ['a', 'e', 'i', 'o', 'u'];
     if (isRegression && vowels.includes(regressionName.substring(0, 1))) {
-      tabInputLabel = tabInputLabel.concat('an');
+      tabInputLabel = tabInputLabel.replace(' a', ' an');
     } else if (!isRegression && vowels.includes(classes[0].substring(0, 1))) {
-      tabInputLabel = tabInputLabel.concat('an');
-    } else {
-      tabInputLabel = tabInputLabel.concat('a');
+      tabInputLabel = tabInputLabel.replace(' a', ' an');
     }
 
     // Set up the plans

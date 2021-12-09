@@ -17,8 +17,7 @@
  *  'neutral', 'very-hard', 'hard']
  * @property {number[] | null} acceptableRange acceptable
  *  ranges of values
- * @property {number} display 0: no display, 1: to display, 2: scheduled to
- *  display on the left panel, 3: scheduled to display on the right panel
+ * @property {string | null} transform A string from ['log10'] or null
 */
 
 /**
@@ -28,7 +27,8 @@
  * @property {string} regressionName Name of the regression model
  * @property {string[]} classes Class names for the classification model
  * @property {number[]} classTarget A list of indexes of target classes
- * @property {boolean} isRegression
+ * @property {string[]} continuousIntegerFeatures Names of continuous features
+ *  that require integer values
  * @property {boolean} isRegression
  * @property {boolean} isRegression
  * @property {boolean} isRegression

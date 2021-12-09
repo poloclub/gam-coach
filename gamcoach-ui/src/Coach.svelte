@@ -6,6 +6,10 @@
   import CoachPanel from './components/coach-panel/CoachPanel.svelte';
 
   import { EBM } from './ebm/ebm';
+  import { GAMCoach } from './ebm/gamcoach';
+  import { Plan } from './Coach';
+  import './typedef';
+
   import d3 from './utils/d3-import';
   import { onMount } from 'svelte';
   import { tooltipConfigStore } from './store';
@@ -22,17 +26,85 @@
   /** @type {Plans} */
   let plans = null;
 
+  /** @type {any[]} */
+  const curExample = [
+    17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
+    'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
+    '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
+  ];
+
   /**
    * Populate the plans.
    */
-  const initPlans = () => {
+  const initPlans = async () => {
     plans = {
       isRegression: false,
       regressionName: 'interest rate',
       score: 12.342,
       classes: ['loan approval', 'loan rejection'],
-      classTarget: [0],
+      classTarget: [1],
+      continuousIntegerFeatures: []
     };
+
+    if (modelData.isClassifier) {
+      plans.isRegression = false;
+      plans.classes = modelData.modelInfo.classes;
+    } else {
+      plans.isRegression = true;
+      plans.regressionName = modelData.modelInfo.regressionName;
+    }
+
+    // Update the list of continuous features that require integer values
+    modelData.features.forEach(f => {
+      // Need to be careful about the features that have both transforms and
+      // integer requirement. For them, the integer transformation is only
+      // applied visually
+      if (f.type === 'continuous' && f.config.transform === null &&
+        f.config.requiresInt
+      ) {
+        plans.continuousIntegerFeatures.push(f.name);
+      }
+    });
+
+    /**
+     * Generate the initial 5 plans. We can use topK = 5, but we will have to
+     * wait for a long time. Instead, we progressively generate these top 5
+     * plans.
+     */
+    const coach = new GAMCoach(modelData);
+    console.log(coach);
+
+    const exampleBatch = [curExample];
+
+    const cfData = [];
+
+    console.time('Plan 1 generated');
+    let cfs = await coach.generateCfs({
+      curExample: exampleBatch,
+      totalCfs: 1,
+      continuousIntegerFeatures: plans.continuousIntegerFeatures
+    });
+    console.timeEnd('Plan 1 generated');
+    cfData.push(cfs.data[0]);
+
+    // Convert the plan into a plan object
+    let curPlan = new Plan(modelData, curExample, plans, cfData);
+    console.log(curPlan);
+
+    // Generate other plans
+    const totalPlanNum = 1;
+    for (let i = 2; i < totalPlanNum + 1; i++) {
+      if (!cfs.isSuccessful) {
+        break;
+      }
+
+      console.time(`Plan ${i} generated`);
+      cfs = await coach.generateSubCfs(cfs.nextCfConfig);
+      cfData.push(cfs.data[0]);
+      console.timeEnd(`Plan ${i} generated`);
+    }
+
+    console.log(cfData);
   };
 
   /**
@@ -46,17 +118,11 @@
     const ebm = new EBM(modelData);
     console.log(ebm);
 
-    const curExample = [
-      17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
-      'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
-      '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
-    ];
-
     const pred = ebm.predictProb([curExample]);
     console.log(pred);
 
     // Initialize the plans
-    initPlans();
+    await initPlans();
   };
 
   initModel();
@@ -131,7 +197,6 @@
 
       <DiffPicker/>
     </div>
-
 
 
   </div>

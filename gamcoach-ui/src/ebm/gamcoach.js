@@ -1,0 +1,1 @@
+../../../../gamcoach-js/dist/browser/gamcoach.js

@@ -98,7 +98,7 @@
     border-radius: $border-radius;
     box-shadow: 0px 2px 15px hsla(0, 0%, 0%, 0.07),
       0px 0px 5px hsla(0, 0%, 0%, 0.12);
-    // max-width: 990px;
+    // width: 990px;
   }
 
   .coach-panel-wrapper {

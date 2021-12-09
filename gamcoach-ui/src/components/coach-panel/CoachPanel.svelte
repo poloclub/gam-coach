@@ -150,8 +150,14 @@
    * Figure out the max width that the score panel can take on the tabs
    */
   const setScorePanelWidth = () => {
-    const tab = d3.select(component)
-      .select(`.tab-${activePlanIndex}`);
+    // Set a fixed width to the tabs element so that its children do not
+    // overflow the container. We have to do that because the overflow is set
+    // to visible for the tab appearance
+    const tabs = d3.select(component)
+      .select('.tabs');
+    tabs.style('width', `${tabs.node().getBoundingClientRect().width}px`);
+
+    const tab = tabs.select(`.tab-${activePlanIndex}`);
 
     // Figure out the max width that the score panel can take
     // The way to do that is to use tab width - max plan text width - star width

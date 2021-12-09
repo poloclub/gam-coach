@@ -241,7 +241,7 @@
   .tab {
     border-right: 1px solid $gray-light-border;
     background-color: $gray-200;
-    padding: 0px 8px 0px 10px;
+    padding: 0px 5px 0px 5px;
     flex: 0 1 75px;
     min-width: 0px;
     position: relative;
@@ -269,6 +269,7 @@
     }
 
     &.selected {
+      padding: 0px 10px 0px 10px;
       height: calc(100% + 2px);
       transform: translateY(-2px);
       z-index: 2;

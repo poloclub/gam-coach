@@ -99,7 +99,7 @@
    * @param planIndex {number} Plan index
    */
   const tabClicked = (e, planIndex)  => {
-    if (!plans.readyPlanIndexes.includes(planIndex)) {
+    if (!plans.readyPlanIndexes.has(planIndex)) {
       return;
     }
     // First hide all the scores on tab
@@ -312,7 +312,7 @@
           >
 
             <div class='loading-container'
-              class:no-display={plans.readyPlanIndexes.includes(plan.planIndex)}
+              class:no-display={plans.readyPlanIndexes.has(plan.planIndex)}
             >
               <div class='line'></div>
               <div class='line'></div>
@@ -320,12 +320,12 @@
             </div>
 
             <span class='tab-name'
-              class:hidden={!plans.readyPlanIndexes.includes(plan.planIndex)}
+              class:hidden={!plans.readyPlanIndexes.has(plan.planIndex)}
               data-text={plan.name}
             >{plan.name}</span>
 
             <div class='star-wrapper'
-              class:hidden={!plans.readyPlanIndexes.includes(plan.planIndex)}
+              class:hidden={!plans.readyPlanIndexes.has(plan.planIndex)}
               on:click={e => starClicked(e, plan)}
               title='Click to save this plan'
             >
@@ -340,7 +340,7 @@
             </div>
 
             <div class='tab-score'
-              class:hidden={!plans.readyPlanIndexes.includes(plan.planIndex)}
+              class:hidden={!plans.readyPlanIndexes.has(plan.planIndex)}
             >
               <div class='score-bar-wrapper'>
                 <ScorePanel plan={plan}

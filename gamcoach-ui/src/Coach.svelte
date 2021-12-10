@@ -47,7 +47,7 @@
       continuousIntegerFeatures: [],
       activePlanIndex: 1,
       nextPlanIndex: 1,
-      readyPlanIndexes: []
+      readyPlanIndexes: new Set()
     };
 
     if (modelData.isClassifier) {
@@ -90,7 +90,7 @@
       continuousIntegerFeatures: plans.continuousIntegerFeatures
     });
     console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
-    plans.readyPlanIndexes.push(tempPlans.nextPlanIndex);
+    plans.readyPlanIndexes.add(tempPlans.nextPlanIndex);
     plans.readyPlanIndexes = plans.readyPlanIndexes;
     cfData.push(cfs.data[0]);
 
@@ -114,7 +114,7 @@
       let curPlan = new Plan(modelData, curExample, plans, cfData);
 
       // Update the tab
-      plans.readyPlanIndexes.push(tempPlans.nextPlanIndex + i);
+      plans.readyPlanIndexes.add(tempPlans.nextPlanIndex + i);
       plans.readyPlanIndexes = plans.readyPlanIndexes;
 
       console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);

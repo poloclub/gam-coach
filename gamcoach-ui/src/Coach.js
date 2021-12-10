@@ -23,7 +23,6 @@ export class Plan {
    * @param {object[]} cfData The data of CFs returned from GAMCoach
    */
   constructor(modelData, curExample, plans, cfData) {
-    console.log(plans, cfData);
     this.features = this.initFeatures(modelData, curExample, cfData);
   }
 

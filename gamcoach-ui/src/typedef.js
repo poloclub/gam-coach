@@ -31,5 +31,6 @@
  *  that require integer values
  * @property {number} activePlanIndex The plan index of the currently active one
  * @property {number} nextPlanIndex The next plan index to count from
- * @property {boolean} isRegression
+ * @property {number[]} readyPlanIndexes An array of indexes of plans that have
+ *  been initialized
  */

@@ -37,7 +37,8 @@
    * Populate the plans.
    */
   const initPlans = async () => {
-    plans = {
+    /**@type {Plans}*/
+    const tempPlans = {
       isRegression: false,
       regressionName: 'interest rate',
       score: 12.342,
@@ -45,15 +46,16 @@
       classTarget: [1],
       continuousIntegerFeatures: [],
       activePlanIndex: 1,
-      nextPlanIndex: 1
+      nextPlanIndex: 1,
+      readyPlanIndexes: []
     };
 
     if (modelData.isClassifier) {
-      plans.isRegression = false;
-      plans.classes = modelData.modelInfo.classes;
+      tempPlans.isRegression = false;
+      tempPlans.classes = modelData.modelInfo.classes;
     } else {
-      plans.isRegression = true;
-      plans.regressionName = modelData.modelInfo.regressionName;
+      tempPlans.isRegression = true;
+      tempPlans.regressionName = modelData.modelInfo.regressionName;
     }
 
     // Update the list of continuous features that require integer values
@@ -64,9 +66,11 @@
       if (f.type === 'continuous' && f.config.transform === null &&
         f.config.requiresInt
       ) {
-        plans.continuousIntegerFeatures.push(f.name);
+        tempPlans.continuousIntegerFeatures.push(f.name);
       }
     });
+
+    plans = tempPlans;
 
     /**
      * Generate the initial 5 plans. We can use topK = 5, but we will have to
@@ -74,19 +78,20 @@
      * plans.
      */
     const coach = new GAMCoach(modelData);
-    console.log(coach);
 
     const exampleBatch = [curExample];
 
     const cfData = [];
 
-    console.time('Plan 1 generated');
+    console.time(`Plan ${tempPlans.nextPlanIndex} generated`);
     let cfs = await coach.generateCfs({
       curExample: exampleBatch,
       totalCfs: 1,
       continuousIntegerFeatures: plans.continuousIntegerFeatures
     });
-    console.timeEnd('Plan 1 generated');
+    console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
+    plans.readyPlanIndexes.push(tempPlans.nextPlanIndex);
+    plans.readyPlanIndexes = plans.readyPlanIndexes;
     cfData.push(cfs.data[0]);
 
     // Convert the plan into a plan object
@@ -94,19 +99,27 @@
     console.log(curPlan);
 
     // Generate other plans
-    const totalPlanNum = 1;
-    for (let i = 2; i < totalPlanNum + 1; i++) {
+    const totalPlanNum = 5;
+    for (let i = 1; i < totalPlanNum; i++) {
       if (!cfs.isSuccessful) {
         break;
       }
 
-      console.time(`Plan ${i} generated`);
+      // Run gam coach
+      console.time(`Plan ${tempPlans.nextPlanIndex + i} generated`);
       cfs = await coach.generateSubCfs(cfs.nextCfConfig);
       cfData.push(cfs.data[0]);
-      console.timeEnd(`Plan ${i} generated`);
+
+      // Get the plan object
+      let curPlan = new Plan(modelData, curExample, plans, cfData);
+
+      // Update the tab
+      plans.readyPlanIndexes.push(tempPlans.nextPlanIndex + i);
+      plans.readyPlanIndexes = plans.readyPlanIndexes;
+
+      console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
     }
 
-    console.log(cfData);
   };
 
   /**
@@ -118,10 +131,8 @@
 
     // Initialize an EBM model
     const ebm = new EBM(modelData);
-    console.log(ebm);
 
     const pred = ebm.predictProb([curExample]);
-    console.log(pred);
 
     // Initialize the plans
     await initPlans();

@@ -99,6 +99,9 @@
    * @param planIndex {number} Plan index
    */
   const tabClicked = (e, planIndex)  => {
+    if (!plans.readyPlanIndexes.includes(planIndex)) {
+      return;
+    }
     // First hide all the scores on tab
     d3.select(component)
       .selectAll('.tab-score')
@@ -181,15 +184,16 @@
 
     // Set up the plans
     const localPlanLabels = [];
+    let curIndex = plans.nextPlanIndex;
     for (let i = 0; i < 5; i++) {
       localPlanLabels.push({
-        name: `Plan ${plans.nextPlanIndex}`,
-        planIndex: plans.nextPlanIndex,
+        name: `Plan ${curIndex}`,
+        planIndex: curIndex,
         isRegression: plans.isRegression,
         score: plans.isRegression ? plans.score : plans.classTarget,
         classes: plans.isRegression ? null : plans.classes
       });
-      plans.nextPlanIndex ++;
+      curIndex ++;
     }
 
     return localPlanLabels;
@@ -298,7 +302,6 @@
       </div>
 
       <div class='tabs'>
-
         {#each planLabels as plan}
           <div class={`tab tab-${plan.planIndex}`}
             class:selected={plan.planIndex === plans.activePlanIndex}
@@ -308,9 +311,21 @@
             title='Generated plan to achieve your desired outcome'
           >
 
-            <span class='tab-name' data-text={plan.name}>{plan.name}</span>
+            <div class='loading-container'
+              class:no-display={plans.readyPlanIndexes.includes(plan.planIndex)}
+            >
+              <div class='line'></div>
+              <div class='line'></div>
+              <div class='line'></div>
+            </div>
+
+            <span class='tab-name'
+              class:hidden={!plans.readyPlanIndexes.includes(plan.planIndex)}
+              data-text={plan.name}
+            >{plan.name}</span>
 
             <div class='star-wrapper'
+              class:hidden={!plans.readyPlanIndexes.includes(plan.planIndex)}
               on:click={e => starClicked(e, plan)}
               title='Click to save this plan'
             >
@@ -324,7 +339,9 @@
               </div>
             </div>
 
-            <div class='tab-score'>
+            <div class='tab-score'
+              class:hidden={!plans.readyPlanIndexes.includes(plan.planIndex)}
+            >
               <div class='score-bar-wrapper'>
                 <ScorePanel plan={plan}
                   scoreWidth={scorePanelWidth}

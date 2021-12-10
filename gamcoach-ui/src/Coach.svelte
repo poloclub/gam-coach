@@ -43,7 +43,9 @@
       score: 12.342,
       classes: ['loan approval', 'loan rejection'],
       classTarget: [1],
-      continuousIntegerFeatures: []
+      continuousIntegerFeatures: [],
+      activePlanIndex: 1,
+      nextPlanIndex: 1
     };
 
     if (modelData.isClassifier) {
@@ -188,7 +190,7 @@
     <div class='coach-wrapper'>
 
       <div class='coach-panel-wrapper'>
-        <CoachPanel plans={plans} windowLoaded={windowLoaded}/>
+        <CoachPanel bind:plans={plans} windowLoaded={windowLoaded}/>
       </div>
 
       <div class='feature-panel-wrapper'>
@@ -197,7 +199,6 @@
 
       <DiffPicker/>
     </div>
-
 
   </div>
 

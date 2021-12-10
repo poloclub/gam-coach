@@ -29,7 +29,7 @@
  * @property {number[]} classTarget A list of indexes of target classes
  * @property {string[]} continuousIntegerFeatures Names of continuous features
  *  that require integer values
- * @property {boolean} isRegression
- * @property {boolean} isRegression
+ * @property {number} activePlanIndex The plan index of the currently active one
+ * @property {number} nextPlanIndex The next plan index to count from
  * @property {boolean} isRegression
  */

@@ -19,7 +19,6 @@
 
   // Component variables
   let component = null;
-  let svg = null;
   let tooltipConfig = null;
   let scorePanelWidth = 0;
 
@@ -27,46 +26,9 @@
   let initialized = false;
 
   // Set up the model goal labels
-  let isRegression = false;
-  let regressionName = '';
-  let classes = ['success', 'fail'];
-  let classTarget = [0];
-  let activePlanIndex = 1;
   let planLabels = [];
-  let nextPlanIndex = 1;
   let tabInputLabel = 'Strategies to get a';
   let savedPlanIndex = new Set();
-
-  /**
-   * Update the plan labels with the new plan information
-   */
-  const InitPlanLabels = () => {
-    const vowels = ['a', 'e', 'i', 'o', 'u'];
-    if (isRegression && vowels.includes(regressionName.substring(0, 1))) {
-      tabInputLabel = tabInputLabel.replace(' a', ' an');
-    } else if (!isRegression && vowels.includes(classes[0].substring(0, 1))) {
-      tabInputLabel = tabInputLabel.replace(' a', ' an');
-    }
-
-    // Set up the plans
-    nextPlanIndex = 1;
-    const localPlanLabels = [];
-    for (let i = 0; i < 5; i++) {
-      localPlanLabels.push({
-        name: `Plan ${nextPlanIndex}`,
-        planIndex: nextPlanIndex,
-        isRegression: isRegression,
-        score: isRegression ? plans.score : classTarget,
-        classes: isRegression ? null : classes
-      });
-      nextPlanIndex ++;
-    }
-
-    return localPlanLabels;
-  };
-
-  // Init the plan labels with fake data so the view can get some space
-  planLabels = InitPlanLabels();
 
   // Set up tooltip
   unsubscribes.push(
@@ -124,7 +86,7 @@
    */
   const tabTransitionEndHandler = (e, planIndex) => {
     // Listen to the flex-grow event
-    if (e.propertyName === 'flex-grow' && planIndex === activePlanIndex) {
+    if (e.propertyName === 'flex-grow' && planIndex === plans.activePlanIndex) {
       d3.select(e.target)
         .select('.tab-score')
         .classed('shown', true);
@@ -142,7 +104,7 @@
       .selectAll('.tab-score')
       .classed('shown', false);
 
-    activePlanIndex = planIndex;
+    plans.activePlanIndex = planIndex;
   };
 
   /**
@@ -156,7 +118,7 @@
       .select('.tabs');
     tabs.style('width', `${tabs.node().getBoundingClientRect().width}px`);
 
-    const tab = tabs.select(`.tab-${activePlanIndex}`);
+    const tab = tabs.select(`.tab-${plans.activePlanIndex}`);
 
     // Figure out the max width that the score panel can take
     // The way to do that is to use tab width - max plan text width - star width
@@ -191,11 +153,11 @@
       .select('.score-panel')
       .append('span')
       .classed('decision', true)
-      .classed('regression', isRegression)
+      .classed('regression', plans.isRegression)
       .style('visibility', 'hidden')
-      .text(isRegression ?
+      .text(plans.isRegression ?
         plans.score :
-        classes[classTarget[0]]
+        plans.classes[plans.classTarget[0]]
       );
     const textWidth = tempText.node().getBoundingClientRect().width;
     tempText.remove();
@@ -205,29 +167,54 @@
   };
 
   /**
+   * Update the plan labels with the new plan information
+   */
+  const InitPlanLabels = () => {
+    const vowels = ['a', 'e', 'i', 'o', 'u'];
+    if (plans.isRegression &&
+      vowels.includes(plans.regressionName.substring(0, 1))) {
+      tabInputLabel = tabInputLabel.replace(' a', ' an');
+    } else if (!plans.isRegression &&
+      vowels.includes(plans.classes[0].substring(0, 1))) {
+      tabInputLabel = tabInputLabel.replace(' a', ' an');
+    }
+
+    // Set up the plans
+    const localPlanLabels = [];
+    for (let i = 0; i < 5; i++) {
+      localPlanLabels.push({
+        name: `Plan ${plans.nextPlanIndex}`,
+        planIndex: plans.nextPlanIndex,
+        isRegression: plans.isRegression,
+        score: plans.isRegression ? plans.score : plans.classTarget,
+        classes: plans.isRegression ? null : plans.classes
+      });
+      plans.nextPlanIndex ++;
+    }
+
+    return localPlanLabels;
+  };
+
+  /**
    * Initialize the tab panel. This function should only be called after the
    * plan data is passed from the parent component.
    */
   const initPlanPanel = async () => {
     initialized = true;
 
-    // Update the plan labels
-    isRegression = plans.isRegression;
-    regressionName = plans.regressionName;
-    classes = plans.classes;
-    classTarget = plans.classTarget;
+    console.log(plans);
 
     planLabels = InitPlanLabels();
+    await tick();
 
     // Show the current active tab details
     const tab = d3.select(component)
-      .select(`.tab-${activePlanIndex}`);
+      .select(`.tab-${plans.activePlanIndex}`);
 
     tab.select('.tab-score')
       .classed('shown', true);
 
     // Set up the width for score panels
-    await tick();
     setScorePanelWidth();
   };
 
@@ -284,69 +271,73 @@
 
   <div class='coach-tab-bar'>
 
-    <div class='tab-input'>
-      <span>{tabInputLabel}</span>
+    {#if plans !== null}
 
-      {#if isRegression}
-        <span class='tab-keyword'>{regressionName}</span>
-        <span>from</span>
-        <input type='number' step='any' id='goal-from'>
+      <div class='tab-input'>
+        <span>{tabInputLabel}</span>
 
-        <span>to</span>
-        <input type='number' step='any' id='goal-to'>
-      {:else}
-        <div class='select'>
-          <select>
-            {#each classes as c, i}
-              {#if classTarget.includes(i)}
-                <option value={i}>{c}</option>
-              {/if}
-            {/each}
-          </select>
-        </div>
-      {/if}
+        {#if plans.isRegression}
+          <span class='tab-keyword'>{plans.regressionName}</span>
+          <span>from</span>
+          <input type='number' step='any' id='goal-from'>
 
-    </div>
+          <span>to</span>
+          <input type='number' step='any' id='goal-to'>
+        {:else}
+          <div class='select'>
+            <select>
+              {#each plans.classes as c, i}
+                {#if plans.classTarget.includes(i)}
+                  <option value={i}>{c}</option>
+                {/if}
+              {/each}
+            </select>
+          </div>
+        {/if}
 
-    <div class='tabs'>
+      </div>
 
-      {#each planLabels as plan}
-        <div class={`tab tab-${plan.planIndex}`}
-          class:selected={plan.planIndex === activePlanIndex}
-          class:regression={isRegression}
-          on:click={(e) => tabClicked(e, plan.planIndex)}
-          on:transitionend={(e) => tabTransitionEndHandler(e, plan.planIndex)}
-          title='Generated plan to achieve your desired outcome'
-        >
+      <div class='tabs'>
 
-          <span class='tab-name' data-text={plan.name}>{plan.name}</span>
-
-          <div class='star-wrapper'
-            on:click={e => starClicked(e, plan)}
-            title='Click to save this plan'
+        {#each planLabels as plan}
+          <div class={`tab tab-${plan.planIndex}`}
+            class:selected={plan.planIndex === plans.activePlanIndex}
+            class:regression={plans.isRegression}
+            on:click={(e) => tabClicked(e, plan.planIndex)}
+            on:transitionend={(e) => tabTransitionEndHandler(e, plan.planIndex)}
+            title='Generated plan to achieve your desired outcome'
           >
-            <div class='svg-icon tab-icon icon-star-solid'
-              class:no-display={!savedPlanIndex.has(plan.planIndex)}
+
+            <span class='tab-name' data-text={plan.name}>{plan.name}</span>
+
+            <div class='star-wrapper'
+              on:click={e => starClicked(e, plan)}
+              title='Click to save this plan'
             >
+              <div class='svg-icon tab-icon icon-star-solid'
+                class:no-display={!savedPlanIndex.has(plan.planIndex)}
+              >
+              </div>
+              <div class='svg-icon tab-icon icon-star-outline'
+                class:no-display={savedPlanIndex.has(plan.planIndex)}
+              >
+              </div>
             </div>
-            <div class='svg-icon tab-icon icon-star-outline'
-              class:no-display={savedPlanIndex.has(plan.planIndex)}
-            >
+
+            <div class='tab-score'>
+              <div class='score-bar-wrapper'>
+                <ScorePanel plan={plan}
+                  scoreWidth={scorePanelWidth}
+                />
+              </div>
             </div>
+
           </div>
+        {/each}
 
-          <div class='tab-score'>
-            <div class='score-bar-wrapper'>
-              <ScorePanel plan={plan}
-                scoreWidth={scorePanelWidth}
-              />
-            </div>
-          </div>
+      </div>
 
-        </div>
-      {/each}
-
-    </div>
+    {/if}
 
   </div>
 

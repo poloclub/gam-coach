@@ -32,6 +32,7 @@
   }
 
   :global(.top-rect) {
+    transition: fill 200ms;
     fill: $gray-400;
   }
 
@@ -55,7 +56,7 @@
   }
 
   :global(.original-value) {
-    fill: $blue-gray-300;
+    fill: $gray-500;
     stroke-linejoin: round;
     stroke-width: 10;
     stroke-opacity: 0;

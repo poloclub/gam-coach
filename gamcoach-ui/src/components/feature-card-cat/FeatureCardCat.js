@@ -208,7 +208,7 @@ const textClickedHandler = (e, d, component, state) => {
   e.stopPropagation();
 
   state.feature.curValue = d.edge;
-  state.stateUpdated();
+  state.stateUpdated('value');
 
   const yLabelGroup = d3.select(component)
     .select('.svg-hist')

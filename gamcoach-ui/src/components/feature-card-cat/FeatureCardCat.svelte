@@ -1,6 +1,6 @@
 <script>
   import d3 from '../../utils/d3-import';
-  import { onMount, tick } from 'svelte';
+  import { onMount, tick, createEventDispatcher } from 'svelte';
   import { fade, fly, scale } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
@@ -40,6 +40,8 @@
   // Binding variables, which will be initialized after window is loaded
   /** @type {HTMLElement} */
   let component = null;
+
+  const dispatch = createEventDispatcher();
 
   state.tickXScale = null;
   state.histSVG = null;
@@ -145,10 +147,23 @@
 
   /**
    * A workaround to listen to changes made in the js functions.
+   * @param {string | null} [key] Type of the update, can be one of ['value',
+   *  'constraint', null]. It triggers corresponding callbacks to update the
+   *  stores.
    */
-  const stateUpdated = () => {
+  const stateUpdated = (key=null) => {
     // Trigger svelte interactivity
     state = state;
+
+    if (key === 'value') {
+      // Propagate the change to FeaturePanel
+      dispatch('curValueUpdated', {
+        newValue: state.feature.curValue
+      });
+    } else if (key === 'constraint') {
+      // TODO
+      console.log('constraint updated');
+    }
   };
   state.stateUpdated = stateUpdated;
 

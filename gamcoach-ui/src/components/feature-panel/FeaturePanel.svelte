@@ -28,7 +28,7 @@
   let component = null;
   let initialized = false;
 
-/** @type {Plan} */
+  /** @type {Plan} */
   let plan = null;
 
   /** @type {HTMLElement}*/
@@ -114,6 +114,26 @@
     console.log(featureGrid);
   };
 
+  /**
+   * Handler when cur feature is updated by the user
+   * @param {CustomEvent} e
+   * @param {Feature} feature
+   */
+  const curValueUpdatedHandler = (e, feature) => {
+    let newValue =  e.detail.newValue;
+
+    // Encode the level if it is a categorical feature
+    if (feature.data.type === 'categorical') {
+      newValue = feature.labelEncoder[newValue];
+    }
+
+    // Update the local EBM
+    plan.ebmLocal.updateFeature(feature.data.name, newValue);
+
+    // Update teh store
+    planStore.set(plan);
+  };
+
   onMount(() => {
     bindInlineSVG(component);
   });
@@ -146,7 +166,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -160,7 +183,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -174,7 +200,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -198,7 +227,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -212,7 +244,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -226,7 +261,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -250,7 +288,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -264,7 +305,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}
@@ -278,7 +322,10 @@
             <FeatureCard feature={feature}>
             </FeatureCard>
           {:else}
-            <FeatureCardCat feature={feature}>
+            <FeatureCardCat
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCardCat>
           {/if}
         {/each}

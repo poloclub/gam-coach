@@ -5,6 +5,8 @@ import '../../typedef';
 import { Plan } from '../../Coach';
 import { sigmoid } from '../../ebm/ebm';
 
+const formatter = d3.format(',.2~f');
+
 export class ScorePanel {
   width;
   height = 30;
@@ -100,9 +102,9 @@ export class ScorePanel {
         .ease(d3.easeLinear);
 
       this.svg.select('.top-rect')
+        .classed('in-range', this.isInRange)
         .transition(widthTransition)
-        .attr('width', this.xScale(this.curValue))
-        .classed('in-range', this.isInRange);
+        .attr('width', this.xScale(this.curValue));
     }
   }
 
@@ -211,7 +213,13 @@ export class ScorePanel {
       .attr('clip-path', `url(#score-bar-clip-${this.planLabel.planIndex})`)
       .classed('in-range', this.isInRange)
       .on('mouseenter', (e) =>
-        this.mouseenterHandler(e, 'Your current score', 125, -10, 'n')
+        this.mouseenterHandler(
+          e,
+          `Your current score ${formatter(this.curValue)}`,
+          125,
+          -10,
+          'n'
+        )
       )
       .on('mouseleave', () => this.mouseleaveHandler());
 
@@ -224,22 +232,11 @@ export class ScorePanel {
       .attr('y', 5)
       .attr('height', contentHeight - 5)
       .on('mouseenter', (e) =>
-        this.mouseenterHandler(e, 'Your original score', 130, -5, 's')
-      )
-      .on('mouseleave', () => this.mouseleaveHandler());
-
-    topLayer
-      .append('rect')
-      .attr('class', 'min-threshold')
-      .attr('x', this.xScale(this.minThreshold) - this.lineWidth / 2)
-      .attr('width', this.lineWidth)
-      .attr('height', contentHeight)
-      .on('mouseenter', (e) =>
         this.mouseenterHandler(
           e,
-          'Score threshold to obtain your desired decision',
-          170,
-          0,
+          `Your original score ${formatter(this.originalValue)}`,
+          130,
+          15,
           's'
         )
       )
@@ -254,9 +251,30 @@ export class ScorePanel {
       .on('mouseenter', (e) =>
         this.mouseenterHandler(
           e,
-          'Score threshold to obtain your desired decision',
+          `Score needed to obtain your desired decision <br> <= ${formatter(
+            this.maxThreshold
+          )}`,
           170,
           0,
+          's'
+        )
+      )
+      .on('mouseleave', () => this.mouseleaveHandler());
+
+    topLayer
+      .append('rect')
+      .attr('class', 'min-threshold')
+      .attr('x', this.xScale(this.minThreshold) - this.lineWidth / 2)
+      .attr('width', this.lineWidth)
+      .attr('height', contentHeight)
+      .on('mouseenter', (e) =>
+        this.mouseenterHandler(
+          e,
+          `Score needed to obtain your desired decision <br> >= ${formatter(
+            this.minThreshold
+          )}`,
+          170,
+          20,
           's'
         )
       )

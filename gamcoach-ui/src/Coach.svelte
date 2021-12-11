@@ -65,14 +65,13 @@
 
     // Initialize the original score
     tempPlans.originalScore = ebm.predict([curExample], true)[0];
-    console.log(tempPlans.originalScore);
 
     // Update the list of continuous features that require integer values
     modelData.features.forEach(f => {
       // Need to be careful about the features that have both transforms and
       // integer requirement. For them, the integer transformation is only
       // applied visually
-      if (f.type === 'continuous' && f.config.transform === null &&
+      if (f.type === 'continuous' && f.config.usesTransform === null &&
         f.config.requiresInt
       ) {
         tempPlans.continuousIntegerFeatures.push(f.name);
@@ -109,7 +108,6 @@
     let curPlanStore = writable(curPlan);
     plans.planStores.set(tempPlans.nextPlanIndex, curPlanStore);
     plans.planStores = plans.planStores;
-    console.log(curPlan);
 
     // Generate other plans
     const totalPlanNum = 5;
@@ -137,7 +135,6 @@
       plans.test = 'wahaha';
     }, 2000);
 
-    console.log(plans);
   };
 
   /**
@@ -223,7 +220,10 @@
       </div>
 
       <div class='feature-panel-wrapper'>
-        <FeaturePanel modelData={modelData} windowLoaded={windowLoaded} />
+        <FeaturePanel
+          planStore={plans && plans.planStores.has(plans.activePlanIndex) ?
+            plans.planStores.get(plans.activePlanIndex) : null}
+          windowLoaded={windowLoaded} />
       </div>
 
       <DiffPicker/>

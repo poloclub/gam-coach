@@ -352,8 +352,11 @@
   const displayLevel = (state, value) => {
     if (state.feature.description.levelDescription === undefined) {
       return '';
+    } else if (state.feature.description.levelDescription[value] === undefined) {
+      return '';
+    } else {
+      return state.feature.description.levelDescription[value].displayName;
     }
-    return state.feature.description.levelDescription[value].displayName;
   };
 
   onMount(() => {

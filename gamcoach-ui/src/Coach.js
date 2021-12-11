@@ -47,6 +47,15 @@ export class Plan {
     /** @type{Feature[]} */
     const features = [];
 
+    // Convert categorical label to level ID
+    const labelDecoder = {};
+    Object.keys(modelData.labelEncoder).forEach((f) => {
+      labelDecoder[f] = {};
+      Object.keys(modelData.labelEncoder[f]).forEach((l) => {
+        labelDecoder[f][modelData.labelEncoder[f][l]] = +l;
+      });
+    });
+
     for (let i = 0; i < modelData.features.length; i++) {
       const curType = modelData.features[i].type;
 
@@ -64,8 +73,8 @@ export class Plan {
           coachValue: cfData[i],
           myValue: cfData[i],
           isChanged: cfData[i] === curExample[i] ? 0 : 1,
-          isConstrained: false,
           difficulty: difficultyTextMap[config.difficulty],
+          isConstrained: false,
           acceptableRange: null,
           transform: config.transform
         };
@@ -75,7 +84,18 @@ export class Plan {
           curFeature.requiresInt = false;
           curFeature.labelEncoder =
             modelData.labelEncoder[modelData.features[i].name];
+
+          // Decode the category to number
+          curFeature.originalValue =
+            labelDecoder[modelData.features[i].name][curExample[i]];
+          curFeature.coachValue =
+            labelDecoder[modelData.features[i].name][cfData[i]];
+          curFeature.myValue =
+            labelDecoder[modelData.features[i].name][cfData[i]];
         }
+
+        curFeature.isConstrained = curFeature.difficulty !== 'neutral' ||
+          curFeature.acceptableRange !== null;
 
         features.push(curFeature);
       }

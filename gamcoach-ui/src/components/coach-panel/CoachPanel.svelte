@@ -25,6 +25,7 @@
 
   const unsubscribes = [];
   let initialized = false;
+  const NUM_TOTAL_PAN = 5;
 
   // Set up the model goal labels
   let planLabels = [];
@@ -209,8 +210,6 @@
   const initPlanPanel = async () => {
     initialized = true;
 
-    console.log(plans);
-
     planLabels = InitPlanLabels();
     await tick();
 
@@ -238,8 +237,6 @@
    * Handler when a new store is added to the plans object.
    */
   const planStoreAdded = () => {
-    console.log('plan store added');
-
     plans.planStores.forEach((planStore, planIndex) => {
       // Add this plan index to a local array and subscribe the store
       if (!localPlans.has(planIndex)) {
@@ -262,7 +259,7 @@
   });
 
   $: windowLoaded && plans && !initialized && initPlanPanel();
-  $: plans && localPlans.size !== 5 && planStoreAdded();
+  $: plans && localPlans.size !== NUM_TOTAL_PAN && planStoreAdded();
 
 </script>
 

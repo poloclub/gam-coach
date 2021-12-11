@@ -5,8 +5,6 @@ import '../../typedef';
 import { Plan } from '../../Coach';
 import { sigmoid } from '../../ebm/ebm';
 
-const colors = config.colors;
-
 export class ScorePanel {
   width;
   height = 30;
@@ -14,9 +12,14 @@ export class ScorePanel {
   rectRadius = 5;
   lineWidth = 2;
   planLabel;
+
+  tooltipConfig;
+  tooltipConfigStore;
+  mouseoverTimeout;
+
   /** @type {Plan} */
   plan = null;
-  storeUnsubscribe;
+  unsubscribes = [];
 
   curValue = 0;
   originalValue = 0;
@@ -41,14 +44,24 @@ export class ScorePanel {
    * @param {object} planLabel
    * @param {Writable<Plan>} planStore
    */
-  constructor(component, scoreWidth, planLabel, planStore) {
+  constructor(component, scoreWidth, planLabel, planStore, tooltipConfigStore) {
     this.component = component;
     this.planLabel = planLabel;
 
     // Subscribe to the plan store
-    this.storeUnsubscribe = planStore.subscribe(value => {
-      this.plan = value;
-    });
+    this.unsubscribes.push(
+      planStore.subscribe((value) => {
+        this.plan = value;
+      })
+    );
+
+    // Subscribe to the tooltip store
+    this.unsubscribes.push(
+      tooltipConfigStore.subscribe((value) => {
+        this.tooltipConfig = value;
+      })
+    );
+    this.tooltipConfigStore = tooltipConfigStore;
 
     // To figure out the svg width, we need to consider the width of the text
     this.width = scoreWidth - planLabel.textWidth - 1;
@@ -71,7 +84,7 @@ export class ScorePanel {
   }
 
   destroy() {
-    this.storeUnsubscribe();
+    this.unsubscribes.forEach((d) => d());
   }
 
   /** @type {boolean} */
@@ -85,6 +98,40 @@ export class ScorePanel {
         this.curValue >= this.minThreshold && this.curValue <= this.maxThreshold
       );
     }
+  }
+
+  mouseenterHandler(e, message, width, yOffset, direction) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const node = e.currentTarget;
+    this.mouseoverTimeout = setTimeout(() => {
+      const position = node.getBoundingClientRect();
+      const curWidth = position.width;
+      const tooltipCenterX = position.x + curWidth / 2;
+      const tooltipCenterY = position.y - yOffset;
+      this.tooltipConfig.html = `
+        <div class='tooltip-content' style='display: flex; flex-direction:
+          column; justify-content: center;'>
+          ${message}
+        </div>
+      `;
+      this.tooltipConfig.width = width;
+      this.tooltipConfig.maxWidth = width;
+      this.tooltipConfig.left = tooltipCenterX - this.tooltipConfig.width / 2;
+      this.tooltipConfig.top = tooltipCenterY;
+      this.tooltipConfig.fontSize = '0.8rem';
+      this.tooltipConfig.show = true;
+      this.tooltipConfig.orientation = direction;
+      this.tooltipConfigStore.set(this.tooltipConfig);
+    }, 200);
+  }
+
+  mouseleaveHandler() {
+    clearTimeout(this.mouseoverTimeout);
+    this.mouseoverTimeout = null;
+    this.tooltipConfig.show = false;
+    this.tooltipConfigStore.set(this.tooltipConfig);
   }
 
   initSVG = () => {
@@ -140,8 +187,16 @@ export class ScorePanel {
       .attr('height', this.rectHeight)
       .attr('clip-path', `url(#score-bar-clip-${this.planLabel.planIndex})`)
       .classed('in-range', this.isInRange)
-      .append('title')
-      .text('Current score to make the decision');
+      .on('mouseenter', (e) =>
+        this.mouseenterHandler(
+          e,
+          'Your current score',
+          145,
+          -10,
+          'n'
+        )
+      )
+      .on('mouseleave', () => this.mouseleaveHandler());
 
     // Draw the bottom lines
     topLayer
@@ -151,8 +206,10 @@ export class ScorePanel {
       .attr('width', this.lineWidth)
       .attr('y', 5)
       .attr('height', contentHeight - 5)
-      .append('title')
-      .text('Your original score');
+      .on('mouseenter', (e) =>
+        this.mouseenterHandler(e, 'Your original score', 130, -5, 's')
+      )
+      .on('mouseleave', () => this.mouseleaveHandler());
 
     topLayer
       .append('rect')
@@ -160,8 +217,16 @@ export class ScorePanel {
       .attr('x', this.xScale(this.minThreshold) - this.lineWidth / 2)
       .attr('width', this.lineWidth)
       .attr('height', contentHeight)
-      .append('title')
-      .text('Threshold to obtain your desired decision');
+      .on('mouseenter', (e) =>
+        this.mouseenterHandler(
+          e,
+          'Score threshold to obtain your desired decision',
+          175,
+          0,
+          's'
+        )
+      )
+      .on('mouseleave', () => this.mouseleaveHandler());
 
     topLayer
       .append('rect')
@@ -169,7 +234,15 @@ export class ScorePanel {
       .attr('x', this.xScale(this.maxThreshold) - this.lineWidth / 2)
       .attr('width', this.lineWidth)
       .attr('height', contentHeight)
-      .append('title')
-      .text('Threshold to obtain your desired decision');
+      .on('mouseenter', (e) =>
+        this.mouseenterHandler(
+          e,
+          'Score threshold to obtain your desired decision',
+          175,
+          0,
+          's'
+        )
+      )
+      .on('mouseleave', () => this.mouseleaveHandler());
   };
 }

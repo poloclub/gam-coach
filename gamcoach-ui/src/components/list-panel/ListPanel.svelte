@@ -23,7 +23,6 @@
   // Set up tooltip
   unsubscribes.push(
     tooltipConfigStore.subscribe(value => {
-      console.log('store updated');
       tooltipConfig = value;
     })
   );

@@ -66,7 +66,7 @@
     position: absolute;
     color: hsl(0, 0%, 95%);
     background-color: black;
-    padding: 4px 8px;
+    padding: 2px 3px;
     border-radius: 4px;
     opacity: 1;
     z-index: 20;

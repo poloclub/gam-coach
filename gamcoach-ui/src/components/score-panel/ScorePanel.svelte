@@ -31,7 +31,8 @@
 
   const initScorePanel = () => {
     initialized = true;
-    scorePanel = new ScorePanel(component, scoreWidth, planLabel, planStore);
+    scorePanel = new ScorePanel(component, scoreWidth, planLabel, planStore,
+      tooltipConfigStore);
     scorePanel.initSVG();
   };
 

@@ -37,7 +37,6 @@
   // Set up tooltip
   unsubscribes.push(
     tooltipConfigStore.subscribe(value => {
-      console.log('store updated');
       tooltipConfig = value;
     })
   );
@@ -341,7 +340,6 @@
             class:regression={plans.isRegression}
             on:click={(e) => tabClicked(e, planLabel.planIndex)}
             on:transitionend={(e) => tabTransitionEndHandler(e, planLabel.planIndex)}
-            title='Generated plan to achieve your desired outcome'
           >
 
             <div class='loading-container'
@@ -378,7 +376,7 @@
               <div class='score-bar-wrapper'>
                 <ScorePanel planLabel={planLabel}
                   planStore={plans.planStores.has(planLabel.planIndex) ?
-                    plans.planStores.get(planLabel.planIndex) :  null
+                    plans.planStores.get(planLabel.planIndex) : null
                   }
                   scoreWidth={scorePanelWidth}
                 />

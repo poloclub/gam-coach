@@ -6,6 +6,7 @@
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
   import '../../typedef';
+  import { Plan } from '../../Coach';
 
   import refreshIcon from '../../img/icon-refresh2.svg';
   import starIconSolid from '../../img/icon-star-solid.svg';
@@ -29,6 +30,10 @@
   let planLabels = [];
   let tabInputLabel = 'Strategies to get a';
   let savedPlanIndex = new Set();
+
+  const localReadyPlanIndexes = new Set();
+  /** @type {Map<number, Plan>} */
+  const localPlans = new Map();
 
   // Set up tooltip
   unsubscribes.push(
@@ -222,6 +227,35 @@
     setScorePanelWidth();
   };
 
+  /**
+   * Handler when plan store is updated.
+   * @param {Plan} value
+   * @param {number} planIndex
+   */
+  const planStoreUpdated = (value, planIndex) => {
+    localPlans.set(planIndex, value);
+  };
+
+  /**
+   * Handler when a new store is added to the plans object.
+   */
+  const planStoreAdded = () => {
+    console.log('plan store added');
+
+    plans.planStores.forEach((planStore, planIndex) => {
+      // Add this plan index to a local array and subscribe the store
+      if (!localReadyPlanIndexes.has(planIndex)) {
+        localReadyPlanIndexes.add(planIndex);
+
+        unsubscribes.push(planStore.subscribe(
+          value => planStoreUpdated(value, planIndex)
+        ));
+
+        console.log('adding', planIndex);
+      }
+    });
+  };
+
   onMount(() => {
     bindInlineSVG(component);
   });
@@ -231,6 +265,7 @@
   });
 
   $: windowLoaded && plans && !initialized && initPlanPanel();
+  $: plans && localReadyPlanIndexes.size !== 5 && planStoreAdded();
 
 </script>
 
@@ -302,17 +337,17 @@
       </div>
 
       <div class='tabs'>
-        {#each planLabels as plan}
-          <div class={`tab tab-${plan.planIndex}`}
-            class:selected={plan.planIndex === plans.activePlanIndex}
+        {#each planLabels as planLabel}
+          <div class={`tab tab-${planLabel.planIndex}`}
+            class:selected={planLabel.planIndex === plans.activePlanIndex}
             class:regression={plans.isRegression}
-            on:click={(e) => tabClicked(e, plan.planIndex)}
-            on:transitionend={(e) => tabTransitionEndHandler(e, plan.planIndex)}
+            on:click={(e) => tabClicked(e, planLabel.planIndex)}
+            on:transitionend={(e) => tabTransitionEndHandler(e, planLabel.planIndex)}
             title='Generated plan to achieve your desired outcome'
           >
 
             <div class='loading-container'
-              class:no-display={plans.readyPlanIndexes.has(plan.planIndex)}
+              class:no-display={plans.readyPlanIndexes.has(planLabel.planIndex)}
             >
               <div class='line'></div>
               <div class='line'></div>
@@ -320,30 +355,30 @@
             </div>
 
             <span class='tab-name'
-              class:hidden={!plans.readyPlanIndexes.has(plan.planIndex)}
-              data-text={plan.name}
-            >{plan.name}</span>
+              class:hidden={!plans.readyPlanIndexes.has(planLabel.planIndex)}
+              data-text={planLabel.name}
+            >{planLabel.name}</span>
 
             <div class='star-wrapper'
-              class:hidden={!plans.readyPlanIndexes.has(plan.planIndex)}
-              on:click={e => starClicked(e, plan)}
+              class:hidden={!plans.readyPlanIndexes.has(planLabel.planIndex)}
+              on:click={e => starClicked(e, planLabel)}
               title='Click to save this plan'
             >
               <div class='svg-icon tab-icon icon-star-solid'
-                class:no-display={!savedPlanIndex.has(plan.planIndex)}
+                class:no-display={!savedPlanIndex.has(planLabel.planIndex)}
               >
               </div>
               <div class='svg-icon tab-icon icon-star-outline'
-                class:no-display={savedPlanIndex.has(plan.planIndex)}
+                class:no-display={savedPlanIndex.has(planLabel.planIndex)}
               >
               </div>
             </div>
 
             <div class='tab-score'
-              class:hidden={!plans.readyPlanIndexes.has(plan.planIndex)}
+              class:hidden={!plans.readyPlanIndexes.has(planLabel.planIndex)}
             >
               <div class='score-bar-wrapper'>
-                <ScorePanel plan={plan}
+                <ScorePanel planLabel={planLabel}
                   scoreWidth={scorePanelWidth}
                 />
               </div>

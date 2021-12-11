@@ -1,4 +1,3 @@
-
 /**
  * @typedef {Object} Feature
  * @property {Object} data The data associated with the feature
@@ -33,4 +32,6 @@
  * @property {number} nextPlanIndex The next plan index to count from
  * @property {Set<number>} readyPlanIndexes A set of indexes of plans that have
  *  been initialized
+ * @property {Map<number, object>} planStores A map that maps plan
+ *  index to the corresponding plan store
  */

@@ -13,7 +13,7 @@ import { EBM, sigmoid, searchSortedLowerIndex } from './ebm';
  */
 export class EBMLocal extends EBM {
   sample;
-  predScores;
+  predScore;
   predProb;
   pred;
 

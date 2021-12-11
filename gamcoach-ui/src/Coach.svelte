@@ -12,6 +12,7 @@
 
   import d3 from './utils/d3-import';
   import { onMount } from 'svelte';
+  import { writable } from 'svelte/store';
   import { tooltipConfigStore } from './store';
 
   // Set up tooltip
@@ -47,7 +48,8 @@
       continuousIntegerFeatures: [],
       activePlanIndex: 1,
       nextPlanIndex: 1,
-      readyPlanIndexes: new Set()
+      readyPlanIndexes: new Set(),
+      planStores: new Map()
     };
 
     if (modelData.isClassifier) {
@@ -95,7 +97,13 @@
     cfData.push(cfs.data[0]);
 
     // Convert the plan into a plan object
-    let curPlan = new Plan(modelData, curExample, plans, cfData);
+    let curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+
+    // Record the plan as a store and attach it to plans with the planIndex as
+    // a key
+    let curPlanStore = writable(curPlan);
+    plans.planStores.set(tempPlans.nextPlanIndex, curPlanStore);
+    plans.planStores = plans.planStores;
     console.log(curPlan);
 
     // Generate other plans
@@ -111,7 +119,10 @@
       cfData.push(cfs.data[0]);
 
       // Get the plan object
-      let curPlan = new Plan(modelData, curExample, plans, cfData);
+      curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+      curPlanStore = writable(curPlan);
+      plans.planStores.set(tempPlans.nextPlanIndex + i, curPlanStore);
+      // plans.planStores = plans.planStores;
 
       // Update the tab
       plans.readyPlanIndexes.add(tempPlans.nextPlanIndex + i);
@@ -120,6 +131,12 @@
       console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
     }
 
+    setTimeout(() => {
+      console.log('testing to change plans');
+      plans.test = 'wahaha';
+    }, 2000);
+
+    console.log(plans);
   };
 
   /**

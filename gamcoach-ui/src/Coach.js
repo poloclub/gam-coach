@@ -1,4 +1,5 @@
 import './typedef';
+import { EBMLocal } from './ebm/ebmLocal';
 
 const difficultyTextMap = {
   1: 'very-easy',
@@ -15,6 +16,10 @@ const difficultyTextMap = {
 export class Plan {
   /** @type{Feature[]} */
   features;
+
+  /** @type{EBMLocal} */
+  ebmLocal;
+
   /**
    * Initialize a Plan object
    * @param {object} modelData Loaded model data
@@ -24,6 +29,11 @@ export class Plan {
    */
   constructor(modelData, curExample, plans, cfData) {
     this.features = this.initFeatures(modelData, curExample, cfData);
+
+    // Initialize an EBM model associating with the plan
+    console.log(cfData);
+    this.ebmLocal = new EBMLocal(modelData, cfData);
+    console.log(this.ebmLocal);
   }
 
   /**

@@ -6,7 +6,7 @@
   import { ScorePanel } from './ScorePanel';
 
   export let scoreWidth = 0;
-  export let plan = null;
+  export let planLabel = null;
 
   const unsubscribes = [];
   const inRange = true;
@@ -28,7 +28,7 @@
   let scorePanel = null;
 
   const initScorePanel = () => {
-    scorePanel = new ScorePanel(component, scoreWidth, plan);
+    scorePanel = new ScorePanel(component, scoreWidth, planLabel);
     scorePanel.initSVG();
   };
 
@@ -55,11 +55,11 @@
 
   <svg class="score-svg" width="10" height="10"/>
 
-  <span class='decision' class:regression={plan.isRegression}>
-    {#if plan.isRegression}
-      {plan.score}
+  <span class='decision' class:regression={planLabel.isRegression}>
+    {#if planLabel.isRegression}
+      {planLabel.score}
     {:else}
-      {plan.classes[plan.score]}
+      {planLabel.classes[planLabel.score]}
     {/if}
   </span>
 

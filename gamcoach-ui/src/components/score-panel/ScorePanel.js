@@ -1,5 +1,9 @@
 import d3 from '../../utils/d3-import';
 import { config } from '../../config';
+import { Writable } from 'svelte/store';
+import '../../typedef';
+import { Plan } from '../../Coach';
+import { sigmoid } from '../../ebm/ebm';
 
 const colors = config.colors;
 
@@ -9,12 +13,15 @@ export class ScorePanel {
   rectHeight = 8;
   rectRadius = 5;
   lineWidth = 2;
-  plan;
+  planLabel;
+  /** @type {Plan} */
+  plan = null;
+  storeUnsubscribe;
 
-  curValue = 0.62;
-  originalValue = 0.4;
-  minThreshold = 0.5;
-  maxThreshold = 0.5;
+  curValue = 0;
+  originalValue = 0;
+  minThreshold = 0;
+  maxThreshold = 0;
 
   padding = {
     top: 1,
@@ -31,20 +38,40 @@ export class ScorePanel {
    * Initialize the score panel
    * @param {HTMLElement} component
    * @param {number} scoreWidth
-   * @param {object} plan
+   * @param {object} planLabel
+   * @param {Writable<Plan>} planStore
    */
-  constructor(component, scoreWidth, plan) {
+  constructor(component, scoreWidth, planLabel, planStore) {
     this.component = component;
-    this.plan = plan;
+    this.planLabel = planLabel;
+
+    // Subscribe to the plan store
+    this.storeUnsubscribe = planStore.subscribe(value => {
+      this.plan = value;
+    });
 
     // To figure out the svg width, we need to consider the width of the text
-    this.width = scoreWidth - plan.textWidth - 1;
+    this.width = scoreWidth - planLabel.textWidth - 1;
 
-    // Initialize scales
-    this.xScale = d3
-      .scaleLinear()
-      .domain([0, 1])
-      .range([0, this.width - this.padding.right - this.padding.left]);
+    // Initialize scales and thresholds
+    if (planLabel.isRegression) {
+      // TODO
+    } else {
+      // If it is a classifier, then the bar range is from 0 to 1
+      this.xScale = d3
+        .scaleLinear()
+        .domain([0, 1])
+        .range([0, this.width - this.padding.right - this.padding.left]);
+
+      this.minThreshold = 0.5;
+      this.maxThreshold = 0.5;
+      this.originalValue = sigmoid(this.plan.originalScore);
+      this.curValue = sigmoid(this.plan.ebmLocal.predScore);
+    }
+  }
+
+  destroy() {
+    this.storeUnsubscribe();
   }
 
   /** @type {boolean} */
@@ -98,8 +125,9 @@ export class ScorePanel {
 
     // Draw the top score bar
     // Prepare for a clip path
-    const clip = content.append('clipPath')
-      .attr('id', `score-bar-clip-${this.plan.planIndex}`);
+    const clip = content
+      .append('clipPath')
+      .attr('id', `score-bar-clip-${this.planLabel.planIndex}`);
 
     clip.node().appendChild(botRect.clone().classed('back-rect', false).node());
 
@@ -110,7 +138,7 @@ export class ScorePanel {
       .attr('y', contentHeight - this.rectHeight)
       .attr('width', this.xScale(this.curValue))
       .attr('height', this.rectHeight)
-      .attr('clip-path', `url(#score-bar-clip-${this.plan.planIndex})`)
+      .attr('clip-path', `url(#score-bar-clip-${this.planLabel.planIndex})`)
       .classed('in-range', this.isInRange)
       .append('title')
       .text('Current score to make the decision');

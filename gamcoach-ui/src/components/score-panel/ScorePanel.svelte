@@ -7,9 +7,11 @@
 
   export let scoreWidth = 0;
   export let planLabel = null;
+  export let planStore = null;
 
   const unsubscribes = [];
   const inRange = true;
+  let initialized = false;
   let mounted = false;
 
   // Set up tooltip
@@ -28,7 +30,8 @@
   let scorePanel = null;
 
   const initScorePanel = () => {
-    scorePanel = new ScorePanel(component, scoreWidth, planLabel);
+    initialized = true;
+    scorePanel = new ScorePanel(component, scoreWidth, planLabel, planStore);
     scorePanel.initSVG();
   };
 
@@ -38,9 +41,10 @@
 
   onDestroy(() => {
     unsubscribes.forEach((unsub) => unsub());
+    scorePanel.destroy();
   });
 
-  $: mounted && scoreWidth > 0 && initScorePanel();
+  $: mounted && !initialized && scoreWidth > 0 && planStore && initScorePanel();
 </script>
 
 <div class="score-panel" bind:this={component}>

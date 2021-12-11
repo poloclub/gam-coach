@@ -24,6 +24,9 @@
   let modelData = null;
   let windowLoaded = false;
 
+  /** @type {EBM} */
+  let ebm = null;
+
   /** @type {Plans} */
   let plans = null;
 
@@ -42,13 +45,13 @@
     const tempPlans = {
       isRegression: false,
       regressionName: 'interest rate',
+      originalScore: 12.111,
       score: 12.342,
-      classes: ['loan approval', 'loan rejection'],
+      classes: ['loan rejection', 'loan approval'],
       classTarget: [1],
       continuousIntegerFeatures: [],
       activePlanIndex: 1,
       nextPlanIndex: 1,
-      readyPlanIndexes: new Set(),
       planStores: new Map()
     };
 
@@ -59,6 +62,10 @@
       tempPlans.isRegression = true;
       tempPlans.regressionName = modelData.modelInfo.regressionName;
     }
+
+    // Initialize the original score
+    tempPlans.originalScore = ebm.predict([curExample], true)[0];
+    console.log(tempPlans.originalScore);
 
     // Update the list of continuous features that require integer values
     modelData.features.forEach(f => {
@@ -92,8 +99,6 @@
       continuousIntegerFeatures: plans.continuousIntegerFeatures
     });
     console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
-    plans.readyPlanIndexes.add(tempPlans.nextPlanIndex);
-    plans.readyPlanIndexes = plans.readyPlanIndexes;
     cfData.push(cfs.data[0]);
 
     // Convert the plan into a plan object
@@ -122,11 +127,7 @@
       curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
       curPlanStore = writable(curPlan);
       plans.planStores.set(tempPlans.nextPlanIndex + i, curPlanStore);
-      // plans.planStores = plans.planStores;
-
-      // Update the tab
-      plans.readyPlanIndexes.add(tempPlans.nextPlanIndex + i);
-      plans.readyPlanIndexes = plans.readyPlanIndexes;
+      plans.planStores = plans.planStores;
 
       console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
     }
@@ -147,7 +148,7 @@
     console.log(modelData);
 
     // Initialize an EBM model
-    const ebm = new EBM(modelData);
+    ebm = new EBM(modelData);
 
     const pred = ebm.predictProb([curExample]);
 

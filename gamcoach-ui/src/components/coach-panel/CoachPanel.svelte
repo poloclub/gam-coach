@@ -31,7 +31,6 @@
   let tabInputLabel = 'Strategies to get a';
   let savedPlanIndex = new Set();
 
-  const localReadyPlanIndexes = new Set();
   /** @type {Map<number, Plan>} */
   const localPlans = new Map();
 
@@ -104,7 +103,7 @@
    * @param planIndex {number} Plan index
    */
   const tabClicked = (e, planIndex)  => {
-    if (!plans.readyPlanIndexes.has(planIndex)) {
+    if (!plans.planStores.has(planIndex)) {
       return;
     }
     // First hide all the scores on tab
@@ -244,14 +243,13 @@
 
     plans.planStores.forEach((planStore, planIndex) => {
       // Add this plan index to a local array and subscribe the store
-      if (!localReadyPlanIndexes.has(planIndex)) {
-        localReadyPlanIndexes.add(planIndex);
+      if (!localPlans.has(planIndex)) {
 
         unsubscribes.push(planStore.subscribe(
           value => planStoreUpdated(value, planIndex)
         ));
 
-        console.log('adding', planIndex);
+        console.log('Adding to local plan', planIndex);
       }
     });
   };
@@ -265,7 +263,7 @@
   });
 
   $: windowLoaded && plans && !initialized && initPlanPanel();
-  $: plans && localReadyPlanIndexes.size !== 5 && planStoreAdded();
+  $: plans && localPlans.size !== 5 && planStoreAdded();
 
 </script>
 
@@ -347,7 +345,7 @@
           >
 
             <div class='loading-container'
-              class:no-display={plans.readyPlanIndexes.has(planLabel.planIndex)}
+              class:no-display={plans.planStores.has(planLabel.planIndex)}
             >
               <div class='line'></div>
               <div class='line'></div>
@@ -355,12 +353,12 @@
             </div>
 
             <span class='tab-name'
-              class:hidden={!plans.readyPlanIndexes.has(planLabel.planIndex)}
+              class:hidden={!plans.planStores.has(planLabel.planIndex)}
               data-text={planLabel.name}
             >{planLabel.name}</span>
 
             <div class='star-wrapper'
-              class:hidden={!plans.readyPlanIndexes.has(planLabel.planIndex)}
+              class:hidden={!plans.planStores.has(planLabel.planIndex)}
               on:click={e => starClicked(e, planLabel)}
               title='Click to save this plan'
             >
@@ -375,10 +373,13 @@
             </div>
 
             <div class='tab-score'
-              class:hidden={!plans.readyPlanIndexes.has(planLabel.planIndex)}
+              class:hidden={!plans.planStores.has(planLabel.planIndex)}
             >
               <div class='score-bar-wrapper'>
                 <ScorePanel planLabel={planLabel}
+                  planStore={plans.planStores.has(planLabel.planIndex) ?
+                    plans.planStores.get(planLabel.planIndex) :  null
+                  }
                   scoreWidth={scorePanelWidth}
                 />
               </div>

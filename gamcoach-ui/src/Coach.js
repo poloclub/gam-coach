@@ -16,9 +16,10 @@ const difficultyTextMap = {
 export class Plan {
   /** @type{Feature[]} */
   features;
-
   /** @type{EBMLocal} */
   ebmLocal;
+  /** @type{number} The raw score of the EBM output on the original sample */
+  originalScore;
 
   /**
    * Initialize a Plan object
@@ -31,9 +32,9 @@ export class Plan {
     this.features = this.initFeatures(modelData, curExample, cfData);
 
     // Initialize an EBM model associating with the plan
-    console.log(cfData);
     this.ebmLocal = new EBMLocal(modelData, cfData);
-    console.log(this.ebmLocal);
+
+    this.originalScore = plans.originalScore;
   }
 
   /**

@@ -22,6 +22,7 @@
 /**
  * @typedef {Object} Plans
  * @property {boolean} isRegression If the model is a regression model
+ * @property {number} originalScore The original score output of the EBM model
  * @property {number} score The current score output of the EBM model
  * @property {string} regressionName Name of the regression model
  * @property {string[]} classes Class names for the classification model
@@ -30,8 +31,6 @@
  *  that require integer values
  * @property {number} activePlanIndex The plan index of the currently active one
  * @property {number} nextPlanIndex The next plan index to count from
- * @property {Set<number>} readyPlanIndexes A set of indexes of plans that have
- *  been initialized
  * @property {Map<number, object>} planStores A map that maps plan
  *  index to the corresponding plan store
  */

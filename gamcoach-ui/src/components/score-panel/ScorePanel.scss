@@ -46,6 +46,8 @@
     stroke-opacity: 0;
     stroke: white;
     transform-origin: center;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
 
     &:hover {
       transform: scaleY(3);
@@ -59,6 +61,8 @@
     stroke-opacity: 0;
     stroke: white;
     transform-origin: center;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
 
     &:hover {
       transform: scaleY(3);

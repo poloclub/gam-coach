@@ -26,6 +26,9 @@ export class ScorePanel {
   minThreshold = 0;
   maxThreshold = 0;
 
+  svg = null;
+  svgInitialized = false;
+
   padding = {
     top: 1,
     bottom: 8,
@@ -52,6 +55,7 @@ export class ScorePanel {
     this.unsubscribes.push(
       planStore.subscribe((value) => {
         this.plan = value;
+        this.planUpdated();
       })
     );
 
@@ -80,6 +84,25 @@ export class ScorePanel {
       this.maxThreshold = 0.5;
       this.originalValue = sigmoid(this.plan.originalScore);
       this.curValue = sigmoid(this.plan.ebmLocal.predScore);
+    }
+  }
+
+  /**
+   * Update the graph based on the new score
+   */
+  planUpdated() {
+    this.curValue = sigmoid(this.plan.ebmLocal.predScore);
+    console.log('updating bar width', this.curValue);
+
+    if (this.svgInitialized) {
+      const widthTransition = d3.transition('width')
+        .duration(this.planLabel.isRegression ? 0 : 200)
+        .ease(d3.easeLinear);
+
+      this.svg.select('.top-rect')
+        .transition(widthTransition)
+        .attr('width', this.xScale(this.curValue))
+        .classed('in-range', this.isInRange);
     }
   }
 
@@ -136,7 +159,7 @@ export class ScorePanel {
 
   initSVG = () => {
     // Set the SVG height to fit its container
-    const svg = d3
+    this.svg = d3
       .select(this.component)
       .select('.score-svg')
       .attr('height', this.height)
@@ -144,7 +167,7 @@ export class ScorePanel {
       .attr('viewBox', `0 0 ${this.width} ${this.height}`)
       .attr('preserveAspectRatio', 'none');
 
-    const content = svg
+    const content = this.svg
       .append('g')
       .attr('class', 'content')
       .attr(
@@ -188,13 +211,7 @@ export class ScorePanel {
       .attr('clip-path', `url(#score-bar-clip-${this.planLabel.planIndex})`)
       .classed('in-range', this.isInRange)
       .on('mouseenter', (e) =>
-        this.mouseenterHandler(
-          e,
-          'Your current score',
-          145,
-          -10,
-          'n'
-        )
+        this.mouseenterHandler(e, 'Your current score', 125, -10, 'n')
       )
       .on('mouseleave', () => this.mouseleaveHandler());
 
@@ -221,7 +238,7 @@ export class ScorePanel {
         this.mouseenterHandler(
           e,
           'Score threshold to obtain your desired decision',
-          175,
+          170,
           0,
           's'
         )
@@ -238,11 +255,13 @@ export class ScorePanel {
         this.mouseenterHandler(
           e,
           'Score threshold to obtain your desired decision',
-          175,
+          170,
           0,
           's'
         )
       )
       .on('mouseleave', () => this.mouseleaveHandler());
+
+    this.svgInitialized = true;
   };
 }

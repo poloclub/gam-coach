@@ -1108,22 +1108,15 @@ def _init_feature_configuration(ebm):
         cur_type = ebm.feature_types[i]
 
         # Use the feature name as the default display name
-        if cur_type == 'continuous':
-            feature_configuration[cur_name] = {
-                'difficulty': 3,
-                'requiresInt': True,
-                'acceptableRange': None
-            }
-
-        # For categorical features, we can also give display name and description
-        # for different levels
-        elif cur_type == 'categorical':
+        if cur_type == 'continuous' or cur_type == 'categorical':
             feature_configuration[cur_name] = {
                 'difficulty': 3,
                 'requiresInt': False,
-                'acceptableRange': None
+                'requiresIncreasing': False,
+                'requiresDecreasing': False,
+                'usesTransform': None,
+                'acceptableRange': None,
             }
-
         else:
             continue
 

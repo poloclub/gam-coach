@@ -163,7 +163,10 @@
 
         {#each featureGrid.changed.left as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -180,7 +183,10 @@
 
         {#each featureGrid.changed.mid as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -197,7 +203,10 @@
 
         {#each featureGrid.changed.right as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -224,7 +233,10 @@
 
         {#each featureGrid.configured.left as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -241,7 +253,10 @@
 
         {#each featureGrid.configured.mid as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -258,7 +273,10 @@
 
         {#each featureGrid.configured.right as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -285,7 +303,10 @@
 
         {#each featureGrid.other.left as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -302,7 +323,10 @@
 
         {#each featureGrid.other.mid as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat
@@ -319,7 +343,10 @@
 
         {#each featureGrid.other.right as feature}
           {#if feature.isCont}
-            <FeatureCard feature={feature}>
+            <FeatureCard
+              feature={feature}
+              on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+            >
             </FeatureCard>
           {:else}
             <FeatureCardCat

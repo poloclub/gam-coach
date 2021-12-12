@@ -360,10 +360,12 @@
               <div class='svg-icon tab-icon icon-star-solid'
                 class:no-display={!savedPlanIndex.has(planLabel.planIndex)}
               >
+                {@html starIconSolid}
               </div>
               <div class='svg-icon tab-icon icon-star-outline'
                 class:no-display={savedPlanIndex.has(planLabel.planIndex)}
               >
+                {@html starIconOutline}
               </div>
             </div>
 

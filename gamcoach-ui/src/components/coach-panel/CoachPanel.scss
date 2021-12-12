@@ -338,10 +338,10 @@
 
   .star-wrapper {
     flex: 0 1 auto;
-    // margin-left: -6px;
     display: none;
     border-radius: 5px;
     padding: 4px;
+    margin: 0px 2px 0px 1px;
     transition: opacity 100ms ease-in-out, background-color 100ms ease-in-out;
 
     &:hover {

@@ -135,6 +135,8 @@ export const initSlider = (component, state) => {
  * @param{number} value The target value to move the thumb to.
  */
 export const moveThumb = (component, state, thumbID, value) => {
+  let stateChangeKey = null;
+
   // Make sure we are only moving within the range of the state.feature value
   if (value > state.feature.valueMax) {
     value = state.feature.valueMax;
@@ -238,6 +240,7 @@ export const moveThumb = (component, state, thumbID, value) => {
   case 'slider-middle-thumb':
     xPos -= thumbBBox.width / 2;
     state.feature.curValue = value;
+    stateChangeKey = 'value';
 
     // Update the color for middle thumb
     if (state.feature.curValue === state.feature.originalValue) {
@@ -287,7 +290,7 @@ export const moveThumb = (component, state, thumbID, value) => {
 
   syncTooltips(component, state);
   thumb.style('left', `${xPos}px`);
-  state.stateUpdated();
+  state.stateUpdated(stateChangeKey);
 };
 
 /**

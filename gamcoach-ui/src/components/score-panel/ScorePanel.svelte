@@ -1,7 +1,8 @@
 <script>
   // @ts-check
   import '../../typedef';
-  import { onMount, onDestroy } from 'svelte';
+  import d3 from '../../utils/d3-import';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { tooltipConfigStore } from '../../store';
   import { ScorePanel } from './ScorePanel';
 
@@ -10,9 +11,10 @@
   export let planStore = null;
 
   const unsubscribes = [];
-  const inRange = true;
+  let isInRange = true;
   let initialized = false;
   let mounted = false;
+  let plan = null;
 
   // Set up tooltip
   let tooltipConfig = null;
@@ -26,13 +28,36 @@
   /** @type {HTMLElement}*/
   let component = null;
 
+  /** @type {HTMLElement}*/
+  let decision = null;
+
   /** @type {ScorePanel}*/
   let scorePanel = null;
 
-  const initScorePanel = () => {
+  /**
+   * @param {boolean} newValue
+   */
+  const updateInRange = (newValue) => {
+    isInRange = newValue;
+  };
+
+  const initScorePanel = async () => {
     initialized = true;
+
+    // Subscribe the plan store
+    unsubscribes.push(
+      planStore.subscribe(value => {
+        plan = value;
+      })
+    );
+
+    await tick();
+
     scorePanel = new ScorePanel(component, scoreWidth, planLabel, planStore,
-      tooltipConfigStore);
+      tooltipConfigStore, updateInRange);
+
+    d3.select(decision).style('width', `${planLabel.textWidth}px`);
+
     scorePanel.initSVG();
   };
 
@@ -60,13 +85,23 @@
 
   <svg class="score-svg" width="10" height="10"/>
 
-  <span class='decision' class:regression={planLabel.isRegression}>
-    {#if planLabel.isRegression}
-      {planLabel.score}
-    {:else}
-      {planLabel.classes[planLabel.score]}
-    {/if}
-  </span>
+  {#if plan}
+    <span class='decision'
+      class:regression={planLabel.isRegression}
+      class:isInRange={isInRange}
+      bind:this={decision}
+    >
+      {#if planLabel.isRegression}
+        {planLabel.score}
+      {:else}
+        {#if isInRange}
+          {planLabel.classes[planLabel.score]}
+        {:else}
+          {planLabel.classes[planLabel.failTarget]}
+        {/if}
+      {/if}
+    </span>
+  {/if}
 
 </div>
 

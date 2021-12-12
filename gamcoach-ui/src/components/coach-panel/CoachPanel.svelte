@@ -156,18 +156,39 @@
     scorePanelWidth = Math.floor(tabWidth - maxNameWidth - starWidth) - 4;
 
     // Compute the text width and pass it to all score panels
-    const tempText = d3.select(component)
-      .select('.score-panel')
-      .append('span')
-      .classed('decision', true)
-      .classed('regression', plans.isRegression)
-      .style('visibility', 'hidden')
-      .text(plans.isRegression ?
-        plans.score :
-        plans.classes[plans.classTarget[0]]
-      );
-    const textWidth = tempText.node().getBoundingClientRect().width;
-    tempText.remove();
+    let textWidth = 0;
+    // For regression, we set the width to the initial score width
+    if (plans.isRegression) {
+      const tempText = d3.select(component)
+        .select('.score-panel')
+        .append('span')
+        .classed('decision', true)
+        .classed('regression', true)
+        .style('visibility', 'hidden')
+        .text(plans.score);
+
+      textWidth = tempText.node().getBoundingClientRect().width;
+      tempText.remove();
+    } else {
+      // For classification, we iterate through all classes to find the max width
+      const tempText = d3.select(component)
+        .select('.score-panel')
+        .append('span')
+        .classed('decision', true)
+        .style('visibility', 'hidden')
+        .text(plans.classes[0]);
+
+      textWidth = tempText.node().getBoundingClientRect().width;
+
+      for (let i = 1; i < plans.classes.length; i ++) {
+        tempText.text(plans.classes[i]);
+        const newWidth = tempText.node().getBoundingClientRect().width;
+        textWidth = Math.max(textWidth, newWidth);
+      }
+
+      tempText.remove();
+    }
+
     planLabels.forEach(p => {
       p.textWidth = textWidth;
     });
@@ -189,13 +210,25 @@
     // Set up the plans
     const localPlanLabels = [];
     let curIndex = plans.nextPlanIndex;
+
+    let failTarget = null;
+    if (!plans.isRegression) {
+      for (let i = 0; i < plans.classes.length; i++) {
+        if (i !== plans.classTarget[0]) {
+          failTarget = i;
+          break;
+        }
+      }
+    }
+
     for (let i = 0; i < 5; i++) {
       localPlanLabels.push({
         name: `Plan ${curIndex}`,
         planIndex: curIndex,
         isRegression: plans.isRegression,
-        score: plans.isRegression ? plans.score : plans.classTarget,
-        classes: plans.isRegression ? null : plans.classes
+        score: plans.isRegression ? plans.score : plans.classTarget[0],
+        classes: plans.isRegression ? null : plans.classes,
+        failTarget: failTarget
       });
       curIndex ++;
     }

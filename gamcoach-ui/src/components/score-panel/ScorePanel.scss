@@ -8,20 +8,6 @@
   align-items: flex-end;
   cursor: default;
   width: 100%;
-
-  :global(.decision) {
-    flex: 0 1 auto;
-    font-size: 0.8rem;
-    border-radius: 2px;
-    padding: 0 3px;
-    border: 1px solid $green-300;
-    color: $green-700;
-    margin-bottom: 6px;
-
-    &:global(.regression) {
-      padding: 0 1px;
-    }
-  }
 }
 
 .score-svg {
@@ -68,5 +54,31 @@
     &:hover {
       transform: scaleY(3);
     }
+  }
+}
+
+.decision {
+  flex: 0 1 auto;
+  position: relative;
+
+  margin-bottom: 6px;
+  padding: 0 3px;
+
+  font-size: 0.8rem;
+  border-radius: 2px;
+
+  border: 1px solid $gray-500;
+  color: $gray-700;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  &.regression {
+    padding: 0 1px;
+  }
+
+  &.isInRange {
+    border: 1px solid $green-300;
+    color: $green-700;
   }
 }

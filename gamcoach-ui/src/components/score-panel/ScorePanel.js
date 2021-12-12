@@ -48,10 +48,19 @@ export class ScorePanel {
    * @param {number} scoreWidth
    * @param {object} planLabel
    * @param {Writable<Plan>} planStore
+   * @param {(newValue: boolean) => void} updateInRange
    */
-  constructor(component, scoreWidth, planLabel, planStore, tooltipConfigStore) {
+  constructor(
+    component,
+    scoreWidth,
+    planLabel,
+    planStore,
+    tooltipConfigStore,
+    updateInRange
+  ) {
     this.component = component;
     this.planLabel = planLabel;
+    this.updateInRange = updateInRange;
 
     // Subscribe to the plan store
     this.unsubscribes.push(
@@ -97,14 +106,19 @@ export class ScorePanel {
     console.log('updating bar width', this.curValue);
 
     if (this.svgInitialized) {
-      const widthTransition = d3.transition('width')
+      const widthTransition = d3
+        .transition('width')
         .duration(this.planLabel.isRegression ? 0 : 200)
         .ease(d3.easeLinear);
 
-      this.svg.select('.top-rect')
+      this.svg
+        .select('.top-rect')
         .classed('in-range', this.isInRange)
         .transition(widthTransition)
         .attr('width', this.xScale(this.curValue));
+
+      // Update isInRange from the score panel svelte
+      this.updateInRange(this.isInRange);
     }
   }
 

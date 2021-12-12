@@ -103,7 +103,6 @@ export class ScorePanel {
    */
   planUpdated() {
     this.curValue = sigmoid(this.plan.ebmLocal.predScore);
-    console.log('updating bar width', this.curValue);
 
     if (this.svgInitialized) {
       const widthTransition = d3

@@ -84,13 +84,13 @@ $card-h-padding: 16px;
     stroke-width: $highlight-stroke-width;
   }
 
-  :global(.bar.original .level-bar) {
-    stroke: $gray-600;
+  :global(.bar.coach .level-bar) {
+    stroke: $green-500;
     stroke-width: $highlight-stroke-width;
   }
 
-  :global(.bar.coach .level-bar) {
-    stroke: $green-500;
+  :global(.bar.original .level-bar) {
+    stroke: $gray-600;
     stroke-width: $highlight-stroke-width;
   }
 
@@ -110,13 +110,19 @@ $card-h-padding: 16px;
 
   :global(.y-label.original) {
     fill: $gray-600;
-
     :global(.text-background) {
       fill: $gray-200;
     }
   }
 
   :global(.y-label.original.user) {
+    fill: $gray-600;
+    :global(.text-background) {
+      fill: $gray-200;
+    }
+  }
+
+  :global(.y-label.original.coach) {
     fill: $gray-600;
     :global(.text-background) {
       fill: $gray-200;

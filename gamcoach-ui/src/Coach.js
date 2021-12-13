@@ -1,5 +1,8 @@
 import './typedef';
 import { EBMLocal } from './ebm/ebmLocal';
+import { EBM } from './ebm/ebm';
+import { GAMCoach } from './ebm/gamcoach';
+import { writable } from 'svelte/store';
 
 const difficultyTextMap = {
   1: 'very-easy',
@@ -215,3 +218,119 @@ export class Constraints {
 
   }
 }
+
+/**
+ * Iteratively populate the plans.
+ * @param {object} modelData
+ * @param {EBM} ebm
+ * @param {object[]} curExample
+ * @param {Constraints} constraints
+ * @param {(newPlans: Plans) => void} plansUpdated
+ */
+export const initPlans = async (
+  modelData,
+  ebm,
+  curExample,
+  constraints,
+  plansUpdated
+) => {
+  /**@type {Plans}*/
+  const tempPlans = {
+    isRegression: false,
+    regressionName: 'interest rate',
+    originalScore: 12.111,
+    score: 12.342,
+    classes: ['loan rejection', 'loan approval'],
+    classTarget: [1],
+    continuousIntegerFeatures: [],
+    activePlanIndex: 1,
+    nextPlanIndex: 1,
+    planStores: new Map()
+  };
+
+  if (modelData.isClassifier) {
+    tempPlans.isRegression = false;
+    tempPlans.classes = modelData.modelInfo.classes;
+  } else {
+    tempPlans.isRegression = true;
+    tempPlans.regressionName = modelData.modelInfo.regressionName;
+  }
+
+  // Initialize the original score
+  tempPlans.originalScore = ebm.predict([curExample], true)[0];
+
+  // Update the list of continuous features that require integer values
+  modelData.features.forEach((f) => {
+    // Need to be careful about the features that have both transforms and
+    // integer requirement. For them, the integer transformation is only
+    // applied visually
+    if (
+      f.type === 'continuous' &&
+      f.config.usesTransform === null &&
+      f.config.requiresInt
+    ) {
+      tempPlans.continuousIntegerFeatures.push(f.name);
+    }
+  });
+
+  const plans = tempPlans;
+  plansUpdated(plans);
+
+  /**
+   * Generate the initial 5 plans. We can use topK = 5, but we will have to
+   * wait for a long time. Instead, we progressively generate these top 5
+   * plans.
+   */
+  const coach = new GAMCoach(modelData);
+
+  const exampleBatch = [curExample];
+
+  const cfData = [];
+
+  console.time(`Plan ${tempPlans.nextPlanIndex} generated`);
+  let cfs = await coach.generateCfs({
+    curExample: exampleBatch,
+    totalCfs: 1,
+    continuousIntegerFeatures: plans.continuousIntegerFeatures,
+    featuresToVary: constraints.featuresToVary,
+    featureRanges: constraints.featureRanges,
+    featureWeightMultipliers: constraints.featureWeightMultipliers
+  });
+  console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
+  cfData.push(cfs.data[0]);
+
+  // Convert the plan into a plan object
+  let curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+
+  // Record the plan as a store and attach it to plans with the planIndex as
+  // a key
+  let curPlanStore = writable(curPlan);
+  plans.planStores.set(tempPlans.nextPlanIndex, curPlanStore);
+  plansUpdated(plans);
+
+  // Generate other plans
+  const totalPlanNum = 5;
+  for (let i = 1; i < totalPlanNum; i++) {
+    if (!cfs.isSuccessful) {
+      break;
+    }
+
+    // Run gam coach
+    console.time(`Plan ${tempPlans.nextPlanIndex + i} generated`);
+    cfs = await coach.generateSubCfs(cfs.nextCfConfig);
+    cfData.push(cfs.data[0]);
+
+    // Get the plan object
+    curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+    curPlanStore = writable(curPlan);
+    plans.planStores.set(tempPlans.nextPlanIndex + i, curPlanStore);
+    plansUpdated(plans);
+
+    console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
+  }
+
+  setTimeout(() => {
+    console.log('testing to change plans');
+    plans.test = 'wahaha';
+  }, 2000);
+};

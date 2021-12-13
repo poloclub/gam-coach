@@ -5,7 +5,7 @@
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import { initHist, initHistSize } from './FeatureCardCat';
+  import { initHist, initHistSize, syncBars } from './FeatureCardCat';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import levelThumbIcon from '../../img/icon-level-thumb.svg';
@@ -356,7 +356,12 @@
    * @param acceptableRange
    */
   const displayAcceptableRange = (acceptableRange) => {
-    let text = '';
+
+    if (acceptableRange !== null && acceptableRange.length === 0) {
+      return 'No acceptable values';
+    }
+
+    let text = 'Acceptable among ';
     const levelDescription = feature.description.levelDescription;
 
     let acceptableRangeAll = acceptableRange;
@@ -364,7 +369,8 @@
       acceptableRangeAll = Object.keys(feature.labelEncoder);
     }
 
-    text = `"${levelDescription[acceptableRangeAll[0]].displayName}"`;
+    text = text.concat(`"${levelDescription[
+      acceptableRangeAll[0]].displayName}"`);
 
     for (let i = 1; i < acceptableRangeAll.length - 1; i++) {
       text = text.concat(', ', `"${
@@ -393,6 +399,40 @@
     } else {
       return state.feature.description.levelDescription[value].displayName;
     }
+  };
+
+  /**
+   * Handler for the reset button click event.
+   * @param {MouseEvent} e Mouse event
+   */
+  const resetClicked = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Restore the cur value
+    state.feature.curValue = state.feature.coachValue;
+    state.stateUpdated('value');
+
+    d3.select(component)
+      .select('.svg-hist')
+      .select('.y-label-group')
+      .selectAll('.y-label')
+      .classed('user', false);
+
+    // Make all bars in the acceptable range
+    state.feature.searchValues = new Set(state.feature.histEdge);
+    feature.acceptableRange = null;
+    syncBars(component, state);
+
+    // Change difficulty to default
+    feature.difficulty = 'neutral';
+    feature.isConstrained = false;
+
+    // Propagate the change to FeaturePanel
+    dispatch('constraintUpdated', {
+      difficulty: feature.difficulty,
+      acceptableRange: feature.acceptableRange
+    });
   };
 
   onMount(() => {
@@ -431,7 +471,10 @@
         </span>
       </div>
 
-      <div class='card-icons' class:collapsed={isCollapsed}>
+      <div class='card-icons'
+        class:collapsed={isCollapsed}
+        on:click={resetClicked}
+      >
 
         <div class='svg-icon icon-refresh'>
           <div class='local-tooltip'>
@@ -510,7 +553,7 @@
     <span class='tag acceptable-tag'
       class:shown={feature.acceptableRange !== null}
     >
-      Acceptable among {displayAcceptableRange(feature.acceptableRange)}
+      {displayAcceptableRange(feature.acceptableRange)}
       <div class='local-tooltip'>
         <span class='content'>New strategies will only search within this range</span>
       </div>

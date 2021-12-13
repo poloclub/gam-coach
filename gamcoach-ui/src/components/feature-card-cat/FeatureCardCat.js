@@ -243,7 +243,7 @@ const textClickedHandler = (e, d, component, state) => {
  * Iterate all level bars and y-label texts and then style them based on
  * on their values
  */
-const syncBars = (component, state) => {
+export const syncBars = (component, state) => {
   // Iterate all level bars and check if they match the special values
   // one-by-one
   const bars = d3.select(component)

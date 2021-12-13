@@ -4,7 +4,8 @@
   import { onMount, tick, createEventDispatcher } from 'svelte';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import {initSlider, initHist, initHistSize} from './FeatureCard';
+  import {initSlider, initHist, initHistSize, moveThumb,
+    syncRangeTrack} from './FeatureCard';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import rangeThumbLeftIcon from '../../img/icon-range-thumb-left.svg';
@@ -377,6 +378,40 @@
     }
   };
 
+  /**
+   * Handler for the reseat button click event.
+   * @param {MouseEvent} e Mouse event
+   */
+  const resetClicked = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Reset the configuration and current values
+    const leftThumbID = 'slider-left-thumb';
+    const rightThumbID = 'slider-right-thumb';
+    const middleThumbID = 'slider-middle-thumb';
+
+    // Move two range thumbs to the left and right ends
+    moveThumb(component, state, leftThumbID, state.feature.valueMin);
+    moveThumb(component, state, rightThumbID, state.feature.valueMax);
+    feature.acceptableRange = null;
+
+    // Change the current value to coach value or original value
+    moveThumb(component, state, middleThumbID, state.feature.coachValue);
+
+    syncRangeTrack(component, state);
+
+    // Change difficulty to default
+    feature.difficulty = 'neutral';
+    feature.isConstrained = false;
+
+    // Propagate the change to FeaturePanel
+    dispatch('constraintUpdated', {
+      difficulty: feature.difficulty,
+      acceptableRange: feature.acceptableRange
+    });
+  };
+
   onMount(() => {
     // Bind the SVG icons on mount
     bindInlineSVG(component);
@@ -405,7 +440,10 @@
         </span>
       </div>
 
-      <div class='card-icons' class:collapsed={isCollapsed}>
+      <div class='card-icons'
+        class:collapsed={isCollapsed}
+        on:click={resetClicked}
+      >
         <div class='svg-icon icon-refresh'>
           <div class='local-tooltip'>
             <span class='content'>Reset</span>

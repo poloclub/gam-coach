@@ -129,6 +129,35 @@ export const initSlider = (component, state) => {
   syncRangeTrack(component, state);
 };
 
+const updateRangeAnnotation = (component, state) => {
+
+  if (state.histSVG === null) { return; }
+
+  const rangeTrackBBox = d3.select(component)
+    .select('.range-track')
+    .node()
+    //@ts-ignore
+    .getBoundingClientRect();
+
+  let labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 -
+    state.annotationRangeXOffset;
+
+  // Handle out of bounds
+  if (labelLeft < 0) {
+    state.annotationRange.classed('no-triangle', true);
+    labelLeft = 0;
+  } else {
+    if (labelLeft > state.annotationRangeXBound) {
+      state.annotationRange.classed('no-triangle', true);
+      labelLeft = state.annotationRangeXBound;
+    } else {
+      state.annotationRange.classed('no-triangle', false);
+    }
+  }
+
+  state.annotationRange.style('left', `${labelLeft}px`);
+};
+
 /**
  * Move the specified thumb to the given value on the slider.
  * @param{string} thumbID The ID of the thumb element.
@@ -188,35 +217,6 @@ export const moveThumb = (component, state, thumbID, value) => {
   let xPos = (value - state.feature.valueMin) /
     (state.feature.valueMax - state.feature.valueMin) * trackBBox.width;
 
-  const updateRangeAnnotation = () => {
-
-    if (state.histSVG === null) { return; }
-
-    const rangeTrackBBox = d3.select(component)
-      .select('.range-track')
-      .node()
-      //@ts-ignore
-      .getBoundingClientRect();
-
-    let labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 -
-      state.annotationRangeXOffset;
-
-    // Handle out of bounds
-    if (labelLeft < 0) {
-      state.annotationRange.classed('no-triangle', true);
-      labelLeft = 0;
-    } else {
-      if (labelLeft > state.annotationRangeXBound) {
-        state.annotationRange.classed('no-triangle', true);
-        labelLeft = state.annotationRangeXBound;
-      } else {
-        state.annotationRange.classed('no-triangle', false);
-      }
-    }
-
-    state.annotationRange.style('left', `${labelLeft}px`);
-  };
-
   // Need to offset the xPos based on the thumb type
   // Also register different values based on the thumb type
   switch (thumbID) {
@@ -225,7 +225,7 @@ export const moveThumb = (component, state, thumbID, value) => {
     state.feature.curMin = value;
     syncTicks(state);
     syncRangeTrack(component, state);
-    updateRangeAnnotation();
+    updateRangeAnnotation(component, state);
     syncFeature(state);
     break;
 
@@ -233,7 +233,7 @@ export const moveThumb = (component, state, thumbID, value) => {
     state.feature.curMax = value;
     syncTicks(state);
     syncRangeTrack(component, state);
-    updateRangeAnnotation();
+    updateRangeAnnotation(component, state);
     syncFeature(state);
     break;
 
@@ -338,7 +338,7 @@ const syncTooltips = (component, state) => {
 /**
  * Sync the background range track with teh current min & max range
  */
-const syncRangeTrack = (component, state) => {
+export const syncRangeTrack = (component, state) => {
   const leftThumb = d3.select(component)
     .select('#slider-left-thumb');
 

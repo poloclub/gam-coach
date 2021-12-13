@@ -114,7 +114,7 @@
     // tempInit();
 
     // Organize the features into corresponding sections
-    featureGrid.loadFeatures(plan.features);
+    featureGrid.loadFeatures(plan.features, constraints);
     featureGrid = featureGrid;
 
     console.log(featureGrid);

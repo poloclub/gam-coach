@@ -1,3 +1,4 @@
+import { Constraints } from '../../Coach';
 
 /**
  * Each row in the feature masonry grid
@@ -39,10 +40,40 @@ export class FeatureGrid {
   }
 
   /**
-   *
-   * @param {Feature[]} features
+   * Initialize the features to put into the grid.
+   * @param {Feature[]} features The initial feature data initialized by the
+   *  Plan object
+   * @param {Constraints} constraints The global constraints object that
+   *  contains the up-to-date constraint info about all the features
    */
-  loadFeatures = (features) => {
+  loadFeatures = (features, constraints) => {
+    // First update the constraint information for all features
+    for (let i = 0; i < features.length; i++) {
+      const name = features[i].data.name;
+
+      // Update the difficulty configuration
+      if (constraints.difficulties.has(name)) {
+        features[i].difficulty = constraints.difficulties.get(name);
+      } else {
+        features[i].difficulty = 'neutral';
+      }
+
+      // Update the acceptable range configuration
+      if (constraints.acceptableRanges.has(name)) {
+        features[i].acceptableRange = constraints.acceptableRanges.get(name);
+      } else {
+        features[i].acceptableRange = null;
+      }
+
+      if (features[i].acceptableRange === null &&
+        features[i].difficulty === 'neutral'
+      ) {
+        features[i].isConstrained = false;
+      } else {
+        features[i].isConstrained = true;
+      }
+    }
+
     // Iterate through the features and put each feature into the correct
     // block and column
     const nextKey = {

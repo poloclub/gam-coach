@@ -13,6 +13,7 @@
   import d3 from './utils/d3-import';
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
+  import { fade, fly } from 'svelte/transition';
   import { tooltipConfigStore } from './store';
 
   const unsubscribes = [];
@@ -221,6 +222,7 @@
     border-radius: $border-radius;
     box-shadow: 0px 2px 15px hsla(0, 0%, 0%, 0.07),
       0px 0px 5px hsla(0, 0%, 0%, 0.12);
+    overflow: hidden;
     // width: 990px;
   }
 
@@ -248,13 +250,24 @@
         <CoachPanel bind:plans={plans} windowLoaded={windowLoaded}/>
       </div>
 
-      <div class='feature-panel-wrapper'>
-        <FeaturePanel
-          planStore={plans && plans.planStores.has(plans.activePlanIndex) ?
-            plans.planStores.get(plans.activePlanIndex) : null}
-          constraintsStore={constraintsStore}
-          windowLoaded={windowLoaded} />
-      </div>
+      {#if plans === null}
+        <div class='feature-panel-wrapper'>
+          <FeaturePanel
+            planStore={null}
+            constraintsStore={constraintsStore}
+            windowLoaded={windowLoaded} />
+        </div>
+      {:else}
+        {#key plans.activePlanIndex}
+          <div class='feature-panel-wrapper'>
+            <FeaturePanel
+              planStore={plans.planStores.has(plans.activePlanIndex) ?
+                plans.planStores.get(plans.activePlanIndex) : null}
+              constraintsStore={constraintsStore}
+              windowLoaded={windowLoaded} />
+          </div>
+        {/key}
+      {/if}
 
       <DiffPicker/>
     </div>

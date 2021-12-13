@@ -14,8 +14,7 @@
  * @property {boolean} isConstrained If user has configured this feature
  * @property {string} difficulty A string selected from ['very-easy', 'easy',
  *  'neutral', 'very-hard', 'hard']
- * @property {number[] | null} acceptableRange acceptable
- *  ranges of values
+ * @property {number[] | null} acceptableRange acceptable ranges of values
  * @property {string | null} transform A string from ['log10'] or null
  * @property {object} description Description of the feature and its levels (
  *  if the feature has categorical values)

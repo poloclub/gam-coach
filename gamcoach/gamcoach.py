@@ -1397,7 +1397,10 @@ def get_model_data(ebm, x_train, model_info, resort_categorical=False,
     if feature_config:
         for feature in feature_config:
             cur_config = feature_config[feature]
-            for k in ['requiresInt', 'difficulty', 'acceptableRange']:
+            for k in [
+                'requiresInt', 'difficulty', 'acceptableRange',
+                'requiresIncreasing', 'requiresDecreasing'
+            ]:
                 if (k in cur_config):
                     feature_configurations[feature][k] = cur_config[k]
 

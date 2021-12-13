@@ -1,6 +1,6 @@
 <script>
   import d3 from '../../utils/d3-import';
-  import { onMount, tick, createEventDispatcher } from 'svelte';
+  import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   import { fade, fly, scale } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
@@ -27,6 +27,7 @@
   let histDrawn = false;
   let isCollapsed = true;
   let isExpanded = false;
+  const unsubscribes = [];
   let state = {};
 
   // Constants
@@ -87,7 +88,7 @@
   };
 
   let diffPickerConfig = null;
-  diffPickerConfigStore.subscribe(value => {
+  let unsub = diffPickerConfigStore.subscribe(value => {
 
     // Listen to the picked event
     if (value.action === 'picked' && value.feature === state.feature.name) {
@@ -95,20 +96,28 @@
       feature.difficulty = value.difficulty;
 
       // Change `isConstrained` if necessary
-      if(feature.difficulty === 'neutral' && feature.acceptableRange === null) {
+      if (feature.difficulty === 'neutral' && feature.acceptableRange === null) {
         feature.isConstrained = false;
       } else {
         feature.isConstrained = true;
       }
+
+      // Propagate the change to FeaturePanel
+      dispatch('constraintUpdated', {
+        difficulty: feature.difficulty,
+        acceptableRange: feature.acceptableRange
+      });
     }
 
     diffPickerConfig = value;
   });
+  unsubscribes.push(unsub);
 
   let tooltipConfig = null;
-  tooltipConfigStore.subscribe(value => {
+  unsub = tooltipConfigStore.subscribe(value => {
     tooltipConfig = value;
   });
+  unsubscribes.push(unsub);
 
   const preProcessSVG = (svgString) => {
     return svgString.replaceAll('black', 'currentcolor')
@@ -148,8 +157,7 @@
   /**
    * A workaround to listen to changes made in the js functions.
    * @param {string | null} [key] Type of the update, can be one of ['value',
-   *  'constraint', null]. It triggers corresponding callbacks to update the
-   *  stores.
+   *  null]. It triggers corresponding callbacks to update the stores.
    */
   const stateUpdated = (key=null) => {
     // Trigger svelte interactivity
@@ -160,16 +168,26 @@
       dispatch('curValueUpdated', {
         newValue: state.feature.curValue
       });
-    } else if (key === 'constraint') {
-      // TODO
-      console.log('constraint updated');
     }
   };
   state.stateUpdated = stateUpdated;
 
-  const featureUpdated = () => {
+  /**
+   * A workaround to listen to change of feature in the js functions.
+   * @param {string | null} [key] If key is 'constraint', then it triggers an
+   * event to the feature panel to update the global constraints.
+   */
+  const featureUpdated = (key=null) => {
     feature = state.featurePtr;
     state = state;
+
+    if (key === 'constraint') {
+      // Propagate the change to FeaturePanel
+      dispatch('constraintUpdated', {
+        difficulty: feature.difficulty,
+        acceptableRange: feature.acceptableRange
+      });
+    }
   };
   state.featureUpdated = featureUpdated;
 
@@ -381,6 +399,10 @@
     // Bind the SVG icons on mount
     bindInlineSVG(component);
     mounted = true;
+  });
+
+  onDestroy(() => {
+    unsubscribes.forEach(unsub => unsub());
   });
 
   $: feature && mounted && !initialized && initFeatureCard();

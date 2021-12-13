@@ -7,12 +7,13 @@
   import d3 from '../../utils/d3-import';
   import '../../typedef';
   import { EBMLocal } from '../../ebm/ebmLocal';
-  import { Plan } from '../../Coach';
+  import { Plan, Constraints } from '../../Coach';
 
   import { onMount, onDestroy, tick } from 'svelte';
   import { tooltipConfigStore } from '../../store';
 
   export let planStore = null;
+  export let constraintsStore = null;
   export let windowLoaded = false;
 
   const unsubscribes = [];
@@ -30,6 +31,9 @@
 
   /** @type {Plan} */
   let plan = null;
+
+  /** @type {Constraints} */
+  let constraints = null;
 
   /** @type {HTMLElement}*/
   let leftColumn = null;
@@ -100,6 +104,12 @@
       })
     );
 
+    unsubscribes.push(
+      constraintsStore.subscribe(value => {
+        constraints = value;
+      })
+    );
+
     // Temp change the features
     // tempInit();
 
@@ -116,7 +126,7 @@
    * @param {Feature} feature
    */
   const curValueUpdatedHandler = (e, feature) => {
-    let newValue =  e.detail.newValue;
+    let newValue = e.detail.newValue;
 
     // Encode the level if it is a categorical feature
     if (feature.data.type === 'categorical') {
@@ -128,6 +138,75 @@
 
     // Update teh store
     planStore.set(plan);
+  };
+
+  /**
+   * Return true if two sets are the same
+   * @param {Set<object>} a
+   * @param {Set<object>} b
+   */
+  const areSetsEqual = (a, b) => {
+    return a.size === b.size && [...a].every(value => b.has(value));
+  };
+
+  /**
+   * Handler when a feature constraint is updated by the user
+   * @param {CustomEvent} e
+   * @param {Feature} feature
+   */
+  const constraintUpdatedHandler = (e, feature) => {
+    const curConstraint = e.detail;
+    const difficulty = curConstraint.difficulty;
+    const acceptableRange = curConstraint.acceptableRange;
+
+    const name = feature.data.name;
+    let needToUpdateStore = false;
+
+    // Update existing difficulty
+    if (constraints.difficulties.has(name) &&
+      constraints.difficulties.get(name) !== difficulty
+    ) {
+      needToUpdateStore = true;
+
+      if (difficulty !== 'neutral') {
+        constraints.difficulties.set(name, difficulty);
+      } else {
+        constraints.difficulties.delete(name);
+      }
+    }
+
+    // Add new difficulty
+    if (!constraints.difficulties.has(name) && difficulty !== 'neutral') {
+      needToUpdateStore = true;
+      constraints.difficulties.set(name, difficulty);
+    }
+
+    // Update existing acceptable range
+    if (constraints.acceptableRanges.has(name)) {
+
+      // Remove existing acceptable range
+      if (acceptableRange === null) {
+        needToUpdateStore = true;
+        constraints.acceptableRanges.delete(name);
+      } else {
+        const ranges = new Set(constraints.acceptableRanges.get(name).values());
+        const newRanges = new Set(acceptableRange);
+        if (!areSetsEqual(ranges, newRanges)) {
+          needToUpdateStore = true;
+          constraints.acceptableRanges.set(name, acceptableRange);
+        }
+      }
+    }
+
+    if (!constraints.acceptableRanges.has(name) && acceptableRange !== null) {
+      needToUpdateStore = true;
+      constraints.acceptableRanges.set(name, acceptableRange);
+    }
+
+    if (needToUpdateStore) {
+      constraintsStore.set(constraints);
+    }
+
   };
 
   onMount(() => {
@@ -168,6 +247,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -188,6 +268,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -208,6 +289,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -238,6 +320,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -258,6 +341,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -278,6 +362,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -308,6 +393,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -328,6 +414,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}
@@ -348,6 +435,7 @@
             <FeatureCardCat
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCardCat>
           {/if}

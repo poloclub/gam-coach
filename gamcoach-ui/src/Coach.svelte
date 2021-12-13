@@ -11,14 +11,18 @@
   import './typedef';
 
   import d3 from './utils/d3-import';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { tooltipConfigStore } from './store';
+
+  const unsubscribes = [];
 
   // Set up tooltip
   let tooltip = null;
   let tooltipConfig = null;
-  tooltipConfigStore.subscribe(value => {tooltipConfig = value;});
+  unsubscribes.push(
+    tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
+  );
 
   // Set up the GAM Coach object
   let modelData = null;
@@ -32,6 +36,8 @@
 
   /** @type {Constraints} */
   let constraints = null;
+
+  let constraintsStore = null;
 
   /** @type {any[]} */
   const curExample = [
@@ -87,6 +93,14 @@
     // Creating the constraints object can change the modelData (setting
     // the acceptance range based on the curExample)
     constraints = new Constraints(modelData, curExample);
+
+    constraintsStore = writable(constraints);
+    unsubscribes.push(
+      constraintsStore.subscribe(value => {
+        console.log(value);
+        constraints = value;
+      })
+    );
 
     /**
      * Generate the initial 5 plans. We can use topK = 5, but we will have to
@@ -170,6 +184,10 @@
     window.onload = () => { windowLoaded = true; };
   });
 
+  onDestroy(() => {
+    unsubscribes.forEach(unsub => unsub());
+  });
+
 </script>
 
 <style lang='scss'>
@@ -234,6 +252,7 @@
         <FeaturePanel
           planStore={plans && plans.planStores.has(plans.activePlanIndex) ?
             plans.planStores.get(plans.activePlanIndex) : null}
+          constraintsStore={constraintsStore}
           windowLoaded={windowLoaded} />
       </div>
 

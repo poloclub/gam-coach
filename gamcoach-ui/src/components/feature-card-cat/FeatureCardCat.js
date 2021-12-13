@@ -293,7 +293,7 @@ const syncFeature = (state) => {
     state.featurePtr.isConstrained = true;
   }
 
-  state.featureUpdated();
+  state.featureUpdated('constraint');
 };
 
 /**

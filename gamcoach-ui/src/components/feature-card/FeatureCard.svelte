@@ -100,6 +100,12 @@
       } else {
         feature.isConstrained = true;
       }
+
+      // Propagate the change to FeaturePanel
+      dispatch('constraintUpdated', {
+        difficulty: feature.difficulty,
+        acceptableRange: feature.acceptableRange
+      });
     }
 
     diffPickerConfig = value;
@@ -150,8 +156,7 @@
   /**
    * A workaround to listen to changes made in the js functions.
    * @param {string | null} [key] Type of the update, can be one of ['value',
-   *  'constraint', null]. It triggers corresponding callbacks to update the
-   *  stores.
+   *  null]. It triggers corresponding callbacks to update the stores.
    */
   const stateUpdated = (key=null) => {
     // Trigger svelte interactivity
@@ -162,16 +167,26 @@
       dispatch('curValueUpdated', {
         newValue: state.feature.curValue
       });
-    } else if (key === 'constraint') {
-      // TODO
-      console.log('constraint updated');
     }
   };
   state.stateUpdated = stateUpdated;
 
-  const featureUpdated = () => {
+  /**
+   * A workaround to listen to change of feature in the js functions.
+   * @param {string | null} [key] If key is 'constraint', then it triggers an
+   * event to the feature panel to update the global constraints.
+   */
+  const featureUpdated = (key=null) => {
     feature = state.featurePtr;
     state = state;
+
+    if (key === 'constraint') {
+      // Propagate the change to FeaturePanel
+      dispatch('constraintUpdated', {
+        difficulty: feature.difficulty,
+        acceptableRange: feature.acceptableRange
+      });
+    }
   };
   state.featureUpdated = featureUpdated;
 

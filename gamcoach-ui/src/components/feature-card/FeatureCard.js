@@ -389,7 +389,7 @@ const syncFeature = (state) => {
     state.featurePtr.isConstrained = true;
   }
 
-  state.featureUpdated();
+  state.featureUpdated('constraint');
 };
 
 export const initHistSize = (component, state) => {
@@ -515,8 +515,9 @@ export const initHist = (component, state) => {
   upperArea.attr('clip-path', `url(#${state.feature.id}-area-clip)`);
 
   // Add vertical marks on the plot
-  const lineHeight = histHeight - padding.top + vGap +
-    state.tickHeights.original;
+  // const lineHeight = histHeight - padding.top + vGap +
+  //   state.tickHeights.original;
+  const lineHeight = histHeight - padding.top;
 
   // --- User ---
   state.densityUserMark = markGroup.append('g')

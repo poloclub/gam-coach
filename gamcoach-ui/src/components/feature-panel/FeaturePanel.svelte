@@ -241,6 +241,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -262,6 +263,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -283,6 +285,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -314,6 +317,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -335,6 +339,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -356,6 +361,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -387,6 +393,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -408,6 +415,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}
@@ -429,6 +437,7 @@
             <FeatureCard
               feature={feature}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
+              on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
             </FeatureCard>
           {:else}

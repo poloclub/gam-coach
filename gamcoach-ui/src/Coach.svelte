@@ -6,7 +6,7 @@
   import CoachPanel from './components/coach-panel/CoachPanel.svelte';
 
   import { EBM } from './ebm/ebm';
-  import { Plan, Constraints, initPlans } from './Coach';
+  import { Plan, Constraints, initPlans, regeneratePlans } from './Coach';
   import './typedef';
 
   import d3 from './utils/d3-import';
@@ -150,7 +150,13 @@
     <div class='coach-wrapper'>
 
       <div class='coach-panel-wrapper'>
-        <CoachPanel bind:plans={plans} windowLoaded={windowLoaded}/>
+        <CoachPanel
+          bind:plans={plans}
+          windowLoaded={windowLoaded}
+          on:regenerateClicked={
+            () => regeneratePlans(constraints, modelData, curExample, plans, plansUpdated)
+          }
+        />
       </div>
 
       {#if plans === null}

@@ -1,7 +1,7 @@
 <script>
   //@ts-check
   import d3 from '../../utils/d3-import';
-  import { onMount, onDestroy, tick } from 'svelte';
+  import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   import { tooltipConfigStore } from '../../store';
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
@@ -26,6 +26,7 @@
   const unsubscribes = [];
   let initialized = false;
   const NUM_TOTAL_PAN = 5;
+  const dispatch = createEventDispatcher();
 
   // Set up the model goal labels
   let planLabels = [];
@@ -283,6 +284,15 @@
     });
   };
 
+  /**
+   * Dispatch the regeneration click event to the parent.
+   */
+  const regenerateClicked = () => {
+    plans.activePlanIndex = plans.nextPlanIndex;
+    initialized = false;
+    dispatch('regenerateClicked');
+  };
+
   onMount(() => {
     bindInlineSVG(component);
   });
@@ -321,6 +331,7 @@
       </div>
 
       <div class='icon-wrapper'
+        on:click={regenerateClicked}
         title='Generate new plans based on my configurations'
       >
         <div class='svg-icon icon-refresh'></div>

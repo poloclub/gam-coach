@@ -221,11 +221,12 @@ export class Constraints {
 
 /**
  * Iteratively populate the plans.
- * @param {object} modelData
- * @param {EBM} ebm
- * @param {object[]} curExample
- * @param {Constraints} constraints
- * @param {(newPlans: Plans) => void} plansUpdated
+ * @param {object} modelData The loaded model data
+ * @param {EBM} ebm Initialized EBM model
+ * @param {object[]} curExample The current sample data
+ * @param {Constraints} constraints Global constraint configurations
+ * @param {(newPlans: Plans) => void} plansUpdated Workaround function to
+ *  trigger an update on the plans variable
  */
 export const initPlans = async (
   modelData,
@@ -285,8 +286,6 @@ export const initPlans = async (
 
   const exampleBatch = [curExample];
 
-  const cfData = [];
-
   console.time(`Plan ${tempPlans.nextPlanIndex} generated`);
   let cfs = await coach.generateCfs({
     curExample: exampleBatch,
@@ -297,7 +296,6 @@ export const initPlans = async (
     featureWeightMultipliers: constraints.featureWeightMultipliers
   });
   console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
-  cfData.push(cfs.data[0]);
 
   // Convert the plan into a plan object
   let curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
@@ -318,7 +316,6 @@ export const initPlans = async (
     // Run gam coach
     console.time(`Plan ${tempPlans.nextPlanIndex + i} generated`);
     cfs = await coach.generateSubCfs(cfs.nextCfConfig);
-    cfData.push(cfs.data[0]);
 
     // Get the plan object
     curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
@@ -329,8 +326,94 @@ export const initPlans = async (
     console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
   }
 
-  setTimeout(() => {
-    console.log('testing to change plans');
-    plans.test = 'wahaha';
-  }, 2000);
+  // Update the next plan index
+  plans.nextPlanIndex += 5;
+  plansUpdated(plans);
+};
+
+/**
+ * Handler for the regenerate button click event. This function regenerates
+ * five new plans to replace the existing plans with the latest constraints
+ * information.
+ * @param {Constraints} constraints Global constraint configurations
+ * @param {object} modelData The loaded model data
+ * @param {object[]} curExample The current sample data
+ * @param {Plans} plans The current plans
+ * @param {(newPlans: Plans) => void} plansUpdated Workaround function to
+ *  trigger an update on the plans variable
+ */
+export const regeneratePlans = async (
+  constraints,
+  modelData,
+  curExample,
+  plans,
+  plansUpdated
+) => {
+
+  /**
+   * To generate new plans, we need to complete the following steps:
+   *
+   * (1) Empty planStores to make tabs start loading animation
+   * (2) Iteratively generate new plans and their stores
+   * (3) Update the active plan index to the first tab when the first plan is
+   *  updated => force an update on the feature panel
+   * (4) Update the next plan index
+   */
+
+  // Step 1: Start tab loading animation
+  plans.planStores = new Map();
+  plansUpdated(plans);
+
+  // Step 2: Iteratively generate new plans with the new constraints
+  const coach = new GAMCoach(modelData);
+  const exampleBatch = [curExample];
+
+  console.log(constraints.featureRanges);
+
+  console.time(`Plan ${plans.nextPlanIndex} generated`);
+  let cfs = await coach.generateCfs({
+    curExample: exampleBatch,
+    totalCfs: 1,
+    continuousIntegerFeatures: plans.continuousIntegerFeatures,
+    featuresToVary: constraints.featuresToVary,
+    featureRanges: constraints.featureRanges,
+    featureWeightMultipliers: constraints.featureWeightMultipliers
+  });
+  console.timeEnd(`Plan ${plans.nextPlanIndex} generated`);
+
+  // Step 3: Update the active plan index
+  plans.activePlanIndex = plans.nextPlanIndex;
+
+  // Convert the plan into a plan object
+  let curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+
+  // Record the plan as a store and attach it to plans with the planIndex as
+  // a key
+  let curPlanStore = writable(curPlan);
+  plans.planStores.set(plans.nextPlanIndex, curPlanStore);
+  plansUpdated(plans);
+
+  // Generate other plans
+  const totalPlanNum = 5;
+  for (let i = 1; i < totalPlanNum; i++) {
+    if (!cfs.isSuccessful) {
+      break;
+    }
+
+    // Run gam coach
+    console.time(`Plan ${plans.nextPlanIndex + i} generated`);
+    cfs = await coach.generateSubCfs(cfs.nextCfConfig);
+
+    // Get the plan object
+    curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+    curPlanStore = writable(curPlan);
+    plans.planStores.set(plans.nextPlanIndex + i, curPlanStore);
+    plansUpdated(plans);
+
+    console.timeEnd(`Plan ${plans.nextPlanIndex + i} generated`);
+  }
+
+  // Update the next plan index
+  plans.nextPlanIndex += 5;
+  plansUpdated(plans);
 };

@@ -329,10 +329,6 @@
 
     </div>
 
-    <!-- <div class='coach-bar'>
-      <svg class='coach-bar-svg'></svg>
-    </div> -->
-
   </div>
 
   <div class='coach-tab-bar'>

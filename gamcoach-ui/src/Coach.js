@@ -75,7 +75,7 @@ export class Plan {
           isChanged: cfData[i] === curExample[i] ? 0 : 1,
           difficulty: difficultyTextMap[config.difficulty],
           isConstrained: false,
-          acceptableRange: null,
+          acceptableRange: config.acceptableRange,
           transform: config.transform
         };
 
@@ -105,5 +105,112 @@ export class Plan {
     features.sort((a, b) => b.data.importance - a.data.importance);
 
     return features;
+  }
+}
+
+export class Constraints {
+  /** @type {Map<string, string>} A map from feature name to the difficulty
+   * string (very easy, easy, neutral, hard, very hard, lock)
+   */
+  difficulties;
+
+  /** @type {Map<string, number[]>} A map from feature name to the acceptable
+   * range. For continuous features, the range is [min, max]; for categorical
+   * features, the range is [level1, level2, ...] where each level is a number.
+   */
+  acceptableRanges;
+
+  /** @type {string[]} */
+  allFeatureNames = [];
+
+  /**
+   * Initialize the Constraints object. It might modify the modelData as some
+   * features only allow increasing/decreasing features. The initializer would
+   * create the acceptable range based on the curExample
+   * @param {object} modelData
+   * @param {object[]} curExample
+   */
+  constructor(modelData, curExample) {
+    this.difficulties = new Map();
+    this.acceptableRanges = new Map();
+
+    // Iterate through the features to search for pre-defined constraints
+    modelData.features.forEach((f, i) => {
+      if (f.type === 'continuous' || f.type === 'categorical') {
+        this.allFeatureNames.push(f.name);
+
+        if (f.config.difficulty !== 3) {
+          this.difficulties.set(f.name, difficultyTextMap[f.config.difficulty]);
+        }
+
+        if (f.config.acceptableRange !== null) {
+          this.acceptableRanges.set(f.name, f.config.acceptableRange);
+        } else {
+          if (f.config.requiresIncreasing) {
+            // Impose acceptable range to be [cur value, max value]
+            const featureMax = f.binEdge[f.binEdge.length - 1];
+            f.config.acceptableRange = [curExample[i], featureMax];
+            this.acceptableRanges.set(f.name, f.config.acceptableRange);
+          } else if (f.config.requiresDecreasing) {
+            // Impose acceptable range to be [min value, cur value]
+            const featureMin = f.binEdge[0];
+            f.config.acceptableRange = [featureMin, curExample[i]];
+            this.acceptableRanges.set(f.name, f.config.acceptableRange);
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Compute feature ranges for generating CF based on this.acceptableRanges
+   */
+  get featureRanges() {
+    return Object.fromEntries(this.acceptableRanges);
+  }
+
+  /**
+   * Compute feature weight multipliers for generating CF based on
+   * this.difficulties
+   */
+  get featureWeightMultipliers() {
+    const multipliers = {};
+
+    const scoreMap = {
+      'very-easy': 0.25,
+      'easy': 0.5,
+      'neutral': 1,
+      'hard': 2,
+      'very-hard': 4
+    };
+
+    this.difficulties.forEach((v, k) => {
+      if (v !== 'lock' && v !== 'neutral') {
+        multipliers[k] = scoreMap[v];
+      }
+    });
+
+    return multipliers;
+  }
+
+  /**
+   * Compute available features to change for generating CF based on this.
+   * difficulties (features that are set to be locked)
+   */
+  get featuresToVary() {
+    const featureToVary = [];
+    const featureDiffs = new Set(this.difficulties.values());
+
+    if (featureDiffs.has('lock')) {
+      this.allFeatureNames.forEach(d => {
+        if (!this.difficulties.has(d) || this.difficulties.get(d) !== 'lock') {
+          featureToVary.push(d);
+        }
+      });
+      return featureToVary;
+    } else {
+      return null;
+    }
+
   }
 }

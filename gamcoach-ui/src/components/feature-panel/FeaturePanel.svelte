@@ -100,12 +100,8 @@
       })
     );
 
-    // Initialize the local ebm
-    // ebmLocal = new EBMLocal(modelData, curExample);
-
     // Temp change the features
-    tempInit();
-    // plan = plan;
+    // tempInit();
 
     // Organize the features into corresponding sections
     featureGrid.loadFeatures(plan.features);

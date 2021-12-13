@@ -339,25 +339,28 @@
    */
   const displayAcceptableRange = (acceptableRange) => {
     let text = '';
+    const levelDescription = feature.description.levelDescription;
 
     let acceptableRangeAll = acceptableRange;
     if (acceptableRange === null) {
       acceptableRangeAll = Object.keys(feature.labelEncoder);
     }
 
-    text = `"${feature.labelEncoder[acceptableRangeAll[0]]}"`;
+    text = `"${levelDescription[acceptableRangeAll[0]].displayName}"`;
 
     for (let i = 1; i < acceptableRangeAll.length - 1; i++) {
       text = text.concat(', ', `"${
-        feature.labelEncoder[acceptableRangeAll[i]]
+        levelDescription[acceptableRangeAll[i]].displayName
       }"`);
     }
 
     if (acceptableRangeAll.length == 2) {
-      text = text.concat(` and "${feature.labelEncoder[acceptableRangeAll[1]]}"`);
+      text = text.concat(` and "${
+        levelDescription[acceptableRangeAll[1]].displayName}"`);
     } else if (acceptableRangeAll.length > 2) {
       text = text.concat(`, and "${
-        feature.labelEncoder[acceptableRangeAll[acceptableRangeAll.length - 1]]
+        levelDescription[acceptableRangeAll[acceptableRangeAll.length - 1]]
+          .displayName
       }"`);
     }
 

@@ -76,7 +76,8 @@ export class Plan {
           difficulty: difficultyTextMap[config.difficulty],
           isConstrained: false,
           acceptableRange: config.acceptableRange,
-          transform: config.transform
+          transform: config.transform,
+          description: modelData.features[i].description
         };
 
         if (curType === 'categorical') {

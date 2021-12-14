@@ -122,6 +122,9 @@ export class ScorePanel {
   }
 
   destroy() {
+    if (this.svg !== null) {
+      this.svg.selectAll('*').remove();
+    }
     this.unsubscribes.forEach((d) => d());
   }
 

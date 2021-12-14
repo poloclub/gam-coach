@@ -289,7 +289,14 @@
    */
   const regenerateClicked = () => {
     plans.activePlanIndex = plans.nextPlanIndex;
+
+    // Make this component ready to be initialized again with new plans
     initialized = false;
+
+    // Make this component listen to new stores
+    plans.planStores.clear();
+    localPlans.clear();
+
     dispatch('regenerateClicked');
   };
 

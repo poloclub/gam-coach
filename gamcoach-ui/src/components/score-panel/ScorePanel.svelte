@@ -61,6 +61,14 @@
     scorePanel.initSVG();
   };
 
+  /**
+   * Reset the component when the planLabels is updated
+   */
+  const planLabelUpdated = () => {
+    scorePanel?.destroy();
+    initialized = false;
+  };
+
   onMount(() => {
     mounted = true;
   });
@@ -71,17 +79,10 @@
   });
 
   $: mounted && !initialized && scoreWidth > 0 && planStore && initScorePanel();
+  $: planLabel && planLabelUpdated();
 </script>
 
 <div class="score-panel" bind:this={component}>
-  <!-- <div class="decision">
-    <span class="decision-result"
-      class:in-range={inRange}
-      title='Current decision'
-    >
-      {inRange ? 'loan approval' : 'loan rejection'}
-    </span>
-  </div> -->
 
   <svg class="score-svg" width="10" height="10"/>
 

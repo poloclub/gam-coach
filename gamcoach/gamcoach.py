@@ -400,9 +400,10 @@ class GAMCoach:
         return cfs
 
     def generate_cont_options(self, cf_direction, cur_feature_index,
-                              cur_feature_name, cur_feature_value,
-                              cur_feature_score, cont_mads, score_gain_bound=None,
-                              epsilon=0.005, need_to_be_int=False):
+                            cur_feature_name, cur_feature_value,
+                            cur_feature_score, cont_mads, cur_example,
+                            score_gain_bound=None, epsilon=0.005,
+                            need_to_be_int=False, skip_unhelpful=True):
         """
         Generage all alternative options for this continuous variable. This function
         would filter out all options that are:
@@ -419,6 +420,7 @@ class GAMCoach:
             cur_feature_value (float): The current feature value.
             cur_feature_score (float): The score for the current feature value.
             cont_mads (dict): A map of feature_name => MAD score.
+            cur_example (list): Current sample values
             score_gain_bound (float): Bound of the score gain. We do not collect
                 options that give `score_gain` > `score_gain_bound` (when
                 `cf_direction=1`), or `score_gain` < `score_gain_bound` (when
@@ -430,6 +432,10 @@ class GAMCoach:
                 optimal CF. Defaults to 0.005.
             need_to_be_int (bool): True if the target values for this continuous
                 variable need to have integer values.
+            skip_unhelpful (bool): True if to skip options from main
+                effects that give opposite score gain. It is rare that there is a
+                positive score gain from pair-interaction that outweigh negative
+                score gain from two main effects, and adjusting the distance penalty.
 
         Returns:
             list: List of option tuples (target, score gain, distance, bin_index)
@@ -454,20 +460,74 @@ class GAMCoach:
         cur_bin_id = search_sorted_lower_index(bin_starts, cur_feature_value)
         assert(additives[cur_bin_id] == cur_feature_score)
 
+        # Identify interaction terms that we need to consider
+        associated_interactions = []
+
+        for cur_feature_id in range(len(self.ebm.feature_names)):
+            cur_feature_type = self.ebm.feature_types[cur_feature_id]
+            if cur_feature_type == 'interaction':
+
+                indexes = self.ebm.feature_groups_[cur_feature_id]
+
+                if cur_feature_index in indexes:
+                    feature_position = 0 if indexes[0] == cur_feature_index else 1
+
+                    other_position = 1 - feature_position
+                    other_index = indexes[other_position]
+                    other_type = self.ebm.feature_types[other_index]
+
+                    # Get the current additive scores and bin edges
+                    inter_additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
+
+                    bin_starts_feature = self.ebm.pair_preprocessor_._get_bin_labels(
+                        cur_feature_index
+                    )
+                    bin_starts_other = self.ebm.pair_preprocessor_._get_bin_labels(
+                        other_index
+                    )
+
+                    # Get the current interaction term score
+                    other_bin = None
+                    if (other_type == 'continuous'):
+                        other_bin = search_sorted_lower_index(
+                            bin_starts_other, float(cur_example[other_index])
+                        )
+                    else:
+                        other_bin = bin_starts_other.index(cur_example[other_index])
+
+                    feature_bin = search_sorted_lower_index(
+                        bin_starts_feature, cur_feature_value
+                    )
+
+                    feature_inter_score = 0
+
+                    if feature_position == 0:
+                        feature_inter_score = inter_additives[feature_bin, other_bin]
+                    else:
+                        feature_inter_score = inter_additives[other_bin, feature_bin]
+
+                    # Extract the row or column where we fix the other feature and
+                    # vary the current feature
+                    feature_inter_bin_starts = bin_starts_feature
+                    feature_inter_additives = []
+
+                    if feature_position == 0:
+                        for i in range(len(inter_additives)):
+                            feature_inter_additives.append(inter_additives[i, other_bin])
+                    else:
+                        for i in range(len(inter_additives[0])):
+                            feature_inter_additives.append(inter_additives[other_bin, i])
+
+                    # Register this interaction term
+                    associated_interactions.append({
+                        'inter_index': indexes,
+                        'cur_interaction_id': cur_feature_id,
+                        'feature_inter_score': feature_inter_score,
+                        'feature_inter_bin_starts': feature_inter_bin_starts,
+                        'feature_inter_additives': feature_inter_additives
+                    })
+
         for i in range(len(additives)):
-            # We only add options that are helpful for the goal
-            score_gain = additives[i] - cur_feature_score
-
-            if cf_direction * score_gain <= 0:
-                continue
-
-            # Filter out of bound options
-            if score_gain_bound:
-                if cf_direction == 1 and score_gain > score_gain_bound:
-                    continue
-                if cf_direction == -1 and score_gain < score_gain_bound:
-                    continue
-
             # Because of the special binning structure of EBM, the distance of
             # bins on the left to the current value is different from the bins
             # that are on the right
@@ -521,7 +581,36 @@ class GAMCoach:
             if cont_mads[cur_feature_name] > 0:
                 distance /= cont_mads[cur_feature_name]
 
-            cont_options.append([target, score_gain, distance, i])
+            # Compute score gain which has two parts:
+            # (1) gain from the change of main effect
+            # (2) gain from the change of interaction effect
+
+            # Main effect
+            main_score_gain = additives[i] - cur_feature_score
+
+            # Interaction terms
+            inter_score_gain = 0
+
+            for d in associated_interactions:
+                inter_bin_id = search_sorted_lower_index(
+                    d['feature_inter_bin_starts'], target
+                )
+                inter_score_gain += d['feature_inter_additives'][inter_bin_id] -\
+                    d['feature_inter_score']
+
+            score_gain = main_score_gain + inter_score_gain
+
+            if cf_direction * score_gain <= 0 and skip_unhelpful:
+                continue
+
+            # Filter out of bound options
+            if score_gain_bound and skip_unhelpful:
+                if cf_direction == 1 and score_gain > score_gain_bound:
+                    continue
+                if cf_direction == -1 and score_gain < score_gain_bound:
+                    continue
+
+            cont_options.append([target, score_gain, distance, i, inter_score_gain])
 
         # Now we can apply the second round of filtering to remove redundant options
         # Redundant options refer to bins that give similar score gain with larger distance
@@ -539,7 +628,8 @@ class GAMCoach:
 
     def generate_cat_options(self, cf_direction, cur_feature_index,
                              cur_feature_value, cur_feature_score,
-                             cur_cat_distance, score_gain_bound=None):
+                             cur_cat_distance, cur_example,
+                             score_gain_bound=None, skip_unhelpful=True):
         """
         Generage all alternative options for this categorical variable. This function
         would filter out all options that are not helpful for the counterfactual
@@ -553,10 +643,15 @@ class GAMCoach:
             cur_feature_value (float): The current feature value.
             cur_feature_score (float): The score for the current feature value.
             cur_cat_distance (dict): A map of feature_level => 1 - frequency.
+            cur_example (list): Current sample values.
             score_gain_bound (float): Bound of the score gain. We do not collect
                 options that give `score_gain` > `score_gain_bound` (when
                 `cf_direction=1`), or `score_gain` < `score_gain_bound` (when
                 `cf_direction=-1`)
+            skip_unhelpful (bool): True if to skip options from main
+                effects that give opposite score gain. It is rare that there is a
+                positive score gain from pair-interaction that outweigh negative
+                score gain from two main effects, and adjusting the distance penalty.
 
         Returns:
             list: List of option tuples (target, score_gain, distance, bin_index).
@@ -579,27 +674,109 @@ class GAMCoach:
         # Create "options", each option is a tuple (target, score_gain, distance, bin_index)
         cat_options = []
 
+        # Identify interaction terms that we need to consider
+        associated_interactions = []
+
+        for cur_feature_id in range(len(self.ebm.feature_names)):
+            cur_feature_type = self.ebm.feature_types[cur_feature_id]
+            if cur_feature_type == 'interaction':
+
+                indexes = self.ebm.feature_groups_[cur_feature_id]
+
+                if cur_feature_index in indexes:
+                    feature_position = 0 if indexes[0] == cur_feature_index else 1
+
+                    other_position = 1 - feature_position
+                    other_index = indexes[other_position]
+                    other_type = self.ebm.feature_types[other_index]
+                    other_name = self.ebm.feature_names[other_index]
+
+                    # Get the current additive scores and bin edges
+                    inter_additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
+
+                    bin_starts_feature = self.ebm.pair_preprocessor_._get_bin_labels(
+                        cur_feature_index
+                    )
+                    bin_starts_other = self.ebm.pair_preprocessor_._get_bin_labels(
+                        other_index
+                    )
+
+                    # Get the current interaction term score
+                    other_bin = None
+                    if (other_type == 'continuous'):
+                        other_bin = search_sorted_lower_index(
+                            bin_starts_other, float(cur_example[other_index])
+                        )
+                    else:
+                        other_bin = bin_starts_other.index(cur_example[other_index])
+
+                    feature_bin = bin_starts_feature.index(cur_feature_value)
+
+                    feature_inter_score = 0
+
+                    if feature_position == 0:
+                        feature_inter_score = inter_additives[feature_bin, other_bin]
+                    else:
+                        feature_inter_score = inter_additives[other_bin, feature_bin]
+
+                    # Extract the row or column where we fix the other feeature and
+                    # vary the current feature
+                    feature_inter_bin_starts = bin_starts_feature
+                    feature_inter_additives = []
+
+                    if feature_position == 0:
+                        for i in range(len(inter_additives)):
+                            feature_inter_additives.append(inter_additives[i, other_bin])
+                    else:
+                        for i in range(len(inter_additives[0])):
+                            feature_inter_additives.append(inter_additives[other_bin, i])
+
+                    # Register this interaction term
+                    associated_interactions.append({
+                        'inter_index': indexes,
+                        'cur_interaction_id': cur_feature_id,
+                        'feature_inter_score': feature_inter_score,
+                        'feature_inter_bin_starts': feature_inter_bin_starts,
+                        'feature_inter_additives': feature_inter_additives
+                    })
+
         for i in range(len(additives)):
             if levels[i] != cur_feature_value:
                 target = levels[i]
-                score_gain = additives[i] - cur_feature_score
+                distance = cur_cat_distance[target]
+
+                # Compute score gain which has two parts:
+                # (1) gain from the change of main effect
+                # (2) gain from the change of interaction effect
+
+                # Main effect
+                main_score_gain = additives[i] - cur_feature_score
+
+                # Interaction terms
+                inter_score_gain = 0
+
+                for d in associated_interactions:
+                    inter_bin_id = d['feature_inter_bin_starts'].index(target)
+                    inter_score_gain += d['feature_inter_additives'][inter_bin_id] -\
+                        d['feature_inter_score']
+
+                score_gain = main_score_gain + inter_score_gain
 
                 # Skip unhelpful options
-                if cf_direction * score_gain <= 0:
+                if cf_direction * score_gain <= 0 and skip_unhelpful:
                     continue
 
                 # Filter out of bound options
-                if score_gain_bound:
+                if score_gain_bound and skip_unhelpful:
                     if cf_direction == 1 and score_gain > score_gain_bound:
                         continue
                     if cf_direction == -1 and score_gain < score_gain_bound:
                         continue
 
-                distance = cur_cat_distance[target]
-
-                cat_options.append([target, score_gain, distance, i])
+                cat_options.append([target, score_gain, distance, i, inter_score_gain])
 
         return cat_options
+
 
     def generate_inter_options(self, cur_feature_id, cur_feature_index_1,
                                cur_feature_index_2, cur_feature_score, options):
@@ -644,112 +821,80 @@ class GAMCoach:
         # categorical features)
         additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
 
-        bin_starts_1 = self.ebm.pair_preprocessor_._get_bin_labels(cur_feature_index_1)
-        bin_starts_2 = self.ebm.pair_preprocessor_._get_bin_labels(cur_feature_index_2)
-
         # Four possibilities here: cont x cont, cont x cat, cat x cont, cat x cat.
         # Each has a different way to lookup the bin table.
         inter_options = []
 
-        if cur_feature_type_1 == 'continuous':
-            if cur_feature_type_2 == 'continuous':
-                # cont x cont
-                bin_starts_1 = bin_starts_1[:-1]
-                bin_starts_2 = bin_starts_2[:-1]
+        # Iterate through all possible combinations of options from these two
+        # variables
+        for opt_1 in options[cur_feature_name_1]:
+            for opt_2 in options[cur_feature_name_2]:
 
-                # Iterate through all possible combinations of options from these two
-                # variables
-                for opt_1 in options[cur_feature_name_1]:
-                    for opt_2 in options[cur_feature_name_2]:
+                bin_starts_1 = self.ebm.pair_preprocessor_._get_bin_labels(cur_feature_index_1)
+                bin_starts_2 = self.ebm.pair_preprocessor_._get_bin_labels(cur_feature_index_2)
+
+                bin_1 = None
+                bin_2 = None
+
+                if cur_feature_type_1 == 'continuous':
+                    if cur_feature_type_2 == 'continuous':
+                        # cont x cont
+                        bin_starts_1 = bin_starts_1[:-1]
+                        bin_starts_2 = bin_starts_2[:-1]
 
                         # locate the bin for each option value
                         bin_1 = search_sorted_lower_index(bin_starts_1, opt_1[0])
                         bin_2 = search_sorted_lower_index(bin_starts_2, opt_2[0])
-                        new_score = additives[bin_1, bin_2]
-                        score_gain = new_score - cur_feature_score
 
-                        # Optimization: here we cannot comapre the score_gain with
-                        # original interaction score to filter interaction options,
-                        # because the choice of two individual main effects do not
-                        # consier this interaction score
-                        #
-                        # Basically, the score gain of one interaction effect does
-                        # not affect the way we choose options for the main
-                        # variables. Only the solver can decide that :(
-
-                        inter_options.append([
-                            [opt_1[0], opt_2[0]],
-                            score_gain,
-                            0,
-                            [opt_1[3], opt_2[3]]
-                        ])
-
-            else:
-                # cont x cat
-                bin_starts_1 = bin_starts_1[:-1]
-
-                # Iterate through all possible combinations of options from these two
-                # variables
-                for opt_1 in options[cur_feature_name_1]:
-                    for opt_2 in options[cur_feature_name_2]:
+                    else:
+                        # cont x cat
+                        bin_starts_1 = bin_starts_1[:-1]
 
                         # locate the bin for each option value
                         bin_1 = search_sorted_lower_index(bin_starts_1, opt_1[0])
                         bin_2 = bin_starts_2.index(opt_2[0])
-                        new_score = additives[bin_1, bin_2]
-                        score_gain = new_score - cur_feature_score
 
-                        inter_options.append([
-                            [opt_1[0], opt_2[0]],
-                            score_gain,
-                            0,
-                            [opt_1[3], opt_2[3]]
-                        ])
-
-        else:
-            if cur_feature_type_2 == 'continuous':
-                # cat x cont
-                bin_starts_2 = bin_starts_2[:-1]
-
-                # Iterate through all possible combinations of options from
-                # these two variables
-                for opt_1 in options[cur_feature_name_1]:
-                    for opt_2 in options[cur_feature_name_2]:
+                else:
+                    if cur_feature_type_2 == 'continuous':
+                        # cat x cont
+                        bin_starts_2 = bin_starts_2[:-1]
 
                         # locate the bin for each option value
                         bin_1 = bin_starts_1.index(opt_1[0])
                         bin_2 = search_sorted_lower_index(bin_starts_2, opt_2[0])
 
-                        new_score = additives[bin_1, bin_2]
-                        score_gain = new_score - cur_feature_score
-
-                        inter_options.append([
-                            [opt_1[0], opt_2[0]],
-                            score_gain,
-                            0,
-                            [opt_1[3], opt_2[3]]
-                        ])
-            else:
-                # cat x cat
-
-                # Iterate through all possible combinations of options from
-                # these two variables
-                for opt_1 in options[cur_feature_name_1]:
-                    for opt_2 in options[cur_feature_name_2]:
+                    else:
+                        # cat x cat
 
                         # locate the bin for each option value
                         bin_1 = bin_starts_1.index(opt_1[0])
                         bin_2 = bin_starts_2.index(opt_2[0])
 
-                        new_score = additives[bin_1, bin_2]
-                        score_gain = new_score - cur_feature_score
+                new_score = additives[bin_1, bin_2]
+                score_gain = new_score - cur_feature_score
 
-                        inter_options.append([
-                            [opt_1[0], opt_2[0]],
-                            score_gain,
-                            0,
-                            [opt_1[3], opt_2[3]]
-                        ])
+                # The score gain on the interaction term need to offset the interaction
+                # score gain we have already counted on the main effect options. That
+                # score is saved in the option tuple.
+                score_gain -= opt_1[4]
+                score_gain -= opt_2[4]
+
+                # Optimization: here we cannot comapre the score_gain with
+                # original interaction score to filter interaction options,
+                # because the choice of two individual main effects do not
+                # consier this interaction score
+                #
+                # Basically, the score gain of one interaction effect does
+                # not affect the way we choose options for the main
+                # variables. Only the solver can decide that :(
+
+                inter_options.append([
+                    [opt_1[0], opt_2[0]],
+                    score_gain,
+                    0,
+                    [opt_1[3], opt_2[3]],
+                    0
+                ])
 
         return inter_options
 

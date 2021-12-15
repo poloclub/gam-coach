@@ -281,7 +281,7 @@ class GAMCoach:
 
                 cur_cat_options = self.generate_cat_options(
                     cf_direction, cur_feature_index, cur_feature_value,
-                    cur_feature_score, cur_cat_distance, cur_example[0]
+                    cur_feature_score, cur_cat_distance, cur_example[0],
                     score_gain_bound
                 )
 

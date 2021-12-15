@@ -269,7 +269,7 @@ class GAMCoach:
                 cur_cont_options = self.generate_cont_options(
                     cf_direction, cur_feature_index, cur_feature_name,
                     cur_feature_value, cur_feature_score, self.cont_mads,
-                    score_gain_bound, epsilon, need_to_be_int
+                    cur_example[0], score_gain_bound, epsilon, need_to_be_int
                 )
 
                 options[cur_feature_name] = cur_cont_options
@@ -281,7 +281,8 @@ class GAMCoach:
 
                 cur_cat_options = self.generate_cat_options(
                     cf_direction, cur_feature_index, cur_feature_value,
-                    cur_feature_score, cur_cat_distance, score_gain_bound
+                    cur_feature_score, cur_cat_distance, cur_example[0]
+                    score_gain_bound
                 )
 
                 options[cur_feature_name] = cur_cat_options

@@ -151,11 +151,12 @@ const textMouseEnterHandler = (e, d, component, state) => {
 
   // Change annotation if the current text label has a special value
   if (d.edge === state.feature.originalValue) {
-    state.helperMessage = '<span class="gray-inverse">My Original Value</span>';
+    state.helperMessage =
+      '<span class="gray-inverse">Your Original Value</span>';
     state.stateUpdated();
   } else if (d.edge === state.feature.curValue) {
     state.helperMessage = `<span class="blue-inverse">
-      My Hypothetical Value</span>`;
+      Your Hypothetical Value</span>`;
     state.stateUpdated();
   } else if (d.edge === state.feature.coachValue) {
     state.helperMessage = `<span class="green-inverse">

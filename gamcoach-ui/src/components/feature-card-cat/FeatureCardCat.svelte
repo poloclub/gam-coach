@@ -79,12 +79,12 @@
   };
 
   const difficultyTextMap = {
-    'neutral': 'Default difficulty',
-    'easy': 'Easy to change',
-    'very-easy': 'Very easy to change',
-    'hard': 'Hard to change',
-    'very-hard': 'Very hard to change',
-    'lock': 'Do not change this feature',
+    'neutral': 'Default priority',
+    'easy': 'High priority',
+    'very-easy': 'Very high priority',
+    'hard': 'Low priority',
+    'very-hard': 'Very low priority',
+    'lock': 'New plans won\'t change it',
   };
 
   let diffPickerConfig = null;
@@ -358,10 +358,10 @@
   const displayAcceptableRange = (acceptableRange) => {
 
     if (acceptableRange !== null && acceptableRange.length === 0) {
-      return 'No acceptable values';
+      return 'New plans won\'t consider this feature';
     }
 
-    let text = 'Acceptable among ';
+    let text = 'New plans consider ';
     const levelDescription = feature.description.levelDescription;
 
     let acceptableRangeAll = acceptableRange;
@@ -533,7 +533,7 @@
           on:click={diffClickedHandler}
         >
           <div class={`icon icon-${feature.difficulty}`}
-            title='Specify the difficulty for me to change this feature'
+            title='Specify how easy for you to change this feature'
           >
             {@html difficultyIconMap[feature.difficulty]}
           </div>
@@ -555,16 +555,19 @@
     >
       {displayAcceptableRange(feature.acceptableRange)}
       <div class='local-tooltip'>
-        <span class='content'>New strategies will only search within this range</span>
+        <span class='content'>New strategies will only consider options within this range</span>
       </div>
     </span>
 
     <span class='tag difficulty-tag'
       class:shown={feature.difficulty !== 'neutral'}
     >
+      <div class={`icon icon-${feature.difficulty}`}>
+        {@html difficultyIconMap[feature.difficulty]}
+      </div>
       {difficultyTextMap[feature.difficulty]}
       <div class='local-tooltip'>
-        <span class='content'>New strategies will prioritize features that are easy to change</span>
+        <span class='content'>New strategies will prioritize features that are easy for you to change</span>
       </div>
     </span>
 

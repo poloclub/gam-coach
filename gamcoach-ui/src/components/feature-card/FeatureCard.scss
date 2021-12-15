@@ -93,7 +93,7 @@ $card-h-padding: 16px;
 
         .local-tooltip{
           transition-delay: 200ms;
-          transform: translateX(-50%) translateY(-60%) scale(1);
+          transform: translateX(-50%) translateY(-8px) scale(1);
         }
       }
 
@@ -272,7 +272,6 @@ $card-h-padding: 16px;
     .feature-difficulty {
       margin-left: auto;
       border-radius: 50%;
-      // background-color: $gray-200;
       width: 1.6rem;
       height: 1.6rem;
       display: flex;
@@ -304,7 +303,7 @@ $card-h-padding: 16px;
       &:hover {
         .local-tooltip{
           transition-delay: 200ms;
-          transform: translateX(-50%) translateY(-15px) scale(1);
+          transform: translateX(-50%) translateY(-8px) scale(1);
         }
       }
     }
@@ -607,6 +606,8 @@ $card-h-padding: 16px;
 
   .tag {
     font-size: 0.9rem;
+    border-radius: 5px;
+    padding: 0px 5px;
     display: inline-block;
     overflow-wrap: break-word;
     position: relative;
@@ -614,7 +615,7 @@ $card-h-padding: 16px;
     &:hover {
       .local-tooltip{
         transition-delay: 200ms;
-        transform: translateX(-50%) translateY(-15px) scale(1);
+        transform: translateX(-50%) translateY(-8px) scale(1);
       }
     }
 
@@ -624,15 +625,27 @@ $card-h-padding: 16px;
   }
 
   .difficulty-tag {
-    border-radius: 5px;
-    padding: 0 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+
     background: $indigo-50;
     color: $indigo-900;
+
+    .icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      :global(svg) {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
   }
 
   .acceptable-tag {
-    border-radius: 5px;
-    padding: 0 5px;
     background: $orange-50;
     color: $orange-800;
   }
@@ -645,7 +658,7 @@ $card-h-padding: 16px;
     visibility: visible;
 
     .tag {
-      display: inline-block;
+      display: flex;
     }
   }
 
@@ -657,22 +670,22 @@ $card-h-padding: 16px;
       display: none;
 
       &.shown {
-        display: inline-block;
+        display: flex;
       }
     }
   }
 
   &.constrained:not(.collapsed) {
     .tag {
-      display: inline-block;
+      display: flex;
     }
   }
 }
 
 .local-tooltip {
   position:absolute;
-  bottom: 13px;
   left: 50%;
+  bottom: 100%;
   z-index: 1;
 
   font-size: 0.8rem;
@@ -681,19 +694,19 @@ $card-h-padding: 16px;
   background-color: $gray-900;
   border: 1px solid $gray-border;
   color: white;
-  width: 220px;
+  width: 215px;
   text-align: center;
 
   -webkit-backface-visibility: hidden;
   -webkit-transform: translateZ(0);
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
   transform-origin: bottom center;
-  transform: translateX(-50%) translateY(-15px) scale(0);
+  transform: translateX(-50%) translateY(-8px) scale(0);
 
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 4px;
+  padding: 4px 4px;
 
   &::before {
     position: absolute;

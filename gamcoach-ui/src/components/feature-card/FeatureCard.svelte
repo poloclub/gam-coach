@@ -79,12 +79,12 @@
   };
 
   const difficultyTextMap = {
-    'neutral': 'Default difficulty',
-    'easy': 'Easy to change',
-    'very-easy': 'Very easy to change',
-    'hard': 'Hard to change',
-    'very-hard': 'Very hard to change',
-    'lock': 'Do not change this feature',
+    'neutral': 'Default priority',
+    'easy': 'High priority',
+    'very-easy': 'Very high priority',
+    'hard': 'Low priority',
+    'very-hard': 'Very low priority',
+    'lock': 'New plans won\'t change it',
   };
 
   let diffPickerConfig = null;
@@ -367,15 +367,17 @@
    * @param acceptableRange
    */
   const displayAcceptableRange = (acceptableRange, stateFeature) => {
+    let text = 'New plans consider from ';
     if (acceptableRange === null) {
-      return `${formatter(stateFeature.valueMin)} to ${
+      text = text.concat(`${formatter(stateFeature.valueMin)} to ${
         formatter(stateFeature.valueMax)
-      }`;
+      }`);
     } else {
-      return `${formatter(acceptableRange[0])} to ${
+      text = text.concat(`${formatter(acceptableRange[0])} to ${
         formatter(acceptableRange[1])
-      }`;
+      }`);
     }
+    return text;
   };
 
   /**
@@ -539,7 +541,7 @@
         <span>Value Distribution of All Users</span>
         <div class='feature-difficulty' on:click={e => diffClickedHandler(e)}>
           <div class={`icon icon-${feature.difficulty}`}
-            title='Specify the difficulty for me to change this feature'
+            title='Specify how easy for you to change this feature'
           >
             {@html difficultyIconMap[feature.difficulty]}
           </div>
@@ -575,18 +577,21 @@
     <span class='tag acceptable-tag'
       class:shown={feature.acceptableRange !== null}
     >
-      Acceptable from {displayAcceptableRange(feature.acceptableRange, state.feature)}
+      {displayAcceptableRange(feature.acceptableRange, state.feature)}
       <div class='local-tooltip'>
-        <span class='content'>New strategies will only search within this range</span>
+        <span class='content'>New strategies will only consider options within this range</span>
       </div>
     </span>
 
     <span class='tag difficulty-tag'
       class:shown={feature.difficulty !== 'neutral'}
     >
+      <div class={`icon icon-${feature.difficulty}`}>
+        {@html difficultyIconMap[feature.difficulty]}
+      </div>
       {difficultyTextMap[feature.difficulty]}
       <div class='local-tooltip'>
-        <span class='content'>New strategies will prioritize features that are easy to change</span>
+        <span class='content'>New strategies will prioritize features that are easy for you to change</span>
       </div>
     </span>
 

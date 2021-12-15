@@ -13,7 +13,8 @@
 
   // Component bindings
   let component = null;
-  let description = 'Difficulty to make a change';
+  const defaultDescription = 'How easy for you to change?';
+  let description = defaultDescription;
 
   let diffPickerConfig = {
     feature: null,
@@ -108,7 +109,7 @@
   };
 
   const iconMouseleaveHandler = () => {
-    description = 'Difficulty to make a change';
+    description = defaultDescription;
   };
 
   const iconClickedHandler = (name) => {
@@ -159,11 +160,13 @@
 <style lang="scss">
   @import '../define';
 
+  $border-color: $gray-border;
+
   .diff-picker {
     background-color: white;
     padding: 0 0 10px 0;
     border-radius: 10px;
-    border: 1px solid $gray-border;
+    border: 1px solid $border-color;
     box-shadow: $shadow-border-large;
     position: absolute;
     z-index: 3;
@@ -205,9 +208,9 @@
       height: 10px;
       bottom: 0;
       left: 25%;
-      border-bottom: 1px solid $gray-border;
-      border-right: 1px solid $gray-border;
-      transform: translate(-50%, 50%) rotate(45deg);
+      border-bottom: 1px solid $border-color;;
+      border-right: 1px solid $border-color;
+      transform: translate(-50%, 60%) rotate(45deg);
       background-color: inherit;
     }
 
@@ -241,7 +244,7 @@
     cursor: pointer;
     padding: 5px 10px;
     font-size: 0.9em;
-    color: $gray-500;
+    color: $gray-600;
   }
 
   .icons {

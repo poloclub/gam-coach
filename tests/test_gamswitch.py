@@ -75,8 +75,8 @@ def test_generate_cfs_options(gs: gamcoach.GAMCoach, cur_example):
     for key in cfs.options:
         total[key] = len(cfs.options[key])
 
-    assert(total['loan_amnt'] == 36)
-    assert(total['loan_amnt x revol_bal'] == 1296)
+    assert(total['loan_amnt'] == 51)
+    assert(total['loan_amnt x revol_bal'] == 2805)
 
 
 def test_generate_cfs_options_with_range(gs: gamcoach.GAMCoach, cur_example):
@@ -95,8 +95,8 @@ def test_generate_cfs_options_with_range(gs: gamcoach.GAMCoach, cur_example):
     for key in cfs.options:
         total[key] = len(cfs.options[key])
 
-    assert(total['loan_amnt'] == 13)
-    assert(total['loan_amnt x revol_bal'] == 468)
+    assert(total['loan_amnt'] == 16)
+    assert(total['loan_amnt x revol_bal'] == 880)
     assert(total['home_ownership'] == 2)
 
 
@@ -115,9 +115,9 @@ def test_generate_cfs_model(gs: gamcoach.GAMCoach, cur_example):
     for key in cfs.variables:
         total += len(cfs.variables[key])
 
-    assert(cfs.model.numVariables() == 2184)
-    assert(total == 2184)
-    assert(cfs.model.numConstraints() == 6013)
+    assert(cfs.model.numVariables() == 4869)
+    assert(total == 4869)
+    assert(cfs.model.numConstraints() == 13927)
 
     cfs.model_summary()
 

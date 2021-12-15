@@ -1,1 +1,1 @@
-"""Unit test package for gamcoach."""
+"""Unit test package for gamcoach"""

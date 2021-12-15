@@ -73,7 +73,6 @@
     constraintsStore = writable(constraints);
     unsubscribes.push(
       constraintsStore.subscribe(value => {
-        console.log(value);
         constraints = value;
       })
     );

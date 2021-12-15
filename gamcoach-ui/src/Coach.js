@@ -293,7 +293,8 @@ export const initPlans = async (
     continuousIntegerFeatures: plans.continuousIntegerFeatures,
     featuresToVary: constraints.featuresToVary,
     featureRanges: constraints.featureRanges,
-    featureWeightMultipliers: constraints.featureWeightMultipliers
+    featureWeightMultipliers: constraints.featureWeightMultipliers,
+    verbose: 0
   });
   console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
 
@@ -368,8 +369,6 @@ export const regeneratePlans = async (
   const coach = new GAMCoach(modelData);
   const exampleBatch = [curExample];
 
-  console.log(constraints.featureRanges);
-
   console.time(`Plan ${plans.nextPlanIndex} generated`);
   let cfs = await coach.generateCfs({
     curExample: exampleBatch,
@@ -377,7 +376,8 @@ export const regeneratePlans = async (
     continuousIntegerFeatures: plans.continuousIntegerFeatures,
     featuresToVary: constraints.featuresToVary,
     featureRanges: constraints.featureRanges,
-    featureWeightMultipliers: constraints.featureWeightMultipliers
+    featureWeightMultipliers: constraints.featureWeightMultipliers,
+    verbose: 0
   });
   console.timeEnd(`Plan ${plans.nextPlanIndex} generated`);
 

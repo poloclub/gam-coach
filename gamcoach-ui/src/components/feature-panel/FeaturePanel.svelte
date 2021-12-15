@@ -71,28 +71,6 @@
     });
   };
 
-
-  /**
-   * Temporarily assign some values to some features.
-   */
-  const tempInit = () => {
-
-    console.log('received features!');
-
-    // Randomly assign different groups to a few features
-    plan.features[2].isConstrained = true;
-    plan.features[2].acceptableRange = [5.28, 20.55];
-    plan.features[4].isConstrained = true;
-    plan.features[4].difficulty = 'easy';
-    plan.features[5].isConstrained = true;
-    plan.features[5].difficulty = 'easy';
-    plan.features[5].acceptableRange = [1, 2, 3];
-    plan.features[7].isConstrained = true;
-    plan.features[7].acceptableRange = [2, 10];
-    plan.features[8].isConstrained = true;
-    plan.features[8].acceptableRange = [3.5, 5.5];
-  };
-
   // Set up the GAM Coach feature cards
   const initFeatureCards = () => {
     initialized = true;
@@ -109,9 +87,6 @@
         constraints = value;
       })
     );
-
-    // Temp change the features
-    // tempInit();
 
     // Organize the features into corresponding sections
     featureGrid.loadFeatures(plan.features, constraints);

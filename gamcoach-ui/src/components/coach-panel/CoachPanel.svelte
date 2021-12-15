@@ -107,6 +107,11 @@
     if (!plans.planStores.has(planIndex)) {
       return;
     }
+
+    if (plans.activePlanIndex === planIndex) {
+      return;
+    }
+
     // First hide all the scores on tab
     d3.select(component)
       .selectAll('.tab-score')

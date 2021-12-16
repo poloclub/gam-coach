@@ -8,22 +8,7 @@
 
   // Component bindings
   let component = null;
-
-  let confirmModalConfig = {
-    name: '',
-    show: false,
-    confirmed: false,
-    contextLines: [
-      `After regenerating plans, you will <b>lose access</b> to all current
-       unsaved plans.`,
-      'Make sure to click the star icons to save plans you like.'
-    ],
-    confirmText: 'Regenerate',
-    cancelText: 'Cancel',
-    doNotShowAgain: true
-  };
-
-  confirmModalConfigStore.set(confirmModalConfig);
+  let confirmModalConfig = null;
 
   confirmModalConfigStore.subscribe(value => {
     confirmModalConfig = value;
@@ -55,18 +40,41 @@
     });
   };
 
-  const closeClickedHandler = () => {
-    d3.select(component)
-      .classed('show', false);
+  const getInitConfig = () => {
+    return {
+      show: false,
+      confirmed: false,
+      contextLines: [''],
+      confirmText: 'OK',
+      cancelText: 'Cancel',
+      doNotShowAgain: false,
+      confirmCallback: () => null
+    };
+  };
+
+  const cancelClicked = () => {
+    confirmModalConfig = getInitConfig();
+    confirmModalConfigStore.set(confirmModalConfig);
+  };
+
+  const confirmClicked = () => {
+    confirmModalConfig.confirmed = true;
+    confirmModalConfig.show = false;
+    confirmModalConfig.confirmCallback(
+      confirmModalConfig.doNotShowAgain,
+      confirmModalConfig.confirmed
+    );
+    confirmModalConfig = getInitConfig();
+    confirmModalConfigStore.set(confirmModalConfig);
   };
 
   onMount(() => {
     bindInlineSVG(component);
 
-    d3.timeout(() => {
-      confirmModalConfig.show = true;
-      confirmModalConfigStore.set(confirmModalConfig);
-    }, 1000);
+    // d3.timeout(() => {
+    //   confirmModalConfig.show = true;
+    //   confirmModalConfigStore.set(confirmModalConfig);
+    // }, 5000);
   });
 
 </script>
@@ -75,21 +83,22 @@
   @import './ConfirmModal.scss';
 </style>
 
-<div class='confirm-modal-back'>
-
+<div class='confirm-modal-back'
+  class:no-display={!confirmModalConfig.show}
+>
 </div>
 
 <div class='confirm-modal'
   tabIndex='0'
   bind:this={component}
-  class:show={confirmModalConfig.show}
+  class:no-display={!confirmModalConfig.show}
 >
 
   <div class='header'>
     <span class='title'>Regenerate Plans</span>
 
     <div class='svg-icon icon-close'
-      on:click={() => closeClickedHandler()}
+      on:click={() => cancelClicked()}
     ></div>
   </div>
 
@@ -110,11 +119,15 @@
 
   <div class='control'>
 
-    <div class='button button-cancel'>
+    <div class='button button-cancel'
+      on:click={() => cancelClicked()}
+    >
       {confirmModalConfig.cancelText}
     </div>
 
-    <div class='button button-confirm'>
+    <div class='button button-confirm'
+      on:click={() => confirmClicked()}
+    >
       {confirmModalConfig.confirmText}
     </div>
 

@@ -4,7 +4,8 @@
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount } from 'svelte';
 
-  import closeIcon from '../../img/icon-close.svg';
+  import receiptIcon from '../../img/icon-receipt.svg';
+  import closeIcon from '../../img/icon-close-outline.svg';
 
   // Component bindings
   let component = null;
@@ -17,7 +18,8 @@
 
   onMount(() => {
     const iconList = [
-      { class: 'icon-close', svg: closeIcon }
+      { class: 'icon-receipt', svg: receiptIcon },
+      { class: 'icon-close', svg: closeIcon },
     ];
     bindInlineSVG(component, iconList);
   });
@@ -25,7 +27,7 @@
 </script>
 
 <style lang="scss">
-  @import './ConfirmModal.scss';
+  @import './BookmarkPanel.scss';
 </style>
 
 <div class='bookmark'
@@ -33,5 +35,22 @@
   bind:this={component}
   class:no-display={true}
 >
+  <div class='header'>
+    <div class='title-line'>
+      <span class='title'>Your Saved Plans</span>
+      <span class='svg-icon icon-close'></span>
+    </div>
+    <span class='description'>
+      Once you have accomplished any one of the plans, we will guarantee you a loan approval.
+    </span>
+  </div>
 
+  <div class='plan-list'>
+
+  </div>
+
+  <div class='download'>
+    <span class='text'>Download Receipt</span>
+    <span class='svg-icon icon-receipt'></span>
+  </div>
 </div>

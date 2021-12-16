@@ -545,16 +545,15 @@
           >
             {@html difficultyIconMap[feature.difficulty]}
           </div>
-
         </div>
       </div>
 
       <div class='annotation annotation-user'>
-        My Hypothetical Value
+        Your Hypothetical Value
       </div>
 
       <div class='annotation annotation-original'>
-        My Original Value
+        Your Original Value
       </div>
 
       <div class='annotation annotation-coach'>
@@ -562,7 +561,7 @@
       </div>
 
       <div class='annotation annotation-range'>
-        My Acceptable Range
+        Your Acceptable Range
       </div>
 
     </div>

@@ -206,7 +206,7 @@ $card-h-padding: 16px;
 
   .annotation {
     position: absolute;
-    border-radius: 5px;
+    border-radius: 3px;
     padding: 0 5px;
     top: 7px;
     cursor: default;
@@ -320,7 +320,7 @@ $card-h-padding: 16px;
   }
 
   .annotation-original {
-    background-color: $gray-400;
+    background-color: $gray-500;
     left: 20px;
   }
 
@@ -594,7 +594,7 @@ $card-h-padding: 16px;
   border-top: 1px solid adjust-color($gray-light-border, $alpha: -0.05);
 
   display: flex;
-  gap: 5px;
+  gap: 6px;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;

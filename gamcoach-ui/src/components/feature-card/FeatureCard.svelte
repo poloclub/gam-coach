@@ -1,5 +1,7 @@
 <script>
+  // @ts-check
   import d3 from '../../utils/d3-import';
+  import { bindInlineSVG } from '../../utils/utils';
   import '../../typedef';
   import { onMount, tick, createEventDispatcher } from 'svelte';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
@@ -59,8 +61,11 @@
     valueMin: 0,
     valueMax: 0,
     requiresInt: false,
+    /** @type {string | number}*/
     originalValue: 0,
+    /** @type {string | number}*/
     curValue: 0,
+    /** @type {string | number}*/
     coachValue: 0,
     curMin: 0,
     curMax: 0,
@@ -116,43 +121,6 @@
   tooltipConfigStore.subscribe(value => {
     tooltipConfig = value;
   });
-
-  const preProcessSVG = (svgString) => {
-    return svgString.replaceAll('black', 'currentcolor')
-      .replaceAll('fill:none', 'fill:currentcolor')
-      .replaceAll('stroke:none', 'fill:currentcolor');
-  };
-
-  /**
-   * Dynamically bind SVG files as inline SVG strings in this component
-   */
-  export const bindInlineSVG = (component) => {
-    const iconList = [
-      { class: 'icon-right-arrow', svg: rightArrowIcon },
-      { class: 'icon-range-thumb-left', svg: rangeThumbLeftIcon },
-      { class: 'icon-range-thumb-right', svg: rangeThumbRightIcon },
-      { class: 'icon-range-thumb-middle', svg: rangeThumbMiddleIcon },
-      { class: 'icon-easy', svg: easyIcon },
-      { class: 'icon-very-easy', svg: veryEasyIcon },
-      { class: 'icon-neutral', svg: neutralIcon },
-      { class: 'icon-hard', svg: hardIcon },
-      { class: 'icon-very-hard', svg: veryHardIcon },
-      { class: 'icon-info', svg: infoIcon },
-      { class: 'icon-close', svg: closeIcon },
-      { class: 'icon-refresh', svg: refreshIcon },
-    ];
-
-    iconList.forEach(d => {
-      d3.select(component)
-        .selectAll(`.svg-icon.${d.class}`)
-        .each((_, i, g) => {
-          const ele = d3.select(g[i]);
-          let html = ele.html();
-          html = html.concat(' ', preProcessSVG(d.svg));
-          ele.html(html);
-        });
-    });
-  };
 
   /**
    * A workaround to listen to changes made in the js functions.
@@ -416,7 +384,16 @@
 
   onMount(() => {
     // Bind the SVG icons on mount
-    bindInlineSVG(component);
+    const iconList = [
+      { class: 'icon-right-arrow', svg: rightArrowIcon },
+      { class: 'icon-range-thumb-left', svg: rangeThumbLeftIcon },
+      { class: 'icon-range-thumb-right', svg: rangeThumbRightIcon },
+      { class: 'icon-range-thumb-middle', svg: rangeThumbMiddleIcon },
+      { class: 'icon-info', svg: infoIcon },
+      { class: 'icon-close', svg: closeIcon },
+      { class: 'icon-refresh', svg: refreshIcon },
+    ];
+    bindInlineSVG(component, iconList);
     mounted = true;
   });
 

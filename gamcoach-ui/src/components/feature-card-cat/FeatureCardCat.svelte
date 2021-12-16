@@ -1,5 +1,7 @@
 <script>
+  // @ts-check
   import d3 from '../../utils/d3-import';
+  import { bindInlineSVG } from '../../utils/utils';
   import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   import { fade, fly, scale } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
@@ -58,15 +60,18 @@
   state.feature = {
     name: '',
     featureName: '',
+    /** @type {string | number}*/
     originalValue: 0,
+    /** @type {string | number}*/
     curValue: 0,
+    /** @type {string | number}*/
     coachValue: 0,
     histEdge: [0],
     histCount: null,
     id: 0,
     labelEncoder: {},
     description: {},
-    searchValues: []
+    searchValues: new Set()
   };
 
   const difficultyIconMap = {
@@ -118,41 +123,6 @@
     tooltipConfig = value;
   });
   unsubscribes.push(unsub);
-
-  const preProcessSVG = (svgString) => {
-    return svgString.replaceAll('black', 'currentcolor')
-      .replaceAll('fill:none', 'fill:currentcolor')
-      .replaceAll('stroke:none', 'fill:currentcolor');
-  };
-
-  /**
-   * Dynamically bind SVG files as inline SVG strings in this component
-   */
-  export const bindInlineSVG = (component) => {
-    const iconList = [
-      { class: 'icon-right-arrow', svg: rightArrowIcon },
-      { class: 'icon-level-thumb', svg: levelThumbIcon },
-      { class: 'icon-easy', svg: easyIcon },
-      { class: 'icon-very-easy', svg: veryEasyIcon },
-      { class: 'icon-neutral', svg: neutralIcon },
-      { class: 'icon-hard', svg: hardIcon },
-      { class: 'icon-very-hard', svg: veryHardIcon },
-      { class: 'icon-info', svg: infoIcon },
-      { class: 'icon-close', svg: closeIcon },
-      { class: 'icon-refresh', svg: refreshIcon },
-    ];
-
-    iconList.forEach(d => {
-      d3.select(component)
-        .selectAll(`.svg-icon.${d.class}`)
-        .each((_, i, g) => {
-          const ele = d3.select(g[i]);
-          let html = ele.html();
-          html = html.concat(' ', preProcessSVG(d.svg));
-          ele.html(html);
-        });
-    });
-  };
 
   /**
    * A workaround to listen to changes made in the js functions.
@@ -232,7 +202,6 @@
 
   /**
    * Handler for clicking the difficulty picker
-   * @param e Event
    */
   const diffClickedHandler = () => {
 
@@ -437,7 +406,14 @@
 
   onMount(() => {
     // Bind the SVG icons on mount
-    bindInlineSVG(component);
+    const iconList = [
+      { class: 'icon-right-arrow', svg: rightArrowIcon },
+      { class: 'icon-level-thumb', svg: levelThumbIcon },
+      { class: 'icon-info', svg: infoIcon },
+      { class: 'icon-close', svg: closeIcon },
+      { class: 'icon-refresh', svg: refreshIcon },
+    ];
+    bindInlineSVG(component, iconList);
     mounted = true;
   });
 

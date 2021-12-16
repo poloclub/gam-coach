@@ -1,5 +1,7 @@
 <script>
+  // @ts-check
   import d3 from '../utils/d3-import';
+  import { bindInlineSVG } from '../utils/utils';
   import { onMount } from 'svelte';
   import { diffPickerConfigStore } from '../store';
 
@@ -49,38 +51,6 @@
     diffPickerConfig = value;
   });
 
-  const preProcessSVG = (svgString) => {
-    return svgString.replaceAll('black', 'currentcolor')
-      .replaceAll('fill:none', 'fill:currentcolor')
-      .replaceAll('stroke:none', 'fill:currentcolor');
-  };
-
-  /**
-   * Dynamically bind SVG files as inline SVG strings in this component
-   */
-  export const bindInlineSVG = (component) => {
-    const iconList = [
-      { class: 'icon-easy', svg: easyIcon },
-      { class: 'icon-very-easy', svg: veryEasyIcon },
-      { class: 'icon-neutral', svg: neutralIcon },
-      { class: 'icon-hard', svg: hardIcon },
-      { class: 'icon-very-hard', svg: veryHardIcon },
-      { class: 'icon-info', svg: infoIcon },
-      { class: 'icon-lock', svg: lockIcon }
-    ];
-
-    iconList.forEach(d => {
-      d3.select(component)
-        .selectAll(`.svg-icon.${d.class}`)
-        .each((_, i, g) => {
-          const ele = d3.select(g[i]);
-          let html = ele.html();
-          html = html.concat(' ', preProcessSVG(d.svg));
-          ele.html(html);
-        });
-    });
-  };
-
   const iconMouseenterHandler = (e) => {
     const curIcon = d3.select(e.target);
     switch(curIcon.attr('data-diff')) {
@@ -122,7 +92,16 @@
   };
 
   onMount(() => {
-    bindInlineSVG(component);
+    const iconList = [
+      { class: 'icon-easy', svg: easyIcon },
+      { class: 'icon-very-easy', svg: veryEasyIcon },
+      { class: 'icon-neutral', svg: neutralIcon },
+      { class: 'icon-hard', svg: hardIcon },
+      { class: 'icon-very-hard', svg: veryHardIcon },
+      { class: 'icon-info', svg: infoIcon },
+      { class: 'icon-lock', svg: lockIcon }
+    ];
+    bindInlineSVG(component, iconList);
 
     // Fix the width of this component so that hovering doesn't change it
     // Also register the focusout event

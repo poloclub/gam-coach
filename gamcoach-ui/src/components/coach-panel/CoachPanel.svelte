@@ -1,6 +1,7 @@
 <script>
   //@ts-check
   import d3 from '../../utils/d3-import';
+  import { bindInlineSVG } from '../../utils/utils';
   import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   import { tooltipConfigStore, confirmModalConfigStore } from '../../store';
 
@@ -55,34 +56,6 @@
       confirmModalConfig = value;
     })
   );
-
-  const preProcessSVG = (svgString) => {
-    return svgString.replaceAll('black', 'currentcolor')
-      .replaceAll('fill:none', 'fill:currentcolor')
-      .replaceAll('stroke:none', 'stroke:currentcolor');
-  };
-
-  /**
-   * Dynamically bind SVG files as inline SVG strings in this component
-   */
-  export const bindInlineSVG = (component) => {
-    const iconList = [
-      { class: 'icon-refresh', svg: refreshIcon },
-      { class: 'icon-star-solid', svg: starIconSolid },
-      { class: 'icon-star-outline', svg: starIconOutline },
-    ];
-
-    iconList.forEach(d => {
-      d3.select(component)
-        .selectAll(`.svg-icon.${d.class}`)
-        .each((_, i, g) => {
-          const ele = d3.select(g[i]);
-          let html = ele.html();
-          html = html.concat(' ', preProcessSVG(d.svg));
-          ele.html(html);
-        });
-    });
-  };
 
   const starClicked = (e, plan) => {
     e.preventDefault();
@@ -234,7 +207,12 @@
   };
 
   onMount(() => {
-    bindInlineSVG(component);
+    const iconList = [
+      { class: 'icon-refresh', svg: refreshIcon },
+      { class: 'icon-star-solid', svg: starIconSolid },
+      { class: 'icon-star-outline', svg: starIconOutline },
+    ];
+    bindInlineSVG(component, iconList);
   });
 
   onDestroy(() => {

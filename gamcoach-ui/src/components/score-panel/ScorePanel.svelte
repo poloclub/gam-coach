@@ -38,6 +38,22 @@
    * @param {boolean} newValue
    */
   const updateInRange = (newValue) => {
+
+    if (isInRange !== newValue) {
+      /** @type {HTMLElement} */
+      let parentNode = d3.select(component).node();
+      while (!parentNode.classList.contains('tab') && parentNode !== null) {
+        parentNode = parentNode.parentElement;
+      }
+      d3.select(parentNode)
+        .select('.star-wrapper')
+        .classed('disabled', !newValue)
+        .attr('title', newValue ?
+          'Click to save this plan' :
+          'You can only save plans that give you desired outcomes'
+        );
+    }
+
     isInRange = newValue;
   };
 

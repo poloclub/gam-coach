@@ -282,6 +282,9 @@
         display: flex;
         &:hover {
           background-color: adjust-color($color: $gray-200, $lightness: -4%);
+          &.disabled {
+            background-color: $gray-50;
+          }
         }
       }
 
@@ -344,8 +347,12 @@
     margin: 0px 2px 0px 1px;
     transition: opacity 100ms ease-in-out, background-color 100ms ease-in-out;
 
-    &:hover {
-      background-color: adjust-color($color: $gray-200, $lightness: -10%);
+    &.disabled {
+      cursor: no-drop;
+
+      .tab-icon {
+        cursor: no-drop;
+      }
     }
   }
 

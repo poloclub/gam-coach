@@ -35,7 +35,7 @@
     bookmarkConfigStore.set(bookmarkConfig);
   };
 
-  const confirmClicked = () => {
+  const downloadClicked = () => {
   };
 
   /**
@@ -98,7 +98,7 @@
 
   </div>
 
-  <div class='download'>
+  <div class='download' on:click={() => downloadClicked()}>
     <span class='text'>Download Receipt</span>
     <span class='svg-icon icon-receipt'></span>
   </div>

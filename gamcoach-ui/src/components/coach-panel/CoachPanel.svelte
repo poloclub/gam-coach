@@ -71,6 +71,13 @@
     e.preventDefault();
     e.stopPropagation();
 
+    // Test if the plan is a success
+    if (e.currentTarget.classList.contains('disabled')) {
+      return;
+    }
+
+    // Warn the users that they are saving adjusted plans
+
     // Add the clicked plan to the saved set
     if (savedPlanIndex.has(plan.planIndex)) {
       savedPlanIndex.delete(plan.planIndex);

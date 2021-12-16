@@ -181,7 +181,7 @@
 
       <DiffPicker/>
       <ConfirmModal/>
-      <BookmarkPanel/>
+      <BookmarkPanel windowLoaded={windowLoaded}/>
     </div>
 
   </div>

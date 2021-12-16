@@ -3,7 +3,9 @@
   import d3 from '../../utils/d3-import';
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
-  import { tooltipConfigStore, confirmModalConfigStore } from '../../store';
+  import { tooltipConfigStore, confirmModalConfigStore,
+    bookmarkConfigStore
+  } from '../../store';
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
   import '../../typedef';
@@ -54,6 +56,14 @@
   unsubscribes.push(
     confirmModalConfigStore.subscribe(value => {
       confirmModalConfig = value;
+    })
+  );
+
+  // Set up the bookmark store
+  let bookmarkConfig = null;
+  unsubscribes.push(
+    bookmarkConfigStore.subscribe(value => {
+      bookmarkConfig = value;
     })
   );
 
@@ -206,6 +216,20 @@
     dispatch('regenerateClicked');
   };
 
+  /**
+   * Toggle the bookmark panel
+   */
+  const bookmarkClicked = () => {
+    // If the the bookmark is already shown, we hide it
+    if ((Date.now() - bookmarkConfig.focusOutTime) < 200) {
+      bookmarkConfig.show = false;
+      bookmarkConfigStore.set(bookmarkConfig);
+    } else {
+      bookmarkConfig.show = true;
+      bookmarkConfigStore.set(bookmarkConfig);
+    }
+  };
+
   onMount(() => {
     const iconList = [
       { class: 'icon-refresh', svg: refreshIcon },
@@ -242,6 +266,7 @@
 
     <div class='coach-controls'>
       <div class='icon-wrapper'
+        on:click={bookmarkClicked}
         title='Saved plans'
       >
         <div class='svg-icon icon-star-outline'></div>

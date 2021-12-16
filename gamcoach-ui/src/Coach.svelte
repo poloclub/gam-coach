@@ -2,7 +2,7 @@
   //@ts-check
   import FeaturePanel from './components/feature-panel/FeaturePanel.svelte';
   import DiffPicker from './components/DiffPicker.svelte';
-  import ConfirmModal from './components/ConfirmModal/ConfirmModal.svelte';
+  import ConfirmModal from './components/confirm-modal/ConfirmModal.svelte';
   import Tooltip from './components/Tooltip.svelte';
   import CoachPanel from './components/coach-panel/CoachPanel.svelte';
 

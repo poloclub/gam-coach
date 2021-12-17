@@ -214,11 +214,11 @@ export class Constraints {
     const multipliers = {};
 
     const scoreMap = {
-      'very-easy': 0.25,
+      'very-easy': 0.1,
       'easy': 0.5,
       'neutral': 1,
       'hard': 2,
-      'very-hard': 4
+      'very-hard': 10
     };
 
     this.difficulties.forEach((v, k) => {

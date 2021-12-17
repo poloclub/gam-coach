@@ -17,7 +17,7 @@
   // Set up the stores
   let bookmarkConfig = {
     show: false,
-    plans: [],
+    plans: new Map(),
     focusOutTime: 0
   };
   bookmarkConfigStore.subscribe(value => {

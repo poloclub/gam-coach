@@ -9,7 +9,7 @@
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
   import '../../typedef';
-  import { Plan } from '../../Coach';
+  import { Plan, SavedPlan } from '../../Coach';
   import { setScorePanelWidth, InitPlanLabels } from './CoachPanel';
 
   import refreshIcon from '../../img/icon-refresh2.svg';
@@ -52,6 +52,10 @@
     localStorage.setItem('needRegenerateConfirm', 'true');
   }
 
+  if (localStorage.getItem('needSaveConfirm') === null) {
+    localStorage.setItem('needSaveConfirm', 'true');
+  }
+
   let confirmModalConfig = null;
   unsubscribes.push(
     confirmModalConfigStore.subscribe(value => {
@@ -60,6 +64,7 @@
   );
 
   // Set up the bookmark store
+  /** @type{BookmarkConfig} */
   let bookmarkConfig = null;
   unsubscribes.push(
     bookmarkConfigStore.subscribe(value => {
@@ -76,13 +81,69 @@
       return;
     }
 
-    // Warn the users that they are saving adjusted plans
-
-    // Add the clicked plan to the saved set
+    // Check if users have already saved this plan
     if (savedPlanIndex.has(plan.planIndex)) {
+
+      // Remove the plan from the bookmarks
+      bookmarkConfig.plans.delete(plan.planIndex);
       savedPlanIndex.delete(plan.planIndex);
     } else {
+      // Warn the users that they are saving adjusted plans
+      const curPlan = localPlans.get(plan.planIndex);
+
+      if (curPlan.isChangedByUser) {
+        const needSaveConfirm = localStorage.getItem('needSaveConfirm');
+        if (needSaveConfirm === 'true') {
+          confirmModalConfig = {
+            title: `Plan ${plan.planIndex} Has Been Modified`,
+            show: true,
+            confirmed: true,
+            contextLines: [
+              `Plan ${plan.planIndex} has been modified by you. Bookmarking this
+               plan will <b> only save these new changes </b> instead of GAM
+               Coach's initial suggested changes.`,
+              `If you want to restore the initial changes, you can click the
+               reset buttons in the extended feature cards.`
+            ],
+            confirmText: 'Save',
+            cancelText: 'Cancel',
+            doNotShowAgain: false,
+            confirmCallback: (doNotShowAgain, confirmed) => {
+              if (confirmed) {
+                localStorage.setItem(
+                  'needSaveConfirm',
+                  doNotShowAgain ? 'false' : 'true'
+                );
+                // Save the new plan to the bookmark
+                const savedPlan = new SavedPlan(
+                  plan.planIndex,
+                  curPlan.ebmLocal
+                );
+                bookmarkConfig.plans.set(plan.planIndex, savedPlan);
+                bookmarkConfigStore.set(bookmarkConfig);
+
+                // Save the plan to the local record
+                savedPlanIndex.add(plan.planIndex);
+                savedPlanIndex = savedPlanIndex;
+              }
+            },
+          };
+          confirmModalConfigStore.set(confirmModalConfig);
+          return;
+        }
+      }
+
+      // Save the new plan to the bookmark
+      const savedPlan = new SavedPlan(
+        plan.planIndex,
+        curPlan.ebmLocal
+      );
+      bookmarkConfig.plans.set(plan.planIndex, savedPlan);
+      bookmarkConfigStore.set(bookmarkConfig);
+
+      // Save the plan to the local record
       savedPlanIndex.add(plan.planIndex);
+
     }
     savedPlanIndex = savedPlanIndex;
   };

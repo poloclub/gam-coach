@@ -16,6 +16,7 @@
 
   const getInitConfig = () => {
     return {
+      title: 'Confirmation',
       show: false,
       confirmed: false,
       contextLines: [''],
@@ -72,7 +73,7 @@
 >
 
   <div class='header'>
-    <span class='title'>Regenerate Plans</span>
+    <span class='title'>{confirmModalConfig.title}</span>
 
     <div class='svg-icon icon-close'
       on:click={() => cancelClicked()}

@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 export const tooltipConfigStore = writable({});
 export const diffPickerConfigStore = writable({});
 export const confirmModalConfigStore = writable({
+  title: 'Confirmation',
   show: false,
   confirmed: false,
   contextLines: [''],
@@ -13,6 +14,6 @@ export const confirmModalConfigStore = writable({
 });
 export const bookmarkConfigStore = writable({
   show: false,
-  plans: [],
+  plans: new Map(),
   focusOutTime: 0
 });

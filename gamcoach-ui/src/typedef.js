@@ -35,3 +35,10 @@
  * @property {Map<number, object>} planStores A map that maps plan
  *  index to the corresponding plan store
  */
+
+/**
+ * @typedef {Object} BookmarkConfig
+ * @property {boolean} show True if the bookmark panel is shown
+ * @property {Map<number, object>} plans A map from plan index to the saved plan
+ * @property {number} focusOutTime Timestamp when the element loses focus
+ */

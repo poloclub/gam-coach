@@ -223,6 +223,7 @@
     // Set up the bookmark config features property
     if (bookmarkConfig.features === null) {
       bookmarkConfig.features = value.features;
+      bookmarkConfig.plansInfo = plans;
       bookmarkConfigStore.set(bookmarkConfig);
     }
   };

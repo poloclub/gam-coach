@@ -72,6 +72,10 @@ import {
   format
 } from 'd3-format';
 
+import {
+  timeFormat
+} from 'd3-time-format';
+
 export default {
   select,
   selectAll,
@@ -105,4 +109,5 @@ export default {
   curveMonotoneX,
   curveMonotoneY,
   curveBasis,
+  timeFormat
 };

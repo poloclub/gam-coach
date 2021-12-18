@@ -16,5 +16,6 @@ export const bookmarkConfigStore = writable({
   show: false,
   features: null,
   plans: new Map(),
-  focusOutTime: 0
+  focusOutTime: 0,
+  plansInfo: null,
 });

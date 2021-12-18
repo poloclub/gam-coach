@@ -4,6 +4,7 @@
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount } from 'svelte';
   import { bookmarkConfigStore } from '../../store';
+  import { downloadReceipt } from './BookmarkPanel';
 
   import receiptIcon from '../../img/icon-receipt.svg';
   import closeIcon from '../../img/icon-close-outline.svg';
@@ -21,7 +22,8 @@
     show: false,
     features: null,
     plans: new Map(),
-    focusOutTime: 0
+    focusOutTime: 0,
+    plansInfo: null
   };
 
   bookmarkConfigStore.subscribe(value => {
@@ -31,7 +33,6 @@
         .focus();
     }
     bookmarkConfig = value;
-    console.log(bookmarkConfig);
   });
 
   const closeClicked = () => {
@@ -41,7 +42,26 @@
   };
 
   const downloadClicked = () => {
+    downloadReceipt(bookmarkConfig);
   };
+
+  /**
+   * @param {BookmarkConfig} bookmarkConfig
+   */
+  const getGoal = (bookmarkConfig) => {
+    if (bookmarkConfig.plansInfo === null) {
+      return '...';
+    }
+
+    if (bookmarkConfig.plansInfo.isRegression) {
+      // TODO
+    } else {
+      const goal = bookmarkConfig.plansInfo.classes[
+        bookmarkConfig.plansInfo.classTarget[0]
+      ];
+      return goal;
+    }
+  }
 
   /**
    * Position the panel under bookmarks and generate buttons
@@ -95,7 +115,7 @@
       <span class='svg-icon icon-close' on:click={() => closeClicked()}></span>
     </div>
     <span class='description'>
-      Once you have accomplished any one of the plans, we will guarantee you a loan approval.
+      Once you have accomplished any one of the plans, we will guarantee you a {getGoal(bookmarkConfig)}.
     </span>
   </div>
 

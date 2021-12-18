@@ -157,7 +157,7 @@ $border-radius: 5px;
 .plan-row {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
   padding: 8px $v-padding;
 
   &:hover {
@@ -167,15 +167,15 @@ $border-radius: 5px;
 
 .plan-title {
   font-size: 0.9rem;
-  font-weight: 400;
-  color: $gray-600;
-  // font-variant: small-caps;
+  font-weight: 600;
 }
 
 .plan-feature {
   display: flex;
   flex-direction: column;
   font-size: 0.85rem;
+  border-left: 2px solid $gray-light-border;
+  padding-left: 8px;
 
   .feature-name {
     font-weight: 600;
@@ -186,6 +186,7 @@ $border-radius: 5px;
     flex-direction: row;
     align-items: center;
     flex-wrap: wrap;
+    // color: $gray-600;
 
     .value-change {
       padding: 0px 14px 8px 5px;

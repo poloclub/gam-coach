@@ -14,6 +14,7 @@ export const confirmModalConfigStore = writable({
 });
 export const bookmarkConfigStore = writable({
   show: false,
+  features: null,
   plans: new Map(),
   focusOutTime: 0
 });

@@ -9,7 +9,7 @@ $border-radius: 5px;
   top: 102px;
   left: 972px;
   width: 225px;
-  height: 300px;
+  max-height: 600px;
   z-index: 3;
   cursor: default;
 
@@ -103,11 +103,6 @@ $border-radius: 5px;
   line-height: 1.3;
 }
 
-.plan-list {
-  padding: 8px $v-padding;
-  flex: 1 0 auto;
-}
-
 .download {
   padding: 8px $v-padding;
   border-top: 1px solid $gray-light-border;
@@ -129,6 +124,11 @@ $border-radius: 5px;
     color: white;
   }
 
+  &:active {
+    background-color: $blue-700;
+    color: white;
+  }
+
   .svg-icon {
     display: flex;
     align-items: center;
@@ -139,3 +139,107 @@ $border-radius: 5px;
     }
   }
 }
+
+.plan-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  .plan-row:not(:last-child) {
+    border-bottom: 1px solid $gray-light-border;
+  }
+
+  .description {
+    padding: 8px $v-padding;
+  }
+}
+
+.plan-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px $v-padding;
+
+  &:hover {
+    background-color: $gray-50;
+  }
+}
+
+.plan-title {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: $gray-600;
+  // font-variant: small-caps;
+}
+
+.plan-feature {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+
+  .feature-name {
+    font-weight: 600;
+  }
+
+  .values {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .value-change {
+      padding: 0px 14px 8px 5px;
+      margin: -5px 0 0 0;
+      color: $green-600;
+
+      &.user {
+        color: $blue-600;
+      }
+    }
+  }
+
+  .feature-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 5px;
+    color: $gray-500;
+
+    &.user {
+      color: $gray-500;
+    }
+  }
+
+  .arrow-right {
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 5px;
+
+    &::after,
+    &::before {
+      content: "";
+      display: block;
+      box-sizing: border-box;
+      position: absolute;
+      right: 3px;
+    }
+
+    &::after {
+      width: 8px;
+      height: 8px;
+      border-top: 2px solid currentColor;
+      border-right: 2px solid currentColor;
+      transform: rotate(45deg);
+      bottom: 7px;
+    }
+
+    &::before {
+      width: calc(100% - 4px);
+      height: 2px;
+      bottom: 10px;
+      background: currentColor;
+    }
+  }
+}
+

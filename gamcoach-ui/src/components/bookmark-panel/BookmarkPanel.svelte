@@ -14,12 +14,16 @@
   let component = null;
   let initialized = false;
 
+  const formatter = d3.format(',.2~f');
+
   // Set up the stores
   let bookmarkConfig = {
     show: false,
+    features: null,
     plans: new Map(),
     focusOutTime: 0
   };
+
   bookmarkConfigStore.subscribe(value => {
     if (value.show) {
       d3.select(component)
@@ -27,6 +31,7 @@
         .focus();
     }
     bookmarkConfig = value;
+    console.log(bookmarkConfig);
   });
 
   const closeClicked = () => {
@@ -82,7 +87,7 @@
 <div class='bookmark'
   tabIndex='0'
   bind:this={component}
-  class:show={bookmarkConfig.show}
+  class:show={true}
 >
   <div class='header'>
     <div class='title-line'>
@@ -95,6 +100,38 @@
   </div>
 
   <div class='plan-list'>
+    {#if bookmarkConfig.plans.size === 0}
+      <div class='description'> To save a plan you like, click the star next to the plan name </div>
+    {:else}
+      {#each [...bookmarkConfig.plans] as [planIndex, savedPlan]}
+        <div class='plan-row'>
+          <div class='plan-title'>
+            Plan {planIndex}
+          </div>
+          {#each savedPlan.getChangeList(bookmarkConfig.features) as item}
+            <div class='plan-feature'>
+              <div class='feature-name'>{item.featureDisplayName}</div>
+              <div class='values'>
+                {item.originalValue}
+                  <div class='feature-arrow'
+                    class:user={false}
+                  >
+                    <span class='value-change'>
+                      {`${(item.newValue - item.originalValue) < 0 ? '' :
+                        '+'}${formatter(
+                          item.newValue - item.originalValue
+                          )}`}
+                    </span>
+
+                    <div class='arrow-right'></div>
+                  </div>
+                {item.newValue}
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/each}
+    {/if}
 
   </div>
 

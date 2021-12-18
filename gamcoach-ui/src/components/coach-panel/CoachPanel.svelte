@@ -86,7 +86,9 @@
 
       // Remove the plan from the bookmarks
       bookmarkConfig.plans.delete(plan.planIndex);
+      bookmarkConfigStore.set(bookmarkConfig);
       savedPlanIndex.delete(plan.planIndex);
+
     } else {
       // Warn the users that they are saving adjusted plans
       const curPlan = localPlans.get(plan.planIndex);
@@ -117,7 +119,8 @@
                 // Save the new plan to the bookmark
                 const savedPlan = new SavedPlan(
                   plan.planIndex,
-                  curPlan.ebmLocal
+                  curPlan.ebmLocal,
+                  curPlan.curExample
                 );
                 bookmarkConfig.plans.set(plan.planIndex, savedPlan);
                 bookmarkConfigStore.set(bookmarkConfig);
@@ -136,7 +139,8 @@
       // Save the new plan to the bookmark
       const savedPlan = new SavedPlan(
         plan.planIndex,
-        curPlan.ebmLocal
+        curPlan.ebmLocal,
+        curPlan.curExample
       );
       bookmarkConfig.plans.set(plan.planIndex, savedPlan);
       bookmarkConfigStore.set(bookmarkConfig);
@@ -215,6 +219,12 @@
    */
   const planStoreUpdated = (value, planIndex) => {
     localPlans.set(planIndex, value);
+
+    // Set up the bookmark config features property
+    if (bookmarkConfig.features === null) {
+      bookmarkConfig.features = value.features;
+      bookmarkConfigStore.set(bookmarkConfig);
+    }
   };
 
   /**
@@ -242,6 +252,7 @@
     const needRegenerateConfirm = localStorage.getItem('needRegenerateConfirm');
     if (needRegenerateConfirm === 'true') {
       confirmModalConfig = {
+        title: 'Regenerate Plans',
         show: true,
         confirmed: true,
         contextLines: [

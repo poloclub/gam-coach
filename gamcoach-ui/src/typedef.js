@@ -39,6 +39,7 @@
 /**
  * @typedef {Object} BookmarkConfig
  * @property {boolean} show True if the bookmark panel is shown
+ * @property {Feature[]} features All features used for the current model
  * @property {Map<number, object>} plans A map from plan index to the saved plan
  * @property {number} focusOutTime Timestamp when the element loses focus
  */

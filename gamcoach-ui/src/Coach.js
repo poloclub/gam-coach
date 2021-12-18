@@ -172,20 +172,22 @@ export class SavedPlan {
         // convert the number index to the level description string
         if (!curFeature.isCont) {
           const labelDecoder = new Map();
+
           Object.entries(curFeature.labelEncoder).
             forEach(([level, levelName]) => {
               labelDecoder.set(levelName,
                 curFeature.description.levelDescription[level].displayName);
             });
 
-          originalValue = labelDecoder[originalValue];
-          newValue = labelDecoder[newValue];
+          originalValue = labelDecoder.get(originalValue);
+          newValue = labelDecoder.get(newValue);
         }
 
         changeList.push({
           featureDisplayName: curFeature.description.displayName,
           originalValue,
-          newValue
+          newValue,
+          isCont: curFeature.isCont
         });
       }
     }

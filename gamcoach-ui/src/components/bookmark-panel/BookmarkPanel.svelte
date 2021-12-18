@@ -112,20 +112,24 @@
             <div class='plan-feature'>
               <div class='feature-name'>{item.featureDisplayName}</div>
               <div class='values'>
-                {item.originalValue}
+                {item.isCont ? formatter(item.originalValue) : item.originalValue}
                   <div class='feature-arrow'
                     class:user={false}
                   >
-                    <span class='value-change'>
-                      {`${(item.newValue - item.originalValue) < 0 ? '' :
-                        '+'}${formatter(
-                          item.newValue - item.originalValue
-                          )}`}
-                    </span>
+                    {#if item.isCont}
+                      <span class='value-change'>
+                        {`${(item.newValue - item.originalValue) < 0 ? '' :
+                          '+'}${formatter(
+                            item.newValue - item.originalValue
+                            )}`}
+                      </span>
+                      <div class='arrow-right'></div>
+                    {:else}
+                      <div class='arrow-right-cat'></div>
+                    {/if}
 
-                    <div class='arrow-right'></div>
                   </div>
-                {item.newValue}
+                {item.isCont ? formatter(item.newValue) : item.newValue}
               </div>
             </div>
           {/each}

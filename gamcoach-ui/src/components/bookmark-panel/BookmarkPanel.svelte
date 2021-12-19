@@ -6,7 +6,8 @@
   import { bookmarkConfigStore } from '../../store';
   import { downloadReceipt } from './BookmarkPanel';
   import { privateKey, publicKey } from '../../key';
-  import { readKey, createMessage, createCleartextMessage, decryptKey, sign, readPrivateKey } from 'openpgp';
+  import { readKey, createCleartextMessage, decryptKey, sign,
+    readPrivateKey } from 'openpgp';
 
   import receiptIcon from '../../img/icon-receipt.svg';
   import closeIcon from '../../img/icon-close-outline.svg';

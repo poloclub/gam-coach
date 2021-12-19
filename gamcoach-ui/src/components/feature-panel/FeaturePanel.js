@@ -1,4 +1,4 @@
-import { Constraints } from '../../Coach';
+import { Constraints } from '../coach/Coach';
 
 /**
  * Each row in the feature masonry grid

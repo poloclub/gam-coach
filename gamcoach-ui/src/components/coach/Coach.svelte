@@ -1,22 +1,19 @@
 <script>
   //@ts-check
-  import FeaturePanel from './components/feature-panel/FeaturePanel.svelte';
-  import DiffPicker from './components/DiffPicker.svelte';
-  import ConfirmModal from './components/confirm-modal/ConfirmModal.svelte';
-  import BookmarkPanel from './components/bookmark-panel/BookmarkPanel.svelte';
-  import Tooltip from './components/Tooltip.svelte';
-  import CoachPanel from './components/coach-panel/CoachPanel.svelte';
+  import FeaturePanel from '../feature-panel/FeaturePanel.svelte';
+  import CoachPanel from '../coach-panel/CoachPanel.svelte';
 
-  import { EBM } from './ebm/ebm';
-  import { Plan, Constraints, initPlans, regeneratePlans } from './Coach';
-  import './typedef';
+  import { EBM } from '../../ebm/ebm';
+  import { Plan, Constraints, initPlans, regeneratePlans } from '../coach/Coach';
+  import '../../typedef';
 
-  import d3 from './utils/d3-import';
+  import d3 from '../../utils/d3-import';
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
-  import { tooltipConfigStore } from './store';
+  import { tooltipConfigStore } from '../../store';
 
+  export let windowLoaded = false;
   const unsubscribes = [];
 
   // Set up tooltip
@@ -28,7 +25,6 @@
 
   // Set up the GAM Coach object
   let modelData = null;
-  let windowLoaded = false;
 
   /** @type {EBM} */
   let ebm = null;
@@ -86,7 +82,6 @@
   initModel();
 
   onMount(() => {
-    window.onload = () => { windowLoaded = true; };
   });
 
   onDestroy(() => {
@@ -97,7 +92,7 @@
 
 <style lang='scss'>
 
-  @import 'define';
+  @import '../../define';
 
   .main-standalone {
     display: flex;
@@ -142,49 +137,32 @@
 
 </style>
 
-<div class='main-standalone'>
 
-  <Tooltip bind:this={tooltip}/>
-
-  <div class='content'>
-
-    <div class='coach-wrapper'>
-
-      <div class='coach-panel-wrapper'>
-        <CoachPanel
-          bind:plans={plans}
-          windowLoaded={windowLoaded}
-          on:regenerateClicked={
-            () => regeneratePlans(constraints, modelData, curExample, plans, plansUpdated)
-          }
-        />
-      </div>
-
-      {#if plans === null}
-        <div class='feature-panel-wrapper'>
-          <FeaturePanel
-            planStore={null}
-            constraintsStore={constraintsStore}
-            windowLoaded={windowLoaded} />
-        </div>
-      {:else}
-        {#key plans.activePlanIndex}
-          <div class='feature-panel-wrapper'>
-            <FeaturePanel
-              planStore={plans.planStores.has(plans.activePlanIndex) ?
-                plans.planStores.get(plans.activePlanIndex) : null}
-              constraintsStore={constraintsStore}
-              windowLoaded={windowLoaded} />
-          </div>
-        {/key}
-      {/if}
-
-      <DiffPicker/>
-      <ConfirmModal/>
-      <BookmarkPanel windowLoaded={windowLoaded}/>
-    </div>
-
-  </div>
-
-
+<div class='coach-panel-wrapper'>
+  <CoachPanel
+    bind:plans={plans}
+    windowLoaded={windowLoaded}
+    on:regenerateClicked={
+      () => regeneratePlans(constraints, modelData, curExample, plans, plansUpdated)
+    }
+  />
 </div>
+
+{#if plans === null}
+  <div class='feature-panel-wrapper'>
+    <FeaturePanel
+      planStore={null}
+      constraintsStore={constraintsStore}
+      windowLoaded={windowLoaded} />
+  </div>
+{:else}
+  {#key plans.activePlanIndex}
+    <div class='feature-panel-wrapper'>
+      <FeaturePanel
+        planStore={plans.planStores.has(plans.activePlanIndex) ?
+          plans.planStores.get(plans.activePlanIndex) : null}
+        constraintsStore={constraintsStore}
+        windowLoaded={windowLoaded} />
+    </div>
+  {/key}
+{/if}

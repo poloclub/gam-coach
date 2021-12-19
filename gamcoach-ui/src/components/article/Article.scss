@@ -1,0 +1,71 @@
+@import '../../define';
+
+.page {
+  display: flex;
+  flex-direction: column;
+}
+
+.top {
+  // height: calc(100vh - 20px);
+  // max-height: 800px;
+  width: 100vw;
+  box-sizing: border-box;
+
+  position: relative;
+  display: grid;
+
+  height: calc(100vh - 5px);
+  max-height: 800px;
+  grid-template-columns: [start] 1fr [mid-start] auto [mid-end] 1fr [end];
+  grid-template-rows: [start] 1fr [content-start] auto [content-end] 1fr [end];
+}
+
+.top-fill {
+  background: $teal-900;
+  grid-column: start / end;
+  grid-row: start / end;
+  height: 70%;
+}
+
+.top-empty {
+  grid-column: end / start;
+  grid-row: start / end;
+  height: 30%;
+}
+
+.coach-left {
+  grid-column: start / mid-start;
+  grid-row: content-start / content-end;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  margin-right: 20px;
+  color: white;
+  text-align: right;
+}
+
+.coach-right {
+  grid-column: mid-end / end;
+  grid-row: content-start / content-end;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-left: 20px;
+  color: white;
+}
+
+.coach-wrapper {
+  grid-column: mid-start / mid-end;
+  grid-row: content-start / content-end;
+
+  border: 1px solid $gray-light-border;
+  background: $gray-50;
+  border-radius: $border-radius;
+  box-shadow: 0px 0px 5px hsla(0, 0%, 0%, 0.08),
+    0px 0px 10px hsla(0, 0%, 0%, 0.08), 0px 5px 35px hsla(0, 0%, 0%, 0.15);
+  overflow: hidden;
+}

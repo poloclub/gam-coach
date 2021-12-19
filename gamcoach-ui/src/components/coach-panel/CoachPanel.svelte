@@ -9,7 +9,7 @@
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
   import '../../typedef';
-  import { Plan, SavedPlan } from '../../Coach';
+  import { Plan, SavedPlan } from '../coach/Coach';
   import { setScorePanelWidth, InitPlanLabels } from './CoachPanel';
 
   import refreshIcon from '../../img/icon-refresh2.svg';

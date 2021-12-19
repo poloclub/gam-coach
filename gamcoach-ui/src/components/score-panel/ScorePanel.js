@@ -2,7 +2,7 @@ import d3 from '../../utils/d3-import';
 import { config } from '../../config';
 import { Writable } from 'svelte/store';
 import '../../typedef';
-import { Plan } from '../../Coach';
+import { Plan } from '../coach/Coach';
 import { sigmoid } from '../../ebm/ebm';
 
 const formatter = d3.format(',.2~f');

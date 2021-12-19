@@ -8,7 +8,7 @@
   import { bindInlineSVG } from '../../utils/utils';
   import '../../typedef';
   import { EBMLocal } from '../../ebm/ebmLocal';
-  import { Plan, Constraints } from '../../Coach';
+  import { Plan, Constraints } from '../coach/Coach';
 
   import { onMount, onDestroy, tick } from 'svelte';
   import { tooltipConfigStore } from '../../store';

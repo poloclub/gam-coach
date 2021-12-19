@@ -1,5 +1,5 @@
 import '../../typedef';
-import { SavedPlan } from '../../Coach';
+import { SavedPlan } from '../coach/Coach';
 import d3 from '../../utils/d3-import';
 
 const formatter = d3.format(',.2~f');

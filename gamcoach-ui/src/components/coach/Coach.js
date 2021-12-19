@@ -1,7 +1,7 @@
-import './typedef';
-import { EBMLocal } from './ebm/ebmLocal';
-import { EBM } from './ebm/ebm';
-import { GAMCoach } from './ebm/gamcoach';
+import '../../typedef';
+import { EBMLocal } from '../../ebm/ebmLocal';
+import { EBM } from '../../ebm/ebm';
+import { GAMCoach } from '../../ebm/gamcoach';
 import { writable } from 'svelte/store';
 
 const difficultyTextMap = {

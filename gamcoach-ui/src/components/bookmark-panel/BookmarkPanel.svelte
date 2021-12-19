@@ -1,10 +1,12 @@
 <script>
   // @ts-check
   import d3 from '../../utils/d3-import';
-  import { bindInlineSVG } from '../../utils/utils';
+  import { bindInlineSVG, downloadText } from '../../utils/utils';
   import { onMount } from 'svelte';
   import { bookmarkConfigStore } from '../../store';
   import { downloadReceipt } from './BookmarkPanel';
+  import { privateKey, publicKey } from '../../key';
+  import { readKey, createMessage, createCleartextMessage, decryptKey, sign, readPrivateKey } from 'openpgp';
 
   import receiptIcon from '../../img/icon-receipt.svg';
   import closeIcon from '../../img/icon-close-outline.svg';
@@ -13,6 +15,7 @@
 
   // Component bindings
   let component = null;
+  let dlAnchor = null;
   let initialized = false;
 
   const formatter = d3.format(',.2~f');
@@ -41,8 +44,23 @@
     bookmarkConfigStore.set(bookmarkConfig);
   };
 
-  const downloadClicked = () => {
-    downloadReceipt(bookmarkConfig);
+  const downloadClicked = async () => {
+    const receiptText = await downloadReceipt(bookmarkConfig);
+    // const pgpPublicKey = await readKey({ armoredKey: publicKey });
+
+    const pgpPrivateKey = await decryptKey({
+      privateKey: await readPrivateKey({ armoredKey: privateKey }),
+      passphrase: 'gamcoach!'
+    });
+
+    const unsignedMessage = await createCleartextMessage({ text: receiptText });
+    const cleartextMessage = await sign({
+      message: unsignedMessage,
+      signingKeys: pgpPrivateKey
+    });
+
+
+    downloadText(cleartextMessage, dlAnchor, 'gamcoach-receipt.txt');
   };
 
   /**
@@ -61,7 +79,7 @@
       ];
       return goal;
     }
-  }
+  };
 
   /**
    * Position the panel under bookmarks and generate buttons
@@ -107,8 +125,9 @@
 <div class='bookmark'
   tabIndex='0'
   bind:this={component}
-  class:show={true}
+  class:show={bookmarkConfig.show}
 >
+  <a bind:this={dlAnchor} id="download-anchor" style="display:none"> </a>
   <div class='header'>
     <div class='title-line'>
       <span class='title'>Your Saved Plans</span>

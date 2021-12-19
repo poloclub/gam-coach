@@ -7,6 +7,7 @@ const formatter = d3.format(',.2~f');
 /**
  * Download the receipt as a text file
  * @param {BookmarkConfig} bookmarkConfig Bookmarks
+ * @returns {Promise<string>}
  */
 export const downloadReceipt = async (bookmarkConfig) => {
   // Create the text content
@@ -114,10 +115,7 @@ export const downloadReceipt = async (bookmarkConfig) => {
     receipt = receipt.concat(separator);
   }
 
-  receipt = receipt.concat('Thanks for using GAM Coach!');
+  receipt = receipt.concat('Thanks for using GAM Coach!\n');
 
-  // Append the model info
-  console.log(bookmarkConfig);
-  console.log(receipt);
-
+  return receipt;
 };

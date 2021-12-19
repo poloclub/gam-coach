@@ -29,3 +29,40 @@ export const bindInlineSVG = (component, iconList) => {
       });
   });
 };
+
+/**
+ * Download a JSON file
+ * @param {any} object
+ * @param {HTMLElement} dlAnchorElem
+ * @param {string} fileName
+ */
+export const downloadJSON = (
+  object,
+  dlAnchorElem,
+  fileName = 'download.json'
+) => {
+  const dataStr =
+    'data:text/json;charset=utf-8,' +
+    encodeURIComponent(JSON.stringify(object));
+  dlAnchorElem.setAttribute('href', dataStr);
+  dlAnchorElem.setAttribute('download', `${fileName}`);
+  dlAnchorElem.click();
+};
+
+/**
+ * Download a text file
+ * @param {string} textString
+ * @param {HTMLElement} dlAnchorElem
+ * @param {string} fileName
+ */
+export const downloadText = (
+  textString,
+  dlAnchorElem,
+  fileName = 'download.json'
+) => {
+  const dataStr =
+    'data:text/plain;charset=utf-8,' + encodeURIComponent(textString);
+  dlAnchorElem.setAttribute('href', dataStr);
+  dlAnchorElem.setAttribute('download', `${fileName}`);
+  dlAnchorElem.click();
+};

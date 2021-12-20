@@ -16,6 +16,9 @@
   const unsubscribes = [];
   let windowLoaded = false;
 
+  const indexFormatter = d3.format('03d');
+  let curIndex = 6;
+
   // Set up tooltip
   let tooltip = null;
   let tooltipConfig = null;
@@ -48,8 +51,20 @@
     <div class='top-empty'></div>
 
     <div class='coach-left'>
-      <div class='arrow'></div>
-      <div class='title'>You are loan applicant #006</div>
+      <div class='help-note'>
+        <div class='arrow'></div>
+        <div class='title'>You are loan applicant</div>
+        <div class='number'>#{indexFormatter(curIndex)}</div>
+        <div class='description'>
+          <span class='line'>
+            Your application is rejected
+          </span>
+          <span class='line'>
+            The bank points your to GAM Coach to help your succeed in next application
+          </span>
+
+        </div>
+      </div>
     </div>
 
     <div class='coach-right'>

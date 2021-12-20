@@ -13,11 +13,18 @@
   import { fade, fly } from 'svelte/transition';
   import { tooltipConfigStore } from '../../store';
 
+  import pointArrowSVG from '../../img/point-arrow.svg';
+  import iconRefreshSVG from '../../img/icon-refresh3.svg';
+  import iconEditrSVG from '../../img/icon-edit.svg';
+
   const unsubscribes = [];
   let windowLoaded = false;
 
   const indexFormatter = d3.format('03d');
   let curIndex = 6;
+
+  const pointArrowSVGProcessed = pointArrowSVG
+    .replaceAll('white', 'currentcolor');
 
   // Set up tooltip
   let tooltip = null;
@@ -51,16 +58,31 @@
     <div class='top-empty'></div>
 
     <div class='coach-left'>
+      <div class='help-arrow'>
+        {@html pointArrowSVGProcessed}
+      </div>
       <div class='help-note'>
         <div class='arrow'></div>
-        <div class='title'>You are loan applicant</div>
-        <div class='number'>#{indexFormatter(curIndex)}</div>
+        <div class='title'>You're loan applicant</div>
+        <div class='input-number'>
+          <div class='svg-icon'
+            title='Edit the input values'
+          >
+            {@html iconEditrSVG}
+          </div>
+          <div class='svg-icon'
+            title='Try a random input sample'
+          >
+            {@html iconRefreshSVG}
+          </div>
+          <div class='number'>#{indexFormatter(curIndex)}</div>
+        </div>
         <div class='description'>
           <span class='line'>
             Your application is rejected
           </span>
           <span class='line'>
-            The bank points your to GAM Coach to help your succeed in next application
+            The bank points you to GAM Coach to help you succeed in next application
           </span>
 
         </div>

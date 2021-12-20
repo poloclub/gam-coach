@@ -3,13 +3,20 @@ import d3 from './d3-import';
 /**
  * Pre-process the svg string to replace fill, stroke, color settings
  * @param {string} svgString
+ * @param {string[]} resetColors A list of colors to reset to currentcolor
  * @returns {string}
  */
-const preProcessSVG = (svgString) => {
-  return svgString
+export const preProcessSVG = (svgString, resetColors=[]) => {
+  let newString = svgString
     .replaceAll('black', 'currentcolor')
     .replaceAll('fill:none', 'fill:currentcolor')
     .replaceAll('stroke:none', 'fill:currentcolor');
+
+  resetColors.forEach(c => {
+    newString = newString.replaceAll(c, 'currentcolor');
+  });
+
+  return newString;
 };
 
 /**

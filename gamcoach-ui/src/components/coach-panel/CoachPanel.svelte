@@ -4,7 +4,7 @@
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   import { tooltipConfigStore, confirmModalConfigStore,
-    bookmarkConfigStore
+    bookmarkConfigStore, inputFormConfigStore
   } from '../../store';
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
@@ -69,6 +69,15 @@
   unsubscribes.push(
     bookmarkConfigStore.subscribe(value => {
       bookmarkConfig = value;
+    })
+  );
+
+  // Set up the input form store
+  /** @type {inputFormConfig}*/
+  let inputFormConfig = null;
+  unsubscribes.push(
+    inputFormConfigStore.subscribe(value => {
+      inputFormConfig = value;
     })
   );
 
@@ -225,6 +234,13 @@
       bookmarkConfig.features = value.features;
       bookmarkConfig.plansInfo = plans;
       bookmarkConfigStore.set(bookmarkConfig);
+    }
+
+    // Set up the input form config features property
+    if (inputFormConfig.features === null) {
+      inputFormConfig.features = value.features;
+      inputFormConfig.plansInfo = plans;
+      inputFormConfigStore.set(inputFormConfig);
     }
   };
 

@@ -11,7 +11,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
-  import { tooltipConfigStore } from '../../store';
+  import { tooltipConfigStore, inputFormConfigStore } from '../../store';
 
   export let windowLoaded = false;
   const unsubscribes = [];
@@ -21,6 +21,12 @@
   let tooltipConfig = null;
   unsubscribes.push(
     tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
+  );
+
+  // Set up the input form config store
+  let inputFormConfig = null;
+  unsubscribes.push(
+    inputFormConfigStore.subscribe(value => inputFormConfig = value)
   );
 
   // Set up the GAM Coach object
@@ -77,6 +83,11 @@
 
     // Initialize the plans
     await initPlans(modelData, ebm, curExample, constraints, plansUpdated);
+
+    // Initialize the input form
+    inputFormConfig.ebm = ebm;
+    inputFormConfig.curExample = curExample;
+    inputFormConfigStore.set(inputFormConfig);
   };
 
   initModel();

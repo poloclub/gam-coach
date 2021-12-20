@@ -4,6 +4,7 @@
   import Coach from '../coach/Coach.svelte';
   import DiffPicker from '../DiffPicker.svelte';
   import ConfirmModal from '../confirm-modal/ConfirmModal.svelte';
+  import InputForm from '../input-form/InputForm.svelte';
   import BookmarkPanel from '../bookmark-panel/BookmarkPanel.svelte';
   import Tooltip from '../Tooltip.svelte';
 
@@ -58,9 +59,7 @@
     <div class='top-empty'></div>
 
     <div class='coach-left'>
-      <div class='help-arrow'>
-        {@html pointArrowSVGProcessed}
-      </div>
+      <!-- <div class='help-arrow'>{@html pointArrowSVGProcessed}</div> -->
       <div class='help-note'>
         <div class='arrow'></div>
         <div class='title'>You're loan applicant</div>
@@ -84,7 +83,6 @@
           <span class='line'>
             The bank points you to GAM Coach to help you succeed in next application
           </span>
-
         </div>
       </div>
     </div>
@@ -99,6 +97,7 @@
 
     <DiffPicker/>
     <ConfirmModal/>
+    <InputForm />
     <BookmarkPanel windowLoaded={windowLoaded}/>
   </div>
 

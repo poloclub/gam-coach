@@ -41,8 +41,9 @@
 
   color: white;
   text-align: right;
+  cursor: default;
 
-  padding: 13px 20px 0 20px;
+  padding: 52px 20px 0 20px;
 }
 
 .coach-right {
@@ -53,7 +54,7 @@
   justify-content: flex-start;
   align-items: flex-start;
 
-  padding: 20px 20px 0 20px;
+  padding: 52px 20px 0 20px;
   color: white;
 }
 
@@ -99,7 +100,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: $teal-800;
+      color: $teal-700;
       cursor: pointer;
       pointer-events: fill;
 
@@ -108,11 +109,11 @@
       }
 
       &:hover {
-        color: $teal-700;
+        color: $teal-600;
       }
 
       &:active {
-        color: $teal-600;
+        color: $teal-500;
       }
 
     }

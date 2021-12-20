@@ -70,13 +70,8 @@
   overflow: hidden;
 }
 
-.help-arrow {
-  width: 64px;
-  color: $teal-800;
-}
-
 .help-note {
-  max-width: 230px;
+  max-width: 224px;
 
   .title {
     font-weight: 600;
@@ -120,12 +115,19 @@
   }
 
   .description {
-    margin-top: 15px;
+    // margin-top: 15px;
     font-size: 0.875rem;
     // color: $green-100;
     color: white;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-end;
+    // gap: 15px;
   }
+}
+
+.help-arrow {
+  margin-top: 20px;
+  width: 64px;
+  color: $teal-700;
 }

@@ -80,8 +80,9 @@
           <span class='line'>
             Your application is rejected
           </span>
+          <div class='help-arrow'>{@html pointArrowSVGProcessed}</div>
           <span class='line'>
-            The bank points you to GAM Coach to help you succeed in next application
+            The bank points you to <b>GAM Coach</b> to help you succeed in next application
           </span>
         </div>
       </div>

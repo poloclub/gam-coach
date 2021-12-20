@@ -33,7 +33,6 @@
       ({contList, catList} = getInputLists(inputFormConfig.features,
         inputFormConfig.curExample));
       newCurExample = getNewCurExample(contList, catList);
-      console.log(newCurExample);
     }
 
     if (inputFormConfig.show) {
@@ -55,13 +54,11 @@
   };
 
   const inputUpdated = () => {
-    console.log('input updated!');
     if (contList.length + catList.length > 0 &&
       !inputFormConfig.plansInfo.isRegression
     ) {
       newCurExample = getNewCurExample(contList, catList);
       const newScore = ebm.predictProb([newCurExample])[0];
-      console.log(newScore, inputFormConfig.plansInfo.classTarget[0]);
       if (inputFormConfig.plansInfo.classTarget[0] === 1) {
         isOutRange = newScore >= 0.5;
       } else {

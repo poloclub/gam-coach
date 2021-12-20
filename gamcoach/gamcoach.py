@@ -1520,7 +1520,7 @@ def get_model_data(ebm, x_train, model_info, resort_categorical=False,
     if feature_info:
         for feature in feature_info:
             feature_descriptions[feature]['displayName'] = feature_info[feature][0]
-            feature_descriptions[feature]['description'] = feature_info[feature][0]
+            feature_descriptions[feature]['description'] = feature_info[feature][1]
 
     if feature_level_info:
         for feature in feature_level_info:
@@ -1545,7 +1545,7 @@ def get_model_data(ebm, x_train, model_info, resort_categorical=False,
             cur_config = feature_config[feature]
             for k in [
                 'requiresInt', 'difficulty', 'acceptableRange',
-                'requiresIncreasing', 'requiresDecreasing'
+                'requiresIncreasing', 'requiresDecreasing', 'usesTransform'
             ]:
                 if (k in cur_config):
                     feature_configurations[feature][k] = cur_config[k]

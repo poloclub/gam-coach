@@ -1,6 +1,16 @@
 import d3 from './d3-import';
 
 /**
+ * Round a number to a given decimal.
+ * @param {number} num Number to round
+ * @param {number} decimal Decimal place
+ * @returns number
+ */
+export const round = (num, decimal) => {
+  return Math.round((num + Number.EPSILON) * (10 ** decimal)) / (10 ** decimal);
+};
+
+/**
  * Pre-process the svg string to replace fill, stroke, color settings
  * @param {string} svgString
  * @param {string[]} resetColors A list of colors to reset to currentcolor

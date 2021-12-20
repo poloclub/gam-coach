@@ -2,19 +2,27 @@
   // @ts-check
   import '../../typedef';
   import d3 from '../../utils/d3-import';
+  import { EBM } from '../../ebm/ebm';
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount } from 'svelte';
-  import { inputFormConfigStore } from '../../store';
-  import { getInputLists } from './InputForm';
+  import { inputFormConfigStore, ebmStore } from '../../store';
+  import { getInputLists, getNewCurExample } from './InputForm';
 
   import closeIcon from '../../img/icon-close.svg';
 
   // Component bindings
   let component = null;
+
   /** @type {inputFormConfig} */
   let inputFormConfig = null;
+
+  /** @type {EBM} */
+  let ebm = null;
+
   let contList = [];
   let catList = [];
+  let newCurExample = [];
+  let isOutRange = false;
 
   inputFormConfigStore.subscribe(value => {
     inputFormConfig = value;
@@ -24,9 +32,16 @@
     ) {
       ({contList, catList} = getInputLists(inputFormConfig.features,
         inputFormConfig.curExample));
-      console.log(contList);
+      newCurExample = getNewCurExample(contList, catList);
+      console.log(newCurExample);
+    }
+
+    if (inputFormConfig.show) {
+      // PASS
     }
   });
+
+  ebmStore.subscribe(value => ebm = value);
 
   const cancelClicked = () => {
     inputFormConfig.show = false;
@@ -34,8 +49,25 @@
   };
 
   const confirmClicked = () => {
+    if (isOutRange) return;
     inputFormConfig.show = false;
     inputFormConfigStore.set(inputFormConfig);
+  };
+
+  const inputUpdated = () => {
+    console.log('input updated!');
+    if (contList.length + catList.length > 0 &&
+      !inputFormConfig.plansInfo.isRegression
+    ) {
+      newCurExample = getNewCurExample(contList, catList);
+      const newScore = ebm.predictProb([newCurExample])[0];
+      console.log(newScore, inputFormConfig.plansInfo.classTarget[0]);
+      if (inputFormConfig.plansInfo.classTarget[0] === 1) {
+        isOutRange = newScore >= 0.5;
+      } else {
+        isOutRange = newScore < 0.5;
+      }
+    }
   };
 
   onMount(() => {
@@ -49,6 +81,8 @@
       inputFormConfigStore.set(inputFormConfig);
     }, 1000);
   });
+
+  $: contList && ebm && inputUpdated();
 
 </script>
 
@@ -103,6 +137,10 @@
 
   <div class='control'>
 
+    <div class='error-message' class:out-range={isOutRange}>
+      Current input already gives the desired AI decision. Try a different value.
+    </div>
+
     <div class='button button-cancel'
       on:click={() => cancelClicked()}
     >
@@ -110,6 +148,7 @@
     </div>
 
     <div class='button button-confirm'
+      class:out-range={isOutRange}
       on:click={() => confirmClicked()}
     >
       Save

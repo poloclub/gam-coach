@@ -89,7 +89,7 @@ export class Plan {
           difficulty: difficultyTextMap[config.difficulty],
           isConstrained: false,
           acceptableRange: config.acceptableRange,
-          transform: config.transform,
+          transform: config.usesTransform,
           description: modelData.features[i].description
         };
 

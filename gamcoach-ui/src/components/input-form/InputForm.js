@@ -1,4 +1,8 @@
 import '../../typedef';
+import d3 from '../../utils/d3-import';
+import { round } from '../../utils/utils';
+
+const formatter = d3.format(',.2~f');
 
 /**
  * Get a list of features to display
@@ -13,12 +17,25 @@ export const getInputLists = (features, curExample) => {
 
   features.forEach(f => {
     if (f.isCont) {
+      let curValue = curExample[f.featureID];
+      if (f.transform === 'log10') {
+        curValue = Math.pow(10, curValue);
+      }
+
+      if (f.requiresInt) {
+        curValue = round(curValue, 0);
+      } else {
+        curValue = formatter(curValue);
+      }
+
       contList.push({
-        curValue: curExample[f.featureID],
+        curValue,
+        transform: f.transform,
         isCont: f.isCont,
         requiresInt: f.requiresInt,
         name: f.description.displayName,
-        description: f.description.description
+        description: f.description.description,
+        featureID: f.featureID
       });
     } else {
       const labelDecoder = new Map();
@@ -49,7 +66,9 @@ export const getInputLists = (features, curExample) => {
         description: f.description.description,
         levelName: curExample[f.featureID],
         levelDisplayName: f.description.levelDescription[curLevel].displayName,
-        allValues: values
+        allValues: values,
+        featureID: f.featureID,
+        labelEncoder: f.labelEncoder
       });
     }
   });
@@ -59,4 +78,40 @@ export const getInputLists = (features, curExample) => {
   catList.sort((a, b) => a.name.localeCompare(b.name));
 
   return {contList, catList};
+};
+
+/**
+ * Convert the contList and catList to the curExample format
+ * @param {object[]} contList
+ * @param {object[]} catList
+ */
+export const getNewCurExample = (contList, catList) => {
+  const newCurExample = [];
+  const featureNum = contList.length + catList.length;
+  for (let i = 0; i < featureNum; i ++) {
+    newCurExample.push(0);
+  }
+
+  contList.forEach(f => {
+    let curValue = f.curValue;
+
+    // Transform the current value from user input
+    if (f.requiresInt) {
+      curValue = round(curValue, 0);
+    }
+    if (f.transform === 'log10') {
+      curValue = Math.log(curValue) / Math.log(10);
+    }
+    newCurExample[f.featureID] = curValue;
+  });
+
+  // Encode the current value from user input
+  catList.forEach(f => {
+    let curValue = f.curValue;
+    // Encode the level to the original encoding
+    curValue = f.labelEncoder[curValue];
+    newCurExample[f.featureID] = curValue;
+  });
+
+  return newCurExample;
 };

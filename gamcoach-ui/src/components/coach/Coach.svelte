@@ -11,7 +11,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
-  import { tooltipConfigStore, inputFormConfigStore } from '../../store';
+  import { tooltipConfigStore, inputFormConfigStore,
+    ebmStore } from '../../store';
 
   export let windowLoaded = false;
   const unsubscribes = [];
@@ -68,6 +69,7 @@
 
     // Initialize an ebm model
     ebm = new EBM(modelData);
+    ebmStore.set(ebm);
 
     // Initialize the Constraints based on the info provided by model developers
     // Creating the constraints object can change the modelData (setting

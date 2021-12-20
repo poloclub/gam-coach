@@ -108,6 +108,16 @@ $border-radius: 5px;
   align-items: center;
   gap: 8px;
 
+  .error-message {
+    margin-right: auto;
+    color: $pink-600;
+    display: none;
+
+    &.out-range {
+      display: flex;
+    }
+  }
+
   .button {
     background-color: white;
     padding: 2px 8px;
@@ -129,6 +139,11 @@ $border-radius: 5px;
         background-color: adjust-color($color: $blue-600, $lightness: -10%);
         border: none;
       }
+
+      &.out-range {
+        cursor: no-drop;
+        background-color: $gray-500;
+      }
     }
 
     &:hover {
@@ -138,6 +153,7 @@ $border-radius: 5px;
     &:active {
       border: 1px solid adjust-color($gray-light-border, $alpha: +0.1);
     }
+
   }
 }
 

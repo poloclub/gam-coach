@@ -30,3 +30,5 @@ export const inputFormConfigStore = writable({
   plansInfo: null,
   curExample: []
 });
+
+export const ebmStore = writable();

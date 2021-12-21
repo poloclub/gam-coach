@@ -162,7 +162,7 @@
       </div>
     {/key}
 
-    <DiffPicker/>
+    <DiffPicker logger={logger}/>
     <ConfirmModal/>
     <InputForm />
     <BookmarkPanel windowLoaded={windowLoaded}/>

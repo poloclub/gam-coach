@@ -1,6 +1,7 @@
 <script>
   // @ts-check
   import d3 from '../utils/d3-import';
+  import { Logger } from '../utils/logger';
   import { bindInlineSVG } from '../utils/utils';
   import { onMount } from 'svelte';
   import { diffPickerConfigStore } from '../store';
@@ -12,6 +13,9 @@
   import veryHardIcon from '../img/icon-very-hard.svg';
   import lockIcon from '../img/icon-lock.svg';
   import infoIcon from '../img/icon-info.svg';
+
+  /** @type {Logger} */
+  export let logger = null;
 
   // Component bindings
   let component = null;
@@ -43,6 +47,12 @@
         .classed('show', true)
         .node()
         .focus();
+
+      // Log the interaction
+      logger?.addLog({
+        eventName: `[${diffPickerConfig.feature}] diff open`,
+        elementName: 'diff picker'
+      });
     } else if (value.action === 'to-hide') {
       d3.select(component)
         .classed('show', false);

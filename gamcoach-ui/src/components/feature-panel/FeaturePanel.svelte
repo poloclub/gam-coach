@@ -17,6 +17,7 @@
   export let planStore = null;
   export let constraintsStore = null;
   export let windowLoaded = false;
+
   /** @type {Logger} */
   export let logger = null;
 
@@ -196,6 +197,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -203,6 +205,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -218,6 +221,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -225,6 +229,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -240,6 +245,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -247,6 +253,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -272,6 +279,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -279,6 +287,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -294,6 +303,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -301,6 +311,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -316,6 +327,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -323,6 +335,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -348,6 +361,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -355,6 +369,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -370,6 +385,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -377,6 +393,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -392,6 +409,7 @@
           {#if feature.isCont}
             <FeatureCard
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >
@@ -399,6 +417,7 @@
           {:else}
             <FeatureCardCat
               feature={feature}
+              logger={logger}
               on:curValueUpdated={(e) => curValueUpdatedHandler(e, feature)}
               on:constraintUpdated={(e) => constraintUpdatedHandler(e, feature)}
             >

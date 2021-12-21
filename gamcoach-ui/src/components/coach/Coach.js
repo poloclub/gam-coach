@@ -326,7 +326,17 @@ export class Constraints {
     } else {
       return null;
     }
+  }
 
+  /**
+   * Return a clean serializable copy of the constraint object.
+   */
+  getCleanCopy() {
+    return {
+      difficulties: Array.from(this.difficulties.entries()),
+      acceptableRanges: Array.from(this.acceptableRanges.entries()),
+      allFeatureNames: this.allFeatureNames.slice()
+    };
   }
 }
 

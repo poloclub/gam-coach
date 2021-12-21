@@ -44,14 +44,14 @@ export class Logger {
    * Add a new log event
    * @param {object} obj Smart parameter
    * @param {string} obj.eventName A string from ['click', 'dragEnd',
-   *  'mouseEnter', 'mouseLeave']
+   *  'mouseEnter', 'mouseLeave'] or any other given name
    * @param {string} obj.elementName Name of the element that users interact
    *  with
-   * @param {Date | null} obj.time Timestamp for the event
-   * @param {string | null} obj.valueName Name of the given value
-   * @param {string | number | null} obj.oldValue Old value that this
+   * @param {Date | null} [obj.time] Timestamp for the event
+   * @param {string | null} [obj.valueName] Name of the given value
+   * @param {string | number | null} [obj.oldValue] Old value that this
    *  interaction changes from
-   * @param {string | number | null} obj.newValue New value that this
+   * @param {string | number | null} [obj.newValue] New value that this
    *  interaction changes to
    */
   addLog({

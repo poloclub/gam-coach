@@ -1,6 +1,7 @@
 <script>
   // @ts-check
   import d3 from '../../utils/d3-import';
+  import { Logger } from '../../utils/logger';
   import { bindInlineSVG } from '../../utils/utils';
   import '../../typedef';
   import { onMount, tick, createEventDispatcher } from 'svelte';
@@ -25,6 +26,9 @@
 
   /** @type {Feature} */
   export let feature = null;
+
+  /** @type {Logger} */
+  export let logger = null;
 
   let mounted = false;
   let initialized = false;
@@ -97,6 +101,15 @@
 
     // Listen to the picked event
     if (value.action === 'picked' && value.feature === state.feature.name) {
+      // Log the interaction
+      logger?.addLog({
+        eventName: `[${feature.data.name}] diff changed`,
+        elementName: 'diff picker',
+        valueName: 'diff',
+        oldValue: feature.difficulty,
+        newValue: value.difficulty
+      });
+
       // Update the icon
       feature.difficulty = value.difficulty;
 
@@ -271,6 +284,14 @@
   export const headerClicked = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    logger?.addLog({
+      eventName: `[${feature.data.name}] clicked`,
+      elementName: 'feature card',
+      valueName: 'isCollapsed',
+      oldValue: isCollapsed ? 'collapsed' : 'extended',
+      newValue: !isCollapsed ? 'collapsed' : 'extended',
+    });
 
     // Register the initial size
     const initBBox = component.getBoundingClientRect();

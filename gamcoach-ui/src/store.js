@@ -2,7 +2,16 @@ import { writable } from 'svelte/store';
 
 export const tooltipConfigStore = writable({});
 
-export const diffPickerConfigStore = writable({});
+export const diffPickerConfigStore = writable({
+  feature: null,
+  focusOutTime: 0,
+  difficulty: 'neutral',
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+  action: ''
+});
 
 export const confirmModalConfigStore = writable({
   title: 'Confirmation',

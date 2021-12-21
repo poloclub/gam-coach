@@ -61,6 +61,9 @@
   /** @type {Feature}*/
   state.featurePtr = feature;
 
+  /** @type {Logger}*/
+  state.logger = logger;
+
   state.feature = {
     name: '',
     featureName: '',
@@ -100,7 +103,9 @@
   let unsub = diffPickerConfigStore.subscribe(value => {
 
     // Listen to the picked event
-    if (value.action === 'picked' && value.feature === state.feature.name) {
+    if (value.action === 'picked' &&
+      value.feature === state.feature.featureName
+    ) {
       // Log the interaction
       logger?.addLog({
         eventName: `[${feature.data.name}] diff changed`,
@@ -201,6 +206,8 @@
         new Set(feature.acceptableRange)
     };
 
+    state.logger = logger;
+
     // Draw the histogram
     // Record the x center values for each bar. The original return value is
     // at the global absolute coordinate. Convert it to local coordinate here.
@@ -219,7 +226,7 @@
   const diffClickedHandler = () => {
 
     // If the diff picker is shown for the current feature, we stop showing
-    if (diffPickerConfig.feature === state.feature.name &&
+    if (diffPickerConfig.feature === state.feature.featureName &&
       (Date.now() - diffPickerConfig.focusOutTime) < 200
     ) {
       diffPickerConfig.x = 0;
@@ -244,7 +251,7 @@
     diffPickerConfig.x = newX;
     diffPickerConfig.y = newY;
     diffPickerConfig.action = 'to-show';
-    diffPickerConfig.feature = state.feature.name;
+    diffPickerConfig.feature = state.feature.featureName;
 
     diffPickerConfigStore.set(diffPickerConfig);
   };
@@ -278,8 +285,9 @@
     e.preventDefault();
     e.stopPropagation();
 
+    console.log(feature, state);
     logger?.addLog({
-      eventName: `[${feature.data.name}] clicked`,
+      eventName: `[${state.feature.featureName}] clicked`,
       elementName: 'feature card',
       valueName: 'isCollapsed',
       oldValue: isCollapsed ? 'collapsed' : 'extended',
@@ -398,6 +406,11 @@
   const resetClicked = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    logger?.addLog({
+      eventName: `[${state.feature.name}] reset clicked`,
+      elementName: 'reset'
+    });
 
     // Restore the cur value
     state.feature.curValue = state.feature.coachValue;

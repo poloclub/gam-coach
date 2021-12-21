@@ -49,10 +49,10 @@ export class Logger {
    *  with
    * @param {Date | null} [obj.time] Timestamp for the event
    * @param {string | null} [obj.valueName] Name of the given value
-   * @param {string | number | null} [obj.oldValue] Old value that this
-   *  interaction changes from
-   * @param {string | number | null} [obj.newValue] New value that this
-   *  interaction changes to
+   * @param {string | number | null | number[]} [obj.oldValue] Old value that
+   *  this interaction changes from
+   * @param {string | number | null | number[]} [obj.newValue] New value that
+   *  this interaction changes to
    */
   addLog({
     eventName,

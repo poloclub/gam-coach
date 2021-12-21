@@ -1,4 +1,5 @@
 import d3 from '../../utils/d3-import';
+import { Logger } from '../../utils/logger';
 import { config } from '../../config';
 import '../../typedef';
 
@@ -92,12 +93,27 @@ const barClickedHandler = (e, d, component, state) => {
   e.preventDefault();
   e.stopPropagation();
 
+  const oldRange = Array.from(state.feature.searchValues);
+
   // Deselect the bar if it has been selected
   if (state.feature.searchValues.has(d.edge)) {
     state.feature.searchValues.delete(d.edge);
   } else {
     state.feature.searchValues.add(d.edge);
   }
+
+  const newRange = Array.from(state.feature.searchValues);
+
+  // Log the interaction
+  /** @type {Logger} */
+  const logger = state.logger;
+  logger.addLog({
+    eventName: `[${state.feature.featureName}] range changed`,
+    elementName: 'bar',
+    valueName: 'range',
+    oldValue: oldRange,
+    newValue: newRange
+  });
 
   syncBars(component, state);
   syncFeature(state);
@@ -207,6 +223,17 @@ const textMouseLeaveHandler = (e, d, component, state) => {
 const textClickedHandler = (e, d, component, state) => {
   e.preventDefault();
   e.stopPropagation();
+
+  // Log the interaction
+  /** @type {Logger} */
+  const logger = state.logger;
+  logger.addLog({
+    eventName: `[${state.feature.featureName}] value changed`,
+    elementName: 'bar',
+    valueName: 'curValue',
+    oldValue: state.feature.labelEncoder[state.feature.curValue],
+    newValue: state.feature.labelEncoder[d.edge]
+  });
 
   state.feature.curValue = d.edge;
   state.stateUpdated('value');

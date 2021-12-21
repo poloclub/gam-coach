@@ -56,6 +56,37 @@
 
   padding: 52px 20px 0 20px;
   color: white;
+
+  .description {
+    max-width: 245px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.95rem;
+
+    strong {
+      font-weight: 600;
+      text-decoration: underline;
+    }
+  }
+
+  .button {
+    background-color: $teal-800;
+    padding: 2px 8px;
+    border-radius: 5px;
+    border: 1px solid $gray-light-border;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+      background-color: $teal-700;
+    }
+
+    &:active {
+      background-color: $teal-600;
+    }
+
+  }
 }
 
 .coach-wrapper {

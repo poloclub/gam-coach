@@ -97,6 +97,7 @@
       <!-- <div class='help-arrow'>{@html pointArrowSVGProcessed}</div> -->
       <div class='help-note'>
         <div class='arrow'></div>
+        <div class='description'>Imagine...</div>
         <div class='title'>You're loan applicant</div>
         <div class='input-number'>
           <div class='svg-icon'
@@ -132,7 +133,19 @@
     </div>
 
     <div class='coach-right'>
-      right content
+      <div class='description'>
+        <span class='line'>
+          Thank you so much for helping us improve GAM Coach!!
+        </span>
+        <span class='line'>
+          Please try your best to <strong>imagine</strong> being a real loan applicant using this tool.
+        </span>
+        <span class='line'>
+          Once you are <strong>satisfied</strong> with any generated plan(s) and have <strong>bookmarked</strong>
+          them, click the button below.
+        </span>
+        <div class='button'>Submit</div>
+      </div>
     </div>
 
     {#key curExample}

@@ -5,6 +5,7 @@
   import { FeatureGrid } from './FeaturePanel';
 
   import d3 from '../../utils/d3-import';
+  import { Logger } from '../../utils/logger';
   import { bindInlineSVG } from '../../utils/utils';
   import '../../typedef';
   import { EBMLocal } from '../../ebm/ebmLocal';
@@ -16,6 +17,8 @@
   export let planStore = null;
   export let constraintsStore = null;
   export let windowLoaded = false;
+  /** @type {Logger} */
+  export let logger = null;
 
   const unsubscribes = [];
 

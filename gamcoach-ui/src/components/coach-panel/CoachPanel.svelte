@@ -1,6 +1,7 @@
 <script>
   //@ts-check
   import d3 from '../../utils/d3-import';
+  import { Logger } from '../../utils/logger';
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   import { tooltipConfigStore, confirmModalConfigStore,
@@ -16,8 +17,9 @@
   import starIconSolid from '../../img/icon-star-solid.svg';
   import starIconOutline from '../../img/icon-star-outline.svg';
 
-  export let featuresStore = null;
   export let windowLoaded = false;
+  /** @type {Logger} */
+  export let logger = null;
 
   /** @type {Plans} */
   export let plans = null;

@@ -3,6 +3,7 @@ import { EBMLocal } from '../../ebm/ebmLocal';
 import { EBM } from '../../ebm/ebm';
 import { GAMCoach } from '../../ebm/gamcoach';
 import { writable } from 'svelte/store';
+import { Logger } from '../../utils/logger';
 
 const difficultyTextMap = {
   1: 'very-easy',
@@ -32,17 +33,22 @@ export class Plan {
   /** @type{object[]} The initial sample */
   curExample;
 
+  /** @type{number} */
+  planIndex;
+
   /**
    * Initialize a Plan object
    * @param {object} modelData Loaded model data
    * @param {object[]} curExample Current sample values
    * @param {Plans} plans
    * @param {object[]} cfData The data of CFs returned from GAMCoach
+   * @param {number} planIndex The index of this plan
    */
-  constructor(modelData, curExample, plans, cfData) {
+  constructor(modelData, curExample, plans, cfData, planIndex) {
     this.features = this.initFeatures(modelData, curExample, cfData);
     this.coachSample = cfData;
     this.curExample = curExample;
+    this.planIndex = planIndex;
 
     // Initialize an EBM model associating with the plan
     this.ebmLocal = new EBMLocal(modelData, cfData);
@@ -135,6 +141,27 @@ export class Plan {
       }
     });
     return isChanged;
+  }
+
+  /**
+   * Create a cleaner copy (without features data) for the current plan
+   */
+  getCleanPlanCopy() {
+    const planCopy = {};
+
+    planCopy.ebmLocal = {
+      pred: this.ebmLocal.pred,
+      predScore: this.ebmLocal.predScore,
+      predProb: this.ebmLocal.predProb,
+      sample: this.ebmLocal.sample.slice()
+    };
+
+    planCopy.originalScore = this.originalScore;
+    planCopy.coachSample = this.coachSample.slice();
+    planCopy.curExample = this.curExample.slice();
+    planCopy.planIndex = this.planIndex;
+
+    return planCopy;
   }
 }
 
@@ -311,13 +338,15 @@ export class Constraints {
  * @param {Constraints} constraints Global constraint configurations
  * @param {(newPlans: Plans) => void} plansUpdated Workaround function to
  *  trigger an update on the plans variable
+ * @param {Logger} logger Logger object
  */
 export const initPlans = async (
   modelData,
   ebm,
   curExample,
   constraints,
-  plansUpdated
+  plansUpdated,
+  logger=null
 ) => {
   /**@type {Plans}*/
   const tempPlans = {
@@ -383,7 +412,19 @@ export const initPlans = async (
   console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
 
   // Convert the plan into a plan object
-  let curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+  let curPlan = new Plan(
+    modelData,
+    curExample,
+    plans,
+    cfs.data[0],
+    tempPlans.nextPlanIndex
+  );
+
+  // Log the current plan
+  logger?.addRecord(
+    `plan${tempPlans.nextPlanIndex}`,
+    curPlan.getCleanPlanCopy()
+  );
 
   // Record the plan as a store and attach it to plans with the planIndex as
   // a key
@@ -403,10 +444,22 @@ export const initPlans = async (
     cfs = await coach.generateSubCfs(cfs.nextCfConfig);
 
     // Get the plan object
-    curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+    curPlan = new Plan(
+      modelData,
+      curExample,
+      plans,
+      cfs.data[0],
+      tempPlans.nextPlanIndex + i
+    );
     curPlanStore = writable(curPlan);
     plans.planStores.set(tempPlans.nextPlanIndex + i, curPlanStore);
     plansUpdated(plans);
+
+    // Log the current plan
+    logger?.addRecord(
+      `plan-${tempPlans.nextPlanIndex + i}`,
+      curPlan.getCleanPlanCopy()
+    );
 
     console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
   }
@@ -469,7 +522,13 @@ export const regeneratePlans = async (
   plans.activePlanIndex = plans.nextPlanIndex;
 
   // Convert the plan into a plan object
-  let curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+  let curPlan = new Plan(
+    modelData,
+    curExample,
+    plans,
+    cfs.data[0],
+    plans.nextPlanIndex
+  );
 
   // Record the plan as a store and attach it to plans with the planIndex as
   // a key
@@ -489,7 +548,14 @@ export const regeneratePlans = async (
     cfs = await coach.generateSubCfs(cfs.nextCfConfig);
 
     // Get the plan object
-    curPlan = new Plan(modelData, curExample, plans, cfs.data[0]);
+    curPlan = new Plan(
+      modelData,
+      curExample,
+      plans,
+      cfs.data[0],
+      plans.nextPlanIndex + i
+    );
+
     curPlanStore = writable(curPlan);
     plans.planStores.set(plans.nextPlanIndex + i, curPlanStore);
     plansUpdated(plans);

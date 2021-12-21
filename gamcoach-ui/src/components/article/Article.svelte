@@ -9,6 +9,7 @@
   import Tooltip from '../Tooltip.svelte';
 
   import d3 from '../../utils/d3-import';
+  import { Logger } from '../../utils/logger';
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
@@ -25,6 +26,9 @@
 
   let curIndex = 6;
   let updated = false;
+
+  // Initialize the logger
+  const logger = new Logger();
 
   /** @type {any[]} */
   let curExample = [
@@ -60,6 +64,7 @@
   );
 
   const refreshClicked = () => {
+    console.log(logger.toJSON());
   };
 
   const editClicked = () => {
@@ -142,7 +147,7 @@
         </span>
         <span class='line'>
           Once you are <strong>satisfied</strong> with any generated plan(s) and have <strong>bookmarked</strong>
-          them, click the button below.
+          them, click the button below to finish.
         </span>
         <div class='button'>Submit</div>
       </div>
@@ -150,7 +155,10 @@
 
     {#key curExample}
       <div class='coach-wrapper'>
-        <Coach windowLoaded={windowLoaded} curExample={curExample}/>
+        <Coach windowLoaded={windowLoaded}
+          curExample={curExample}
+          logger={logger}
+        />
       </div>
     {/key}
 

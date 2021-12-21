@@ -8,6 +8,7 @@
   import '../../typedef';
 
   import d3 from '../../utils/d3-import';
+  import { Logger } from '../../utils/logger';
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
@@ -16,6 +17,9 @@
 
   export let windowLoaded = false;
   export let curExample = null;
+
+  /** @type {Logger} */
+  export let logger = null;
 
   let initialized = false;
   const unsubscribes = [];
@@ -82,12 +86,16 @@
     );
 
     // Initialize the plans
-    await initPlans(modelData, ebm, curExample, constraints, plansUpdated);
+    await initPlans(modelData, ebm, curExample, constraints, plansUpdated,
+      logger);
 
     // Initialize the input form
     inputFormConfig.ebm = ebm;
     inputFormConfig.curExample = curExample;
     inputFormConfigStore.set(inputFormConfig);
+
+    // Log the initial values
+    logger.setInitialValues({constraints, curExample, plans});
   };
 
   onMount(() => {
@@ -153,6 +161,7 @@
   <CoachPanel
     bind:plans={plans}
     windowLoaded={windowLoaded}
+    logger={logger}
     on:regenerateClicked={
       () => regeneratePlans(constraints, modelData, curExample, plans, plansUpdated)
     }
@@ -162,6 +171,7 @@
 {#if plans === null}
   <div class='feature-panel-wrapper'>
     <FeaturePanel
+      logger={logger}
       planStore={null}
       constraintsStore={constraintsStore}
       windowLoaded={windowLoaded} />
@@ -170,6 +180,7 @@
   {#key plans.activePlanIndex}
     <div class='feature-panel-wrapper'>
       <FeaturePanel
+        logger={logger}
         planStore={plans.planStores.has(plans.activePlanIndex) ?
           plans.planStores.get(plans.activePlanIndex) : null}
         constraintsStore={constraintsStore}

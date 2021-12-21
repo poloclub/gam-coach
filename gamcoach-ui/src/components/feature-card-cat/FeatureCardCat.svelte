@@ -408,7 +408,7 @@
     e.stopPropagation();
 
     logger?.addLog({
-      eventName: `[${state.feature.name}] reset clicked`,
+      eventName: `[${state.feature.featureName}] reset clicked`,
       elementName: 'reset'
     });
 

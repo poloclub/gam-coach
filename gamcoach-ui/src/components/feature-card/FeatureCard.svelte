@@ -55,6 +55,7 @@
   state.histSVG = null;
   state.densityClip = null;
   state.showingAnnotation = null;
+  state.logger = logger;
 
   /** @type {Feature}*/
   state.featurePtr = feature;
@@ -100,7 +101,9 @@
   diffPickerConfigStore.subscribe(value => {
 
     // Listen to the picked event
-    if (value.action === 'picked' && value.feature === state.feature.name) {
+    if (value.action === 'picked' &&
+      value.feature === state.feature.featureName
+    ) {
       // Log the interaction
       logger?.addLog({
         eventName: `[${feature.data.name}] diff changed`,
@@ -224,6 +227,8 @@
       stateUpdated: stateUpdated,
     };
 
+    state.logger = logger;
+
     if (feature.requiresInt) {
       state.feature.valueMin = Math.floor(state.feature.valueMin);
       state.feature.curMin = Math.floor(state.feature.curMin);
@@ -244,10 +249,10 @@
    * Handler for clicking the difficulty picker
    * @param e Event
    */
-  const diffClickedHandler = (e) => {
+  const diffClickedHandler = () => {
 
     // If the diff picker is shown for the current feature, we stop showing
-    if (diffPickerConfig.feature === state.feature.name &&
+    if (diffPickerConfig.feature === state.feature.featureName &&
       (Date.now() - diffPickerConfig.focusOutTime) < 200
     ) {
       diffPickerConfig.x = 0;
@@ -272,7 +277,7 @@
     diffPickerConfig.x = newX;
     diffPickerConfig.y = newY;
     diffPickerConfig.action = 'to-show';
-    diffPickerConfig.feature = state.feature.name;
+    diffPickerConfig.feature = state.feature.featureName;
 
     diffPickerConfigStore.set(diffPickerConfig);
   };
@@ -376,6 +381,11 @@
   const resetClicked = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    logger?.addLog({
+      eventName: `[${state.feature.featureName}] reset clicked`,
+      elementName: 'reset'
+    });
 
     // Reset the configuration and current values
     const leftThumbID = 'slider-left-thumb';

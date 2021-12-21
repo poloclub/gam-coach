@@ -1,4 +1,6 @@
 import d3 from '../../utils/d3-import';
+import { Logger } from '../../utils/logger';
+import { round } from '../../utils/utils';
 import { config } from '../../config';
 
 const colors = config.colors;
@@ -9,6 +11,14 @@ const formatter = d3.format(',.2~f');
  */
 const showAnnotation = (component, state, type) => {
   if (state.showingAnnotation !== null) { return; }
+
+  // Log the interaction
+  /** @type {Logger} */
+  const logger = state.logger;
+  logger?.addLog({
+    eventName: `[${state.feature.featureName}] annotation shown`,
+    elementName: `annotation ${type}`
+  });
 
   d3.select(component)
     .selectAll('.annotation-name')
@@ -47,11 +57,24 @@ const mouseDownHandler = (e, component, state) => {
   e.stopPropagation();
 
   const thumb = e.target;
-  if (!thumb.id.includes('thumb')) { return; }
+  if (!thumb.id.includes('thumb')) {
+    return;
+  }
 
   const track = thumb.parentNode;
   const trackWidth = track.getBoundingClientRect().width;
   thumb.focus();
+
+  // Logging the value change
+  let eventName = `[${state.feature.featureName}] range changed`;
+  let valueName = 'range';
+  let oldValueValue = state.featurePtr.acceptableRange;
+
+  if (thumb.id.includes('middle')) {
+    eventName = `[${state.feature.featureName}] value changed`;
+    valueName = 'curValue';
+    oldValueValue = state.feature.curValue;
+  }
 
   let localHideAnnotation = () => {};
   if (thumb.id.includes('middle')) {
@@ -71,13 +94,18 @@ const mouseDownHandler = (e, component, state) => {
 
     // Handle integer value if it is required
     if (state.feature.requiresInt) {
-      newValue = state.feature.valueMin + parseInt(
-        (state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth
-      );
+      newValue =
+        state.feature.valueMin +
+        round(
+          ((state.feature.valueMax - state.feature.valueMin) * deltaX) /
+            trackWidth,
+          0
+        );
     } else {
-      newValue = state.feature.valueMin + parseFloat(
-        (state.feature.valueMax - state.feature.valueMin) * deltaX / trackWidth
-      );
+      newValue =
+        state.feature.valueMin +
+        ((state.feature.valueMax - state.feature.valueMin) * deltaX) /
+          trackWidth;
     }
 
     moveThumb(component, state, thumb.id, newValue);
@@ -89,6 +117,22 @@ const mouseDownHandler = (e, component, state) => {
     document.body.style.cursor = 'default';
     thumb.blur();
     localHideAnnotation();
+
+    // Log the interaction
+    let newValueValue = state.featurePtr.acceptableRange;
+    if (thumb.id.includes('middle')) {
+      newValueValue = state.feature.curValue;
+    }
+
+    /** @type {Logger} */
+    const logger = state.logger;
+    logger?.addLog({
+      eventName,
+      elementName: 'slider',
+      valueName,
+      oldValue: oldValueValue,
+      newValue: newValueValue
+    });
   };
 
   // Listen to mouse move on the whole page (users can drag outside of the

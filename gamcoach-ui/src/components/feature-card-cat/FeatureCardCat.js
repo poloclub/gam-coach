@@ -43,6 +43,14 @@ const barMouseEnterHandler = (e, d, component, state) => {
 
   if (state.dragging) return;
 
+  // Log the interaction
+  /** @type {Logger} */
+  const logger = state.logger;
+  logger?.addLog({
+    eventName: `[${state.feature.featureName}] annotation shown`,
+    elementName: 'annotation bar'
+  });
+
   // Cancel the previous opacity -> 1 callback if it was set
   if (state.tickOpacityTimeout !== null) {
     clearTimeout(state.tickOpacityTimeout);
@@ -50,9 +58,7 @@ const barMouseEnterHandler = (e, d, component, state) => {
   }
 
   // Trigger hover on the x label element
-  d3.select(component)
-    .select(`#track-label-${d.edge}`)
-    .classed('hover', true);
+  d3.select(component).select(`#track-label-${d.edge}`).classed('hover', true);
 
   d3.select(component)
     .select('.svg-hist')
@@ -125,6 +131,14 @@ const barClickedHandler = (e, d, component, state) => {
  */
 const textGroupMouseEnterHandler = (state) => {
   if (state.dragging) return;
+
+  // Log the interaction
+  /** @type {Logger} */
+  const logger = state.logger;
+  logger?.addLog({
+    eventName: `[${state.feature.featureName}] annotation shown`,
+    elementName: 'annotation text'
+  });
 
   state.helperMessage = `Click to Try a
     <span class="blue">Different Value</span>`;

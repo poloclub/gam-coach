@@ -2,6 +2,7 @@
   // @ts-check
   import '../../typedef';
   import d3 from '../../utils/d3-import';
+  import { Logger } from '../../utils/logger';
   import { onMount, onDestroy, tick } from 'svelte';
   import { tooltipConfigStore } from '../../store';
   import { ScorePanel } from './ScorePanel';
@@ -9,6 +10,9 @@
   export let scoreWidth = 0;
   export let planLabel = null;
   export let planStore = null;
+
+  /** @type {Logger} */
+  export let logger = null;
 
   const unsubscribes = [];
   let isInRange = true;
@@ -70,7 +74,7 @@
     await tick();
 
     scorePanel = new ScorePanel(component, scoreWidth, planLabel, planStore,
-      tooltipConfigStore, updateInRange);
+      tooltipConfigStore, updateInRange, logger);
 
     d3.select(decision).style('width', `${planLabel.textWidth}px`);
 

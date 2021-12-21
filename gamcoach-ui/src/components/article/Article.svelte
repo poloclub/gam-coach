@@ -103,7 +103,7 @@
       <!-- <div class='help-arrow'>{@html pointArrowSVGProcessed}</div> -->
       <div class='help-note'>
         <div class='arrow'></div>
-        <div class='description'>Imagine...</div>
+        <div class='title-top'>Imagine...</div>
         <div class='title'>You're loan applicant</div>
         <div class='input-number'>
           <div class='svg-icon'

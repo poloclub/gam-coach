@@ -1,4 +1,5 @@
 import d3 from '../../utils/d3-import';
+import { Logger } from '../../utils/logger';
 import { config } from '../../config';
 import { Writable } from 'svelte/store';
 import '../../typedef';
@@ -49,6 +50,7 @@ export class ScorePanel {
    * @param {object} planLabel
    * @param {Writable<Plan>} planStore
    * @param {(newValue: boolean) => void} updateInRange
+   * @param {Logger | null} logger
    */
   constructor(
     component,
@@ -56,11 +58,14 @@ export class ScorePanel {
     planLabel,
     planStore,
     tooltipConfigStore,
-    updateInRange
+    updateInRange,
+    logger
   ) {
     this.component = component;
     this.planLabel = planLabel;
     this.updateInRange = updateInRange;
+    /** @type {Logger} */
+    this.logger = logger;
 
     // Subscribe to the plan store
     this.unsubscribes.push(
@@ -141,9 +146,34 @@ export class ScorePanel {
     }
   }
 
+  /**
+   * Handler for mouse enter event
+   * @param {MouseEvent} e
+   * @param {string} message
+   * @param {number} width
+   * @param {number} yOffset
+   * @param {string} direction
+   */
   mouseenterHandler(e, message, width, yOffset, direction) {
     e.preventDefault();
     e.stopPropagation();
+
+    // Log the interaction
+    const eventName = 'annotation shown';
+    let elementName = 'score annotation original';
+
+    if (message.includes('current')) {
+      elementName = 'score annotation current';
+    }
+
+    if (message.includes('needed')) {
+      elementName = 'score annotation threshold';
+    }
+
+    this.logger?.addLog({
+      eventName,
+      elementName
+    });
 
     const node = e.currentTarget;
     this.mouseoverTimeout = setTimeout(() => {

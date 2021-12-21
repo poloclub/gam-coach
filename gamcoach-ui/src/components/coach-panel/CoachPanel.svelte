@@ -470,6 +470,7 @@
                     plans.planStores.get(planLabel.planIndex) : null
                   }
                   scoreWidth={scorePanelWidth}
+                  logger={logger}
                 />
               </div>
             </div>

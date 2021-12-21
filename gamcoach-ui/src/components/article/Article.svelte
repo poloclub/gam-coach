@@ -17,7 +17,7 @@
 
   import pointArrowSVG from '../../img/point-arrow.svg';
   import iconRefreshSVG from '../../img/icon-refresh3.svg';
-  import iconEditrSVG from '../../img/icon-edit.svg';
+  import iconEditSVG from '../../img/icon-edit.svg';
 
   const unsubscribes = [];
   let windowLoaded = false;
@@ -29,6 +29,7 @@
 
   // Initialize the logger
   const logger = new Logger();
+  // const logger = null;
 
   /** @type {any[]} */
   let curExample = [
@@ -64,7 +65,7 @@
   );
 
   const refreshClicked = () => {
-    console.log(logger.toJSON());
+    console.log(logger?.toJSON());
   };
 
   const editClicked = () => {
@@ -109,7 +110,7 @@
             title='Edit the input values'
             on:click={() => editClicked()}
           >
-            {@html iconEditrSVG}
+            {@html iconEditSVG}
           </div>
           <div class='svg-icon'
             title='Try a random input sample'

@@ -95,7 +95,7 @@
     inputFormConfigStore.set(inputFormConfig);
 
     // Log the initial values
-    logger.setInitialValues({
+    logger?.setInitialValues({
       constraints: constraints.getCleanCopy(), curExample, plans
     });
   };

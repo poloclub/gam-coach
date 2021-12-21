@@ -92,6 +92,9 @@
       return;
     }
 
+    // Log the interaction
+    const oldValue = Array.from(savedPlanIndex);
+
     // Check if users have already saved this plan
     if (savedPlanIndex.has(plan.planIndex)) {
 
@@ -161,6 +164,14 @@
 
     }
     savedPlanIndex = savedPlanIndex;
+
+    logger?.addLog({
+      eventName: 'plan starred',
+      elementName: 'star',
+      valueName: 'savedPlanIndex',
+      oldValue: oldValue,
+      newValue: Array.from(savedPlanIndex)
+    });
   };
 
   /**

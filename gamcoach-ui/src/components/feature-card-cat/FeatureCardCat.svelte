@@ -285,7 +285,6 @@
     e.preventDefault();
     e.stopPropagation();
 
-    console.log(feature, state);
     logger?.addLog({
       eventName: `[${state.feature.featureName}] clicked`,
       elementName: 'feature card',

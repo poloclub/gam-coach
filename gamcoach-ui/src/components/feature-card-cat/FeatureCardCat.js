@@ -113,7 +113,7 @@ const barClickedHandler = (e, d, component, state) => {
   // Log the interaction
   /** @type {Logger} */
   const logger = state.logger;
-  logger.addLog({
+  logger?.addLog({
     eventName: `[${state.feature.featureName}] range changed`,
     elementName: 'bar',
     valueName: 'range',
@@ -241,7 +241,7 @@ const textClickedHandler = (e, d, component, state) => {
   // Log the interaction
   /** @type {Logger} */
   const logger = state.logger;
-  logger.addLog({
+  logger?.addLog({
     eventName: `[${state.feature.featureName}] value changed`,
     elementName: 'bar',
     valueName: 'curValue',
@@ -375,7 +375,6 @@ export const initHistSize = (component, state) => {
  * Initialize the density plot.
  */
 export const initHist = (component, state) => {
-  console.log(state.feature);
 
   // Use the parent size to initialize the SVG size
   const parentDiv = d3.select(component)

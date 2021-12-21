@@ -6,14 +6,15 @@
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount } from 'svelte';
   import { inputFormConfigStore, ebmStore } from '../../store';
-  import { getInputLists, getNewCurExample } from './InputForm';
+  import { getInputLists, getNewCurExample,
+    isCurExampleChanged } from './InputForm';
 
   import closeIcon from '../../img/icon-close.svg';
 
   // Component bindings
   let component = null;
 
-  /** @type {inputFormConfig} */
+  /** @type {InputFormConfig} */
   let inputFormConfig = null;
 
   /** @type {EBM} */
@@ -50,6 +51,15 @@
   const confirmClicked = () => {
     if (isOutRange) return;
     inputFormConfig.show = false;
+
+    // Check if we should update the curExample
+    console.log(inputFormConfig.curExample, newCurExample);
+    console.log(isCurExampleChanged(inputFormConfig.curExample, newCurExample));
+
+    if (isCurExampleChanged(inputFormConfig.curExample, newCurExample)) {
+      inputFormConfig.curExample = newCurExample;
+      inputFormConfig.action = 'saved';
+    }
     inputFormConfigStore.set(inputFormConfig);
   };
 
@@ -74,12 +84,13 @@
     bindInlineSVG(component, iconList);
 
     d3.timeout(() => {
-      inputFormConfig.show = true;
+      inputFormConfig.show = false;
       inputFormConfigStore.set(inputFormConfig);
     }, 1000);
   });
 
   $: contList && ebm && inputUpdated();
+  $: catList && ebm && inputUpdated();
 
 </script>
 

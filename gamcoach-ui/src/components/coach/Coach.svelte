@@ -15,6 +15,9 @@
     ebmStore } from '../../store';
 
   export let windowLoaded = false;
+  export let curExample = null;
+
+  let initialized = false;
   const unsubscribes = [];
 
   // Set up tooltip
@@ -44,13 +47,6 @@
 
   let constraintsStore = null;
 
-  /** @type {any[]} */
-  const curExample = [
-    17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
-    'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
-    '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
-  ];
-
   /**
    * Workaround to trigger an update to the plans variable.
    * @param {Plans} newPlans
@@ -63,6 +59,8 @@
    * Load the model and populate the plans.
    */
   const initModel = async () => {
+    initialized = true;
+
     // Load the model data
     modelData = await d3.json('/data/lc-classifier.json');
     console.log(modelData);
@@ -92,14 +90,14 @@
     inputFormConfigStore.set(inputFormConfig);
   };
 
-  initModel();
-
   onMount(() => {
   });
 
   onDestroy(() => {
     unsubscribes.forEach(unsub => unsub());
   });
+
+  $: curExample && !initialized && initModel();
 
 </script>
 

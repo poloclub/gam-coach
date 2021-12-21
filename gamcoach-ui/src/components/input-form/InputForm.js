@@ -115,3 +115,27 @@ export const getNewCurExample = (contList, catList) => {
 
   return newCurExample;
 };
+
+/**
+ * Return true if curExample is different from the newCurExample
+ * @param {object[]} curExample
+ * @param {object[]} newCurExample
+ */
+export const isCurExampleChanged = (curExample, newCurExample) => {
+  if (curExample.length !== newCurExample.length) return true;
+
+  for (let i = 0; i < curExample.length; i++) {
+    if (!isNaN(curExample[i])) {
+      if (Math.abs(curExample[i] - newCurExample[i]) > 1e-5) {
+        return true;
+      }
+    } else {
+      // String case
+      if (curExample[i] !== newCurExample[i]) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};

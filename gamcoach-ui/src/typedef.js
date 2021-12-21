@@ -46,10 +46,11 @@
  */
 
 /**
- * @typedef {Object} inputFormConfig
+ * @typedef {Object} InputFormConfig
  * @property {boolean} show True if the bookmark panel is shown
  * @property {Feature[]} features All features used for the current model
  * @property {Plans} plansInfo The information about all the plans
  * @property {object} ebm The EBM model
  * @property {object[]} curExample The current sample
+ * @property {string} action A value of ['saved']
  */

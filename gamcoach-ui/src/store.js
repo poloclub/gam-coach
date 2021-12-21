@@ -28,7 +28,8 @@ export const inputFormConfigStore = writable({
   ebm: null,
   features: null,
   plansInfo: null,
-  curExample: []
+  curExample: [],
+  action: null
 });
 
 export const ebmStore = writable();

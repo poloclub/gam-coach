@@ -73,7 +73,7 @@
   );
 
   // Set up the input form store
-  /** @type {inputFormConfig}*/
+  /** @type {InputFormConfig}*/
   let inputFormConfig = null;
   unsubscribes.push(
     inputFormConfigStore.subscribe(value => {

@@ -306,6 +306,9 @@
     opacity: 0;
     transition: opacity 200ms ease-in;
 
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+
     &:global(.shown) {
       opacity: 1;
     }

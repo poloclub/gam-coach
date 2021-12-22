@@ -91,11 +91,11 @@
   };
 
   const difficultyTextMap = {
-    'neutral': 'Default priority',
-    'easy': 'High priority',
-    'very-easy': 'Very high priority',
-    'hard': 'Low priority',
-    'very-hard': 'Very low priority',
+    'neutral': 'Default difficulty',
+    'easy': 'Easy to change',
+    'very-easy': 'Very easy to change',
+    'hard': 'Hard to change',
+    'very-hard': 'Very hard to change',
     'lock': 'New plans won\'t change it',
   };
 

@@ -202,6 +202,12 @@
       return;
     }
 
+    // Log the interaction
+    logger?.addLog({
+      eventName: `(plan${planIndex} clicked`,
+      elementName: 'tab'
+    });
+
     // First hide all the scores on tab
     d3.select(component)
       .selectAll('.tab-score')
@@ -339,6 +345,12 @@
     } else {
       bookmarkConfig.show = true;
       bookmarkConfigStore.set(bookmarkConfig);
+
+      // Log the interaction
+      logger?.addLog({
+        eventName: 'bookmark opened',
+        elementName: 'bookmark'
+      });
     }
   };
 

@@ -348,7 +348,7 @@ export class Constraints {
  * @param {Constraints} constraints Global constraint configurations
  * @param {(newPlans: Plans) => void} plansUpdated Workaround function to
  *  trigger an update on the plans variable
- * @param {Logger} logger Logger object
+ * @param {Logger} [logger] Logger object
  */
 export const initPlans = async (
   modelData,
@@ -406,8 +406,13 @@ export const initPlans = async (
    * plans.
    */
   const coach = new GAMCoach(modelData);
-
   const exampleBatch = [curExample];
+
+  // Log the constraints before generating the first plan
+  logger?.addRecord(
+    `plan${tempPlans.nextPlanIndex}Constraint`,
+    constraints.getCleanCopy()
+  );
 
   console.time(`Plan ${tempPlans.nextPlanIndex} generated`);
   let cfs = await coach.generateCfs({
@@ -467,7 +472,7 @@ export const initPlans = async (
 
     // Log the current plan
     logger?.addRecord(
-      `plan-${tempPlans.nextPlanIndex + i}`,
+      `plan${tempPlans.nextPlanIndex + i}`,
       curPlan.getCleanPlanCopy()
     );
 
@@ -489,15 +494,16 @@ export const initPlans = async (
  * @param {Plans} plans The current plans
  * @param {(newPlans: Plans) => void} plansUpdated Workaround function to
  *  trigger an update on the plans variable
+ * @param {Logger} [logger] Logger object
  */
 export const regeneratePlans = async (
   constraints,
   modelData,
   curExample,
   plans,
-  plansUpdated
+  plansUpdated,
+  logger=null
 ) => {
-
   /**
    * To generate new plans, we need to complete the following steps:
    *
@@ -515,6 +521,12 @@ export const regeneratePlans = async (
   // Step 2: Iteratively generate new plans with the new constraints
   const coach = new GAMCoach(modelData);
   const exampleBatch = [curExample];
+
+  // Log the constraints before generating the first plan
+  logger?.addRecord(
+    `plan${plans.nextPlanIndex}Constraint`,
+    constraints.getCleanCopy()
+  );
 
   console.time(`Plan ${plans.nextPlanIndex} generated`);
   let cfs = await coach.generateCfs({
@@ -546,6 +558,9 @@ export const regeneratePlans = async (
   plans.planStores.set(plans.nextPlanIndex, curPlanStore);
   plansUpdated(plans);
 
+  // Log the current plan
+  logger?.addRecord(`plan${plans.nextPlanIndex}`, curPlan.getCleanPlanCopy());
+
   // Generate other plans
   const totalPlanNum = 5;
   for (let i = 1; i < totalPlanNum; i++) {
@@ -571,6 +586,12 @@ export const regeneratePlans = async (
     plansUpdated(plans);
 
     console.timeEnd(`Plan ${plans.nextPlanIndex + i} generated`);
+
+    // Log the current plan
+    logger?.addRecord(
+      `plan${plans.nextPlanIndex + i}`,
+      curPlan.getCleanPlanCopy()
+    );
   }
 
   // Update the next plan index

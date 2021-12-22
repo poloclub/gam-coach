@@ -94,10 +94,8 @@
     inputFormConfig.curExample = curExample;
     inputFormConfigStore.set(inputFormConfig);
 
-    // Log the initial values
-    logger?.setInitialValues({
-      constraints: constraints.getCleanCopy(), curExample, plans
-    });
+    // Log the plans
+    logger?.addRecord('plans', plans);
   };
 
   onMount(() => {
@@ -165,7 +163,9 @@
     windowLoaded={windowLoaded}
     logger={logger}
     on:regenerateClicked={
-      () => regeneratePlans(constraints, modelData, curExample, plans, plansUpdated)
+      () => regeneratePlans(constraints, modelData, curExample, plans,
+        plansUpdated, logger
+      )
     }
   />
 </div>

@@ -38,6 +38,10 @@
     '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
   ];
 
+  logger?.setInitialValues({
+    curExample
+  });
+
   const pointArrowSVGProcessed = pointArrowSVG
     .replaceAll('white', 'currentcolor');
 
@@ -56,6 +60,15 @@
 
       // Update curExample if it is changed
       if (inputFormConfig.action === 'saved') {
+        // Log the interaction
+        logger?.addLog({
+          eventName: 'curExampleUpdated',
+          elementName: 'input form',
+          valueName: 'curExample',
+          oldValue: curExample,
+          newValue: inputFormConfig.curExample
+        });
+
         inputFormConfig.action = null;
         updated = true;
         curExample = inputFormConfig.curExample;
@@ -166,7 +179,7 @@
     <DiffPicker logger={logger}/>
     <ConfirmModal/>
     <InputForm />
-    <BookmarkPanel windowLoaded={windowLoaded}/>
+    <BookmarkPanel windowLoaded={windowLoaded} logger={logger}/>
   </div>
 
 

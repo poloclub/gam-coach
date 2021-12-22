@@ -1,6 +1,7 @@
 <script>
   // @ts-check
   import d3 from '../../utils/d3-import';
+  import { Logger } from '../../utils/logger';
   import { bindInlineSVG, downloadText } from '../../utils/utils';
   import { onMount } from 'svelte';
   import { bookmarkConfigStore } from '../../store';
@@ -13,6 +14,9 @@
   import closeIcon from '../../img/icon-close-outline.svg';
 
   export let windowLoaded = false;
+
+  /** @type {Logger} */
+  export let logger = null;
 
   // Component bindings
   let component = null;
@@ -60,8 +64,16 @@
       signingKeys: pgpPrivateKey
     });
 
-
     downloadText(cleartextMessage, dlAnchor, 'gamcoach-receipt.txt');
+
+    // Log the interaction
+    logger?.addLog({
+      eventName: 'receipt downloaded',
+      elementName: 'bookmark',
+      valueName: 'receipt',
+      oldValue: null,
+      newValue: cleartextMessage
+    });
   };
 
   /**

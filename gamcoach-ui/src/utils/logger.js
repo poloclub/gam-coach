@@ -2,7 +2,7 @@
 /**
  * @typedef {Object} LogValue A value that an interaction event changes
  * @property {string} name Value name
- * @property {string | number} value Value
+ * @property {string | number | number[]} value Value
  */
 
 /**
@@ -36,8 +36,8 @@ export class Logger {
     this.startTime = new Date();
 
     // Create a map to register any object on the fly
-    /** @type {Map<string, any>} */
-    this.record = new Map();
+    /** @type {object[][]} Each entry is [key, value, timestamp]*/
+    this.records = [];
   }
 
   /**
@@ -112,7 +112,7 @@ export class Logger {
       endTime: new Date(),
       initialValues: this.initialValues,
       endValues: endValues,
-      record: Array.from(this.record.entries())
+      records: this.records
     };
     return JSON.stringify(exportLog);
   }
@@ -131,6 +131,6 @@ export class Logger {
    * @param {any} value Any serializable object
    */
   addRecord(key, value) {
-    this.record.set(key, value);
+    this.records.push([key, value, new Date()]);
   }
 }

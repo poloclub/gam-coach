@@ -53,9 +53,6 @@
     inputFormConfig.show = false;
 
     // Check if we should update the curExample
-    console.log(inputFormConfig.curExample, newCurExample);
-    console.log(isCurExampleChanged(inputFormConfig.curExample, newCurExample));
-
     if (isCurExampleChanged(inputFormConfig.curExample, newCurExample)) {
       inputFormConfig.curExample = newCurExample;
       inputFormConfig.action = 'saved';

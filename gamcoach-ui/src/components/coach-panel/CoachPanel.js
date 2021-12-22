@@ -39,7 +39,8 @@ export const InitPlanLabels = (plans, tabInputLabel) => {
       isRegression: plans.isRegression,
       score: plans.isRegression ? plans.score : plans.classTarget[0],
       classes: plans.isRegression ? null : plans.classes,
-      failTarget: failTarget
+      failTarget: failTarget,
+      textWidth: 0
     });
     curIndex++;
   }

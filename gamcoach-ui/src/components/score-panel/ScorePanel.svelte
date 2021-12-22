@@ -10,12 +10,13 @@
   export let scoreWidth = 0;
   export let planLabel = null;
   export let planStore = null;
+  export let isFailed = false;
 
   /** @type {Logger} */
   export let logger = null;
 
   const unsubscribes = [];
-  let isInRange = true;
+  let isInRange = false;
   let initialized = false;
   let mounted = false;
   let plan = null;
@@ -63,6 +64,7 @@
 
   const initScorePanel = async () => {
     initialized = true;
+    isInRange = !isFailed;
 
     // Subscribe the plan store
     unsubscribes.push(
@@ -98,7 +100,8 @@
     scorePanel.destroy();
   });
 
-  $: mounted && !initialized && scoreWidth > 0 && planStore && initScorePanel();
+  $: mounted && !initialized && scoreWidth > 0 && planLabel.textWidth > 0 &&
+    planStore && initScorePanel();
   $: planLabel && planLabelUpdated();
 </script>
 

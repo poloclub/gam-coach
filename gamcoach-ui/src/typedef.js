@@ -34,6 +34,7 @@
  * @property {number} nextPlanIndex The next plan index to count from
  * @property {Map<number, object>} planStores A map that maps plan
  *  index to the corresponding plan store
+ * @property {Set<number>} failedPlans A set of planIndexes of failed plans
  */
 
 /**

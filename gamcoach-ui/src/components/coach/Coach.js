@@ -387,7 +387,8 @@ export const initPlans = async (
     continuousIntegerFeatures: [],
     activePlanIndex: 1,
     nextPlanIndex: 1,
-    planStores: new Map()
+    planStores: new Map(),
+    failedPlans: new Set()
   };
 
   if (modelData.isClassifier) {
@@ -449,7 +450,7 @@ export const initPlans = async (
     modelData,
     curExample,
     plans,
-    cfs.data[0],
+    cfs.isSuccessful ? cfs.data[0] : curExample,
     tempPlans.nextPlanIndex
   );
 
@@ -464,6 +465,22 @@ export const initPlans = async (
   let curPlanStore = writable(curPlan);
   plans.planStores.set(tempPlans.nextPlanIndex, curPlanStore);
   plansUpdated(plans);
+
+  // Handle failure case
+  if (!cfs.isSuccessful) {
+    for (
+      let i = tempPlans.nextPlanIndex;
+      i < tempPlans.nextPlanIndex + 5;
+      i++
+    ) {
+      plans.failedPlans.add(i);
+      plansUpdated(plans);
+    }
+
+    plans.nextPlanIndex += 5;
+    plansUpdated(plans);
+    return;
+  }
 
   // Generate other plans
   const totalPlanNum = 5;
@@ -481,7 +498,7 @@ export const initPlans = async (
       modelData,
       curExample,
       plans,
-      cfs.data[0],
+      cfs.isSuccessful ? cfs.data[0] : curExample,
       tempPlans.nextPlanIndex + i
     );
     curPlanStore = writable(curPlan);
@@ -495,6 +512,19 @@ export const initPlans = async (
     );
 
     console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
+
+    // Handle failure case
+    if (!cfs.isSuccessful) {
+      for (
+        let j = tempPlans.nextPlanIndex + i;
+        j < tempPlans.nextPlanIndex + 5;
+        j++
+      ) {
+        plans.failedPlans.add(j);
+        plansUpdated(plans);
+      }
+      break;
+    }
   }
 
   // Update the next plan index
@@ -566,7 +596,7 @@ export const regeneratePlans = async (
     modelData,
     curExample,
     plans,
-    cfs.data[0],
+    cfs.isSuccessful ? cfs.data[0] : curExample,
     plans.nextPlanIndex
   );
 
@@ -578,6 +608,18 @@ export const regeneratePlans = async (
 
   // Log the current plan
   logger?.addRecord(`plan${plans.nextPlanIndex}`, curPlan.getCleanPlanCopy());
+
+  // Handle failure case
+  if (!cfs.isSuccessful) {
+    for (let j = plans.nextPlanIndex; j < plans.nextPlanIndex + 5; j++) {
+      plans.failedPlans.add(j);
+      plansUpdated(plans);
+    }
+
+    plans.nextPlanIndex += 5;
+    plansUpdated(plans);
+    return;
+  }
 
   // Generate other plans
   const totalPlanNum = 5;
@@ -595,7 +637,7 @@ export const regeneratePlans = async (
       modelData,
       curExample,
       plans,
-      cfs.data[0],
+      cfs.isSuccessful ? cfs.data[0] : curExample,
       plans.nextPlanIndex + i
     );
 
@@ -610,6 +652,15 @@ export const regeneratePlans = async (
       `plan${plans.nextPlanIndex + i}`,
       curPlan.getCleanPlanCopy()
     );
+
+    // Handle failure case
+    if (!cfs.isSuccessful) {
+      for (let j = plans.nextPlanIndex + i; j < plans.nextPlanIndex + 5; j++) {
+        plans.failedPlans.add(j);
+        plansUpdated(plans);
+      }
+      break;
+    }
   }
 
   // Update the next plan index

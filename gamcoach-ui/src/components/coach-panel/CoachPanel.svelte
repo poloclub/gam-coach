@@ -447,6 +447,7 @@
           >
 
             <div class='loading-container'
+              class:no-animation={plans.failedPlans.has(planLabel.planIndex)}
               class:no-display={plans.planStores.has(planLabel.planIndex)}
             >
               <div class='line'></div>
@@ -481,6 +482,7 @@
             >
               <div class='score-bar-wrapper'>
                 <ScorePanel planLabel={planLabel}
+                  isFailed={plans.failedPlans.has(planLabel.planIndex)}
                   planStore={plans.planStores.has(planLabel.planIndex) ?
                     plans.planStores.get(planLabel.planIndex) : null
                   }

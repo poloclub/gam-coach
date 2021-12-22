@@ -366,15 +366,26 @@
    */
   const displayAcceptableRange = (acceptableRange, stateFeature) => {
     let text = 'New plans consider from ';
-    if (acceptableRange === null) {
-      text = text.concat(`${formatter(stateFeature.valueMin)} to ${
-        formatter(stateFeature.valueMax)
-      }`);
-    } else {
-      text = text.concat(`${formatter(acceptableRange[0])} to ${
-        formatter(acceptableRange[1])
-      }`);
+    let curMin = stateFeature.valueMin;
+    let curMax = stateFeature.valueMax;
+
+    if (acceptableRange !== null) {
+      curMin = acceptableRange[0];
+      curMax = acceptableRange[1];
     }
+
+    if (state.feature.transform !== null) {
+      if (state.feature.requiresInt) {
+        curMin = round(state.feature.transformFunc(curMin), 0);
+        curMax = round(state.feature.transformFunc(curMax), 0);
+      } else {
+        curMin = state.feature.transformFunc(curMin), 0;
+        curMax = state.feature.transformFunc(curMax), 0;
+      }
+    }
+
+    text = text.concat(`${formatter(curMin)} to ${formatter(curMax)}`);
+
     return text;
   };
 

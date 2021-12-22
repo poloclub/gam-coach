@@ -1,6 +1,7 @@
 import '../../typedef';
 import { EBMLocal } from '../../ebm/ebmLocal';
 import { EBM } from '../../ebm/ebm';
+import { round } from '../../utils/utils';
 import { GAMCoach } from '../../ebm/gamcoach';
 import { writable } from 'svelte/store';
 import { Logger } from '../../utils/logger';
@@ -193,6 +194,7 @@ export class SavedPlan {
         const curFeature = features.filter(f => f.featureID === i)[0];
         let originalValue = this.curExample[i];
         let newValue = this.sample[i];
+        let changeValue = null;
 
         // Encode the values if it is a categorical variable
         // We need to first convert the string value to a number index, then
@@ -208,12 +210,28 @@ export class SavedPlan {
 
           originalValue = labelDecoder.get(originalValue);
           newValue = labelDecoder.get(newValue);
+        } else {
+          // For continuous values, we need to check if it has transformation
+          if (curFeature.transform === 'log10') {
+            if (curFeature.requiresInt) {
+              originalValue = round(Math.pow(10, originalValue), 0);
+              newValue = round(Math.pow(10, newValue), 0);
+              changeValue = newValue - originalValue;
+            } else {
+              originalValue = Math.pow(10, originalValue);
+              newValue = Math.pow(10, newValue);
+              changeValue = newValue - originalValue;
+            }
+          } else {
+            changeValue = newValue - originalValue;
+          }
         }
 
         changeList.push({
           featureDisplayName: curFeature.description.displayName,
           originalValue,
           newValue,
+          changeValue,
           isCont: curFeature.isCont
         });
       }

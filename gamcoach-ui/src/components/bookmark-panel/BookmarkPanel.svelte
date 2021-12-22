@@ -170,10 +170,9 @@
                   >
                     {#if item.isCont}
                       <span class='value-change'>
-                        {`${(item.newValue - item.originalValue) < 0 ? '' :
-                          '+'}${formatter(
-                            item.newValue - item.originalValue
-                            )}`}
+                        {`${(item.changeValue) < 0 ? '' :'+'}${formatter(
+                          item.changeValue
+                        )}`}
                       </span>
                       <div class='arrow-right'></div>
                     {:else}

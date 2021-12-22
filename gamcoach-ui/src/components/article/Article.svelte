@@ -5,6 +5,7 @@
   import DiffPicker from '../DiffPicker.svelte';
   import ConfirmModal from '../confirm-modal/ConfirmModal.svelte';
   import InputForm from '../input-form/InputForm.svelte';
+  import RatingForm from '../input-form/RatingForm.svelte';
   import BookmarkPanel from '../bookmark-panel/BookmarkPanel.svelte';
   import Tooltip from '../Tooltip.svelte';
 
@@ -13,7 +14,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
-  import { tooltipConfigStore, inputFormConfigStore } from '../../store';
+  import { tooltipConfigStore, inputFormConfigStore,
+    ratingFormConfigStore } from '../../store';
 
   import pointArrowSVG from '../../img/point-arrow.svg';
   import iconRefreshSVG from '../../img/icon-refresh3.svg';
@@ -77,6 +79,12 @@
     })
   );
 
+  /** @type {RatingFormConfig} */
+  let ratingFormConfig = null;
+  unsubscribes.push(
+    ratingFormConfigStore.subscribe(value => {ratingFormConfig = value;})
+  );
+
   const refreshClicked = () => {
     console.log(logger?.toJSON());
   };
@@ -86,6 +94,11 @@
     inputFormConfig.curExample = curExample;
     inputFormConfig.action = null;
     inputFormConfigStore.set(inputFormConfig);
+  };
+
+  const submitClicked = () => {
+    ratingFormConfig.show = true;
+    ratingFormConfigStore.set(ratingFormConfig);
   };
 
   onMount(() => {
@@ -163,7 +176,7 @@
           Once you are <strong>satisfied</strong> with any generated plan(s) and have <strong>bookmarked</strong>
           them, click the button below to finish.
         </span>
-        <div class='button'>Submit</div>
+        <div class='button' on:click={() => submitClicked()}>I'm Done!</div>
       </div>
     </div>
 
@@ -179,6 +192,7 @@
     <DiffPicker logger={logger}/>
     <ConfirmModal/>
     <InputForm />
+    <RatingForm />
     <BookmarkPanel windowLoaded={windowLoaded} logger={logger}/>
   </div>
 

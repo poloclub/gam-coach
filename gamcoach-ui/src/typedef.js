@@ -55,3 +55,16 @@
  * @property {object[]} curExample The current sample
  * @property {string} action A value of ['saved']
  */
+
+/**
+ * @typedef {Object} PlanRating
+ * @property {number} planIndex The index of the rated plan
+ * @property {string} rating The numerical score ('1' - '3') of the plan
+ * @property {string} explanation A short sentence reviewing the plan
+ */
+
+/**
+ * @typedef {Object} RatingFormConfig
+ * @property {boolean} show True if the bookmark panel is shown
+ * @property {PlanRating[]} planRatings A list of plan ratings
+ */

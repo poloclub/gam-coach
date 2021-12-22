@@ -41,4 +41,9 @@ export const inputFormConfigStore = writable({
   action: null
 });
 
+export const ratingFormConfigStore = writable({
+  show: false,
+  planRatings: []
+});
+
 export const ebmStore = writable();

@@ -79,11 +79,6 @@
       { class: 'icon-close', svg: closeIcon }
     ];
     bindInlineSVG(component, iconList);
-
-    d3.timeout(() => {
-      inputFormConfig.show = false;
-      inputFormConfigStore.set(inputFormConfig);
-    }, 1000);
   });
 
   $: contList && ebm && inputUpdated();

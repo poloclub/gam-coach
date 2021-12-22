@@ -93,7 +93,7 @@ const mouseDownHandler = (e, component, state) => {
     let newValue;
 
     // Handle integer value if it is required
-    if (state.feature.requiresInt) {
+    if (state.feature.requiresInt && state.feature.transform === null) {
       newValue =
         state.feature.valueMin +
         round(
@@ -221,30 +221,30 @@ export const moveThumb = (component, state, thumbID, value) => {
 
   // Special rules based on the thumb type
   switch (thumbID) {
-  case 'slider-left-thumb':
-    if (value > state.feature.curMax) {
-      value = state.feature.curMax;
-    }
-    break;
+    case 'slider-left-thumb':
+      if (value > state.feature.curMax) {
+        value = state.feature.curMax;
+      }
+      break;
 
-  case 'slider-right-thumb':
-    if (value < state.feature.curMin) {
-      value = state.feature.curMin;
-    }
-    break;
+    case 'slider-right-thumb':
+      if (value < state.feature.curMin) {
+        value = state.feature.curMin;
+      }
+      break;
 
-  case 'slider-middle-thumb':
-    // if (value > state.feature.curMax) {
-    //   value = state.feature.curMax;
-    // }
-    // if (value < state.feature.curMin) {
-    //   value = state.feature.curMin;
-    // }
-    break;
+    case 'slider-middle-thumb':
+      // if (value > state.feature.curMax) {
+      //   value = state.feature.curMax;
+      // }
+      // if (value < state.feature.curMin) {
+      //   value = state.feature.curMin;
+      // }
+      break;
 
-  default:
-    console.warn('Unknown thumb type in moveThumb()');
-    break;
+    default:
+      console.warn('Unknown thumb type in moveThumb()');
+      break;
   }
 
   // Save the current value to the HTML element
@@ -264,72 +264,73 @@ export const moveThumb = (component, state, thumbID, value) => {
   // Need to offset the xPos based on the thumb type
   // Also register different values based on the thumb type
   switch (thumbID) {
-  case 'slider-left-thumb':
-    xPos -= thumbBBox.width;
-    state.feature.curMin = value;
-    syncTicks(state);
-    syncRangeTrack(component, state);
-    updateRangeAnnotation(component, state);
-    syncFeature(state);
-    break;
+    case 'slider-left-thumb':
+      xPos -= thumbBBox.width;
+      state.feature.curMin = value;
+      syncTicks(state);
+      syncRangeTrack(component, state);
+      updateRangeAnnotation(component, state);
+      syncFeature(state);
+      break;
 
-  case 'slider-right-thumb':
-    state.feature.curMax = value;
-    syncTicks(state);
-    syncRangeTrack(component, state);
-    updateRangeAnnotation(component, state);
-    syncFeature(state);
-    break;
+    case 'slider-right-thumb':
+      state.feature.curMax = value;
+      syncTicks(state);
+      syncRangeTrack(component, state);
+      updateRangeAnnotation(component, state);
+      syncFeature(state);
+      break;
 
-  case 'slider-middle-thumb':
-    xPos -= thumbBBox.width / 2;
-    state.feature.curValue = value;
-    stateChangeKey = 'value';
+    case 'slider-middle-thumb':
+      xPos -= thumbBBox.width / 2;
+      state.feature.curValue = value;
+      stateChangeKey = 'value';
 
-    // Update the color for middle thumb
-    if (state.feature.curValue === state.feature.originalValue) {
-      thumb.classed('user', false);
-      thumb.classed('coach', false);
-    } else if (state.feature.curValue === state.feature.coachValue) {
-      thumb.classed('user', false);
-      thumb.classed('coach', true);
-    } else {
-      thumb.classed('user', true);
-      thumb.classed('coach', false);
-    }
-
-    // Move the user tick mark on the density plot
-    if (state.histSVG !== null) {
-      state.densityUserMark.attr(
-        'transform', `translate(${state.tickXScale(value)}, 0)`
-      );
-
-      // Update annotation position
-      let labelLeft = state.densityUserMark.select('line').node()
-        .getBoundingClientRect().x - state.annotationUserXOffset;
-
-      // Handle out of bounds
-      if (labelLeft < 0) {
-        state.annotationUser.classed('no-triangle', true);
-        labelLeft = 0;
+      // Update the color for middle thumb
+      if (state.feature.curValue === state.feature.originalValue) {
+        thumb.classed('user', false);
+        thumb.classed('coach', false);
+      } else if (state.feature.curValue === state.feature.coachValue) {
+        thumb.classed('user', false);
+        thumb.classed('coach', true);
       } else {
-
-        if (labelLeft > state.annotationUserXBound) {
-          state.annotationUser.classed('no-triangle', true);
-          labelLeft = state.annotationUserXBound;
-        } else {
-          state.annotationUser.classed('no-triangle', false);
-        }
+        thumb.classed('user', true);
+        thumb.classed('coach', false);
       }
 
-      state.annotationUser.style('left', `${labelLeft}px`);
-    }
+      // Move the user tick mark on the density plot
+      if (state.histSVG !== null) {
+        state.densityUserMark.attr(
+          'transform',
+          `translate(${state.tickXScale(value)}, 0)`
+        );
 
-    break;
+        // Update annotation position
+        let labelLeft =
+          state.densityUserMark.select('line').node().getBoundingClientRect()
+            .x - state.annotationUserXOffset;
 
-  default:
-    console.warn('Unknown thumb type in moveThumb()');
-    break;
+        // Handle out of bounds
+        if (labelLeft < 0) {
+          state.annotationUser.classed('no-triangle', true);
+          labelLeft = 0;
+        } else {
+          if (labelLeft > state.annotationUserXBound) {
+            state.annotationUser.classed('no-triangle', true);
+            labelLeft = state.annotationUserXBound;
+          } else {
+            state.annotationUser.classed('no-triangle', false);
+          }
+        }
+
+        state.annotationUser.style('left', `${labelLeft}px`);
+      }
+
+      break;
+
+    default:
+      console.warn('Unknown thumb type in moveThumb()');
+      break;
   }
 
   syncTooltips(component, state);
@@ -675,7 +676,7 @@ export const initHist = (component, state) => {
     .style('dominant-baseline', 'hanging')
     .style('font-size', '0.9em')
     .style('fill', colors['gray-500'])
-    .text(d3.format('.2~f')(state.feature.valueMin));
+    .text(formatter(state.feature.transformFunc(state.feature.valueMin)));
 
   tickBackGroup.append('text')
     .attr('class', 'label-max-value')
@@ -685,7 +686,7 @@ export const initHist = (component, state) => {
     .style('dominant-baseline', 'hanging')
     .style('font-size', '0.9em')
     .style('fill', colors['gray-500'])
-    .text(d3.format('.2~f')(state.feature.valueMax));
+    .text(formatter(state.feature.transformFunc(state.feature.valueMax)));
 
   // Initialize the positions for the annotation labels
   const xOffset = d3.select(component)

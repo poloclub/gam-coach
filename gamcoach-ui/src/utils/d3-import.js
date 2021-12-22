@@ -10,7 +10,8 @@ import {
 import {
   scaleLinear,
   scalePoint,
-  scaleBand
+  scaleBand,
+  scalePow
 } from 'd3-scale';
 
 import {
@@ -83,6 +84,7 @@ export default {
   scaleLinear,
   scalePoint,
   scaleBand,
+  scalePow,
   schemeTableau10,
   max,
   maxIndex,

@@ -2,7 +2,7 @@
   // @ts-check
   import d3 from '../../utils/d3-import';
   import { Logger } from '../../utils/logger';
-  import { bindInlineSVG } from '../../utils/utils';
+  import { bindInlineSVG, round } from '../../utils/utils';
   import '../../typedef';
   import { onMount, tick, createEventDispatcher } from 'svelte';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
@@ -66,6 +66,8 @@
     valueMin: 0,
     valueMax: 0,
     requiresInt: false,
+    transformFunc: null,
+    transform: null,
     /** @type {string | number}*/
     originalValue: 0,
     /** @type {string | number}*/
@@ -209,6 +211,9 @@
       name: featureInfo.description.displayName,
       featureName: featureInfo.name,
       requiresInt: feature.requiresInt,
+      transformFunc: feature.transform === 'log10' ?
+        d => Math.pow(10, d) : d => d,
+      transform: feature.transform,
       originalValue: feature.originalValue,
       curValue: feature.coachValue,
       coachValue: feature.coachValue,
@@ -247,7 +252,6 @@
 
   /**
    * Handler for clicking the difficulty picker
-   * @param e Event
    */
   const diffClickedHandler = () => {
 
@@ -465,7 +469,14 @@
     <div class='values'>
 
         <span class='value-old'>
-          {formatter(state.feature.originalValue)}
+          {
+            state.feature.transform === null ? formatter(state.feature.originalValue) :
+            formatter(
+              state.feature.requiresInt ?
+              round(state.feature.transformFunc(state.feature.originalValue), 0)
+              : state.feature.transformFunc(state.feature.originalValue)
+            )
+          }
         </span>
 
         <div class='feature-arrow'
@@ -479,10 +490,29 @@
               state.feature.curValue !== state.feature.coachValue
             }
           >
-            {`${(state.feature.curValue - state.feature.originalValue) < 0 ? '' :
-              '+'}${formatter(
-                state.feature.curValue - state.feature.originalValue
-                )}`}
+            {(() => {
+              // Figure out the sign
+              const sign = state.feature.curValue -
+                state.feature.originalValue < 0 ? '' : '+';
+
+              if (state.feature.transform === null) {
+                const diff = state.feature.curValue -
+                  state.feature.originalValue;
+                return `${sign}${formatter(diff)}`;
+              } else {
+                let curDiff = state.feature.transformFunc(
+                  state.feature.curValue) - state.feature.transformFunc(
+                  state.feature.originalValue);
+                if (state.feature.requiresInt) {
+                  curDiff = round(state.feature.transformFunc(
+                    state.feature.curValue), 0) - round(
+                      state.feature.transformFunc(
+                        state.feature.originalValue), 0);
+                }
+                return `${sign}${formatter(curDiff)}`;
+              }
+            })()
+            }
           </span>
 
           <div class='arrow-right'></div>
@@ -491,7 +521,14 @@
         <span class='value-new'
           class:hidden={state.feature.originalValue === state.feature.curValue}
         >
-          {formatter(state.feature.curValue)}
+          {
+            state.feature.transform === null ? formatter(state.feature.curValue) :
+            formatter(
+              state.feature.requiresInt ?
+              round(state.feature.transformFunc(state.feature.curValue), 0)
+              : state.feature.transformFunc(state.feature.curValue)
+            )
+          }
         </span>
 
     </div>
@@ -547,7 +584,7 @@
       <div class='annotation annotation-name show'>
         <div class='svg-icon icon-info'></div>
         <span>Value Distribution of All Users</span>
-        <div class='feature-difficulty' on:click={e => diffClickedHandler(e)}>
+        <div class='feature-difficulty' on:click={() => diffClickedHandler()}>
           <div class={`icon icon-${feature.difficulty}`}
             title='Specify how easy for you to change this feature'
           >

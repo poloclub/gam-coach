@@ -6,6 +6,7 @@ import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import preprocess from 'svelte-preprocess';
 import inlineSvg from 'rollup-plugin-inline-svg';
+import json from '@rollup/plugin-json';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -43,6 +44,7 @@ export default {
       removeTags: false,
       removeSVGTagAttrs: false,
     }),
+    json(),
     svelte({
       compilerOptions: {
         // enable run-time checks when not in production

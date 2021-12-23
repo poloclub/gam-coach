@@ -1,6 +1,6 @@
 import d3 from '../../utils/d3-import';
 import { Logger } from '../../utils/logger';
-import { config } from '../../config';
+import { config } from '../../config/config';
 import { Writable } from 'svelte/store';
 import '../../typedef';
 import { Plan } from '../coach/Coach';

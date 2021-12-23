@@ -1,7 +1,7 @@
 import d3 from '../../utils/d3-import';
 import { Logger } from '../../utils/logger';
 import { round } from '../../utils/utils';
-import { config } from '../../config';
+import { config } from '../../config/config';
 
 const colors = config.colors;
 const formatter = d3.format(',.2~f');

@@ -101,6 +101,7 @@
 
   const refreshClicked = () => {
     console.log(logger?.toJSON());
+    logger?.uploadToDropbox();
   };
 
   const editClicked = () => {

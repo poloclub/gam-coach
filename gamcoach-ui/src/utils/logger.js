@@ -1,3 +1,5 @@
+import d3 from '../utils/d3-import';
+import { round } from '../utils/utils';
 
 /**
  * @typedef {Object} LogValue A value that an interaction event changes
@@ -102,22 +104,6 @@ export class Logger {
   }
 
   /**
-   * Export the logs as a JSON string.
-   * @param {any} [endValues] Any values to exported with the log
-   */
-  toJSON(endValues = null) {
-    const exportLog = {
-      log: this.log,
-      startTime: this.startTime,
-      endTime: new Date(),
-      initialValues: this.initialValues,
-      endValues: endValues,
-      records: this.records
-    };
-    return JSON.stringify(exportLog);
-  }
-
-  /**
    * Overwrite the initial values
    * @param {any} initialValues
    */
@@ -185,5 +171,80 @@ export class Logger {
     if (navigator.userAgent.indexOf('like Mac') != -1) osName = 'ios';
 
     this.addRecord('os', osName);
+  }
+
+  /**
+   * Export the logs as a JSON string.
+   * @param {any} [endValues] Any values to exported with the log
+   */
+  toJSON(endValues = null) {
+    const exportLog = {
+      log: this.log,
+      startTime: this.startTime,
+      endTime: new Date(),
+      initialValues: this.initialValues,
+      endValues: endValues,
+      records: this.records
+    };
+    return JSON.stringify(exportLog);
+  }
+
+  /**
+   * Upload the
+   */
+  async uploadToDropbox() {
+    try {
+      // Try to fetch the token information
+      /** @type {object} */
+      const token = await d3.json('/data/token.json');
+
+      // Generate a random file name
+      const randomNum = round(Math.random() * 100000, 0);
+      const fileName = `f${randomNum}.json`;
+
+      const url = 'https://content.dropboxapi.com/2/files/upload';
+
+      const param = {
+        path: `/${fileName}`,
+        mode: 'add',
+        autorename: true,
+        mute: false,
+        'strict_conflict': false
+      };
+
+      const blob = new Blob([this.toJSON()], {type: 'application/json'});
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.dropbox}`,
+          'Dropbox-API-Arg': JSON.stringify(param),
+          'Content-type': 'application/octet-stream'
+        },
+        body: blob
+      });
+
+      // Handle failure
+      if (response.status !== 200) {
+        alert(''.concat('Failed to directly upload plan data directly. ',
+          'Please download the plan data (.JSON file) and upload it to your ',
+          'Google Survey form. We are sorry for the inconvenience.'));
+        return -1;
+      } else {
+        return randomNum;
+      }
+
+    } catch (e) {
+      console.error('Failed to upload to dropbox with', e);
+      alert(
+        ''.concat(
+          'Failed to directly upload plan data directly. ',
+          'Please download the plan data (.JSON file) and upload it to your ',
+          'Google Survey form. We are sorry for the inconvenience.'
+        )
+      );
+      return -1;
+    }
+
   }
 }

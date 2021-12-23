@@ -6,7 +6,7 @@
   import { onMount } from 'svelte';
   import { bookmarkConfigStore } from '../../store';
   import { downloadReceipt } from './BookmarkPanel';
-  import { privateKey, publicKey } from '../../key';
+  import { privateKey, publicKey } from '../../config/key';
   import { readKey, createCleartextMessage, decryptKey, sign,
     readPrivateKey } from 'openpgp';
 

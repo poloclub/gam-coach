@@ -63,6 +63,7 @@
   state.feature = {
     name: '',
     featureName: '',
+    description: '',
     valueMin: 0,
     valueMax: 0,
     requiresInt: false,
@@ -210,6 +211,7 @@
     state.feature = {
       name: featureInfo.description.displayName,
       featureName: featureInfo.name,
+      description: featureInfo.description.description,
       requiresInt: feature.requiresInt,
       transformFunc: feature.transform === 'log10' ?
         d => Math.pow(10, d) : d => d,
@@ -459,7 +461,7 @@
   >
 
     <div class='top-row'>
-      <div class='feature-info'>
+      <div class='feature-info' title={state.feature.description}>
         <span class='feature-name'>
           {state.feature.name}
         </span>

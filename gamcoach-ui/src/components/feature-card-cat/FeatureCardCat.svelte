@@ -67,6 +67,7 @@
   state.feature = {
     name: '',
     featureName: '',
+    descriptionString: '',
     /** @type {string | number}*/
     originalValue: 0,
     /** @type {string | number}*/
@@ -193,6 +194,7 @@
     state.feature = {
       name: featureInfo.description.displayName,
       featureName: featureInfo.name,
+      descriptionString: featureInfo.description.description,
       originalValue: feature.originalValue,
       curValue: feature.coachValue,
       coachValue: feature.coachValue,
@@ -474,7 +476,7 @@
 
     <div class='top-row'>
 
-      <div class='feature-info'>
+      <div class='feature-info' title={state.feature.descriptionString}>
         <span class='feature-name'>
           {state.feature.name}
         </span>

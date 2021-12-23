@@ -67,4 +67,5 @@
  * @typedef {Object} RatingFormConfig
  * @property {boolean} show True if the bookmark panel is shown
  * @property {PlanRating[]} planRatings A list of plan ratings
+ * @property {string} action Value from ['submit']
  */

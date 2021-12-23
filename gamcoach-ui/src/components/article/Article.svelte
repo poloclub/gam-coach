@@ -82,7 +82,19 @@
   /** @type {RatingFormConfig} */
   let ratingFormConfig = null;
   unsubscribes.push(
-    ratingFormConfigStore.subscribe(value => {ratingFormConfig = value;})
+    ratingFormConfigStore.subscribe(value => {
+      ratingFormConfig = value;
+
+      // If the users have reviewed all saved plans, we put it into the log and
+      // submit the log
+      if (ratingFormConfig.action === 'submit') {
+
+        logger?.addRecord('ratings', ratingFormConfig.planRatings);
+
+        ratingFormConfig.action = '';
+        ratingFormConfigStore.set(ratingFormConfig);
+      }
+    })
   );
 
   const refreshClicked = () => {

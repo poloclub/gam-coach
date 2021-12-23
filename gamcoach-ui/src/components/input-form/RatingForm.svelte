@@ -2,12 +2,9 @@
   // @ts-check
   import '../../typedef';
   import d3 from '../../utils/d3-import';
-  import { EBM } from '../../ebm/ebm';
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount } from 'svelte';
   import { bookmarkConfigStore, ratingFormConfigStore } from '../../store';
-  import { getInputLists, getNewCurExample,
-    isCurExampleChanged } from './InputForm';
 
   import closeIcon from '../../img/icon-close.svg';
 
@@ -23,25 +20,33 @@
   const planRatingsMap = {};
 
   ratingFormConfigStore.subscribe(value => {
-    // Create a saved plan index
-    if (value.show) {
-    }
     ratingFormConfig = value;
   });
 
   /** @type {BookmarkConfig} */
   let bookmarkConfig = null;
   bookmarkConfigStore.subscribe(value => {
+    // Create a saved plan index
     [...value.plans.keys()].forEach((planIndex) => {
+      const existingRating = ratingFormConfig.planRatings.filter(
+        d => d.planIndex === +planIndex
+      );
+      let explanation = '';
+      let rating = '0';
+
+      if (existingRating.length === 1) {
+        explanation = existingRating[0].explanation;
+        rating = existingRating[0].rating;
+      }
+
       planRatingsMap[planIndex] = {
         planIndex,
-        rating: '0',
-        explanation: ''
+        rating,
+        explanation
       };
     });
 
     bookmarkConfig = value;
-    console.log(planRatingsMap);
   });
 
   const cancelClicked = () => {
@@ -50,7 +55,27 @@
   };
 
   const confirmClicked = () => {
-    if (bookmarkConfig.plans.size === 0) return;
+    if (!canSubmit(bookmarkConfig, planRatingsMap)) {
+      return;
+    }
+
+    // Convert local ratings to store
+    ratingFormConfig.planRatings = [];
+
+    Object.keys(planRatingsMap).forEach(planIndex => {
+      /** @type {PlanRating} */
+      const planRating = {
+        planIndex: parseInt(planIndex),
+        rating: planRatingsMap[planIndex].rating,
+        explanation: planRatingsMap[planIndex].explanation
+      };
+      ratingFormConfig.planRatings.push(planRating);
+    });
+
+    // Tell the parent that all plans are rated
+    ratingFormConfig.action = 'submit';
+    ratingFormConfig.show = false;
+    ratingFormConfigStore.set(ratingFormConfig);
   };
 
   /**
@@ -65,10 +90,7 @@
       canSubmit = false;
     }
 
-    console.log(planRatingsMap);
-
     Object.keys(planRatingsMap).forEach((planIndex) => {
-      console.log(planRatingsMap[planIndex], planRatingsMap[planIndex].rating === '0', planRatingsMap[planIndex].explanation === '');
       if (planRatingsMap[planIndex].rating === '0') {
         canSubmit = false;
       }
@@ -76,8 +98,6 @@
         canSubmit = false;
       }
     });
-
-    console.log('to true');
 
     return canSubmit;
   };
@@ -87,10 +107,6 @@
       { class: 'icon-close', svg: closeIcon }
     ];
     bindInlineSVG(component, iconList);
-
-    // d3.timeout(() => {
-    //   ratingForm.show = true;
-    // }, 1000);
   });
 
 </script>

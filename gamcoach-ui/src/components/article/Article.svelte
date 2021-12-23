@@ -43,6 +43,8 @@
   logger?.setInitialValues({
     curExample
   });
+  logger?.addBrowserRecord();
+  logger?.addOSRecord();
 
   const pointArrowSVGProcessed = pointArrowSVG
     .replaceAll('white', 'currentcolor');

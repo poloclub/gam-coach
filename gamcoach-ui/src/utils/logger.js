@@ -133,4 +133,57 @@ export class Logger {
   addRecord(key, value) {
     this.records.push([key, value, new Date()]);
   }
+
+  /**
+   * Detect what is the current browser and add the info to the record.
+   */
+  addBrowserRecord() {
+    let browser = 'unknown';
+
+    if (
+      (!!window.opr && !!opr.addons) ||
+      !!window.opera ||
+      navigator.userAgent.indexOf(' OPR/') >= 0
+    ) {
+      browser = 'opera';
+    } else if (typeof InstallTrigger !== 'undefined') {
+      browser = 'firefox';
+    } else if (
+      /constructor/i.test(window.HTMLElement) ||
+      (function (p) {
+        return p.toString() === '[object SafariRemoteNotification]';
+      })(
+        !window['safari'] ||
+          (typeof safari !== 'undefined' && window['safari'].pushNotification)
+      )
+    ) {
+      browser = 'safari';
+    } else if (/*@cc_on!@*/ false || !!document.documentMode) {
+      browser = 'ie';
+    } else if (!!window.StyleMedia) {
+      browser = 'edge';
+    } else if (
+      !!window.chrome &&
+      (!!window.chrome.webstore || !!window.chrome.runtime)
+    ) {
+      browser = 'chrome';
+    }
+
+    this.addRecord('browser', browser);
+  }
+
+  /**
+   * Detect the current OS and add the info to the record.
+   */
+  addOSRecord() {
+    let osName = 'Unknown OS';
+
+    if (navigator.userAgent.indexOf('Win') != -1) osName = 'windows';
+    if (navigator.userAgent.indexOf('Mac') != -1) osName = 'mac';
+    if (navigator.userAgent.indexOf('Linux') != -1) osName = 'linux';
+    if (navigator.userAgent.indexOf('Android') != -1) osName = 'android';
+    if (navigator.userAgent.indexOf('like Mac') != -1) osName = 'ios';
+
+    this.addRecord('os', osName);
+  }
 }

@@ -51,8 +51,35 @@
 
   const confirmClicked = () => {
     if (bookmarkConfig.plans.size === 0) return;
+  };
 
-    console.log('confirm clciked');
+  /**
+   * Return true if users can submit the rating form
+   * @param {BookmarkConfig} bookmarkConfig
+   * @param {Object.<number, PlanRating>} planRatingsMap
+   */
+  const canSubmit = (bookmarkConfig, planRatingsMap) => {
+    let canSubmit = true;
+
+    if (bookmarkConfig.plans.size === 0) {
+      canSubmit = false;
+    }
+
+    console.log(planRatingsMap);
+
+    Object.keys(planRatingsMap).forEach((planIndex) => {
+      console.log(planRatingsMap[planIndex], planRatingsMap[planIndex].rating === '0', planRatingsMap[planIndex].explanation === '');
+      if (planRatingsMap[planIndex].rating === '0') {
+        canSubmit = false;
+      }
+      if (planRatingsMap[planIndex].explanation === '') {
+        canSubmit = false;
+      }
+    });
+
+    console.log('to true');
+
+    return canSubmit;
   };
 
   onMount(() => {
@@ -95,7 +122,7 @@
     {#if bookmarkConfig.plans.size === 0}
       <div class='description'>You need to bookmark at least one plan.</div>
     {:else}
-      <div class='description'>Almost there! Please rate the plans you have bookmarked.</div>
+      <div class='description'>Almost there! Please review and rate the plans you have bookmarked. Thank you!</div>
       {#each [...bookmarkConfig.plans] as [planIndex, savedPlan]}
         <div class='plan-row'>
           <div class='plan-title'>
@@ -135,9 +162,8 @@
               <div class='plan-review'>
                 <label for={`review-${planIndex}`}>Why do you like this plan?</label>
                 <textarea id={`review-${planIndex}`}
-                  contenteditable="true"
-                  bind:innerHTML={planRatingsMap[planIndex].explanation}
-                >{planRatingsMap[planIndex].explanation}</textarea>
+                  bind:value={planRatingsMap[planIndex].explanation}
+                ></textarea>
               </div>
 
               <div class='plan-rating'>
@@ -158,6 +184,11 @@
   </div>
 
   <div class='control'>
+
+    <div class='error-message' class:out-range={!canSubmit(bookmarkConfig, planRatingsMap)}>
+      Review and rate all plans to submit
+    </div>
+
     <div class='button button-cancel'
       on:click={() => cancelClicked()}
     >
@@ -165,7 +196,7 @@
     </div>
 
     <div class='button button-confirm'
-      class:out-range={bookmarkConfig.plans.size === 0}
+      class:out-range={!canSubmit(bookmarkConfig, planRatingsMap)}
       on:click={() => confirmClicked()}
     >
       Submit

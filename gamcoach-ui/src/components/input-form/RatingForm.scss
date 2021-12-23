@@ -2,7 +2,14 @@
 
 .content {
   max-height: 600px;
+  max-width: 470px;
   overflow: auto;
+}
+
+.control {
+  .error-message {
+    color: $gray-800;
+  }
 }
 
 .plan-row {
@@ -20,6 +27,7 @@
 .plan-change {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .plan-block {

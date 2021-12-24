@@ -426,6 +426,7 @@ export const initPlans = async (
    */
   const coach = new GAMCoach(modelData);
   const exampleBatch = [curExample];
+  const singleFeatures = new Set();
 
   // Log the constraints before generating the first plan
   logger?.addRecord(
@@ -444,6 +445,13 @@ export const initPlans = async (
     verbose: 0
   });
   console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
+
+  // If the plan only uses one feature, we store it to a set and avoid future
+  // plans that only uses that feature
+  if (cfs.activeVariables[0].length === 1) {
+    const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
+    singleFeatures.add(curFeature);
+  }
 
   // Convert the plan into a plan object
   let curPlan = new Plan(
@@ -492,6 +500,18 @@ export const initPlans = async (
     // Run gam coach
     console.time(`Plan ${tempPlans.nextPlanIndex + i} generated`);
     cfs = await coach.generateSubCfs(cfs.nextCfConfig);
+    console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
+
+    // If the new plan uses only one feature, we mute it and repeat again
+    if (cfs.activeVariables[0].length === 1) {
+      const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
+      if (singleFeatures.has(curFeature)) {
+        i--;
+        continue;
+      } else {
+        singleFeatures.add(curFeature);
+      }
+    }
 
     // Get the plan object
     curPlan = new Plan(
@@ -510,8 +530,6 @@ export const initPlans = async (
       `plan${tempPlans.nextPlanIndex + i}`,
       curPlan.getCleanPlanCopy()
     );
-
-    console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
 
     // Handle failure case
     if (!cfs.isSuccessful) {
@@ -569,6 +587,7 @@ export const regeneratePlans = async (
   // Step 2: Iteratively generate new plans with the new constraints
   const coach = new GAMCoach(modelData);
   const exampleBatch = [curExample];
+  const singleFeatures = new Set();
 
   // Log the constraints before generating the first plan
   logger?.addRecord(
@@ -587,6 +606,13 @@ export const regeneratePlans = async (
     verbose: 0
   });
   console.timeEnd(`Plan ${plans.nextPlanIndex} generated`);
+
+  // If the plan only uses one feature, we store it to a set and avoid future
+  // plans that only uses that feature
+  if (cfs.activeVariables[0].length === 1) {
+    const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
+    singleFeatures.add(curFeature);
+  }
 
   // Step 3: Update the active plan index
   plans.activePlanIndex = plans.nextPlanIndex;
@@ -631,6 +657,18 @@ export const regeneratePlans = async (
     // Run gam coach
     console.time(`Plan ${plans.nextPlanIndex + i} generated`);
     cfs = await coach.generateSubCfs(cfs.nextCfConfig);
+    console.timeEnd(`Plan ${plans.nextPlanIndex + i} generated`);
+
+    // If the new plan uses only one feature, we mute it and repeat again
+    if (cfs.activeVariables[0].length === 1) {
+      const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
+      if (singleFeatures.has(curFeature)) {
+        i--;
+        continue;
+      } else {
+        singleFeatures.add(curFeature);
+      }
+    }
 
     // Get the plan object
     curPlan = new Plan(
@@ -644,8 +682,6 @@ export const regeneratePlans = async (
     curPlanStore = writable(curPlan);
     plans.planStores.set(plans.nextPlanIndex + i, curPlanStore);
     plansUpdated(plans);
-
-    console.timeEnd(`Plan ${plans.nextPlanIndex + i} generated`);
 
     // Log the current plan
     logger?.addRecord(

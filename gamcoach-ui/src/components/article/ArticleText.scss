@@ -167,14 +167,14 @@ $header-color: $teal-900;
 }
 
 .important-note {
-  border-left: 0.2rem solid $orange-500;
+  border-left: 0.2rem solid $teal-600;
   border-radius: 0.2rem;
   box-shadow: 0 .2rem .5rem hsla(0, 0%, 0%, 0.05),0 0 .0625rem hsla(0, 0%, 0%, 0.1);
   padding: 0 0.5rem 0.5rem;
 
   .title {
-    background-color: $orange-50;
-    font-weight: 500;
+    background-color: $teal-50;
+    font-weight: 600;
     margin: 0 -0.5rem 0.5rem;
     padding: .5rem .5rem .5rem 1rem;
     border-top-right-radius: 0.2rem;

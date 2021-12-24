@@ -92,7 +92,7 @@
     // Update the local EBM
     plan.ebmLocal.updateFeature(feature.data.name, newValue);
 
-    // Update teh store
+    // Update the store
     planStore.set(plan);
   };
 

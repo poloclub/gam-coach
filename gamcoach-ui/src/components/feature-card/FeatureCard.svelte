@@ -214,7 +214,9 @@
       description: featureInfo.description.description,
       requiresInt: feature.requiresInt,
       transformFunc: feature.transform === 'log10' ?
-        d => Math.pow(10, d) : d => d,
+        (feature.requiresInt ?
+          d => round(Math.pow(10, d), 0) : d => Math.pow(10, d)
+        ) : d => d,
       transform: feature.transform,
       originalValue: feature.originalValue,
       curValue: feature.coachValue,

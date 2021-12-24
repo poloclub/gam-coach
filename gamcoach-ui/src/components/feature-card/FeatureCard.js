@@ -367,17 +367,17 @@ const syncTooltips = (component, state) => {
   d3.select(component)
     .select('#slider-left-thumb')
     .select('.thumb-label span')
-    .text(formatter(state.feature.curMin));
+    .text(formatter(state.feature.transformFunc(state.feature.curMin)));
 
   d3.select(component)
     .select('#slider-right-thumb')
     .select('.thumb-label span')
-    .text(formatter(state.feature.curMax));
+    .text(formatter(state.feature.transformFunc(state.feature.curMax)));
 
   d3.select(component)
     .select('#slider-middle-thumb')
     .select('.thumb-label span')
-    .text(formatter(state.feature.curValue));
+    .text(formatter(state.feature.transformFunc(state.feature.curValue)));
 };
 
 /**

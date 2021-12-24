@@ -1,5 +1,5 @@
 import d3 from '../utils/d3-import';
-import { round } from '../utils/utils';
+import { round, downloadJSON } from '../utils/utils';
 
 /**
  * @typedef {Object} LogValue A value that an interaction event changes
@@ -199,7 +199,7 @@ export class Logger {
       const token = await d3.json('/data/token.json');
 
       // Generate a random file name
-      const randomNum = round(Math.random() * 100000, 0);
+      const randomNum = round(Math.random() * 1000000, 0);
       const fileName = `f${randomNum}.json`;
 
       const url = 'https://content.dropboxapi.com/2/files/upload';
@@ -226,9 +226,11 @@ export class Logger {
 
       // Handle failure
       if (response.status !== 200) {
-        alert(''.concat('Failed to directly upload plan data directly. ',
-          'Please download the plan data (.JSON file) and upload it to your ',
+        alert(''.concat('Failed to directly upload plan data. ',
+          'Please download the strategy data file (\'strategy-data.json\') ',
+          'and upload it to your ',
           'Google Survey form. We are sorry for the inconvenience.'));
+        this.download();
         return -1;
       } else {
         return randomNum;
@@ -238,13 +240,21 @@ export class Logger {
       console.error('Failed to upload to dropbox with', e);
       alert(
         ''.concat(
-          'Failed to directly upload plan data directly. ',
+          'Failed to directly upload plan data. ',
           'Please download the plan data (.JSON file) and upload it to your ',
           'Google Survey form. We are sorry for the inconvenience.'
         )
       );
+      this.download();
       return -1;
     }
 
+  }
+
+  /**
+   * Download the log file as a JSON file.
+   */
+  download() {
+    downloadJSON(JSON.parse(this.toJSON()), null, 'strategy-data.json');
   }
 }

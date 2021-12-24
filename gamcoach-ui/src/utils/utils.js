@@ -50,27 +50,42 @@ export const bindInlineSVG = (component, iconList) => {
 /**
  * Download a JSON file
  * @param {any} object
- * @param {HTMLElement} dlAnchorElem
- * @param {string} fileName
+ * @param {HTMLElement | null} [dlAnchorElem]
+ * @param {string} [fileName]
  */
 export const downloadJSON = (
   object,
-  dlAnchorElem,
+  dlAnchorElem = null,
   fileName = 'download.json'
 ) => {
   const dataStr =
     'data:text/json;charset=utf-8,' +
     encodeURIComponent(JSON.stringify(object));
-  dlAnchorElem.setAttribute('href', dataStr);
-  dlAnchorElem.setAttribute('download', `${fileName}`);
-  dlAnchorElem.click();
+
+  // Create dlAnchor if it is not given
+  let myDlAnchorElem = dlAnchorElem;
+  let needToRemoveAnchor = false;
+
+  if (dlAnchorElem === null) {
+    myDlAnchorElem = document.createElement('a');
+    myDlAnchorElem.style.display = 'none';
+    needToRemoveAnchor = true;
+  }
+
+  myDlAnchorElem.setAttribute('href', dataStr);
+  myDlAnchorElem.setAttribute('download', `${fileName}`);
+  myDlAnchorElem.click();
+
+  if (needToRemoveAnchor) {
+    myDlAnchorElem.remove();
+  }
 };
 
 /**
  * Download a text file
  * @param {string} textString
- * @param {HTMLElement} dlAnchorElem
- * @param {string} fileName
+ * @param {HTMLElement | null} [dlAnchorElem]
+ * @param {string} [fileName]
  */
 export const downloadText = (
   textString,
@@ -79,7 +94,22 @@ export const downloadText = (
 ) => {
   const dataStr =
     'data:text/plain;charset=utf-8,' + encodeURIComponent(textString);
-  dlAnchorElem.setAttribute('href', dataStr);
-  dlAnchorElem.setAttribute('download', `${fileName}`);
-  dlAnchorElem.click();
+
+  // Create dlAnchor if it is not given
+  let myDlAnchorElem = dlAnchorElem;
+  let needToRemoveAnchor = false;
+
+  if (dlAnchorElem === null) {
+    myDlAnchorElem = document.createElement('a');
+    myDlAnchorElem.style.display = 'none';
+    needToRemoveAnchor = true;
+  }
+
+  myDlAnchorElem.setAttribute('href', dataStr);
+  myDlAnchorElem.setAttribute('download', `${fileName}`);
+  myDlAnchorElem.click();
+
+  if (needToRemoveAnchor) {
+    myDlAnchorElem.remove();
+  }
 };

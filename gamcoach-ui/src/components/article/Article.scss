@@ -85,8 +85,35 @@
     &:active {
       background-color: $teal-600;
     }
-
   }
+
+  .code {
+    margin-top: 5px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &.no-display {
+      display: none;
+    }
+
+    .code-number {
+      background-color: $orange-800;
+      padding: 2px 5px;
+      border-radius: 5px;
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  .download-message {
+    margin-top: 3px;
+    font-size: 0.89rem;
+    text-align: center;
+  }
+
+
 }
 
 .coach-wrapper {
@@ -169,4 +196,8 @@
   margin-top: 20px;
   width: 48px;
   color: $teal-700;
+}
+
+.no-display {
+  display: none;
 }

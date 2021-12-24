@@ -27,6 +27,8 @@
   const indexFormatter = d3.format('03d');
 
   let curIndex = 6;
+  let verificationCode = null;
+  let buttonText = 'I\'m Done!';
   let updated = false;
 
   // Initialize the logger
@@ -95,13 +97,28 @@
 
         ratingFormConfig.action = '';
         ratingFormConfigStore.set(ratingFormConfig);
+
+        // Upload the log to dropbox
+        buttonText = 'Uploading...';
+        logger?.uploadToDropbox()
+          .then(value => {
+            console.log(value);
+            if (value > 0) {
+              // Success show the number
+              buttonText = 'Finished, thank you!';
+              verificationCode = value;
+            } else {
+              // Failed, but the download should start
+              buttonText = 'Failed to upload';
+              verificationCode = 999999;
+            }
+          });
       }
     })
   );
 
   const refreshClicked = () => {
     console.log(logger?.toJSON());
-    logger?.uploadToDropbox();
   };
 
   const editClicked = () => {
@@ -112,6 +129,8 @@
   };
 
   const submitClicked = () => {
+    if (verificationCode !== null) return;
+
     ratingFormConfig.show = true;
     ratingFormConfigStore.set(ratingFormConfig);
   };
@@ -191,7 +210,18 @@
           Once you are <strong>satisfied</strong> with any generated plan(s) and have <strong>bookmarked</strong>
           them, click the button below to finish.
         </span>
-        <div class='button' on:click={() => submitClicked()}>I'm Done!</div>
+
+        <div class='button' on:click={() => submitClicked()}>{buttonText}</div>
+
+        <div class='code' class:no-display={verificationCode === null}>
+          <span class='title'>Verification Code</span>
+          <span class='code-number'>{verificationCode}</span>
+        </div>
+
+        <div class='download-message' class:no-display={verificationCode !== 999999}>
+          Please upload "strategy-data.json" to Google Survey
+        </div>
+
       </div>
     </div>
 

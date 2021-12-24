@@ -1,0 +1,132 @@
+
+# Text for the article
+
+introduction:
+  main:
+    - >
+      👋 Hello! We are a team of computer science researchers. Thank you so much
+      for taking your time to help us improve our tool, GAM Coach.
+    - >
+      You might have heard that some banks 🏦 are using Artificial Intelligence
+      (AI) to decide whether a person can or cannot get a loan. These banks ask
+      for the loan applicant's information, such as <u>annual income</u>,
+      <u>employment length</u>, and <u>credit score</u>. Then, the banks use AI
+      programs to go through all collected information and decide on whether to
+      approve or reject this client's loan application.
+    - >
+      Unfortunately, many people's loan applications are rejected by these
+      programs. 🙁 Therefore, we are developing GAM Coach, an interactive
+      coaching tool to <strong>help these rejected loan applicants succeed in
+      their future applications!</strong> 💪 To do that, GAM Coach identifies an
+      applicant's current weakness and provides simple and customizable
+      strategies to get their next loan application approved.
+    - >
+      In this task, we want you to <strong>pretend to be a person whose loan
+      application is rejected by a bank</strong>. The bank points you to GAM
+      Coach to help you improve and succeed in future applications.
+  important:
+    - >
+      Please try your best to imagine that you are a real user—using GAM Coach
+      to find the strategies that <strong>you think are useful</strong>. Our
+      goal in this study is to learn what strategies would be helpful for real
+      users and how GAM Coach can help everyday people.
+
+tool:
+  pre:
+    - >
+      GAM Coach is a web-based interactive tool that helps users identify
+      strategies to obtain a desirable AI decision (e.g., loan application
+      approval). These strategies can be "if you increase your FICO score
+      (credit score) by 3 points, and increase your credit utilization by 2.65%,
+      you will get the loan." (figure below)
+  after:
+    - >
+      In this scenario, you are a loan applicant whose application is rejected
+      by a bank. The bank then gives you a link to GAM Coach to help you improve
+      and succeed in the next application. GAM Coach is pre-loaded with all
+      "information" you provided to the bank, e.g., <code>annual income</code>,
+      <code>employment length</code>, <code>FICO score</code> (credit score).
+      Each piece of the information is called a "feature". For example,
+      <code>FICO score</code> is one feature, and it has your value
+      <code>650</code>.
+    - >
+      GAM Coach uses all these features and values to compute best strategies
+      that you can apply to get the next loan. In addition, you can tell GAM
+      Coach what features are easier to change than others. For example, maybe
+      it's easier for you to change your <code>FICO score</code> than changing
+      <code>employment length</code>, and maybe you only want to change
+      <code>FICO Score</code> in a certain range. As you can see, these strategy
+      preferences vary from user to user, so GAM Coach allows you to specify
+      <strong>your own preference</strong> and generate personalized strategies
+      <strong>just for you.</strong>
+
+feature:
+  main: >
+    👉 Please watch the <a href='#s-complete'>Comprehensive Walk-through
+    Video</a> to learn how a loan applicant can use GAM Changer.
+  gap: >
+    You can click the link below to watch a video on how each feature works.
+  list:
+    - name: Change initial input values
+      id: s-initial-value
+    - name: Explore different strategies to get a loan approval
+      id: s-strategies
+    - name: >
+        Experiment with different feature values to see how they affect
+        the application decision
+      id: s-values
+    - name: Specify difficulty of different features
+      id: s-difficulty
+    - name: Specify the acceptable range of different features
+      id: s-range
+    - name: Generate new strategies that meet your preferences
+      id: s-generate
+    - name: Bookmark strategies you like and download a "receipt"
+      id: s-bookmark
+    - name: Submit the HIT task
+      id: s-submit
+
+task:
+  main: >
+    The main task in this HIT is to <strong>pretend to be a real user</strong>
+    and use GAM Coach until you find a strategy (or strategies) that you are
+    satisfied with. The strategy can be anything. It can be one of the first
+    five initial strategies, or a follow-up strategy that meets your specified
+    preference. <strong>There is no right answer</strong>, just use GAM Coach as
+    you are a real loan applicant who hopes to find a good strategy to improve.
+    😄
+  gap: >
+    Here are some concrete steps to help you complete the HIT:
+  list:
+    - >
+      (Optional) <strong>Click the edit icon</strong> on the left panel to
+      change the initial input values. For example, you can change the input to
+      match someone you know, so the scenario is more <strong>relatable to
+      you</strong>.
+    - >
+      <strong>Imagine to be a real user</strong> and use GAM Coach
+    - >
+      <strong>Click the the star icon</strong> on the plan tabs to bookmark
+      strategies you like
+    - >
+      Once you are satisfied with your bookmarked strategies (one or several),
+      <strong>click the "I'm done" button</strong> on the right panel
+    - >
+      <strong>Rate</strong> your bookmarked strategies and
+      <strong>explain</strong> why you like them
+    - >
+      <strong>Click the "submit" button</strong> to submit the data to us
+    - >
+      GAM Coach will generates a unique code (6-digit number) for you,
+      <strong>copy and paste</strong> it in your google survey
+    - >
+      <strong>Answer all questions</strong> in the google survey and
+      <strong>submit</strong> the survey
+    - >
+      <strong>Paste the code</strong> in MTurk page and <strong>submit</strong>
+      it
+    - >
+      Done—thank you so much! 🙏
+
+
+

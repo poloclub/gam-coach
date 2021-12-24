@@ -21,6 +21,8 @@
   import iconRefreshSVG from '../../img/icon-refresh3.svg';
   import iconEditSVG from '../../img/icon-edit.svg';
 
+  import text from '../../config/text.yaml';
+
   const unsubscribes = [];
   let windowLoaded = false;
 
@@ -239,6 +241,71 @@
     <InputForm />
     <RatingForm />
     <BookmarkPanel windowLoaded={windowLoaded} logger={logger}/>
+  </div>
+
+  <div class='article'>
+
+    <h2 id='s-introduction'>Introduction</h2>
+    {#each text.introduction.main as p}
+      <p>{@html p}</p>
+    {/each}
+
+    <div class='important-note'>
+      <p class='title'>Important Note</p>
+      <p class='content'>{@html text.introduction.important}</p>
+    </div>
+
+
+    <h2 id='s-tool'>What is GAM Coach?</h2>
+    {#each text.tool.pre as p}
+      <p>{@html p}</p>
+    {/each}
+
+    {#each text.tool.after as p}
+      <p>{@html p}</p>
+    {/each}
+
+    <h2 id='s-feature'>What Can I Do with GAM Coach?</h2>
+    <p>{@html text.feature.main}</p>
+    <p>{@html text.feature.gap}</p>
+
+    <ol>
+      {#each text.feature.list as item}
+        <li><a href={`#${item.id}`}>{item.name}</a></li>
+      {/each}
+    </ol>
+
+    <h2 id='s-task'>So, What is My Task?</h2>
+    <p>{@html text.task.main}</p>
+    <p>{@html text.task.gap}</p>
+
+    <ol>
+      {#each text.task.list as item}
+        <li>{@html item}</li>
+      {/each}
+    </ol>
+
+    <h2 id='s-tutorial'>Tutorial</h2>
+
+    <h4 id='s-complete'>Overview</h4>
+
+    <h4 id='s-initial-values'>Change initial input values</h4>
+
+    <h4 id='s-strategies'>Explore different strategies</h4>
+
+    <h4 id='s-values'>Change feature values</h4>
+
+    <h4 id='s-difficulty'>Specify difficulty</h4>
+
+    <h4 id='s-range'>Specify acceptable range</h4>
+
+    <h4 id='s-generate'>Generate new strategies</h4>
+
+    <h4 id='s-bookmark'>Bookmark strategies and download a receipt</h4>
+
+    <h4 id='s-submit'>Submit the HIT task</h4>
+
+    <!-- ![image](https://user-images.githubusercontent.com/15007159/147296366-aeaf84bb-ee06-451d-8fc2-9202f26a36fb.png) -->
   </div>
 
 

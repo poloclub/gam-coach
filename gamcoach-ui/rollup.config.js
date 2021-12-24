@@ -7,6 +7,7 @@ import css from 'rollup-plugin-css-only';
 import preprocess from 'svelte-preprocess';
 import inlineSvg from 'rollup-plugin-inline-svg';
 import json from '@rollup/plugin-json';
+import yaml from '@rollup/plugin-yaml';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -45,6 +46,7 @@ export default {
       removeSVGTagAttrs: false,
     }),
     json(),
+    yaml(),
     svelte({
       compilerOptions: {
         // enable run-time checks when not in production

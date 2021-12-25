@@ -129,7 +129,7 @@
       // Propagate the change to FeaturePanel
       dispatch('constraintUpdated', {
         difficulty: feature.difficulty,
-        acceptableRange: feature.acceptableRange
+        acceptableRange: encodeAcceptableRange(feature.acceptableRange)
       });
     }
 
@@ -174,7 +174,7 @@
       // Propagate the change to FeaturePanel
       dispatch('constraintUpdated', {
         difficulty: feature.difficulty,
-        acceptableRange: feature.acceptableRange
+        acceptableRange: encodeAcceptableRange(feature.acceptableRange)
       });
     }
   };
@@ -401,6 +401,18 @@
   };
 
   /**
+   * gamcoach.js uses edge names for acceptable range, we need to translate
+   * edge id to edge names
+   * @param {number[]} acceptableRange Edge ids
+   */
+  const encodeAcceptableRange = (acceptableRange) => {
+    // Need to encode the edge labels (numbers) to edge names (string)
+    // gamcoach.js uses edge names for the acceptable range
+    if (acceptableRange === null) return null;
+    return acceptableRange.map((id) => state.feature.labelEncoder[id]);
+  };
+
+  /**
    * Handler for the reset button click event.
    * @param {MouseEvent} e Mouse event
    */
@@ -435,7 +447,7 @@
     // Propagate the change to FeaturePanel
     dispatch('constraintUpdated', {
       difficulty: feature.difficulty,
-      acceptableRange: feature.acceptableRange
+      acceptableRange: encodeAcceptableRange(feature.acceptableRange)
     });
   };
 

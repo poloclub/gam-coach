@@ -61,6 +61,21 @@ export class FeatureGrid {
       // Update the acceptable range configuration
       if (constraints.acceptableRanges.has(name)) {
         features[i].acceptableRange = constraints.acceptableRanges.get(name);
+
+        // If this feature is a categorical feature, we also need to encode the
+        // acceptable range from edge names to edge ids
+        if (features[i].data.type === 'categorical') {
+          const labelDecoder = new Map();
+          Object.entries(features[i].labelEncoder).forEach(
+            ([level, levelName]) => {
+              labelDecoder.set(levelName, level);
+            }
+          );
+
+          features[i].acceptableRange = features[i].acceptableRange.map((id) =>
+            labelDecoder.get(id)
+          );
+        }
       } else {
         features[i].acceptableRange = null;
       }

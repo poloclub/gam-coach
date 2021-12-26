@@ -8,7 +8,8 @@
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import { initHist, initHistSize, syncBars } from './FeatureCardCat';
+  import { initHist, initHistSize, syncBars, titleMouseenterHandler,
+    titleMouseleaveHandler } from './FeatureCardCat';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import levelThumbIcon from '../../img/icon-level-thumb.svg';
@@ -488,7 +489,14 @@
 
     <div class='top-row'>
 
-      <div class='feature-info' title={state.feature.descriptionString}>
+      <div class='feature-info'
+        on:mouseenter={(e) => titleMouseenterHandler(
+          e, tooltipConfig, tooltipConfigStore, state.feature.descriptionString
+        )}
+        on:mouseleave={(e) => titleMouseleaveHandler(
+          e, tooltipConfig, tooltipConfigStore
+        )}
+      >
         <span class='feature-name'>
           {state.feature.name}
         </span>

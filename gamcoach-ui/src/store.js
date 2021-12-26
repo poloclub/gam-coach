@@ -1,6 +1,16 @@
 import { writable } from 'svelte/store';
 
-export const tooltipConfigStore = writable({});
+export const tooltipConfigStore = writable({
+  show: false,
+  html: 'null',
+  left: 0,
+  top: 0,
+  width: 80,
+  maxWidth: 80,
+  fontSize: '14px',
+  orientation: 's',
+  mouseoverTimeout: null
+});
 
 export const diffPickerConfigStore = writable({
   feature: null,

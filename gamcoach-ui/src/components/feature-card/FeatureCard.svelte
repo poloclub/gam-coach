@@ -8,7 +8,10 @@
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
   import {initSlider, initHist, initHistSize, moveThumb,
-    syncRangeTrack} from './FeatureCard';
+    syncRangeTrack } from './FeatureCard';
+
+  import {titleMouseenterHandler,
+    titleMouseleaveHandler} from '../feature-card-cat/FeatureCardCat';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import rangeThumbLeftIcon from '../../img/icon-range-thumb-left.svg';
@@ -463,7 +466,14 @@
   >
 
     <div class='top-row'>
-      <div class='feature-info' title={state.feature.description}>
+      <div class='feature-info'
+        on:mouseenter={(e) => titleMouseenterHandler(
+          e, tooltipConfig, tooltipConfigStore, state.feature.description
+        )}
+        on:mouseleave={(e) => titleMouseleaveHandler(
+          e, tooltipConfig, tooltipConfigStore
+        )}
+      >
         <span class='feature-name'>
           {state.feature.name}
         </span>

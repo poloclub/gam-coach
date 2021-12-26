@@ -11,19 +11,25 @@
     width: 80,
     maxWidth: 80,
     fontSize: '14px',
+    tryHeight: false,
     orientation: 's'
   };
-  let currentShow = false;
-
+  let style = '';
   let tooltip = null;
 
-  $: style = `left: ${tooltipConfig.left}px; top: ${tooltipConfig.top}px;
-    width: ${tooltipConfig.width}px; max-width: ${tooltipConfig.maxWidth}px;
-    font-size: ${tooltipConfig.fontSize}`;
+  const updateStyle = () => {
+    if (tooltipConfig.width === 0) {
+      style = `left: ${tooltipConfig.left}px; top: ${tooltipConfig.top}px;
+        max-width: ${tooltipConfig.maxWidth}px;
+        font-size: ${tooltipConfig.fontSize}`;
+    } else {
+      style = `left: ${tooltipConfig.left}px; top: ${tooltipConfig.top}px;
+        width: ${tooltipConfig.width}px; max-width: ${tooltipConfig.maxWidth}px;
+        font-size: ${tooltipConfig.fontSize}`;
+    }
+  };
 
   tooltipConfigStore.subscribe(value => {
-    let selection = d3.select(tooltip);
-
     if (value === null) {
       return;
     }
@@ -36,37 +42,21 @@
         value.top -= 8;
       }
       tooltipConfig = value;
-
-      selection.style('visibility', 'visible');
-      d3.select(tooltip)
-        .transition('show')
-        .duration(100)
-        .ease(d3.easeQuadInOut)
-        .style('opacity', 1);
-      currentShow = true;
-
     } else {
-      if (currentShow) {
-        d3.select(tooltip)
-          .style('visibility', 'hidden');
-        currentShow = false;
-      }
       tooltipConfig = value;
     }
-  });
 
-  onMount(() => {
-    d3.select(tooltip).style('visibility', 'hidden');
+    updateStyle();
   });
 
 </script>
 
-<style>
+<style lang="scss">
   .tooltip {
     position: absolute;
     color: hsl(0, 0%, 95%);
     background-color: black;
-    padding: 2px 3px;
+    padding: 2px 6px 4px 6px;
     border-radius: 4px;
     opacity: 1;
     z-index: 20;
@@ -77,6 +67,10 @@
     box-sizing: border-box;
     pointer-events: none;
     text-align: center;
+
+    &.hidden {
+      visibility: hidden;
+    }
   }
 
   .arrow-up {
@@ -101,7 +95,7 @@
   }
 </style>
 
-<div class="tooltip" style={style} bind:this={tooltip}>
+<div class="tooltip" style={style} bind:this={tooltip} class:hidden={!tooltipConfig.show}>
   <div class:arrow-up={tooltipConfig.orientation === 'n'}
     class:arrow-down={tooltipConfig.orientation === 's'}
   ></div>

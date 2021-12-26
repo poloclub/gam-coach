@@ -1,6 +1,7 @@
 import d3 from '../../utils/d3-import';
 import { Logger } from '../../utils/logger';
 import { config } from '../../config/config';
+import { tick } from 'svelte';
 import '../../typedef';
 
 const colors = config.colors;
@@ -586,4 +587,74 @@ export const initHist = (component, state) => {
   });
 
   return xValues;
+};
+
+/**
+ * Handler for mouse enter event on the card title
+ * @param {MouseEvent} e mouse event
+ * @param {any} tooltipConfig tooltip config
+ * @param {any} tooltipConfigStore tooltip config store
+ * @param {string} message tooltip message to show
+ */
+export const titleMouseenterHandler = async (
+  e,
+  tooltipConfig,
+  tooltipConfigStore,
+  message
+) => {
+
+  const node = e.currentTarget;
+
+  tooltipConfig.mouseoverTimeout = setTimeout(async () => {
+    // Test the width of the title
+    tooltipConfig.width = 0;
+    tooltipConfig.maxWidth = 200;
+    tooltipConfig.orientation = 's';
+    tooltipConfig.show = false;
+    tooltipConfig.fontSize = '0.8rem';
+    tooltipConfig.html = `
+    <div class='tooltip-content' style='display: flex; flex-direction:
+      column; justify-content: center;'>
+      ${message}
+    </div>
+  `;
+    tooltipConfigStore.set(tooltipConfig);
+
+    await tick();
+
+    const tooltip = d3.select('.tooltip').node();
+    const bbox = tooltip.getBoundingClientRect();
+
+    const position = node.getBoundingClientRect();
+    const curWidth = position.width;
+
+    const tooltipCenterX = position.x + curWidth / 2;
+    const tooltipCenterY = position.y - bbox.height + 3;
+
+    tooltipConfig.width = 0;
+    tooltipConfig.maxWidth = 200;
+    tooltipConfig.left = tooltipCenterX - bbox.width / 2;
+    tooltipConfig.top = tooltipCenterY;
+    tooltipConfig.fontSize = '0.8rem';
+    tooltipConfig.show = true;
+    tooltipConfig.orientation = 's';
+    tooltipConfigStore.set(tooltipConfig);
+  }, 400);
+};
+
+/**
+ * Handler for mouse leave event on the card title
+ * @param {MouseEvent} e mouse event
+ * @param {any} tooltipConfig tooltip config
+ * @param {any} tooltipConfigStore tooltip config store
+ */
+export const titleMouseleaveHandler = (
+  e,
+  tooltipConfig,
+  tooltipConfigStore
+) => {
+  clearTimeout(tooltipConfig.mouseoverTimeout);
+  tooltipConfig.mouseoverTimeout = null;
+  tooltipConfig.show = false;
+  tooltipConfigStore.set(tooltipConfig);
 };

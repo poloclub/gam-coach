@@ -289,6 +289,11 @@
 
     <h4 id='s-complete'>Overview</h4>
 
+    <video controls>
+      <source src='/videos/tutorial-overview.mp4'>
+      <track kind='captions'>
+    </video>
+
     <h4 id='s-initial-values'>Change initial input values</h4>
 
     <h4 id='s-strategies'>Explore different strategies</h4>

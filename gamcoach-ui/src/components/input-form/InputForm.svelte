@@ -5,9 +5,12 @@
   import { EBM } from '../../ebm/ebm';
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount } from 'svelte';
-  import { inputFormConfigStore, ebmStore } from '../../store';
+  import { inputFormConfigStore, ebmStore,
+    tooltipConfigStore } from '../../store';
   import { getInputLists, getNewCurExample,
     isCurExampleChanged } from './InputForm';
+  import {titleMouseenterHandler,
+    titleMouseleaveHandler} from '../feature-card-cat/FeatureCardCat';
 
   import closeIcon from '../../img/icon-close.svg';
 
@@ -25,6 +28,9 @@
   let newCurExample = [];
   let isOutRange = false;
 
+  let tooltipConfig = null;
+  tooltipConfigStore.subscribe(value => {tooltipConfig = value;});
+
   inputFormConfigStore.subscribe(value => {
     inputFormConfig = value;
 
@@ -34,10 +40,6 @@
       ({contList, catList} = getInputLists(inputFormConfig.features,
         inputFormConfig.curExample));
       newCurExample = getNewCurExample(contList, catList);
-    }
-
-    if (inputFormConfig.show) {
-      // PASS
     }
   });
 
@@ -113,7 +115,14 @@
     <div class='content-cont'>
       {#each contList as item}
         <div class='input-wrapper'>
-          <span class='name' title={item.description}>{item.name}</span>
+          <span class='name'
+            on:mouseenter={(e) => titleMouseenterHandler(
+              e, tooltipConfig, tooltipConfigStore, item.description
+            )}
+            on:mouseleave={(e) => titleMouseleaveHandler(
+              e, tooltipConfig, tooltipConfigStore
+            )}
+          >{item.name}</span>
           <input class='feature-input' type='number'
             step={item.requiresInt? '1':'0.1'} bind:value={item.curValue}>
         </div>
@@ -123,7 +132,14 @@
     <div class='content-cat'>
       {#each catList as item}
         <div class='input-wrapper'>
-          <span class='name' title={item.description}>{item.name}</span>
+          <span class='name'
+            on:mouseenter={(e) => titleMouseenterHandler(
+              e, tooltipConfig, tooltipConfigStore, item.description
+            )}
+            on:mouseleave={(e) => titleMouseleaveHandler(
+              e, tooltipConfig, tooltipConfigStore
+            )}
+          >{item.name}</span>
           <select class='feature-select' bind:value={item.curValue}>
             {#each item.allValues as value}
               <option value={value.level}>{value.levelDisplayName}</option>

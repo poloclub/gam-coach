@@ -9,7 +9,6 @@
 
   import {initSlider, initHist, initHistSize, moveThumb,
     syncRangeTrack } from './FeatureCard';
-
   import {titleMouseenterHandler,
     titleMouseleaveHandler} from '../feature-card-cat/FeatureCardCat';
 

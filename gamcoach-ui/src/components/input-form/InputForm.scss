@@ -56,10 +56,12 @@ $border-radius: 5px;
   .input-wrapper {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 10px;
 
     .name {
       flex: 0 0 auto;
+      text-decoration: underline;
+      text-decoration-style: dotted;
     }
 
     .feature-input {
@@ -81,10 +83,12 @@ $border-radius: 5px;
   .input-wrapper {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 10px;
 
     .name {
       flex: 0 0 auto;
+      text-decoration: underline;
+      text-decoration-style: dotted;
     }
 
     .feature-select {

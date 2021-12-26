@@ -318,6 +318,11 @@
       {/each}
     </ol>
 
+    <div class='important-note'>
+      <p class='title'>Important Note</p>
+      <p class='content'>{@html text.task.accept}</p>
+    </div>
+
     <h2 id='detailed-tutorial'>Detailed Tutorial Videos</h2>
     <p>{@html text.detail}</p>
 

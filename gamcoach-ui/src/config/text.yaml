@@ -101,7 +101,7 @@ task:
     Here are some concrete steps to help you complete the HIT:
   list:
     - >
-      (Optional) <strong>Click the edit icon</strong> on the left panel to
+      <strong>Click the edit icon</strong> on the left panel to
       change the initial input values. For example, you can change the input to
       match someone you know, so the scenario is more <strong>relatable to
       you</strong>.
@@ -117,18 +117,27 @@ task:
       <strong>Rate</strong> your bookmarked strategies and
       <strong>explain</strong> why you like them
     - >
-      <strong>Click the "submit" button</strong> to submit the data to us
+      <strong>Click the "submit" button</strong> to submit the data to us. The
+      data contains your interaction logs (e.g., clicks, hovering, drags) and
+      all generated strategies.
     - >
       GAM Coach will generates a unique code (6-digit number) for you,
       <strong>copy and paste</strong> it in your google survey
     - >
-      <strong>Answer all questions</strong> in the google survey and
+      <strong>Answer all questions</strong> in the Google survey and
       <strong>submit</strong> the survey
     - >
       <strong>Paste the code</strong> in MTurk page and <strong>submit</strong>
       it
     - >
       Done—thank you so much! 🙏
+  accept: >
+    We will accept your HIT once (1) we have received your interaction log and strategy
+    data, Google survey, HIT submission under the <strong> same
+    verification code</strong>, (2) the interaction log data and survey
+    response suggest that you have <strong>made effort to pretend to be a real
+    user</strong> using GAM Coach. For example, the survey responses are
+    coherent with your interactions with the tool.
 
 overview: >
   The tutorial video above will help you learn how to use GAM Coach and complete

@@ -155,7 +155,7 @@
 
   <Tooltip bind:this={tooltip}/>
 
-  <div class='top'>
+  <div class='top' id='s-top'>
 
     <div class='top-fill'></div>
 
@@ -289,26 +289,22 @@
 
     <h4 id='s-complete'>Overview</h4>
 
-    <video controls>
+    <video class='wide-video' controls muted>
       <source src='/videos/tutorial-overview.mp4'>
       <track kind='captions'>
     </video>
 
-    <h4 id='s-initial-values'>Change initial input values</h4>
+    {#each text.video as item}
+      <h4 id={`s-${item.video}`}>{item.header}</h4>
 
-    <h4 id='s-strategies'>Explore different strategies</h4>
+      <video autoplay loop playsinline muted class:wide-video={item.isWide}>
+        <source src={`/videos/tutorial-${item.video}.mp4`}>
+        <track kind='captions'>
+      </video>
 
-    <h4 id='s-values'>Change feature values</h4>
+      <p>{@html item.text}</p>
+    {/each}
 
-    <h4 id='s-difficulty'>Specify difficulty</h4>
-
-    <h4 id='s-range'>Specify acceptable range</h4>
-
-    <h4 id='s-generate'>Generate new strategies</h4>
-
-    <h4 id='s-bookmark'>Bookmark strategies and download a receipt</h4>
-
-    <h4 id='s-submit'>Submit the HIT task</h4>
 
     <!-- ![image](https://user-images.githubusercontent.com/15007159/147296366-aeaf84bb-ee06-451d-8fc2-9202f26a36fb.png) -->
   </div>

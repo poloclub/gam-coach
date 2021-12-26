@@ -196,8 +196,12 @@ $header-color: currentcolor;
 
 video {
   width: 100%;
-  grid-column: long-start / long-end;
+  grid-column: text-start / text-end;
 
   box-shadow: 0px 0px 8px hsla(0, 0%, 0%, 0.1);
   border-radius: 10px;
+
+  &.wide-video {
+    grid-column: long-start / long-end;
+  }
 }

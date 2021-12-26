@@ -73,7 +73,7 @@
     featureGrid.loadFeatures(plan.features, constraints);
     featureGrid = featureGrid;
 
-    console.log(featureGrid);
+    // console.log(featureGrid);
   };
 
   /**

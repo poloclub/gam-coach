@@ -62,19 +62,21 @@ tool:
 
 feature:
   main: >
-    👉 Please watch the <a href='#s-complete'>Comprehensive Walk-through
-    Video</a> to learn how a loan applicant can use GAM Changer.
+    Please watch a walk-through tutorial video below to learn how a loan
+    applicant can use GAM Coach.
   gap: >
-    You can click the link below to watch a video on how each feature works.
+    If you encounter any problems while using GAM Coach, you can click the link
+    below to watch a shorter and more specific video explaining how each GAM
+    Coach functionality works.
   list:
     - name: Change initial input values
-      id: s-initial-value
+      id: s-input
     - name: Explore different strategies to get a loan approval
-      id: s-strategies
+      id: s-explore
     - name: >
         Experiment with different feature values to see how they affect
         the application decision
-      id: s-values
+      id: s-value
     - name: Specify difficulty of different features
       id: s-difficulty
     - name: Specify the acceptable range of different features
@@ -82,7 +84,7 @@ feature:
     - name: Generate new strategies that meet your preferences
       id: s-generate
     - name: Bookmark strategies you like and download a "receipt"
-      id: s-bookmark
+      id: s-download
     - name: Submit the HIT task
       id: s-submit
 
@@ -127,6 +129,17 @@ task:
       it
     - >
       Done—thank you so much! 🙏
+
+overview: >
+  The tutorial video above will help you learn how to use GAM Coach and complete
+  this HIT. Please don't replicate what the video does. We want you to imagine to
+  be a real user and use GAM Coach to find strategies <strong>work for
+  you.</strong>
+
+detail: >
+  We list a few more shorter videos that each explain one functionality of GAM
+  Coach. You are not required to watch these videos. However, if you encounter
+  any problems while using GAM Coach, you might find these videos helpful.
 
 video:
   - header: Change initial input values

@@ -11,6 +11,16 @@ export const round = (num, decimal) => {
 };
 
 /**
+ * Get a random number between [min, max], inclusive
+ * @param {number} min Min value
+ * @param {number} max Max value
+ * @returns number
+ */
+export const random = (min, max) => {
+  return Math.floor(Math.random() * (max - min)) + min;
+};
+
+/**
  * Pre-process the svg string to replace fill, stroke, color settings
  * @param {string} svgString
  * @param {string[]} resetColors A list of colors to reset to currentcolor

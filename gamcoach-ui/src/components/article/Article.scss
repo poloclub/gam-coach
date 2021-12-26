@@ -175,6 +175,9 @@
         color: $teal-500;
       }
 
+      &.no-display {
+        display: none;
+      }
     }
   }
 

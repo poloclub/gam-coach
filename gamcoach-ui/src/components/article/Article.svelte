@@ -16,19 +16,20 @@
   import { fade, fly } from 'svelte/transition';
   import { tooltipConfigStore, inputFormConfigStore,
     ratingFormConfigStore } from '../../store';
+  import { random } from '../../utils/utils';
 
   import pointArrowSVG from '../../img/point-arrow.svg';
   import iconRefreshSVG from '../../img/icon-refresh3.svg';
   import iconEditSVG from '../../img/icon-edit.svg';
 
   import text from '../../config/text.yaml';
+  import samples from '../../config/lc-classifier-random-samples.json';
 
   const unsubscribes = [];
   let windowLoaded = false;
 
   const indexFormatter = d3.format('03d');
 
-  let curIndex = 6;
   let verificationCode = null;
   let buttonText = 'I\'m Done!';
   let updated = false;
@@ -37,12 +38,20 @@
   const logger = new Logger();
   // const logger = null;
 
+  let curIndex = 126;
   /** @type {any[]} */
   let curExample = [
     17000.0, '36 months', '3 years', 'RENT', 4.831869774280501,
     'Source Verified', 'major_purchase', 10.09, '0', 11.0, '0', 5.0,
-    '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0
-  ];
+    '1', 1.7075701760979363, 0.4, 9.0, 'Individual', '0', '1', 712.0];
+
+  // Example that is closest to the median
+  curExample = [15000.0, '36 months', '10+ years', 'RENT', 4.785329835010767,
+    'Source Verified', 'debt_consolidation', 20.47, '0', 16.0, '0', 11.0, '0',
+    4.041451902647006, 57.7, 21.0, 'Individual', '0', '0', 677.0];
+
+  // curIndex = random(0, samples.length - 1);
+  // curExample = samples[curIndex];
 
   logger?.setInitialValues({
     curExample
@@ -120,7 +129,23 @@
   );
 
   const refreshClicked = () => {
-    console.log(logger?.toJSON());
+    // Resample the cur example
+    curIndex = random(0, samples.length - 1);
+    const newExample = samples[curIndex];
+
+    // Log the interaction
+    logger?.addLog({
+      eventName: 'curExampleUpdated',
+      elementName: 'shuffle',
+      valueName: 'curExample',
+      oldValue: curExample,
+      newValue: newExample
+    });
+
+    updated = false;
+    curExample = newExample;
+
+    // console.log(logger?.toJSON());
   };
 
   const editClicked = () => {
@@ -155,7 +180,7 @@
 
   <Tooltip bind:this={tooltip}/>
 
-  <div class='top' id='s-top'>
+  <div class='top' id='top'>
 
     <div class='top-fill'></div>
 
@@ -174,7 +199,7 @@
           >
             {@html iconEditSVG}
           </div>
-          <div class='svg-icon'
+          <div class='svg-icon no-display'
             title='Try a random input sample'
             on:click={() => refreshClicked()}
           >
@@ -245,7 +270,7 @@
 
   <div class='article'>
 
-    <h2 id='s-introduction'>Introduction</h2>
+    <h2 id='introduction'>Introduction</h2>
     {#each text.introduction.main as p}
       <p>{@html p}</p>
     {/each}
@@ -256,7 +281,7 @@
     </div>
 
 
-    <h2 id='s-tool'>What is GAM Coach?</h2>
+    <h2 id='tool'>What is GAM Coach?</h2>
     {#each text.tool.pre as p}
       <p>{@html p}</p>
     {/each}
@@ -265,8 +290,16 @@
       <p>{@html p}</p>
     {/each}
 
-    <h2 id='s-feature'>What Can I Do with GAM Coach?</h2>
+    <h2 id='tutorial'>What Can I Do with GAM Coach?</h2>
     <p>{@html text.feature.main}</p>
+
+    <video class='wide-video' controls playsinline muted>
+      <source src='/videos/tutorial-overview.mp4'>
+      <track kind='captions'>
+    </video>
+
+    <p>{@html text.overview}</p>
+
     <p>{@html text.feature.gap}</p>
 
     <ol>
@@ -275,7 +308,7 @@
       {/each}
     </ol>
 
-    <h2 id='s-task'>So, What is My Task?</h2>
+    <h2 id='task'>So, What is My Task?</h2>
     <p>{@html text.task.main}</p>
     <p>{@html text.task.gap}</p>
 
@@ -285,19 +318,13 @@
       {/each}
     </ol>
 
-    <h2 id='s-tutorial'>Tutorial</h2>
+    <h2 id='detailed-tutorial'>Detailed Tutorial Videos</h2>
+    <p>{@html text.detail}</p>
 
-    <h4 id='s-complete'>Overview</h4>
+    {#each text.video as item, i}
+      <h4 id={`${item.video}`}>{i + 1}. {item.header}</h4>
 
-    <video class='wide-video' controls muted>
-      <source src='/videos/tutorial-overview.mp4'>
-      <track kind='captions'>
-    </video>
-
-    {#each text.video as item}
-      <h4 id={`s-${item.video}`}>{item.header}</h4>
-
-      <video autoplay loop playsinline muted class:wide-video={item.isWide}>
+      <video controls loop playsinline muted class:wide-video={item.isWide}>
         <source src={`/videos/tutorial-${item.video}.mp4`}>
         <track kind='captions'>
       </video>
@@ -305,9 +332,6 @@
       <p>{@html item.text}</p>
     {/each}
 
-
-    <!-- ![image](https://user-images.githubusercontent.com/15007159/147296366-aeaf84bb-ee06-451d-8fc2-9202f26a36fb.png) -->
   </div>
-
 
 </div>

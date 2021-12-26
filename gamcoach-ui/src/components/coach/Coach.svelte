@@ -67,7 +67,7 @@
 
     // Load the model data
     modelData = await d3.json('/data/lc-classifier.json');
-    console.log(modelData);
+    // console.log(modelData);
 
     // Initialize an ebm model
     ebm = new EBM(modelData);

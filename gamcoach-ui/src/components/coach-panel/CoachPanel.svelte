@@ -287,6 +287,14 @@
    * Handler for regenerate click event.
    */
   const regenerateClicked = () => {
+    // Let users wait the current batch to finish or fail before starting the
+    // next batch
+    if (plans.failedPlans.size === 0 && localPlans.size !== 5) {
+      alert(''.concat('Please wait until all pending plans are generated ',
+        'before regenerating any new plans.'));
+      return;
+    }
+
     // Show the confirm modal if it is the first time
     const needRegenerateConfirm = localStorage.getItem('needRegenerateConfirm');
     if (needRegenerateConfirm === 'true') {

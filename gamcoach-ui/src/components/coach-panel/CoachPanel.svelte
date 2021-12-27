@@ -71,6 +71,29 @@
   unsubscribes.push(
     bookmarkConfigStore.subscribe(value => {
       bookmarkConfig = value;
+
+      if (bookmarkConfig.action === 'addUnpicked') {
+        bookmarkConfig.unpickedPlans = new Map();
+        const localIndexes = [...localPlans.keys()];
+        for (let j = 0; j < localIndexes.length; j++) {
+          const i = localIndexes[j];
+          if (!bookmarkConfig.plans.has(i)) {
+            const curPlan = localPlans.get(i);
+            const savedPlan = new SavedPlan(
+              curPlan.planIndex,
+              curPlan.ebmLocal,
+              curPlan.curExample
+            );
+            bookmarkConfig.unpickedPlans.set(i, savedPlan);
+          }
+
+          if (bookmarkConfig.unpickedPlans.size >= 2) {
+            break;
+          }
+        }
+        bookmarkConfig.action = undefined;
+        bookmarkConfigStore.set(bookmarkConfig);
+      }
     })
   );
 
@@ -330,6 +353,28 @@
    * Dispatch the regeneration click event to the parent.
    */
   const dispatchRegenerateClicked = () => {
+    // Save two un-pinked plans for review during user study
+    if (logger && plans.nextPlanIndex === 6) {
+
+      bookmarkConfig.unpickedPlans = new Map();
+      for (let i = 1; i < 6; i++) {
+        if (!bookmarkConfig.plans.has(i)) {
+          const curPlan = localPlans.get(i);
+          const savedPlan = new SavedPlan(
+            curPlan.planIndex,
+            curPlan.ebmLocal,
+            curPlan.curExample
+          );
+          bookmarkConfig.unpickedPlans.set(i, savedPlan);
+        }
+
+        if (bookmarkConfig.unpickedPlans.size >= 2) {
+          break;
+        }
+      }
+      bookmarkConfigStore.set(bookmarkConfig);
+    }
+
     plans.activePlanIndex = plans.nextPlanIndex;
 
     // Make this component ready to be initialized again with new plans

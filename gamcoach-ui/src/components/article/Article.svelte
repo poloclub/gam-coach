@@ -199,8 +199,9 @@
     // Warn user that they have un-realized constraints
     if (constraints.hasNewConstraints) {
       alert(''.concat('You have set a new preference, but you have not ',
-        'generate new plans with the preference yet. Click "Regenerate" button ',
-        'to generate new plans with your new preference.'
+        'generate new plans with this new preference yet. Click "Regenerate"',
+        'button ',
+        'to generate new plans that meet your new preference.'
       ));
       return;
     }
@@ -212,6 +213,12 @@
         'plans that you are satisfied with.'
       ));
       return;
+    }
+
+    // If there is no unpicked plans set up, add them
+    if (bookmarkConfig.unpickedPlans === undefined) {
+      bookmarkConfig.action = 'addUnpicked';
+      bookmarkConfigStore.set(bookmarkConfig);
     }
 
     constraintRatingFormConfig.show = true;
@@ -284,10 +291,10 @@
     <div class='coach-right'>
       <div class='description'>
         <span class='line'>
-          Thank you so much for helping us improve GAM Coach!!
+          Please try your best to <strong>imagine</strong> being a real loan applicant using this tool.
         </span>
         <span class='line'>
-          Please try your best to <strong>imagine</strong> being a real loan applicant using this tool.
+          Imagine what kinds of strategies would be <strong>most helpful in real life</strong>.
         </span>
         <span class='line'>
           Once you are <strong>satisfied</strong> with any generated plan(s) and have <strong>bookmarked</strong>

@@ -42,9 +42,32 @@
       planRatingsMap[planIndex] = {
         planIndex,
         rating,
-        explanation
+        explanation,
+        isSaved: true
       };
     });
+
+    if (value.unpickedPlans !== undefined) {
+      [...value.unpickedPlans.keys()].forEach((planIndex) => {
+        const existingRating = ratingFormConfig.planRatings.filter(
+          d => d.planIndex === +planIndex
+        );
+        let explanation = '';
+        let rating = '0';
+
+        if (existingRating.length === 1) {
+          explanation = existingRating[0].explanation;
+          rating = existingRating[0].rating;
+        }
+
+        planRatingsMap[planIndex] = {
+          planIndex,
+          rating,
+          explanation,
+          isSaved: false
+        };
+      });
+    }
 
     bookmarkConfig = value;
   });
@@ -67,7 +90,8 @@
       const planRating = {
         planIndex: parseInt(planIndex),
         rating: planRatingsMap[planIndex].rating,
-        explanation: planRatingsMap[planIndex].explanation
+        explanation: planRatingsMap[planIndex].explanation,
+        isSaved: planRatingsMap[planIndex].isSaved
       };
       ratingFormConfig.planRatings.push(planRating);
     });
@@ -138,11 +162,20 @@
     {#if bookmarkConfig.plans.size === 0}
       <div class='description'>You need to bookmark at least one plan.</div>
     {:else}
-      <div class='description'>Almost there! Please review and rate the plans you have bookmarked. Thank you!</div>
+
+      <span class='tips'>
+        Tips: If you find it hard to find good answers for the following questions,
+        we suggest to refresh the webpage and restart <strong>Task 2</strong>.
+      </span>
+
+      <div class='description bottom'>
+        Please review and rate the plans you have bookmarked.
+        All explanations should emphasize why these plans are helpful <strong>for you</strong>.
+      </div>
       {#each [...bookmarkConfig.plans] as [planIndex, savedPlan]}
         <div class='plan-row'>
           <div class='plan-title'>
-            Plan {planIndex}
+            Plan {planIndex} (picked by you)
           </div>
 
           <div class='plan-block'>
@@ -196,6 +229,73 @@
           </div>
         </div>
       {/each}
+
+      <div class='description bottom'>
+        We notice that you didn't pick the following plans.
+        Why didn't you pick them?
+        Explanations should emphasize why these plans are less helpful <strong>for you</strong>,
+        comparing to the plans that you have picked.
+      </div>
+      {#if bookmarkConfig.unpickedPlans !== undefined}
+      {#each [...bookmarkConfig.unpickedPlans] as [planIndex, savedPlan]}
+        <div class='plan-row'>
+          <div class='plan-title'>
+            Plan {planIndex} (unpicked)
+          </div>
+
+          <div class='plan-block'>
+            <div class='plan-change'>
+              {#each savedPlan.getChangeList(bookmarkConfig.features) as item}
+                <div class='plan-feature'>
+                  <div class='feature-name'>{item.featureDisplayName}</div>
+                  <div class='values'>
+                    {item.isCont ? formatter(item.originalValue) : item.originalValue}
+                      <div class='feature-arrow'
+                        class:user={false}
+                      >
+                        {#if item.isCont}
+                          <span class='value-change'>
+                            {`${(item.changeValue) < 0 ? '' :'+'}${formatter(
+                              item.changeValue
+                            )}`}
+                          </span>
+                          <div class='arrow-right'></div>
+                        {:else}
+                          <div class='arrow-right-cat'></div>
+                        {/if}
+
+                      </div>
+                    {item.isCont ? formatter(item.newValue) : item.newValue}
+                  </div>
+                </div>
+              {/each}
+            </div>
+
+            <div class='plan-input'>
+
+              <div class='plan-review'>
+                <label for={`review-${planIndex}`}>Why don't you pick this plan?</label>
+                <textarea id={`review-${planIndex}`}
+                  bind:value={planRatingsMap[planIndex].explanation}
+                ></textarea>
+              </div>
+
+              <div class='plan-rating'>
+                <select class='rating-select' bind:value={planRatingsMap[planIndex].rating}>
+                  <option value='0'>Select a Rating Score</option>
+                  <option value='-1'>-1 - Can be helpful in some cases</option>
+                  <option value='-2'>-2 - Unhelpful plan</option>
+                  <option value='-3'>-3 - Harmful plan</option>
+                </select>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      {/each}
+      {/if}
+
     {/if}
   </div>
 
@@ -208,7 +308,7 @@
     <div class='button button-cancel'
       on:click={() => cancelClicked()}
     >
-      Cancel
+      Back
     </div>
 
     <div class='button button-confirm'

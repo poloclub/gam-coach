@@ -161,12 +161,15 @@
   <div class='content'>
     {#if constraintList.length === 0}
       <span>
-        You <strong>did not</strong> set any preferences (difficulty or acceptable range of features). It means
+        You <strong>did not set any preferences</strong> (difficulty or acceptable range of features). It means
         that all features have the same difficulty for you to change, and GAM Coach
-        can suggest any feature value for you.
+        can suggest any feature values for you.
       </span>
 
-      <label for='empty-reason'>Explain why setting preferences is not helpful or necessary in your case.</label>
+      <label for='empty-reason'>Explain why you chose not to set any preferences.
+        Your explanation should emphasize why setting preferences is not helpful
+        or necessary <strong>for your</strong>.
+      </label>
       <textarea id='empty-reason' placeholder='I did not set any preferences, because...'
         bind:value={emptyReason}
       ></textarea>
@@ -221,13 +224,13 @@
   <div class='control'>
 
     <div class='error-message' class:out-range={!canSubmit(constraintRatingMap, emptyReason)}>
-      Complete all fields to proceed
+      Complete all fields to proceed or go back
     </div>
 
     <div class='button button-cancel'
       on:click={() => cancelClicked()}
     >
-      Cancel
+      Back
     </div>
 
     <div class='button button-confirm'

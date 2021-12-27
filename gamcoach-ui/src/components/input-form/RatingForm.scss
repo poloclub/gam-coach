@@ -2,13 +2,15 @@
 
 .content {
   max-height: 600px;
-  max-width: 470px;
+  max-width: 490px;
   overflow: auto;
+  overscroll-behavior: none;
 }
 
 .control {
   .error-message {
-    color: $gray-800;
+    color: $gray-600;
+    font-size: 0.9rem;
   }
 }
 
@@ -161,4 +163,19 @@
       background: currentColor;
     }
   }
+}
+
+.description {
+  &.bottom {
+    border-top: 1px solid $gray-light-border;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+}
+
+.tips {
+  border-radius: 0.2rem;
+  background-color: $teal-50;
+  color: $teal-800;
+  padding: 4px 6px;
 }

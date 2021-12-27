@@ -61,6 +61,7 @@
  * @property {number} planIndex The index of the rated plan
  * @property {string} rating The numerical score ('1' - '3') of the plan
  * @property {string} explanation A short sentence reviewing the plan
+ * @property {boolean} isSaved True if this plan is saved by the user
  */
 
 /**

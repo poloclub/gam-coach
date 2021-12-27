@@ -1,6 +1,7 @@
 import d3 from '../../utils/d3-import';
 import { Logger } from '../../utils/logger';
 import { config } from '../../config/config';
+import { round } from '../../utils/utils';
 import { Writable } from 'svelte/store';
 import '../../typedef';
 import { Plan } from '../coach/Coach';
@@ -137,7 +138,9 @@ export class ScorePanel {
   get isInRange() {
     // Binary classification
     if (this.minThreshold === this.maxThreshold) {
-      return this.curValue >= this.minThreshold;
+      // JSON Weights are rounded to 6 digit, so in rare cases there might be
+      // numerical errors
+      return round(this.curValue, 3) >= this.minThreshold;
     } else {
       // Regression
       return (

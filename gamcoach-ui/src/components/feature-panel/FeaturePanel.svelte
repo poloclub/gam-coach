@@ -160,6 +160,7 @@
     }
 
     if (needToUpdateStore) {
+      constraints.hasNewConstraints = true;
       constraintsStore.set(constraints);
     }
 

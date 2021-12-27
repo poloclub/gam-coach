@@ -265,6 +265,8 @@ export class Constraints {
   /** @type {object} */
   labelDecoder = {};
 
+  hasNewConstraints = true;
+
   /**
    * Initialize the Constraints object. It might modify the modelData as some
    * features only allow increasing/decreasing features. The initializer would
@@ -443,6 +445,9 @@ export const initPlans = async (
     }
   });
 
+  // Consume the new constraints
+  constraints.hasNewConstraints = false;
+
   const plans = tempPlans;
   plansUpdated(plans);
 
@@ -607,6 +612,9 @@ export const regeneratePlans = async (
    * (4) Update the next plan index
    */
 
+  // Consume the new constraints
+  constraints.hasNewConstraints = false;
+
   // Step 1: Start tab loading animation
   plans.planStores = new Map();
   plansUpdated(plans);
@@ -652,6 +660,7 @@ export const regeneratePlans = async (
     cfs.isSuccessful ? cfs.data[0] : curExample,
     plans.nextPlanIndex
   );
+  console.log(curPlan);
 
   // Record the plan as a store and attach it to plans with the planIndex as
   // a key

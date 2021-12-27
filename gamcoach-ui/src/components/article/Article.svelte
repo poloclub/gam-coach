@@ -15,8 +15,10 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
-  import { tooltipConfigStore, inputFormConfigStore,
-    ratingFormConfigStore, constraintRatingFormConfigStore } from '../../store';
+  import { tooltipConfigStore, inputFormConfigStore, constraintsStore,
+    bookmarkConfigStore, ratingFormConfigStore,
+    constraintRatingFormConfigStore } from '../../store';
+  import { Constraints } from '../coach/Coach';
   import { random } from '../../utils/utils';
 
   import pointArrowSVG from '../../img/point-arrow.svg';
@@ -69,6 +71,18 @@
   unsubscribes.push(
     tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
   );
+
+  /** @type {Constraints} */
+  let constraints = null;
+  unsubscribes.push(constraintsStore.subscribe(value => {
+    constraints = value;
+  }));
+
+  /** @type {BookmarkConfig} */
+  let bookmarkConfig = null;
+  unsubscribes.push(bookmarkConfigStore.subscribe(value => {
+    bookmarkConfig = value;
+  }));
 
   /** @type {InputFormConfig} */
   let inputFormConfig = null;
@@ -181,6 +195,25 @@
 
   const submitClicked = () => {
     if (verificationCode !== null) return;
+
+    // Warn user that they have un-realized constraints
+    if (constraints.hasNewConstraints) {
+      alert(''.concat('You have set a new preference, but you have not ',
+        'generate new plans with the preference yet. Click "Regenerate" button ',
+        'to generate new plans with your new preference.'
+      ));
+      return;
+    }
+
+    if (bookmarkConfig.plans.size === 0) {
+      alert(''.concat('You need to save at least one plan to submit your task. ',
+        'Keep exploring suggested strategies and click the star icon (next to ',
+        'the plan name) to save ',
+        'plans that you are satisfied with.'
+      ));
+      return;
+    }
+
     constraintRatingFormConfig.show = true;
     constraintRatingFormConfigStore.set(constraintRatingFormConfig);
   };

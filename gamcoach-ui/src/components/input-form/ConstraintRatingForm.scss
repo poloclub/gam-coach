@@ -1,0 +1,63 @@
+@import './InputForm.scss';
+
+.content {
+  max-height: 600px;
+  max-width: 600px;
+  overflow: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.control {
+  .error-message {
+    color: $gray-800;
+  }
+}
+
+.constraint-name {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.constraint-item {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  align-items: center;
+
+  .constraint-item-name {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background-color: $orange-50;
+    color: $orange-800;
+
+    &.difficulty {
+      background-color: $indigo-50;
+      color: $indigo-800;
+    }
+
+    .svg-icon {
+      width: 1rem;
+      height: 1rem;
+      margin: 0 3px;
+    }
+  }
+
+  .constraint-rating {
+    flex: 1 1 auto;
+
+    select {
+      width: 100%;
+    }
+  }
+}
+
+textarea {
+  width: 100%;
+  height: 200px;
+}

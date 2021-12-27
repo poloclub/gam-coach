@@ -256,6 +256,15 @@ export class Constraints {
   /** @type {string[]} */
   allFeatureNames = [];
 
+  /** @type {string[]} */
+  allFeatureDisplayNames = [];
+
+  /** @type {string[]} */
+  allFeatureTransforms = [];
+
+  /** @type {object} */
+  labelEncoder = {};
+
   /**
    * Initialize the Constraints object. It might modify the modelData as some
    * features only allow increasing/decreasing features. The initializer would
@@ -266,11 +275,20 @@ export class Constraints {
   constructor(modelData, curExample) {
     this.difficulties = new Map();
     this.acceptableRanges = new Map();
+    this.labelEncoder = {};
+
+    console.log(modelData);
 
     // Iterate through the features to search for pre-defined constraints
     modelData.features.forEach((f, i) => {
       if (f.type === 'continuous' || f.type === 'categorical') {
         this.allFeatureNames.push(f.name);
+        this.allFeatureDisplayNames.push(f.description.displayName);
+        this.allFeatureTransforms.push(f.config.usesTransform);
+
+        if (f.type === 'categorical') {
+          this.labelEncoder[f.name] = f.description.levelDescription;
+        }
 
         if (f.config.difficulty !== 3) {
           this.difficulties.set(f.name, difficultyTextMap[f.config.difficulty]);
@@ -311,9 +329,9 @@ export class Constraints {
 
     const scoreMap = {
       'very-easy': 0.1,
-      'easy': 0.5,
-      'neutral': 1,
-      'hard': 2,
+      easy: 0.5,
+      neutral: 1,
+      hard: 2,
       'very-hard': 10
     };
 
@@ -335,7 +353,7 @@ export class Constraints {
     const featureDiffs = new Set(this.difficulties.values());
 
     if (featureDiffs.has('lock')) {
-      this.allFeatureNames.forEach(d => {
+      this.allFeatureNames.forEach((d) => {
         if (!this.difficulties.has(d) || this.difficulties.get(d) !== 'lock') {
           featureToVary.push(d);
         }

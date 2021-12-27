@@ -34,11 +34,11 @@ introduction:
 tool:
   pre:
     - >
-      GAM Coach is a web-based interactive tool that helps users identify
-      strategies to obtain a desirable AI decision (e.g., loan application
+      GAM Coach is a web-based interactive tool that <strong>helps users identify
+      strategies to obtain a desirable AI decision</strong> (e.g., loan application
       approval). These strategies can be "if you increase your FICO score
       (credit score) by 3 points, and increase your credit utilization by 2.65%,
-      you will get the loan." (figure below)
+      you will get the loan."
   after:
     - >
       In this scenario, you are a loan applicant whose application is rejected
@@ -50,8 +50,8 @@ tool:
       <code>FICO score</code> is one feature, and it has your value
       <code>650</code>.
     - >
-      GAM Coach uses all these features and values to compute best strategies
-      that you can apply to get the next loan. In addition, you can tell GAM
+      GAM Coach uses all these features and values to identify the best strategies
+      that you can use to get the next loan. In addition, you can tell GAM
       Coach what features are easier to change than others. For example, maybe
       it's easier for you to change your <code>FICO score</code> than changing
       <code>employment length</code>, and maybe you only want to change
@@ -92,11 +92,8 @@ task:
   main: >
     The main task in this HIT is to <strong>pretend to be a real user</strong>
     and use GAM Coach until you find a strategy (or strategies) that you are
-    satisfied with. The strategy can be anything. It can be one of the first
-    five initial strategies, or a follow-up strategy that meets your specified
-    preference. <strong>There is no right answer</strong>, just use GAM Coach as
+    satisfied with. <strong>There is no right answers</strong>, just use GAM Coach as
     you are a real loan applicant who hopes to find a good strategy to improve.
-    😄
   gap: >
     Here are some concrete steps to help you complete the HIT:
   list:

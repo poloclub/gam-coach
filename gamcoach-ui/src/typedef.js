@@ -18,7 +18,7 @@
  * @property {string | null} transform A string from ['log10'] or null
  * @property {object} description Description of the feature and its levels (
  *  if the feature has categorical values)
-*/
+ */
 
 /**
  * @typedef {Object} Plans
@@ -64,8 +64,24 @@
  */
 
 /**
+ * @typedef {Object} ConstraintRating
+ * @property {string} featureName The name of the constraint
+ * @property {string} difficultyRating The numerical score ('1' - '3') of the
+ * plan
+ * @property {string} rangeRating The numerical score ('1' - '3') of the plan
+ * @property {string} emptyReason The reason why there is no preference set
+ */
+
+/**
  * @typedef {Object} RatingFormConfig
  * @property {boolean} show True if the bookmark panel is shown
  * @property {PlanRating[]} planRatings A list of plan ratings
+ * @property {string} action Value from ['submit']
+ */
+
+/**
+ * @typedef {Object} ConstraintRatingFormConfig
+ * @property {boolean} show True if the rating panel is shown
+ * @property {ConstraintRating[]} constraintRatings A list of constraint ratings
  * @property {string} action Value from ['submit']
  */

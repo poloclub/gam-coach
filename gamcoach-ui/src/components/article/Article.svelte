@@ -6,6 +6,7 @@
   import ConfirmModal from '../confirm-modal/ConfirmModal.svelte';
   import InputForm from '../input-form/InputForm.svelte';
   import RatingForm from '../input-form/RatingForm.svelte';
+  import ConstraintRatingForm from '../input-form/ConstraintRatingForm.svelte';
   import BookmarkPanel from '../bookmark-panel/BookmarkPanel.svelte';
   import Tooltip from '../Tooltip.svelte';
 
@@ -265,21 +266,16 @@
     <ConfirmModal/>
     <InputForm />
     <RatingForm />
+    <ConstraintRatingForm />
     <BookmarkPanel windowLoaded={windowLoaded} logger={logger}/>
   </div>
 
   <div class='article'>
 
-    <h2 id='introduction'>Introduction</h2>
+    <!-- <h2 id='introduction'>Introduction</h2>
     {#each text.introduction.main as p}
       <p>{@html p}</p>
-    {/each}
-
-    <div class='important-note'>
-      <p class='title'>Important Note</p>
-      <p class='content'>{@html text.introduction.important}</p>
-    </div>
-
+    {/each} -->
 
     <h2 id='tool'>What is GAM Coach?</h2>
     {#each text.tool.pre as p}
@@ -289,6 +285,11 @@
     {#each text.tool.after as p}
       <p>{@html p}</p>
     {/each}
+
+    <div class='important-note'>
+      <p class='title'>Important Note</p>
+      <p class='content'>{@html text.introduction.important}</p>
+    </div>
 
     <h2 id='tutorial'>What Can I Do with GAM Coach?</h2>
     <p>{@html text.feature.main}</p>

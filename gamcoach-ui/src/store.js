@@ -12,6 +12,8 @@ export const tooltipConfigStore = writable({
   mouseoverTimeout: null
 });
 
+export const constraintsStore = writable(null);
+
 export const diffPickerConfigStore = writable({
   feature: null,
   focusOutTime: 0,
@@ -54,6 +56,12 @@ export const inputFormConfigStore = writable({
 export const ratingFormConfigStore = writable({
   show: false,
   planRatings: [],
+  action: ''
+});
+
+export const constraintRatingFormConfigStore = writable({
+  show: false,
+  constraintRatings: [],
   action: ''
 });
 

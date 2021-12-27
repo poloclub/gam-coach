@@ -13,7 +13,7 @@
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
   import { tooltipConfigStore, inputFormConfigStore,
-    ebmStore } from '../../store';
+    ebmStore, constraintsStore } from '../../store';
 
   export let windowLoaded = false;
   export let curExample = null;
@@ -49,8 +49,6 @@
   /** @type {Constraints} */
   let constraints = null;
 
-  let constraintsStore = null;
-
   /**
    * Workaround to trigger an update to the plans variable.
    * @param {Plans} newPlans
@@ -78,7 +76,7 @@
     // the acceptance range based on the curExample)
     constraints = new Constraints(modelData, curExample);
 
-    constraintsStore = writable(constraints);
+    constraintsStore.set(constraints);
     unsubscribes.push(
       constraintsStore.subscribe(value => {
         constraints = value;

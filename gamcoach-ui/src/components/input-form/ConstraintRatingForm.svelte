@@ -7,6 +7,7 @@
   import { bookmarkConfigStore, constraintRatingFormConfigStore,
     constraintsStore } from '../../store';
   import { Constraints } from '../coach/Coach';
+  import { getConstraintList } from './ConstraintRatingForm';
 
   import closeIcon from '../../img/icon-close.svg';
   import easyIcon from '../../img/icon-easy.svg';
@@ -45,111 +46,46 @@
     constraints = value;
   });
 
-  /**
-   * Get a list of user specified constraints
-   * @param {Constraints} constraints
-   */
-  const getConstraintList = (constraints) => {
-    const constraintList = [];
-    if (constraints === null) return [];
-
-    constraints.acceptableRanges.forEach((acceptableRange, featureName) => {
-      if (!(featureName === 'earliest_cr_line')) {
-      // if (true) {
-        constraintList.push ({
-          featureName,
-          acceptableRange
-        });
-      }
-    });
-
-    const existingFeatures = new Set(constraintList.map(d => d.featureName));
-
-    constraints.difficulties.forEach((difficulty, featureName) => {
-      let skipCur = false;
-      if (featureName === 'delinq_2yrs' && difficulty === 'very-hard') {
-        skipCur = true;
-      }
-      if (featureName === 'pub_rec' && difficulty === 'very-hard') {
-        skipCur = true;
-      }
-      if (featureName === 'pub_rec_bankruptcies' && difficulty === 'very-hard') {
-        skipCur = true;
-      }
-
-      if (!skipCur) {
-        // This feature is already added
-        if (existingFeatures.has(featureName)) {
-          constraintList.filter(d => d.featureName === featureName)[0]
-            .difficulty = difficulty;
-        } else {
-          constraintList.push({
-            featureName,
-            difficulty
-          });
-        }
-      }
-    });
-
-    // Translate values to readable texts
-    constraintList.forEach((c, i) => {
-      // Translate feature name to display name
-      constraintList[i].displayName = constraints.allFeatureDisplayNames[
-        constraints.allFeatureNames.indexOf(c.featureName)
-      ];
-
-      // Translate the acceptable range of categorical features
-      if (constraints.labelEncoder[c.featureName] !== undefined &&
-        c.acceptableRange !== undefined
-      ) {
-        constraintList[i].acceptableRangeText = JSON
-          .stringify(c.acceptableRange.map(
-            d => constraints.labelEncoder[c.featureName][d])
-          );
-      }
-
-      // Translate the acceptable range of cont features that use transform
-      if (constraints.labelEncoder[c.featureName] === undefined &&
-        constraints.allFeatureTransforms[
-          constraints.allFeatureNames.indexOf(c.featureName)] === 'log10'
-      ) {
-        constraintList[i].acceptableRangeText = `From ${
-          Math.pow(10, c.acceptableRange[0])
-        } to ${
-          Math.pow(10, c.acceptableRange[1])
-        }`;
-      }
-
-      // Translate the acceptable range of cont features that do not use transform
-      if (constraints.labelEncoder[c.featureName] === undefined &&
-        constraints.allFeatureTransforms[
-          constraints.allFeatureNames.indexOf(c.featureName)] === null
-      ) {
-        constraintList[i].acceptableRangeText = `From ${
-          c.acceptableRange[0]
-        } to ${
-          c.acceptableRange[1]
-        }`;
-      }
-
-      // Initialize the rating map
-      constraintRatingMap[c.featureName] = {
-        difficulty: '0',
-        acceptableRange: '0'
-      };
-    });
-
-    return constraintList;
-  };
-
   constraintRatingFormConfigStore.subscribe(value => {
     constraintRatingFormConfig = value;
 
     if (constraintRatingFormConfig.show) {
       constraintList = getConstraintList(constraints);
-      console.log(constraintList);
+
+      // Initialize the rating map
+      constraintList.forEach(c => {
+        constraintRatingMap[c.featureName] = {
+          difficulty: c.difficulty === undefined ? '-1' : '0',
+          acceptableRange: c.acceptableRange === undefined ? '-1': '0'
+        };
+      });
     }
   });
+
+  /**
+   * Return true if users can submit the rating form
+   * @param {Object.<string, any>} constraintRatingMap
+   * @param {string} emptyReason
+   */
+  const canSubmit = (constraintRatingMap, emptyReason) => {
+    let canSubmit = true;
+
+    Object.keys(constraintRatingMap).forEach((featureName) => {
+      if (constraintRatingMap[featureName].difficulty === '0') {
+        canSubmit = false;
+      }
+
+      if (constraintRatingMap[featureName].acceptableRange === '0') {
+        canSubmit = false;
+      }
+    });
+
+    if (Object.keys(constraintRatingMap).length === 0 && emptyReason === '') {
+      canSubmit = false;
+    }
+
+    return canSubmit;
+  };
 
   const cancelClicked = () => {
     constraintRatingFormConfig.show = false;
@@ -157,9 +93,9 @@
   };
 
   const confirmClicked = () => {
-    // if (!canSubmit(bookmarkConfig, planRatingsMap)) {
-    //   return;
-    // }
+    if (!canSubmit(constraintRatingMap, emptyReason)) {
+      return;
+    }
 
     // Convert local ratings to store
     constraintRatingFormConfig.constraintRatings = [];
@@ -195,12 +131,6 @@
       { class: 'icon-close', svg: closeIcon }
     ];
     bindInlineSVG(component, iconList);
-
-    setTimeout(() => {
-      constraintRatingFormConfig.show = true;
-      constraintRatingFormConfigStore.set(constraintRatingFormConfig);
-      console.log(constraints);
-    }, 1000);
   });
 
 </script>
@@ -242,7 +172,7 @@
       ></textarea>
 
     {:else}
-
+      <span class='label'>How important is each specified preference?</span>
       {#each constraintList as constraint}
         <div class='constraint-row'>
           <div class='constraint-name'>
@@ -290,7 +220,7 @@
 
   <div class='control'>
 
-    <div class='error-message' class:out-range={true}>
+    <div class='error-message' class:out-range={!canSubmit(constraintRatingMap, emptyReason)}>
       Complete all fields to proceed
     </div>
 
@@ -301,7 +231,7 @@
     </div>
 
     <div class='button button-confirm'
-      class:out-range={true}
+      class:out-range={!canSubmit(constraintRatingMap, emptyReason)}
       on:click={() => confirmClicked()}
     >
       Next

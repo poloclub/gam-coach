@@ -16,7 +16,7 @@
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
   import { tooltipConfigStore, inputFormConfigStore,
-    ratingFormConfigStore } from '../../store';
+    ratingFormConfigStore, constraintRatingFormConfigStore } from '../../store';
   import { random } from '../../utils/utils';
 
   import pointArrowSVG from '../../img/point-arrow.svg';
@@ -129,6 +129,29 @@
     })
   );
 
+  /** @type {ConstraintRatingFormConfig}*/
+  let constraintRatingFormConfig = null;
+  unsubscribes.push(
+    constraintRatingFormConfigStore.subscribe(value => {
+      constraintRatingFormConfig = value;
+
+      // If the users have reviewed all constraints, we put the review in the log
+      // proceed to show the plan review
+      if (constraintRatingFormConfig.action === 'proceed') {
+
+        logger?.addRecord('constraintRating',
+          constraintRatingFormConfig.constraintRatings);
+
+        constraintRatingFormConfig.action = '';
+        constraintRatingFormConfigStore.set(constraintRatingFormConfig);
+
+        // Show the plan review window
+        ratingFormConfig.show = true;
+        ratingFormConfigStore.set(ratingFormConfig);
+      }
+    })
+  );
+
   const refreshClicked = () => {
     // Resample the cur example
     curIndex = random(0, samples.length - 1);
@@ -158,9 +181,8 @@
 
   const submitClicked = () => {
     if (verificationCode !== null) return;
-
-    ratingFormConfig.show = true;
-    ratingFormConfigStore.set(ratingFormConfig);
+    constraintRatingFormConfig.show = true;
+    constraintRatingFormConfigStore.set(constraintRatingFormConfig);
   };
 
   onMount(() => {

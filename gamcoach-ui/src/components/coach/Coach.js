@@ -263,7 +263,7 @@ export class Constraints {
   allFeatureTransforms = [];
 
   /** @type {object} */
-  labelEncoder = {};
+  labelDecoder = {};
 
   /**
    * Initialize the Constraints object. It might modify the modelData as some
@@ -275,7 +275,7 @@ export class Constraints {
   constructor(modelData, curExample) {
     this.difficulties = new Map();
     this.acceptableRanges = new Map();
-    this.labelEncoder = {};
+    this.labelDecoder = {};
 
     console.log(modelData);
 
@@ -287,7 +287,16 @@ export class Constraints {
         this.allFeatureTransforms.push(f.config.usesTransform);
 
         if (f.type === 'categorical') {
-          this.labelEncoder[f.name] = f.description.levelDescription;
+          const labelDecoder = {};
+
+          Object.entries(modelData.labelEncoder[f.name]).forEach(
+            ([level, levelName]) => {
+              labelDecoder[levelName] =
+                f.description.levelDescription[level].displayName;
+            }
+          );
+
+          this.labelDecoder[f.name] = labelDecoder;
         }
 
         if (f.config.difficulty !== 3) {

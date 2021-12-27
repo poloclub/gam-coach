@@ -2,12 +2,16 @@
 
 .content {
   max-height: 600px;
-  max-width: 600px;
+  max-width: 500px;
   overflow: auto;
 
   display: flex;
   flex-direction: column;
   gap: 15px;
+
+  .label {
+    font-size: 1rem;
+  }
 }
 
 .control {
@@ -21,14 +25,21 @@
   margin-bottom: 5px;
 }
 
+.constraint-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .constraint-item {
   display: flex;
   width: 100%;
   gap: 10px;
   align-items: center;
+  justify-content: flex-start;
 
   .constraint-item-name {
-    flex: 1 1 auto;
+    flex-grow: 1;
     display: flex;
     align-items: center;
     padding: 2px 4px;
@@ -49,7 +60,7 @@
   }
 
   .constraint-rating {
-    flex: 1 1 auto;
+    flex-shrink: 0;
 
     select {
       width: 100%;

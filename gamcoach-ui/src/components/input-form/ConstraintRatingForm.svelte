@@ -168,7 +168,7 @@
 
       <label for='empty-reason'>Explain why you chose not to set any preferences.
         Your explanation should emphasize why setting preferences is not helpful
-        or necessary <strong>for your</strong>.
+        or necessary <strong>in your case</strong>.
       </label>
       <textarea id='empty-reason' placeholder='I did not set any preferences, because...'
         bind:value={emptyReason}

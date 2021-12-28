@@ -302,7 +302,7 @@
   <div class='control'>
 
     <div class='error-message' class:out-range={!canSubmit(bookmarkConfig, planRatingsMap)}>
-      Review and rate all plans to submit
+      Review and rate all plans to submit or go back
     </div>
 
     <div class='button button-cancel'

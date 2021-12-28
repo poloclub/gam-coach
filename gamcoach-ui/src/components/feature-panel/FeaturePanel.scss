@@ -51,7 +51,7 @@
 .row-header {
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   background-color: white;
   opacity: 0.95;
@@ -67,6 +67,57 @@
     font-size: 1rem;
     font-weight: 400;
     color: $gray-600;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  #hidden-select {
+    display: none;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  .select {
+    position: relative;
+    border-radius: 4px;
+    border: 1px solid $gray-light-border;
+    margin: 0 4px;
+    line-height: 1.2;
+
+    select {
+      padding: 0 16px 0 6px;
+      margin: 0px;
+      border: none;
+      position: relative;
+      background-color: transparent;
+      color: $gray-600;
+      background-color: white;
+      font-weight: 400;
+
+      -moz-appearance: none;
+      -webkit-appearance: none;
+    }
+
+    &::after {
+      right: 6px;
+
+      $select-border-color: $gray-600;
+      border-right: 2px solid $select-border-color;
+      border-top: 2px solid $select-border-color;
+
+      content: '';
+      display: block;
+      height: 6px;
+      width: 6px;
+      pointer-events: none;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%) rotate(135deg);
+      transform-origin: center;
+    }
   }
 
   .svg-icon {

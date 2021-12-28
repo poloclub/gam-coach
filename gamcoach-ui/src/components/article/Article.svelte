@@ -53,6 +53,9 @@
     'Source Verified', 'debt_consolidation', 20.47, '0', 16.0, '0', 11.0, '0',
     4.041451902647006, 57.7, 21.0, 'Individual', '0', '0', 677.0];
 
+  curIndex = 63;
+  curExample = samples[curIndex];
+
   // curIndex = random(0, samples.length - 1);
   // curExample = samples[curIndex];
 
@@ -183,7 +186,7 @@
     updated = false;
     curExample = newExample;
 
-    // console.log(logger?.toJSON());
+    console.log(logger?.toJSON());
   };
 
   const editClicked = () => {
@@ -262,7 +265,7 @@
           >
             {@html iconEditSVG}
           </div>
-          <div class='svg-icon no-display'
+          <div class='svg-icon'
             title='Try a random input sample'
             on:click={() => refreshClicked()}
           >

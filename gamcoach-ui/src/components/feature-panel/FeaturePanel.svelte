@@ -33,6 +33,7 @@
   /** @type {HTMLElement}*/
   let component = null;
   let initialized = false;
+  let mounted = false;
 
   /** @type {Plan} */
   let plan = null;
@@ -52,6 +53,8 @@
   /** @type {FeatureGrid} */
   let featureGrid = new FeatureGrid();
 
+  let maxFeatureNum = 'null';
+
   // Set up the GAM Coach feature cards
   const initFeatureCards = () => {
     initialized = true;
@@ -68,6 +71,12 @@
         constraints = value;
       })
     );
+
+    if (constraints.maxNumFeaturesToVary === null) {
+      maxFeatureNum = 'null';
+    } else {
+      maxFeatureNum = `${constraints.maxNumFeaturesToVary}`;
+    }
 
     // Organize the features into corresponding sections
     featureGrid.loadFeatures(plan.features, constraints);
@@ -94,6 +103,57 @@
 
     // Update the store
     planStore.set(plan);
+  };
+
+  const maxFeatureNumChanged = () => {
+    resizeFeatureSelect();
+
+    if (constraints === null) return;
+
+    const oldValue = constraints.maxNumFeaturesToVary;
+
+    // Update the constraints
+    if (maxFeatureNum === 'null') {
+      constraints.maxNumFeaturesToVary = null;
+    } else {
+      constraints.maxNumFeaturesToVary = parseInt(maxFeatureNum);
+    }
+    constraintsStore.set(constraints);
+
+    logger?.addLog({
+      eventName: 'feature num changed',
+      elementName: 'select',
+      valueName: 'maxNumFeaturesToVary',
+      oldValue,
+      newValue: constraints.maxNumFeaturesToVary
+    });
+  };
+
+  /**
+   * Change the width of the select button so it fits the current content
+   */
+  const resizeFeatureSelect = () => {
+    const optionMap = {
+      'null': 'any number of',
+      '1': 'at most one',
+      '2': 'at most two',
+      '3': 'at most three',
+      '4': 'at most four',
+    };
+
+    const hiddenSelect = d3.select(component)
+      .select('#hidden-select')
+      .style('display', 'initial');
+
+    hiddenSelect.select('#hidden-option')
+      .text(optionMap[maxFeatureNum]);
+
+    const selectWidth = hiddenSelect.node().clientWidth + 5 + 'px';
+    hiddenSelect.style('display', 'none');
+
+    d3.select(component)
+      .select('#feature-num-select')
+      .style('width', selectWidth);
   };
 
   /**
@@ -167,6 +227,7 @@
   };
 
   onMount(() => {
+    mounted = true;
     const iconList = [];
     bindInlineSVG(component, iconList);
   });
@@ -176,6 +237,7 @@
   });
 
   $: windowLoaded && planStore && !initialized && initFeatureCards();
+  $: mounted && maxFeatureNum && maxFeatureNumChanged();
 
 </script>
 
@@ -188,6 +250,23 @@
   <div class='card-block'>
     <div class='row-header'>
       <span class='label'>Suggested Changes</span>
+      <span class='label'>New plans can change
+        <div class='select' id='hidden-select'>
+          <select>
+            <option id='hidden-option'></option>
+          </select>
+        </div>
+        <div class='select'>
+          <select id='feature-num-select' bind:value={maxFeatureNum}>
+            <option value='null'>any number of</option>
+            <option value='1'>at most one</option>
+            <option value='2'>at most two</option>
+            <option value='3'>at most three</option>
+            <option value='4'>at most four</option>
+          </select>
+        </div>
+        {maxFeatureNum === '1' ? 'feature' : 'features'}
+      </span>
     </div>
 
     <div class='card-row'>

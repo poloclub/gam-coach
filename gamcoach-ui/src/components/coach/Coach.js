@@ -267,6 +267,9 @@ export class Constraints {
 
   hasNewConstraints = true;
 
+  /** @type {number | null} */
+  maxNumFeaturesToVary = null;
+
   /**
    * Initialize the Constraints object. It might modify the modelData as some
    * features only allow increasing/decreasing features. The initializer would
@@ -382,7 +385,8 @@ export class Constraints {
     return {
       difficulties: Array.from(this.difficulties.entries()),
       acceptableRanges: Array.from(this.acceptableRanges.entries()),
-      allFeatureNames: this.allFeatureNames.slice()
+      allFeatureNames: this.allFeatureNames.slice(),
+      maxNumFeaturesToVary: this.maxNumFeaturesToVary
     };
   }
 }
@@ -474,37 +478,43 @@ export const initPlans = async (
     featuresToVary: constraints.featuresToVary,
     featureRanges: constraints.featureRanges,
     featureWeightMultipliers: constraints.featureWeightMultipliers,
-    verbose: 0
+    verbose: 0,
+    maxNumFeaturesToVary: constraints.maxNumFeaturesToVary
   });
   console.timeEnd(`Plan ${tempPlans.nextPlanIndex} generated`);
 
   // If the plan only uses one feature, we store it to a set and avoid future
   // plans that only uses that feature
-  if (cfs.activeVariables[0].length === 1) {
+  if (cfs.isSuccessful && cfs.activeVariables[0].length === 1) {
     const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
     singleFeatures.add(curFeature);
   }
 
-  // Convert the plan into a plan object
-  let curPlan = new Plan(
-    modelData,
-    curExample,
-    plans,
-    cfs.isSuccessful ? cfs.data[0] : curExample,
-    tempPlans.nextPlanIndex
-  );
+  let curPlan;
+  let curPlanStore;
 
-  // Log the current plan
-  logger?.addRecord(
-    `plan${tempPlans.nextPlanIndex}`,
-    curPlan.getCleanPlanCopy()
-  );
+  if (cfs.isSuccessful) {
+    // Convert the plan into a plan object
+    curPlan = new Plan(
+      modelData,
+      curExample,
+      plans,
+      cfs.isSuccessful ? cfs.data[0] : curExample,
+      tempPlans.nextPlanIndex
+    );
 
-  // Record the plan as a store and attach it to plans with the planIndex as
-  // a key
-  let curPlanStore = writable(curPlan);
-  plans.planStores.set(tempPlans.nextPlanIndex, curPlanStore);
-  plansUpdated(plans);
+    // Log the current plan
+    logger?.addRecord(
+      `plan${tempPlans.nextPlanIndex}`,
+      curPlan.getCleanPlanCopy()
+    );
+
+    // Record the plan as a store and attach it to plans with the planIndex as
+    // a key
+    curPlanStore = writable(curPlan);
+    plans.planStores.set(tempPlans.nextPlanIndex, curPlanStore);
+    plansUpdated(plans);
+  }
 
   // Handle failure case
   if (!cfs.isSuccessful) {
@@ -535,7 +545,7 @@ export const initPlans = async (
     console.timeEnd(`Plan ${tempPlans.nextPlanIndex + i} generated`);
 
     // If the new plan uses only one feature, we mute it and repeat again
-    if (cfs.activeVariables[0].length === 1) {
+    if (cfs.isSuccessful && cfs.activeVariables[0].length === 1) {
       const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
       if (singleFeatures.has(curFeature)) {
         i--;
@@ -545,23 +555,25 @@ export const initPlans = async (
       }
     }
 
-    // Get the plan object
-    curPlan = new Plan(
-      modelData,
-      curExample,
-      plans,
-      cfs.isSuccessful ? cfs.data[0] : curExample,
-      tempPlans.nextPlanIndex + i
-    );
-    curPlanStore = writable(curPlan);
-    plans.planStores.set(tempPlans.nextPlanIndex + i, curPlanStore);
-    plansUpdated(plans);
+    if (cfs.isSuccessful) {
+      // Get the plan object
+      curPlan = new Plan(
+        modelData,
+        curExample,
+        plans,
+        cfs.isSuccessful ? cfs.data[0] : curExample,
+        tempPlans.nextPlanIndex + i
+      );
+      curPlanStore = writable(curPlan);
+      plans.planStores.set(tempPlans.nextPlanIndex + i, curPlanStore);
+      plansUpdated(plans);
 
-    // Log the current plan
-    logger?.addRecord(
-      `plan${tempPlans.nextPlanIndex + i}`,
-      curPlan.getCleanPlanCopy()
-    );
+      // Log the current plan
+      logger?.addRecord(
+        `plan${tempPlans.nextPlanIndex + i}`,
+        curPlan.getCleanPlanCopy()
+      );
+    }
 
     // Handle failure case
     if (!cfs.isSuccessful) {
@@ -638,7 +650,8 @@ export const regeneratePlans = async (
     featuresToVary: constraints.featuresToVary,
     featureRanges: constraints.featureRanges,
     featureWeightMultipliers: constraints.featureWeightMultipliers,
-    verbose: 0
+    verbose: 0,
+    maxNumFeaturesToVary: constraints.maxNumFeaturesToVary
   });
   console.timeEnd(`Plan ${plans.nextPlanIndex} generated`);
 
@@ -652,24 +665,29 @@ export const regeneratePlans = async (
   // Step 3: Update the active plan index
   plans.activePlanIndex = plans.nextPlanIndex;
 
-  // Convert the plan into a plan object
-  let curPlan = new Plan(
-    modelData,
-    curExample,
-    plans,
-    cfs.isSuccessful ? cfs.data[0] : curExample,
-    plans.nextPlanIndex
-  );
-  console.log(curPlan);
+  let curPlan;
+  let curPlanStore;
 
-  // Record the plan as a store and attach it to plans with the planIndex as
-  // a key
-  let curPlanStore = writable(curPlan);
-  plans.planStores.set(plans.nextPlanIndex, curPlanStore);
-  plansUpdated(plans);
+  if (cfs.isSuccessful) {
+    // Convert the plan into a plan object
+    curPlan = new Plan(
+      modelData,
+      curExample,
+      plans,
+      cfs.isSuccessful ? cfs.data[0] : curExample,
+      plans.nextPlanIndex
+    );
+    console.log(curPlan);
 
-  // Log the current plan
-  logger?.addRecord(`plan${plans.nextPlanIndex}`, curPlan.getCleanPlanCopy());
+    // Record the plan as a store and attach it to plans with the planIndex as
+    // a key
+    curPlanStore = writable(curPlan);
+    plans.planStores.set(plans.nextPlanIndex, curPlanStore);
+    plansUpdated(plans);
+
+    // Log the current plan
+    logger?.addRecord(`plan${plans.nextPlanIndex}`, curPlan.getCleanPlanCopy());
+  }
 
   // Handle failure case
   if (!cfs.isSuccessful) {
@@ -696,7 +714,7 @@ export const regeneratePlans = async (
     console.timeEnd(`Plan ${plans.nextPlanIndex + i} generated`);
 
     // If the new plan uses only one feature, we mute it and repeat again
-    if (cfs.activeVariables[0].length === 1) {
+    if (cfs.isSuccessful && cfs.activeVariables[0].length === 1) {
       const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
       if (singleFeatures.has(curFeature)) {
         i--;
@@ -706,28 +724,31 @@ export const regeneratePlans = async (
       }
     }
 
-    // Get the plan object
-    curPlan = new Plan(
-      modelData,
-      curExample,
-      plans,
-      cfs.isSuccessful ? cfs.data[0] : curExample,
-      plans.nextPlanIndex + i
-    );
+    if (cfs.isSuccessful) {
+      // Get the plan object
+      curPlan = new Plan(
+        modelData,
+        curExample,
+        plans,
+        cfs.isSuccessful ? cfs.data[0] : curExample,
+        plans.nextPlanIndex + i
+      );
 
-    curPlanStore = writable(curPlan);
-    plans.planStores.set(plans.nextPlanIndex + i, curPlanStore);
-    plansUpdated(plans);
+      curPlanStore = writable(curPlan);
+      plans.planStores.set(plans.nextPlanIndex + i, curPlanStore);
+      plansUpdated(plans);
 
-    // Log the current plan
-    logger?.addRecord(
-      `plan${plans.nextPlanIndex + i}`,
-      curPlan.getCleanPlanCopy()
-    );
+      // Log the current plan
+      logger?.addRecord(
+        `plan${plans.nextPlanIndex + i}`,
+        curPlan.getCleanPlanCopy()
+      );
+    }
 
     // Handle failure case
     if (!cfs.isSuccessful) {
       for (let j = plans.nextPlanIndex + i; j < plans.nextPlanIndex + 5; j++) {
+        console.log(j);
         plans.failedPlans.add(j);
         plansUpdated(plans);
       }

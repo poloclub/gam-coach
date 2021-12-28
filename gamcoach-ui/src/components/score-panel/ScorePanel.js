@@ -138,9 +138,7 @@ export class ScorePanel {
   get isInRange() {
     // Binary classification
     if (this.minThreshold === this.maxThreshold) {
-      // JSON Weights are rounded to 6 digit, so in rare cases there might be
-      // numerical errors
-      return round(this.curValue, 3) >= this.minThreshold;
+      return this.curValue >= this.minThreshold;
     } else {
       // Regression
       return (

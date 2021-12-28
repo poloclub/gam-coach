@@ -34,11 +34,11 @@ introduction:
 tool:
   pre:
     - >
-      GAM Coach is a web-based interactive tool that <strong>helps users identify
-      strategies to obtain a desirable AI decision</strong> (e.g., loan application
-      approval). These strategies can be "if you increase your FICO score
-      (credit score) by 3 points, and increase your credit utilization by 2.65%,
-      you will get the loan."
+      GAM Coach is a web-based interactive tool that <strong>helps users
+      identify strategies to obtain a desirable AI decision</strong> (e.g., loan
+      application approval). These strategies can be "if you increase your FICO
+      score (credit score) by 3 points, and increase your credit utilization by
+      2.65%, you will get the loan."
   after:
     - >
       In this scenario, you are a loan applicant whose application is rejected
@@ -50,15 +50,15 @@ tool:
       <code>FICO score</code> is one feature, and it has your value
       <code>650</code>.
     - >
-      GAM Coach uses all these features and values to identify the best strategies
-      that you can use to get the next loan. In addition, you can tell GAM
-      Coach what features are easier to change than others. For example, maybe
-      it's easier for you to change your <code>FICO score</code> than changing
-      <code>employment length</code>, and maybe you only want to change
-      <code>FICO Score</code> in a certain range. As you can see, these strategy
-      preferences vary from user to user, so GAM Coach allows you to specify
-      <strong>your own preference</strong> and generate personalized strategies
-      <strong>just for you.</strong>
+      GAM Coach uses all these features and values to identify the best
+      strategies that you can use to get the next loan. In addition, you can
+      tell GAM Coach what features are easier to change than others. For
+      example, maybe it's easier for you to change your <code>FICO score</code>
+      than changing <code>employment length</code>, and maybe you only want to
+      change <code>FICO Score</code> in a certain range. As you can see, these
+      strategy preferences vary from user to user, so GAM Coach allows you to
+      specify <strong>your own preference</strong> and generate personalized
+      strategies <strong>just for you.</strong>
 
 feature:
   main: >
@@ -67,15 +67,16 @@ feature:
   gap: >
     If you encounter any problems while using GAM Coach, you can click the link
     below to watch a shorter and more specific video explaining how each GAM
-    Coach functionality works.
+    Coach functionality works. You can also <a
+    href="mailto:jayw@gatech.edu">email us</a>.
   list:
     - name: Change initial input values
       id: s-input
     - name: Explore different strategies to get a loan approval
       id: s-explore
     - name: >
-        Experiment with different feature values to see how they affect
-        the application decision
+        Experiment with different feature values to see how they affect the
+        application decision
       id: s-value
     - name: Specify difficulty of different features
       id: s-difficulty
@@ -89,11 +90,74 @@ feature:
       id: s-submit
 
 task:
+  intro: >
+    There are two tasks: (1) Learn how to use GAM Coach, follow the steps below
+    and complete a short quiz on the Google survey; (2) Pretend to be a real
+    user, and keep using GAM Coach until you find a strategy that you would be
+    satisfied with if you were a real user.
+  first: >
+    By default, GAM Coach would load the information of Julia (Applicant #126)
+    and provides suggestions for her to improve future application. Please watch
+    tutorial videos and complete the following steps.
+  firstList:
+    - >
+      Julia is curious about the loan decision process, so she wants to play
+      around with some values to see how that would affect the decisions.
+    - >
+      Click Plan 1, <strong>change the hypothetical value</strong> of <code>FICO
+      score</code> to 662. <em>Answer question 1</em> on the Google survey.
+    - >
+      <strong>Reset</strong> your changes on <code>FICO score</code> by clicking
+      the "reset" button.
+    - >
+      <strong>Try different hypothetical values</strong> of <code>Loan
+      Purpose</code>. <em>Answer question 2</em> on the Google survey.
+    - >
+      Browse Plan 1 to Plan 5. <em>Answer question 3</em> on the Google survey.
+    - >
+      Julia really wants to get the loan, but she is not willing to compromise
+      the amount of loan she can get. Help her by <strong>setting the
+      difficulty</strong> of <code>Loan Amount</code> to "impossible to change",
+      so new plans won't change this feature.
+    - >
+      Click the "Regenerate" button on the top right to generate new plans.
+      <em>Answer question 4</em> on the Google survey.
+    - >
+      Julia notices that no plan is changing her <code>Credit
+      Utilization</code>! It is actually very easy for her to cut down the
+      credit use to a lower range like from 10% to 40%. <strong>Change the
+      acceptable range</strong> of <code>Credit Utilization</code> to "from 10
+      to 40". <strong>Change the difficulty</strong> of <code>Credit
+      Utilization</code> to "very easy".
+    - >
+      Generate new plans. <em>Answer question 5</em> on the Google survey.
+    - >
+      Julia is planning to buy a condo this year, so changing the home ownership
+      status is very easy. <strong>Change the acceptable range</strong> of
+      <code>Home Ownership</code> to "Mortgage" and "Rent". <strong>Change the
+      difficulty</strong> of <code>Home Ownership</code> to "very easy".
+    - >
+      Generate new plans. <em>Answer question 6</em> on the Google survey.
+    - >
+      Julia has found a lot of good strategies, but many of them require her to
+      change multiple features. Julia wonders if it is possible to only change
+      one feature to get the loan. <strong>Change the max number of features a
+      plan can change</strong> to 1.
+    - >
+      Generate new plans. <em>Answer question 7</em> on the Google survey.
+    - >
+      <strong>Bookmark a plan</strong> (any plan) by clicking the star icon next
+      to the plan name. <strong>Download a receipt<strong> and <em>Answer
+      question 8</em> on the Google survey.
+    - >
+      You have completed Task 1. Proceed to the next section in your Google
+      survey.
   main: >
     The main task in this HIT is to <strong>pretend to be a real user</strong>
     and use GAM Coach until you find a strategy (or strategies) that you are
-    satisfied with. <strong>There is no right answers</strong>, just use GAM Coach as
-    you are a real loan applicant who hopes to find a good strategy to improve.
+    satisfied with. <strong>There is no right answers</strong>, just use GAM
+    Coach as you are a real loan applicant who hopes to find a good strategy to
+    improve.
   gap: >
     Here are some concrete steps to help you complete the HIT:
   list:
@@ -129,10 +193,10 @@ task:
     - >
       Done—thank you so much! 🙏
   accept: >
-    We will accept your HIT once (1) we have received your interaction log and strategy
-    data, Google survey, HIT submission under the <strong> same
-    verification code</strong>, (2) the interaction log data and survey
-    response suggest that you have <strong>made effort to pretend to be a real
+    We will accept your HIT once (1) we have received your interaction log and
+    strategy data, Google survey, HIT submission under the <strong> same
+    verification code</strong>, (2) the interaction log data and survey response
+    suggest that you have <strong>made effort to pretend to be a real
     user</strong> using GAM Coach. For example, the survey responses are
     coherent with your interactions with the tool.
 

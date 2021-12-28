@@ -25,7 +25,7 @@
   import iconRefreshSVG from '../../img/icon-refresh3.svg';
   import iconEditSVG from '../../img/icon-edit.svg';
 
-  import text from '../../config/text.yaml';
+  import text from '../../config/text.yml';
   import samples from '../../config/lc-classifier-random-samples.json';
 
   const unsubscribes = [];
@@ -53,8 +53,8 @@
     'Source Verified', 'debt_consolidation', 20.47, '0', 16.0, '0', 11.0, '0',
     4.041451902647006, 57.7, 21.0, 'Individual', '0', '0', 677.0];
 
-  curIndex = 63;
-  curExample = samples[curIndex];
+  // curIndex = 63;
+  // curExample = samples[curIndex];
 
   // curIndex = random(0, samples.length - 1);
   // curExample = samples[curIndex];
@@ -364,7 +364,7 @@
       <track kind='captions'>
     </video>
 
-    <p>{@html text.overview}</p>
+    <!-- <p>{@html text.overview}</p> -->
 
     <p>{@html text.feature.gap}</p>
 
@@ -375,6 +375,18 @@
     </ol>
 
     <h2 id='task'>So, What is My Task?</h2>
+    <p>{@html text.task.intro}</p>
+
+    <h4>Task 1</h4>
+    <p>{@html text.task.first}</p>
+
+    <ol>
+      {#each text.task.firstList as item}
+        <li class='task-list'>{@html item}</li>
+      {/each}
+    </ol>
+
+    <h4>Task 2</h4>
     <p>{@html text.task.main}</p>
     <p>{@html text.task.gap}</p>
 

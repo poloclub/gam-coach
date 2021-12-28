@@ -202,6 +202,14 @@
   color: $teal-700;
 }
 
+.task-list {
+  :global(em) {
+    font-style: normal;
+    font-weight: 600;
+    color: $light-blue-700;
+  }
+}
+
 .no-display {
   display: none;
 }

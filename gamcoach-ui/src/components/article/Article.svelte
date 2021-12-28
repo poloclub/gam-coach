@@ -392,13 +392,32 @@
 
     <ol>
       {#each text.task.list as item}
-        <li>{@html item}</li>
+        <li>{@html item.item}</li>
+        {#if item.list !== null}
+          <ol>
+            {#each item.list as subItem}
+              <li>{@html subItem}</li>
+            {/each}
+          </ol>
+        {/if}
       {/each}
     </ol>
 
     <div class='important-note'>
-      <p class='title'>Important Note</p>
+      <p class='title'>HIT Acceptance Criteria</p>
       <p class='content'>{@html text.task.accept}</p>
+    </div>
+
+    <div class='important-note'>
+      <p class='title'>Bonus Criteria</p>
+      <div class='content'>
+        <p>{@html text.task.bonus.intro}</p>
+        <ol>
+          {#each text.task.bonus.list as item}
+            <li>{@html item}</li>
+          {/each}
+        </ol>
+      </div>
     </div>
 
     <h2 id='detailed-tutorial'>Detailed Tutorial Videos</h2>

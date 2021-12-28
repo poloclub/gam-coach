@@ -94,15 +94,15 @@ task:
     There are two tasks: (1) Learn how to use GAM Coach, follow the steps below
     and complete a short quiz on the Google survey; (2) Pretend to be a real
     user, and keep using GAM Coach until you find a strategy that you would be
-    satisfied with if you were a real user.
+    satisfied with if you were a rejected loan applicant.
   first: >
     By default, GAM Coach would load the information of Julia (Applicant #126)
-    and provides suggestions for her to improve future application. Please watch
+    and provides suggestions for her to improve future applications. Please watch
     tutorial videos and complete the following steps.
   firstList:
     - >
       Julia is curious about the loan decision process, so she wants to play
-      around with some values to see how that would affect the decisions.
+      around with some values to learn how they would affect the loan decision.
     - >
       Click Plan 1, <strong>change the hypothetical value</strong> of <code>FICO
       score</code> to 662. <em>Answer question 1</em> on the Google survey.
@@ -123,9 +123,9 @@ task:
       Click the "Regenerate" button on the top right to generate new plans.
       <em>Answer question 4</em> on the Google survey.
     - >
-      Julia notices that no plan is changing her <code>Credit
+      Julia notices that not a single plan is changing her <code>Credit
       Utilization</code>! It is actually very easy for her to cut down the
-      credit use to a lower range like from 10% to 40%. <strong>Change the
+      credit use to a lower range (e.g., 10% to 40%). <strong>Change the
       acceptable range</strong> of <code>Credit Utilization</code> to "from 10
       to 40". <strong>Change the difficulty</strong> of <code>Credit
       Utilization</code> to "very easy".
@@ -147,58 +147,103 @@ task:
       Generate new plans. <em>Answer question 7</em> on the Google survey.
     - >
       <strong>Bookmark a plan</strong> (any plan) by clicking the star icon next
-      to the plan name. <strong>Download a receipt<strong> and <em>Answer
+      to the plan name. <strong>Download a receipt</strong> and <em>Answer
       question 8</em> on the Google survey.
     - >
       You have completed Task 1. Proceed to the next section in your Google
       survey.
   main: >
-    The main task in this HIT is to <strong>pretend to be a real user</strong>
-    and use GAM Coach until you find a strategy (or strategies) that you are
-    satisfied with. <strong>There is no right answers</strong>, just use GAM
-    Coach as you are a real loan applicant who hopes to find a good strategy to
-    improve.
+    You are now a GAM Coach master, and it is your show time! In this task, you
+    will <strong>pretend to be a real user</strong> and keep using GAM Coach
+    until you find a strategy (or multiple strategies!) that you would be
+    satisfied with if you were a loan applicant. You are free to set any
+    preferences to fit your need. <strong>There are no a right answers</strong>,
+    as the best strategy is different from person to person.
   gap: >
-    Here are some concrete steps to help you complete the HIT:
+    Here are some concrete steps to help you get started:
   list:
-    - >
-      <strong>Click the edit icon</strong> on the left panel to
-      change the initial input values. For example, you can change the input to
-      match someone you know, so the scenario is more <strong>relatable to
-      you</strong>.
-    - >
-      <strong>Imagine to be a real user</strong> and use GAM Coach
-    - >
-      <strong>Click the the star icon</strong> on the plan tabs to bookmark
-      strategies you like
-    - >
-      Once you are satisfied with your bookmarked strategies (one or several),
-      <strong>click the "I'm done" button</strong> on the right panel
-    - >
-      <strong>Rate</strong> your bookmarked strategies and
-      <strong>explain</strong> why you like them
-    - >
-      <strong>Click the "submit" button</strong> to submit the data to us. The
-      data contains your interaction logs (e.g., clicks, hovering, drags) and
-      all generated strategies.
-    - >
-      GAM Coach will generates a unique code (6-digit number) for you,
-      <strong>copy and paste</strong> it in your google survey
-    - >
-      <strong>Answer all questions</strong> in the Google survey and
-      <strong>submit</strong> the survey
-    - >
-      <strong>Paste the code</strong> in MTurk page and <strong>submit</strong>
-      it
-    - >
-      Done—thank you so much! 🙏
+    - item: >
+        <strong>Click the refresh icon</strong> on the left side to change the
+        initial input values to another random loan applicant's values. You
+        <strong>cannot</strong> use Julia's info (Applicant #126) for Task 2.
+      list: null
+    - item: >
+        <strong>Click the edit icon</strong> on the left side to view the
+        current input values. To help you simulate the real-life use case, you
+        can change any input values to mimic your real value or someone you
+        know. You are <strong>required to change</strong> the input value of
+        <strong>at least one feature</strong>.
+      list: null
+    - item: >
+        Repeat step 1 and 2 until you find initial input values that you are
+        comfortable with.
+      list: null
+    - item: >
+        <strong>Imagine to be a real user</strong> and keep using GAM Coach
+        until you find a set of strategies that you would pick if you were a
+        rejected loan applicant.
+      list:
+        - >
+          Remember to save plans you are interested in before generating new
+          plans, because you won't be able to access old unsaved plans.
+        - >
+          You can remove a saved plan by clicking the "Bookmarks" button and
+          then the "trash can" icon next to the plan name. It is helpful when
+          you find better plans in new generations.
+    - item: >
+        Once you are satisfied with your bookmarked strategies, <strong>click
+        the "I'm done" button</strong> on the right side. <strong>Rate and
+        review</strong> your preferences and plans. Then, <strong>click the
+        "submit" button</strong> to send your data to us. The data contains your
+        interaction logs (e.g., clicks, hovering, drags), generated
+        strategies, and all your reviews.
+      list: null
+    - item: >
+        GAM Coach will generates a unique code (6-digit number) for you,
+        <strong>copy and paste</strong> it in your Google survey.
+      list: null
+    - item: >
+        <strong>Answer all questions</strong> in the Google survey and
+        <strong>submit</strong> the survey.
+      list: null
+    - item: >
+        <strong>Paste the code</strong> in MTurk page and
+        <strong>submit</strong> it.
+      list: null
+    - item: >
+        Done—thank you so much!
+      list: null
+
   accept: >
     We will accept your HIT once (1) we have received your interaction log and
     strategy data, Google survey, HIT submission under the <strong> same
-    verification code</strong>, (2) the interaction log data and survey response
-    suggest that you have <strong>made effort to pretend to be a real
-    user</strong> using GAM Coach. For example, the survey responses are
-    coherent with your interactions with the tool.
+    verification code</strong>, (2) you have correctly answered all quiz
+    questions, (3) Your interaction log shows that you have completed all
+    required tasks.
+
+  bonus:
+    intro: >
+      You will get a $2 bonus reward if your responses (interaction log, survey
+      results, preference & plan reviews) show that you have <strong>tried your
+      best</strong> to imagine to be a real user of GAM Coach to help us improve
+      GAM Coach. You will get the bonus if your responses can score at least 10
+      points, based on the following list:
+    list:
+      - >
+        Your interaction log shows that you are engaged with the tool (+3
+        points)
+      - >
+        Your explanations for preferences and plans are well-justified and
+        convincing (+9 points)
+      - >
+        Your explanations show that you have put real effort to imagine to be a
+        real user (+2 points)
+      - >
+        You provide specific feedback to improve GAM Coach or/and the HIT design
+        (+ 5 points)
+      - >
+        You have noticed and reported some "strange" patterns of suggested plans
+        (+ 9 points)
 
 overview: >
   The tutorial video above will help you learn how to use GAM Coach and complete

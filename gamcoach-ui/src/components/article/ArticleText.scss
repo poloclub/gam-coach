@@ -178,6 +178,7 @@ $header-color: currentcolor;
   box-shadow: 0 .2rem .5rem hsla(0, 0%, 0%, 0.05),0 0 .0625rem hsla(0, 0%, 0%, 0.1);
   padding: 0 0.5rem 0.5rem;
   grid-column: text-start / text-end;
+  margin: 15px 0;
 
   .title {
     background-color: $teal-50;

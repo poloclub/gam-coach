@@ -11,6 +11,7 @@
     readPrivateKey } from 'openpgp';
 
   import receiptIcon from '../../img/icon-receipt.svg';
+  import trashIcon from '../../img/icon-trash2.svg';
   import closeIcon from '../../img/icon-close-outline.svg';
 
   export let windowLoaded = false;
@@ -46,6 +47,16 @@
   const closeClicked = () => {
     bookmarkConfig.show = false;
     bookmarkConfig.focusOutTime = Date.now();
+    bookmarkConfigStore.set(bookmarkConfig);
+  };
+
+  /**
+   * Remove the plan from the bookmark
+   * @param {number} planIndex
+   */
+  const deleteClicked = (planIndex) => {
+    bookmarkConfig.plans.delete(planIndex);
+    bookmarkConfig.action = 'delete';
     bookmarkConfigStore.set(bookmarkConfig);
   };
 
@@ -158,7 +169,10 @@
       {#each [...bookmarkConfig.plans] as [planIndex, savedPlan]}
         <div class='plan-row'>
           <div class='plan-title'>
-            Plan {planIndex}
+            <span class='plan-title-name'>Plan {planIndex}</span>
+            <span class='svg-icon delete' on:click={() => deleteClicked(planIndex)}
+              title='Remove this plan'
+              >{@html trashIcon}</span>
           </div>
           {#each savedPlan.getChangeList(bookmarkConfig.features) as item}
             <div class='plan-feature'>

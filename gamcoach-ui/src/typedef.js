@@ -44,6 +44,9 @@
  * @property {Map<number, object>} plans A map from plan index to the saved plan
  * @property {number} focusOutTime Timestamp when the element loses focus
  * @property {Plans} plansInfo The information about all the plans
+ * @property {string} [action] Value from ['addUnpicked', 'delete']
+ * @property {Map<number, object>} [unpickedPlans] A map from plan index to some
+ *  unpicked plans
  */
 
 /**

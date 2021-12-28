@@ -168,6 +168,32 @@ $border-radius: 5px;
 .plan-title {
   font-size: 0.9rem;
   font-weight: 600;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  .svg-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $gray-700;
+    cursor: pointer;
+    pointer-events: fill;
+
+    :global(svg) {
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+
+    &:hover {
+      color: $gray-900;
+    }
+
+    &:active {
+      color: black;
+    }
+  }
 }
 
 .plan-feature {

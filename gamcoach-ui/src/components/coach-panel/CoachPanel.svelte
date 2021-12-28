@@ -94,6 +94,21 @@
         bookmarkConfig.action = undefined;
         bookmarkConfigStore.set(bookmarkConfig);
       }
+
+      if (bookmarkConfig.action === 'delete') {
+        // Sync up the bookmarked plans
+        savedPlanIndex.forEach(planIndex => {
+          console.log(planIndex, bookmarkConfig.plans);
+          console.log(bookmarkConfig.plans.has(planIndex));
+          if (!bookmarkConfig.plans.has(planIndex)) {
+            savedPlanIndex.delete(planIndex);
+            savedPlanIndex = savedPlanIndex;
+          }
+          console.log(savedPlanIndex.has(planIndex));
+        });
+        bookmarkConfig.action = undefined;
+        bookmarkConfigStore.set(bookmarkConfig);
+      }
     })
   );
 

@@ -68,7 +68,7 @@ export class FeatureGrid {
           const labelDecoder = new Map();
           Object.entries(features[i].labelEncoder).forEach(
             ([level, levelName]) => {
-              labelDecoder.set(levelName, level);
+              labelDecoder.set(levelName, parseInt(level));
             }
           );
 

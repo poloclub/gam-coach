@@ -351,10 +351,10 @@
       <p>{@html p}</p>
     {/each}
 
-    <div class='important-note'>
+    <!-- <div class='important-note'>
       <p class='title'>Important Note</p>
       <p class='content'>{@html text.introduction.important}</p>
-    </div>
+    </div> -->
 
     <h2 id='tutorial'>What Can I Do with GAM Coach?</h2>
     <p>{@html text.feature.main}</p>
@@ -411,7 +411,7 @@
     <div class='important-note'>
       <p class='title'>Bonus Criteria</p>
       <div class='content'>
-        <p>{@html text.task.bonus.intro}</p>
+        <p class='content'>{@html text.task.bonus.intro}</p>
         <ol>
           {#each text.task.bonus.list as item}
             <li>{@html item}</li>

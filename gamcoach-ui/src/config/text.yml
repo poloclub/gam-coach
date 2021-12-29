@@ -71,23 +71,25 @@ feature:
     href="mailto:jayw@gatech.edu">email us</a>.
   list:
     - name: Change initial input values
-      id: s-input
+      id: input
     - name: Explore different strategies to get a loan approval
-      id: s-explore
+      id: explore
     - name: >
         Experiment with different feature values to see how they affect the
         application decision
-      id: s-value
+      id: value
     - name: Specify difficulty of different features
-      id: s-difficulty
+      id: difficulty
     - name: Specify the acceptable range of different features
-      id: s-range
+      id: range
     - name: Generate new strategies that meet your preferences
-      id: s-generate
+      id: generate
+    - name: Set the max number of features that plans can change
+      id: max-num
     - name: Bookmark strategies you like and download a "receipt"
-      id: s-download
+      id: download
     - name: Submit the HIT task
-      id: s-submit
+      id: submit
 
 task:
   intro: >
@@ -108,10 +110,13 @@ task:
       score</code> to 662. <em>Answer question 1</em> on the Google survey.
     - >
       <strong>Reset</strong> your changes on <code>FICO score</code> by clicking
-      the "reset" button.
+      the "reset" button (top right of the card).
     - >
       <strong>Try different hypothetical values</strong> of <code>Loan
       Purpose</code>. <em>Answer question 2</em> on the Google survey.
+    - >
+      <strong>Reset</strong> your changes on <code>Loan Purpose</code> by clicking
+      the "reset" button.
     - >
       Browse Plan 1 to Plan 5. <em>Answer question 3</em> on the Google survey.
     - >
@@ -261,27 +266,27 @@ video:
     video: input
     isWide: true
     text: >
-      We highly recommend you to watch this overview video. It shows how a crowd
-      work pretends to be a loan applicant and uses GAM Coach to find good
-      strategies to help future applications.
-  - header: Explore different strategies
-    video: explore
-    isWide: false
-    text: >
       The default GAM Coach input is based on the information from a real
       rejected loan applicant. The initial values might be very different from
       your values. If it can help you imagine being a real user using GAM Coach,
       you can change the input values to mimic your values or someone you know.
-      This step is optional.
-  - header: Change feature values
-    video: value
+  - header: Explore different strategies
+    video: explore
     isWide: false
     text: >
       Every time you ask GAM Coach to generate strategies, it generates 5
       different plans for you. You can click the different tabs to compare and
       explore different plans. If you set some configurations to some feature
       under one tab, the configuration is synced to all other tabs
-      automatically.
+      automatically. <strong>You need to click the regenerate button to apply these new
+      configurations.</strong>
+  - header: Change feature values
+    video: value
+    isWide: false
+    text: >
+      You might want to try out some "hypothetical" values to see how the they
+      would affect your loan decision score. Setting these values does not have
+      any impact on you or new plan generations.
   - header: Specify difficulty
     video: difficulty
     isWide: false
@@ -313,6 +318,13 @@ video:
       constraints. You can keep fine-tuning your specifications and regenerating
       new plans until you find the strategies that work <strong>for
       you</strong>.
+  - header: Max number of features that a plan can change
+    video: max-num
+    isWide: false
+    text: >
+      Some users prefer strategies that only change a few features. You can change
+      the max number of features that a plan can change by clicking the drop
+      down menu on the top right of the tool.
   - header: Bookmark strategies and download a receipt
     video: download
     isWide: false
@@ -328,8 +340,8 @@ video:
     isWide: true
     text: >
       After you find your favorite strategies, you can click the "I'm Done"
-      button to submit. It would ask you to rate your saved plans. Please write
-      a few sentences describing why you choose these strategies and rate them.
-      Next, GAM Coach will show you a unique 6-digit verification code. You want
-      to put the code in the Google Survey as well as the HIT page.
+      button to submit. It would ask you to rate your preferences and plans.
+      Please provide detailed explanations. Next, GAM Coach will show you a
+      unique 6-digit verification code. You need to copy the code in the Google
+      Survey and the HIT page.
 

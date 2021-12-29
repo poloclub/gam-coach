@@ -99,9 +99,10 @@ $header-color: currentcolor;
   padding: .2em .2em;
   margin: 0;
   font-size: 85%;
-  background-color: rgba(27, 31, 35, .05);
+  background-color: $gray-100;
+  color: $pink-600;
   border-radius: 3px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .article :global(kbd) {

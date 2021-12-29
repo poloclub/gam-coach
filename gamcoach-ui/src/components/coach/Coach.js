@@ -677,7 +677,6 @@ export const regeneratePlans = async (
       cfs.isSuccessful ? cfs.data[0] : curExample,
       plans.nextPlanIndex
     );
-    console.log(curPlan);
 
     // Record the plan as a store and attach it to plans with the planIndex as
     // a key
@@ -748,7 +747,6 @@ export const regeneratePlans = async (
     // Handle failure case
     if (!cfs.isSuccessful) {
       for (let j = plans.nextPlanIndex + i; j < plans.nextPlanIndex + 5; j++) {
-        console.log(j);
         plans.failedPlans.add(j);
         plansUpdated(plans);
       }

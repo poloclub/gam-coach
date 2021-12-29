@@ -242,7 +242,7 @@
 
     // Log the interaction
     logger?.addLog({
-      eventName: `(plan${planIndex} clicked`,
+      eventName: `plan${planIndex} clicked`,
       elementName: 'tab'
     });
 

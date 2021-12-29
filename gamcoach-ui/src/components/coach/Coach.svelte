@@ -13,7 +13,7 @@
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
   import { tooltipConfigStore, inputFormConfigStore,
-    ebmStore, constraintsStore } from '../../store';
+    ebmStore, constraintsStore, bookmarkConfigStore } from '../../store';
 
   export let windowLoaded = false;
   export let curExample = null;
@@ -70,6 +70,16 @@
     // Initialize an ebm model
     ebm = new EBM(modelData);
     ebmStore.set(ebm);
+
+    // Re-initialize the bookmark config
+    const bookmarkConfig = {
+      show: false,
+      features: null,
+      plans: new Map(),
+      focusOutTime: 0,
+      plansInfo: null
+    };
+    bookmarkConfigStore.set(bookmarkConfig);
 
     // Initialize the Constraints based on the info provided by model developers
     // Creating the constraints object can change the modelData (setting

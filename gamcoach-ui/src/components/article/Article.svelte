@@ -403,7 +403,7 @@
       {/each}
     </ol>
 
-    <div class='important-note'>
+    <div class='important-note' id='acceptance'>
       <p class='title'>HIT Acceptance Criteria</p>
       <p class='content'>{@html text.task.accept}</p>
     </div>

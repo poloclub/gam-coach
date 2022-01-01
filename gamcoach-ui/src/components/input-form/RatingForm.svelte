@@ -301,9 +301,9 @@
 
   <div class='control'>
 
-    <div class='error-message' class:out-range={!canSubmit(bookmarkConfig, planRatingsMap)}>
-      Review and rate all plans to submit or go back
-    </div>
+    <span class='error-message' class:out-range={!canSubmit(bookmarkConfig, planRatingsMap)}>
+      <strong>Review</strong> and <strong>rate</strong> all plans to submit
+    </span>
 
     <div class='button button-cancel'
       on:click={() => cancelClicked()}

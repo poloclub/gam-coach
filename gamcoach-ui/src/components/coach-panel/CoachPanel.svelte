@@ -278,7 +278,7 @@
     // Need to set a timeout here to wait for the tab transition animation
     setTimeout(() => {
       scorePanelWidth = setScorePanelWidth(component, plans, planLabels);
-    }, 200);
+    }, 300);
   };
 
   /**

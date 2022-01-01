@@ -168,7 +168,6 @@
 <div class='coach-panel-wrapper'>
   <CoachPanel
     bind:plans={plans}
-    windowLoaded={windowLoaded}
     logger={logger}
     on:regenerateClicked={
       () => regeneratePlans(constraints, modelData, curExample, plans,
@@ -184,7 +183,7 @@
       logger={logger}
       planStore={null}
       constraintsStore={constraintsStore}
-      windowLoaded={windowLoaded} />
+    />
   </div>
 {:else}
   {#key plans.activePlanIndex}
@@ -194,7 +193,7 @@
         planStore={plans.planStores.has(plans.activePlanIndex) ?
           plans.planStores.get(plans.activePlanIndex) : null}
         constraintsStore={constraintsStore}
-        windowLoaded={windowLoaded} />
+      />
     </div>
   {/key}
 {/if}

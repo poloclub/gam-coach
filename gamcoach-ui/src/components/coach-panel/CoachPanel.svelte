@@ -17,7 +17,6 @@
   import starIconSolid from '../../img/icon-star-solid.svg';
   import starIconOutline from '../../img/icon-star-outline.svg';
 
-  export let windowLoaded = false;
   /** @type {Logger} */
   export let logger = null;
 
@@ -311,7 +310,6 @@
     plans.planStores.forEach((planStore, planIndex) => {
       // Add this plan index to a local array and subscribe the store
       if (!localPlans.has(planIndex)) {
-
         unsubscribes.push(planStore.subscribe(
           value => planStoreUpdated(value, planIndex)
         ));
@@ -435,7 +433,7 @@
     unsubscribes.forEach(unsub => unsub());
   });
 
-  $: windowLoaded && plans && !initialized && initPlanPanel();
+  $: plans && !initialized && initPlanPanel();
   $: plans && localPlans.size !== NUM_TOTAL_PAN && planStoreAdded();
 
 </script>

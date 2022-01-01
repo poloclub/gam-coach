@@ -62,19 +62,12 @@ export const setScorePanelWidth = (component, plans, planLabels) => {
 
   // Figure out the max width that the score panel can take
   // The way to do that is to use tab width - max plan text width - star width
-  let paddingL;
-  let paddingR;
-  try {
-    paddingL = parseInt(
-      getComputedStyle(tab.node()).getPropertyValue('padding-left')
-    );
-    paddingR = parseInt(
-      getComputedStyle(tab.node()).getPropertyValue('padding-right')
-    );
-  } catch {
-    paddingL = 10;
-    paddingR = 10;
-  }
+  const paddingL = parseInt(
+    getComputedStyle(tab.node()).getPropertyValue('padding-left')
+  );
+  const paddingR = parseInt(
+    getComputedStyle(tab.node()).getPropertyValue('padding-right')
+  );
 
   const tabWidth =
     tab.node().getBoundingClientRect().width - paddingL - paddingR;

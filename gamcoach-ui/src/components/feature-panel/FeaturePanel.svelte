@@ -16,7 +16,6 @@
 
   export let planStore = null;
   export let constraintsStore = null;
-  export let windowLoaded = false;
 
   /** @type {Logger} */
   export let logger = null;
@@ -236,7 +235,7 @@
     unsubscribes.forEach(unsub => unsub());
   });
 
-  $: windowLoaded && planStore && !initialized && initFeatureCards();
+  $: planStore && !initialized && initFeatureCards();
   $: mounted && maxFeatureNum && maxFeatureNumChanged();
 
 </script>

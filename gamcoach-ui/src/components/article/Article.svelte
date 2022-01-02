@@ -229,7 +229,8 @@
   };
 
   onMount(() => {
-    window.onload = () => { windowLoaded = true; };
+    // window.onload = () => { windowLoaded = true; };
+    windowLoaded = true;
   });
 
   onDestroy(() => {

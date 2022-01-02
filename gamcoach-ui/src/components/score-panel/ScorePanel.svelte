@@ -97,7 +97,7 @@
 
   onDestroy(() => {
     unsubscribes.forEach((unsub) => unsub());
-    scorePanel.destroy();
+    scorePanel?.destroy();
   });
 
   $: mounted && !initialized && scoreWidth > 0 && planLabel.textWidth > 0 &&

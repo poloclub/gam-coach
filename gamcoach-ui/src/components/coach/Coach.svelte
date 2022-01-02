@@ -167,6 +167,7 @@
 
 <div class='coach-panel-wrapper'>
   <CoachPanel
+    windowLoaded={windowLoaded}
     bind:plans={plans}
     logger={logger}
     on:regenerateClicked={
@@ -189,6 +190,7 @@
   {#key plans.activePlanIndex}
     <div class='feature-panel-wrapper'>
       <FeaturePanel
+        windowLoaded={windowLoaded}
         logger={logger}
         planStore={plans.planStores.has(plans.activePlanIndex) ?
           plans.planStores.get(plans.activePlanIndex) : null}

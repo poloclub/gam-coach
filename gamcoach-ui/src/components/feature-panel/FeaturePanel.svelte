@@ -14,6 +14,7 @@
   import { onMount, onDestroy, tick } from 'svelte';
   import { tooltipConfigStore } from '../../store';
 
+  export let windowLoaded = false;
   export let planStore = null;
   export let constraintsStore = null;
 
@@ -235,7 +236,7 @@
     unsubscribes.forEach(unsub => unsub());
   });
 
-  $: planStore && !initialized && initFeatureCards();
+  $: windowLoaded && planStore && !initialized && initFeatureCards();
   $: mounted && maxFeatureNum && maxFeatureNumChanged();
 
 </script>

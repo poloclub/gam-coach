@@ -17,6 +17,7 @@
   import starIconSolid from '../../img/icon-star-solid.svg';
   import starIconOutline from '../../img/icon-star-outline.svg';
 
+  export let windowLoaded = false;
   /** @type {Logger} */
   export let logger = null;
 
@@ -433,7 +434,7 @@
     unsubscribes.forEach(unsub => unsub());
   });
 
-  $: plans && !initialized && initPlanPanel();
+  $: windowLoaded && plans && !initialized && initPlanPanel();
   $: plans && localPlans.size !== NUM_TOTAL_PAN && planStoreAdded();
 
 </script>

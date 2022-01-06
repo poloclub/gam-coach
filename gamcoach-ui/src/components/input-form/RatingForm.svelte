@@ -47,6 +47,13 @@
       };
     });
 
+    // Remove plans that are no longer in the bookmark list
+    Object.keys(planRatingsMap).forEach(key => {
+      if (![...value.plans.keys()].includes(+key)) {
+        delete planRatingsMap[key];
+      }
+    });
+
     if (value.unpickedPlans !== undefined) {
       [...value.unpickedPlans.keys()].forEach((planIndex) => {
         const existingRating = ratingFormConfig.planRatings.filter(

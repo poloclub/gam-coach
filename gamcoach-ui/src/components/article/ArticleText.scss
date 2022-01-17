@@ -7,6 +7,7 @@ $header-color: currentcolor;
   display: grid;
   grid-template-columns: [start] 1fr [long-start] calc((1000px - 78ch) / 2)
     [text-start] 78ch [text-end] calc((1000px - 78ch) / 2) [long-end] 1fr [end];
+  color: $gray-800;
 }
 
 .article h2 {
@@ -22,7 +23,7 @@ $header-color: currentcolor;
   color: $header-color;
   font-size: 32px;
   font-weight: 450;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   margin-top: 8px;
   grid-column: text-start / text-end;
 }
@@ -47,7 +48,9 @@ $header-color: currentcolor;
 
 .article .figure-caption {
   font-size: 13px;
-  margin-top: 5px;
+  margin-top: 9px;
+  padding: 0 5px;
+  color: $gray-600;
 }
 
 .article ol {
@@ -200,8 +203,17 @@ video {
   width: 100%;
   grid-column: text-start / text-end;
 
-  box-shadow: 0px 0px 8px hsla(0, 0%, 0%, 0.1);
+  box-shadow: 0px 0px 3px hsla(0, 0%, 0%, 0.2),0px 2px 8px hsla(0, 0%, 0%, 0.1);
   border-radius: 10px;
+
+  &.wide-video {
+    grid-column: long-start / long-end;
+  }
+}
+
+.video {
+  width: 100%;
+  grid-column: text-start / text-end;
 
   &.wide-video {
     grid-column: long-start / long-end;

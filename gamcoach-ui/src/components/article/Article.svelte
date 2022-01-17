@@ -352,9 +352,28 @@
 
     <h2 id='tutorial'>How to Use <span class='teal'>GAM Coach</span> as an End-user?</h2>
 
+    {#each text.video as item, i}
+      {#if item.header !== null}
+        <h4 id={`${item.video}`}>{item.header}</h4>
+      {/if}
+
+      <div class='video'>
+        <video autoplay loop muted playsinline class:wide-video={item.isWide}>
+          <source src={`/videos/tutorial-${item.video}.mp4`}>
+          <track kind='captions'>
+        </video>
+        <div class="figure-caption">
+          Figure {item.figureID}. {@html item.caption}
+        </div>
+      </div>
+
+      {#each item.text as p}
+        <p>{@html p}</p>
+      {/each}
+    {/each}
 
 
-    <h2 id='tutorial'>Use <span class='teal'>GAM Coach</span> as an ML Developer?</h2>
+    <h2 id='tutorial'>Use <span class='teal'>GAM Coach</span> as an ML Developer</h2>
 
     <h2 id='tutorial'>Demo Video</h2>
 
@@ -411,26 +430,7 @@
 
     <h2 id='tutorial'>How is <span class='teal'>GAM Coach</span> Developed?</h2>
 
-    <!-- <p>{@html text.feature.main}</p> -->
-    <!--
-    <video class='wide-video' controls playsinline muted>
-      <source src='/videos/tutorial-overview.mp4'>
-      <track kind='captions'>
-    </video> -->
 
-    <!-- <h2 id='detailed-tutorial'>Detailed Tutorial Videos</h2>
-    <p>{@html text.detail}</p>
-
-    {#each text.video as item, i}
-      <h4 id={`${item.video}`}>{i + 1}. {item.header}</h4>
-
-      <video controls loop playsinline muted class:wide-video={item.isWide}>
-        <source src={`/videos/tutorial-${item.video}.mp4`}>
-        <track kind='captions'>
-      </video>
-
-      <p>{@html item.text}</p>
-    {/each} -->
 
   </div>
 
@@ -438,7 +438,7 @@
     <div class='footer-main'>
 
       <div class='footer-cp'>
-        <div>Submission to FAccT'22</div>
+        <div>FAccT'22 Submission</div>
         <div>Thanks for reviewing the manuscript!</div>
       </div>
 

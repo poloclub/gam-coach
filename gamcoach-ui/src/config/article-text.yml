@@ -24,118 +24,110 @@ tool:
       feature, and <strong>iteratively fine-tune recourse plans</strong> until
       finding satisfactory ones.
 
-feature:
-  main: >
-    Please watch a walk-through tutorial video below to learn how a loan
-    applicant can use GAM Coach.
-  gap: >
-    If you encounter any problems while using GAM Coach, you can click the link
-    below to watch a shorter and more specific video explaining how each GAM
-    Coach functionality works. You can also <a
-    href="mailto:jayw@gatech.edu">email us</a>.
-  list:
-    - name: Change initial input values
-      id: input
-    - name: Explore different strategies to get a loan approval
-      id: explore
-    - name: >
-        Experiment with different feature values to see how they affect the
-        application decision
-      id: value
-    - name: Specify difficulty of different features
-      id: difficulty
-    - name: Specify the acceptable range of different features
-      id: range
-    - name: Generate new strategies that meet your preferences
-      id: generate
-    - name: Set the max number of features that plans can change
-      id: max-num
-    - name: Bookmark strategies you like and download a "receipt"
-      id: download
-    - name: Submit the HIT task
-      id: submit
 
 video:
-  - header: Change initial input values
-    video: input
-    isWide: true
-    text: >
-      The default GAM Coach input is based on the information from a real
-      rejected loan applicant. The initial values might be very different from
-      your values. If it can help you imagine being a real user using GAM Coach,
-      you can change the input values to mimic your values or someone you know.
-  - header: Explore different strategies
+  - header: null
     video: explore
     isWide: false
-    text: >
-      Every time you ask GAM Coach to generate strategies, it generates 5
-      different plans for you. You can click the different tabs to compare and
-      explore different plans. If you set some configurations to some feature
-      under one tab, the configuration is synced to all other tabs
-      automatically. <strong>You need to click the regenerate button to apply these new
-      configurations.</strong>
-  - header: Change feature values
-    video: value
+    figureID: 1
+    caption: >
+      The main view of GAM Coach consists of a <em>Coach Menu</em> (top) and a <em>Feature Panel</em> (bottom).
+      End-users can easily browse different recourse plans and associated feature information.
+    text:
+      - >
+        GAM Coach's user interface consists of a <em>Coach Menu</em> and a
+        <em>Feature Panel</em> (Figure 1). For each recourse iteration, GAM Coach
+        generate 5 diverse recourse plans and organizes them as five extendable
+        tabs in the <em>Coach Menu</em>. When a user clicks on a tab, it extends
+        to show the decision score associated with the recourse plan. Then,
+        the <em>Feature Panel</em> updates its content to reflect the selected
+        recourse plan. The <em>Feature Panel</em> displays each feature used in
+        the model as a <em>Feature Card</em> and organizes these cards into three
+        sections: (1) Suggested Changes, where the selected plan makes changes on
+        these features; (2) Configured Features, where features have preferences
+        configured; (3) and all other features. Users can click each <em>Feature
+        Card</em> to view details regard the value distribution, configure
+        recourse preferences, and experiment with hypothetical values.
+
+  - header: Specify Recourse Preferences
+    video: explore
     isWide: false
-    text: >
-      You might want to try out some "hypothetical" values to see how the they
-      would affect your loan decision score. Setting these values does not have
-      any impact on you or new plan generations.
-  - header: Specify difficulty
-    video: difficulty
+    figureID: 2
+    caption: >
+      The main view of GAM Coach consists of a Coach Menu (top) and a Feature
+      Panel (bottom). End-users can easily browse different recourse plans and
+      associated feature information.
+    text:
+      - >
+        Users can easily specify their recourse preferences through GAM Coach
+        user interfaces. To configure the <strong>difficulty</strong> of
+        changing a feature in real-life, users can click the smiley icon on the
+        top right of each <em>Feature Card</em> and choose an accurate
+        difficulty level. There are six difficulty levels, ranging from very
+        easy to change to impossible to change. When generating new recourse
+        plans, GAM Coach will prioritize features that are easy for a user to
+        change, and GAM Coach will not change features that are set as
+        impossible to change.
+      - >
+        Users can drag the orange slider and click the orange bars to specify an
+        <strong>acceptable range</strong> for a continuous feature or a
+        categorical feature, respectively. When generating new recourse plans,
+        GAM Coach will only make changes within the user's specified acceptable
+        ranges. Finally, users can click the dropdown to configure the
+        <strong>max number of features</strong> that a plan can change. When
+        generating new recourse plans, GAM Coach will only change at most that
+        number of features in each plan. It is useful when users want to find
+        more concise plans.
+
+  - header: Ask "What-If" Questions
+    video: explore
     isWide: false
-    text: >
-      GAM Coach tries to find the "best" strategy for users to succeed. However,
-      the definition of "best" is different from one user to another. For
-      example, maybe it is easier for you to change <code>FICO score</code> in
-      real life, but it might be easier for your friend to change <code>Loan
-      Amount</code> instead. Therefore, GAM Coach allows you to specify the
-      difficulty to change a feature in real life. New plans will try to
-      prioritize features that are easier for you to change and ignore features
-      that are hard or impossible to change.
-  - header: Specify acceptable range
-    video: range
+    figureID: 3
+    caption: >
+      The main view of GAM Coach consists of a Coach Menu (top) and a Feature Panel (bottom).
+      End-users can easily browse different recourse plans and associated feature information.
+    text:
+      - >
+        To help end-users better understand how the underlying model makes
+        decisions, GAM Coach allows users to <strong>experiment with any
+        hypothetical feature values</strong> and inspect their effects on the
+        model output. For continuous features, users can drag the blue thumb on
+        the slider to try an alternative feature value. For categorical
+        features, users can click the text labels next to the bars. Since GAM
+        Coach uses modern web technologies to run the underlying ML model
+        locally in the user's browser, users can inspect how hypothetical
+        feature values change the model decision in real-time.
+
+  - header: Save a Verifiable Recourse Receipt
+    video: explore
     isWide: false
-    text: >
-      Similar to difficulties, many users have an "acceptable range" of changes.
-      For example, some user might be able to lower the <code>Loan Amount</code>
-      in the next application, but they can only decrease it by $2000. They can
-      tell GAM Coach the acceptable range by dragging sliders or clicking bars
-      in the feature cards. New plans will make sure to meet your acceptable
-      range.
-  - header: Generate new strategies
-    video: generate
-    isWide: false
-    text: >
-      After setting difficulties and acceptable ranges for some features, you
-      can click the "Regenerate" button to generate new plans that meet your
-      constraints. You can keep fine-tuning your specifications and regenerating
-      new plans until you find the strategies that work <strong>for
-      you</strong>.
-  - header: Max number of features that a plan can change
-    video: max-num
-    isWide: false
-    text: >
-      Some users prefer strategies that only change a few features. You can change
-      the max number of features that a plan can change by clicking the drop
-      down menu on the top right of the tool.
-  - header: Bookmark strategies and download a receipt
-    video: download
-    isWide: false
-    text: >
-      Don't forget to save plans you like by clicking the star icon in the tab
-      bar. It would save the plan to your Bookmarks. In the Bookmarks pop-up,
-      You can also download a receipt. A receipt is a securely signed document
-      that you can use as proof in your future applications: if you make the
-      changes suggested by GAM Coach, the bank will guarantee you a loan
-      approval.
-  - header: Submit the HIT task
-    video: submit
-    isWide: true
-    text: >
-      After you find your favorite strategies, you can click the "I'm Done"
-      button to submit. It would ask you to rate your preferences and plans.
-      Please provide detailed explanations. Next, GAM Coach will show you a
-      unique 6-digit verification code. You need to copy the code in the Google
-      Survey and the HIT page.
+    figureID: 3
+    caption: >
+      The main view of GAM Coach consists of a Coach Menu (top) and a Feature Panel (bottom).
+      End-users can easily browse different recourse plans and associated feature information.
+    text:
+      - >
+        When a user finds a satisfactory recourse plan, they can click the star icon next to the
+        plan name to bookmark this plan.
+        The user can also click the bookmark button in the <em>Coach Menu</em> to open the
+        <em>Bookmarks Window</em> that presents a visual summary of all saved recourse plans.
+        If the user is happy with all saved plans, they can download a recourse receipt.
+        Introduced by <a href='https://arxiv.org/abs/1711.00399'>Wachter et al.</a>,
+        a recourse receipt is a contract that the decision maker agrees to provide the decision subject
+        with the preferred outcome if the a recourse plan is achieved in a specified period.
+      - >
+        GAM Coach is the first system that realizes this receipt concept.
+        Leveraging modern public-key cryptography, GAM Coach introduces a
+        verifiable recourse receipt system. When a user downloads a receipt, GAM
+        Coach writes a <a
+        href='https://en.wikipedia.org/wiki/Pretty_Good_Privacy'>PGP-signed</a>
+        (with the decision maker's private key) plain text that includes a
+        timestamp, the user's original data, a hash of the model weights, and
+        the saved recourse plans. Therefore, a decision subject can hold
+        the decision maker accountable by proving the authenticity of the
+        receipt to a third-party authority with the decision maker's public key.
+        In addition, the decision maker can prevent a decision subject to cheat
+        with a counterfeit receipt by verifying the receipt's integrity with the private
+        key.
+
 

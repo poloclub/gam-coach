@@ -24,9 +24,6 @@
   import pointArrowSVG from '../../img/point-arrow.svg';
   import iconRefreshSVG from '../../img/icon-refresh3.svg';
   import iconEditSVG from '../../img/icon-edit.svg';
-  import iconGithub from '../../img/icon-github.svg';
-  import iconVideo from '../../img/icon-youtube.svg';
-  import iconPdf from '../../img/icon-pdf.svg';
 
   import text from '../../config/text.yml';
   import samples from '../../config/lc-classifier-random-samples.json';
@@ -299,27 +296,28 @@
     </div>
 
     <div class='coach-right'>
-      <div class='icon-container'>
-        <a target="_blank" href="https://github.com/anonfacct/gam-coach/">
-          <div class="svg-icon" title="Open-source code">
-            {@html iconGithub}
-          </div>
-          <span>Code</span>
-        </a>
+      <div class='description'>
+        <span class='line'>
+          Please try your best to <strong>imagine</strong> being a real loan applicant using this tool.
+        </span>
+        <span class='line'>
+          Imagine what kinds of strategies would be <strong>most helpful in real life</strong>.
+        </span>
+        <span class='line'>
+          Once you are <strong>satisfied</strong> with any generated plan(s) and have <strong>bookmarked</strong>
+          them, click the button below to finish.
+        </span>
 
-        <a target="_blank" href="https://youtu.be/0q3aqwrSbTk">
-          <div class="svg-icon" title="Demo video">
-            {@html iconVideo}
-          </div>
-          <span>Video</span>
-        </a>
+        <div class='button' on:click={() => submitClicked()}>{buttonText}</div>
 
-        <!-- <a target="_blank" href="https://facctsubmission.com">
-          <div class="svg-icon" title="Paper">
-            {@html iconPdf}
-          </div>
-          <span>Paper</span>
-        </a> -->
+        <div class='code' class:no-display={verificationCode === null}>
+          <span class='title'>Verification Code</span>
+          <span class='code-number'>{verificationCode}</span>
+        </div>
+
+        <div class='download-message' class:no-display={verificationCode !== 999999}>
+          Please upload "strategy-data.json" to Google Survey
+        </div>
 
       </div>
     </div>

@@ -268,7 +268,7 @@ export class Constraints {
   hasNewConstraints = true;
 
   /** @type {number | null} */
-  maxNumFeaturesToVary = null;
+  maxNumFeaturesToVary = 4;
 
   /**
    * Initialize the Constraints object. It might modify the modelData as some

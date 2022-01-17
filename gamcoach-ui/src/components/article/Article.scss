@@ -114,7 +114,32 @@
     text-align: center;
   }
 
+  .icon-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
 
+  a {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: white;
+    gap: 10px;
+    font-size: 1.1rem;
+  }
+
+  .svg-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    :global(svg) {
+      width: 30px;
+      height: 30px;
+    }
+  }
 }
 
 .coach-wrapper {

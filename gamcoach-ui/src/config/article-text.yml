@@ -166,8 +166,38 @@ video:
 
 developer:
   - >
-    hello
+    ML developers can easily create a GAM Coach instance with their own
+    generalized additive models (GAMs). If the developers use the popular <a
+    href='https://interpret.ml/docs/ebm.html'>Explainable Boosting Machine
+    (EBM)</a> model with the <a
+    href='https://interpret.ml/docs/intro.html'>InterpretML</a> library, they
+    can create their own GAM Coach with one function call which exports the
+    model weights of a trained EBM. In addition, we provide developers with
+    libraries (both Python and JavaScript) to generate recourse plans for EBM
+    models. The GAM Coach user interface is model-agnostic, so developers can
+    apply the interface as long as the recourse generation method supports users
+    to specify preferences. Visit GAM Coach's <aa
+    href="https://github.com/anonfacct/gam-coach">GitHub repository</a> to learn
+    more.
+  - >
+    Even though GAM Coach is designed for decision subjects who are less
+    familiar with ML and domain-specific concepts, developers can also use GAM
+    Coach to understand and debug their models. In an online study with 41
+    Amazon Mechanical Turk Workers, many GAM Coach users have encountered and
+    reported counterintuitive recourse plans, such as lowering the income to
+    obtain a loan approval. It suggests that developers can also use GAM Coach
+    to discover potentially problematic patterns in their ML model or recourse
+    generation methods.
 
 development:
   - >
-    hello
+    To operationalizes interactive recourse, GAM Coach uses <a
+    href='https://interpret.ml/docs/ebm.html'>Explainable Boosting Machine
+    (EBM)</a> models as the underlying ML model and a novel adaptation of
+    integer linear programming to generate recourse plans. In this demo, GAM
+    Coach solves all integer programs <strong>directly in your browser</strong>, with <a
+    href="https://webassembly.org/">WebAssembly</a>, a modern web technology to
+    accelerating in-browser computation. The user interface is written in
+    Javascript using <a href="https://svelte.dev/">Svelte</a> as a framework and
+    <a href="https://d3js.org/">D3.js</a> for visualizations.
+    See our manuscript for details about the recourse generation technique and implementations.

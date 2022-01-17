@@ -43,8 +43,7 @@
   let updated = false;
 
   // Initialize the logger
-  const logger = new Logger();
-  // const logger = null;
+  const logger = null;
 
   let curIndex = 126;
   /** @type {any[]} */
@@ -66,12 +65,6 @@
 
   // curIndex = random(0, samples.length - 1);
   // curExample = samples[curIndex];
-
-  logger?.setInitialValues({
-    curExample
-  });
-  logger?.addBrowserRecord();
-  logger?.addOSRecord();
 
   const pointArrowSVGProcessed = pointArrowSVG
     .replaceAll('white', 'currentcolor');
@@ -103,15 +96,6 @@
 
       // Update curExample if it is changed
       if (inputFormConfig.action === 'saved') {
-        // Log the interaction
-        logger?.addLog({
-          eventName: 'curExampleUpdated',
-          elementName: 'input form',
-          valueName: 'curExample',
-          oldValue: curExample,
-          newValue: inputFormConfig.curExample
-        });
-
         inputFormConfig.action = null;
         updated = true;
         curExample = inputFormConfig.curExample;
@@ -120,76 +104,10 @@
     })
   );
 
-  /** @type {RatingFormConfig} */
-  let ratingFormConfig = null;
-  unsubscribes.push(
-    ratingFormConfigStore.subscribe(value => {
-      ratingFormConfig = value;
-
-      // If the users have reviewed all saved plans, we put it into the log and
-      // submit the log
-      if (ratingFormConfig.action === 'submit') {
-
-        logger?.addRecord('ratings', ratingFormConfig.planRatings);
-
-        ratingFormConfig.action = '';
-        ratingFormConfigStore.set(ratingFormConfig);
-
-        // Upload the log to dropbox
-        buttonText = 'Uploading...';
-        logger?.uploadToDropbox()
-          .then(value => {
-            console.log(value);
-            if (value > 0) {
-              // Success show the number
-              buttonText = 'Finished, thank you!';
-              verificationCode = value;
-            } else {
-              // Failed, but the download should start
-              buttonText = 'Failed to upload';
-              verificationCode = 999999;
-            }
-          });
-      }
-    })
-  );
-
-  /** @type {ConstraintRatingFormConfig}*/
-  let constraintRatingFormConfig = null;
-  unsubscribes.push(
-    constraintRatingFormConfigStore.subscribe(value => {
-      constraintRatingFormConfig = value;
-
-      // If the users have reviewed all constraints, we put the review in the log
-      // proceed to show the plan review
-      if (constraintRatingFormConfig.action === 'proceed') {
-
-        logger?.addRecord('constraintRating',
-          constraintRatingFormConfig.constraintRatings);
-
-        constraintRatingFormConfig.action = '';
-        constraintRatingFormConfigStore.set(constraintRatingFormConfig);
-
-        // Show the plan review window
-        ratingFormConfig.show = true;
-        ratingFormConfigStore.set(ratingFormConfig);
-      }
-    })
-  );
-
   const refreshClicked = () => {
     // Resample the cur example
     curIndex = random(0, samples.length - 1);
     const newExample = samples[curIndex];
-
-    // Log the interaction
-    logger?.addLog({
-      eventName: 'curExampleUpdated',
-      elementName: 'shuffle',
-      valueName: 'curExample',
-      oldValue: curExample,
-      newValue: newExample
-    });
 
     updated = false;
     curExample = newExample;
@@ -202,38 +120,6 @@
     inputFormConfig.curExample = curExample;
     inputFormConfig.action = null;
     inputFormConfigStore.set(inputFormConfig);
-  };
-
-  const submitClicked = () => {
-    if (verificationCode !== null) return;
-
-    // Warn user that they have un-realized constraints
-    if (constraints.hasNewConstraints) {
-      alert(''.concat('You have set a new preference, but you have not ',
-        'generate new plans with this new preference yet. Click "Regenerate"',
-        'button ',
-        'to generate new plans that meet your new preference.'
-      ));
-      return;
-    }
-
-    if (bookmarkConfig.plans.size === 0) {
-      alert(''.concat('You need to save at least one plan to submit your task. ',
-        'Keep exploring suggested strategies and click the star icon (next to ',
-        'the plan name) to save ',
-        'plans that you are satisfied with.'
-      ));
-      return;
-    }
-
-    // If there is no unpicked plans set up, add them
-    if (bookmarkConfig.unpickedPlans === undefined) {
-      bookmarkConfig.action = 'addUnpicked';
-      bookmarkConfigStore.set(bookmarkConfig);
-    }
-
-    constraintRatingFormConfig.show = true;
-    constraintRatingFormConfigStore.set(constraintRatingFormConfig);
   };
 
   onMount(() => {
@@ -316,13 +202,6 @@
           <span>Video</span>
         </a>
 
-        <!-- <a target="_blank" href="https://facctsubmission.com">
-          <div class="svg-icon" title="Paper">
-            {@html iconPdf}
-          </div>
-          <span>Paper</span>
-        </a> -->
-
       </div>
     </div>
 
@@ -338,8 +217,6 @@
     <DiffPicker logger={logger}/>
     <ConfirmModal/>
     <InputForm />
-    <RatingForm />
-    <ConstraintRatingForm />
     <BookmarkPanel windowLoaded={windowLoaded} logger={logger}/>
   </div>
 
@@ -372,56 +249,21 @@
       {/each}
     {/each}
 
-
     <h2 id='tutorial'>Use <span class='teal'>GAM Coach</span> as an ML Developer</h2>
+
+    {#each text.developer as p}
+      <p>{@html p}</p>
+    {/each}
 
     <h2 id='tutorial'>Demo Video</h2>
 
     <ul class='video-list'>
-      <li class='video-link' on:click={currentPlayer.play(0)}>
-        Introduction
-        <small>(0:00-0:34)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(36)}>
-        Feature Card Organization
-        <small>(0:34-0:50)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(53)}>
-        Plan Tabs
-        <small>(0:50-1:00)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(60)}>
-        Explore Hypothetical Values of a Continuous Feature
-        <small>(1:00-1:15)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(76)}>
-        Specify Feature Difficulty
-        <small>(1:16-1:24)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(84)}>
-        Specify Acceptable Range of a Continuous Feature
-        <small>(1:24-1:34)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(94)}>
-        Specify Max Number of Features a Plan Can Change
-        <small>(1:34-1:49)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(109)}>
-        Bookmark Satisfactory Plans
-        <small>(1:49-2:00)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(120)}>
-        Explore Hypothetical Values of a Categorical Feature
-        <small>(2:00-2:08)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(128)}>
-        Specify Acceptable Range of a Categorical Feature
-        <small>(2:08-2:35)</small>
-      </li>
-      <li class='video-link' on:click={currentPlayer.play(155)}>
-        Download a verifiable Recourse Receipt
-        <small>(2:35-2:48)</small>
-      </li>
+      {#each text.youtubeTimes as time, i}
+        <li class='video-link' on:click={currentPlayer.play(time.startTime)}>
+          {time.name}
+          <small>{time.timestamp}</small>
+        </li>
+      {/each}
     </ul>
 
     <div class="youtube-video">
@@ -430,7 +272,9 @@
 
     <h2 id='tutorial'>How is <span class='teal'>GAM Coach</span> Developed?</h2>
 
-
+    {#each text.development as p}
+      <p>{@html p}</p>
+    {/each}
 
   </div>
 

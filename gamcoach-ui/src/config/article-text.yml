@@ -24,6 +24,40 @@ tool:
       feature, and <strong>iteratively fine-tune recourse plans</strong> until
       finding satisfactory ones.
 
+youtubeTimes:
+  - startTime: 0
+    name: Introduction
+    timestamp: (0:00-0:34)
+  - startTime: 36
+    name: Feature Card Organization
+    timestamp: (0:34-0:50)
+  - startTime: 53
+    name: Recourse Plan Tabs
+    timestamp: (0:50-1:00)
+  - startTime: 60
+    name: Explore Hypothetical Values of a Continuous Feature
+    timestamp: (1:00-1:15)
+  - startTime: 76
+    name: Specify Feature Difficulty
+    timestamp: (1:16-1:24)
+  - startTime: 84
+    name: Specify Acceptable Range of a Continuous Feature
+    timestamp: (1:24-1:34)
+  - startTime: 94
+    name: Specify Max Number of Features a Plan Can Change
+    timestamp: (1:34-1:49)
+  - startTime: 109
+    name: Bookmark Satisfactory Plans
+    timestamp: (1:49-2:00)
+  - startTime: 120
+    name: Explore Hypothetical Values of a Categorical Feature
+    timestamp: (2:00-2:08)
+  - startTime: 128
+    name: Specify Acceptable Range of a Categorical Feature
+    timestamp: (2:08-2:35)
+  - startTime: 155
+    name: Download a verifiable Recourse Receipt
+    timestamp: (2:35-2:48)
 
 video:
   - header: null
@@ -130,4 +164,10 @@ video:
         with a counterfeit receipt by verifying the receipt's integrity with the private
         key.
 
+developer:
+  - >
+    hello
 
+development:
+  - >
+    hello

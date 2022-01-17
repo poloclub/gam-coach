@@ -207,3 +207,12 @@ video {
     grid-column: long-start / long-end;
   }
 }
+
+.article .video-list {
+  grid-column: text-start / text-end;
+  margin: 0 0 15px 0;
+}
+
+.article .youtube-video {
+  grid-column: text-start / text-end;
+}

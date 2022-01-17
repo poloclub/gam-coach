@@ -9,6 +9,7 @@
   import ConstraintRatingForm from '../input-form/ConstraintRatingForm.svelte';
   import BookmarkPanel from '../bookmark-panel/BookmarkPanel.svelte';
   import Tooltip from '../Tooltip.svelte';
+  import Youtube from './Youtube.svelte';
 
   import d3 from '../../utils/d3-import';
   import { Logger } from '../../utils/logger';
@@ -28,11 +29,12 @@
   import iconVideo from '../../img/icon-youtube.svg';
   import iconPdf from '../../img/icon-pdf.svg';
 
-  import text from '../../config/text.yml';
+  import text from '../../config/article-text.yml';
   import samples from '../../config/lc-classifier-random-samples.json';
 
   const unsubscribes = [];
   let windowLoaded = false;
+  let currentPlayer = null;
 
   const indexFormatter = d3.format('03d');
 
@@ -343,90 +345,80 @@
 
   <div class='article'>
 
-    <!-- <h2 id='introduction'>Introduction</h2>
-    {#each text.introduction.main as p}
-      <p>{@html p}</p>
-    {/each} -->
-
-    <h2 id='tool'>What is GAM Coach?</h2>
+    <h2 id='tool'>What is <span class='teal'>GAM Coach</span>?</h2>
     {#each text.tool.pre as p}
       <p>{@html p}</p>
     {/each}
 
-    {#each text.tool.after as p}
-      <p>{@html p}</p>
-    {/each}
+    <h2 id='tutorial'>How to Use <span class='teal'>GAM Coach</span> as an End-user?</h2>
 
-    <!-- <div class='important-note'>
-      <p class='title'>Important Note</p>
-      <p class='content'>{@html text.introduction.important}</p>
-    </div> -->
 
-    <h2 id='tutorial'>What Can I Do with GAM Coach?</h2>
-    <p>{@html text.feature.main}</p>
 
+    <h2 id='tutorial'>Use <span class='teal'>GAM Coach</span> as an ML Developer?</h2>
+
+    <h2 id='tutorial'>Demo Video</h2>
+
+    <ul class='video-list'>
+      <li class='video-link' on:click={currentPlayer.play(0)}>
+        Introduction
+        <small>(0:00-0:34)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(36)}>
+        Feature Card Organization
+        <small>(0:34-0:50)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(53)}>
+        Plan Tabs
+        <small>(0:50-1:00)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(60)}>
+        Explore Hypothetical Values of a Continuous Feature
+        <small>(1:00-1:15)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(76)}>
+        Specify Feature Difficulty
+        <small>(1:16-1:24)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(84)}>
+        Specify Acceptable Range of a Continuous Feature
+        <small>(1:24-1:34)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(94)}>
+        Specify Max Number of Features a Plan Can Change
+        <small>(1:34-1:49)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(109)}>
+        Bookmark Satisfactory Plans
+        <small>(1:49-2:00)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(120)}>
+        Explore Hypothetical Values of a Categorical Feature
+        <small>(2:00-2:08)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(128)}>
+        Specify Acceptable Range of a Categorical Feature
+        <small>(2:08-2:35)</small>
+      </li>
+      <li class='video-link' on:click={currentPlayer.play(155)}>
+        Download a verifiable Recourse Receipt
+        <small>(2:35-2:48)</small>
+      </li>
+    </ul>
+
+    <div class="youtube-video">
+      <Youtube videoId="0q3aqwrSbTk" playerId="demo_video" bind:this={currentPlayer}/>
+    </div>
+
+    <h2 id='tutorial'>How is <span class='teal'>GAM Coach</span> Developed?</h2>
+
+    <!-- <p>{@html text.feature.main}</p> -->
+    <!--
     <video class='wide-video' controls playsinline muted>
       <source src='/videos/tutorial-overview.mp4'>
       <track kind='captions'>
-    </video>
+    </video> -->
 
-    <!-- <p>{@html text.overview}</p> -->
-
-    <p>{@html text.feature.gap}</p>
-
-    <ol>
-      {#each text.feature.list as item}
-        <li><a href={`#${item.id}`}>{item.name}</a></li>
-      {/each}
-    </ol>
-
-    <h2 id='task'>So, What is My Task?</h2>
-    <p>{@html text.task.intro}</p>
-
-    <h4>Task 1</h4>
-    <p>{@html text.task.first}</p>
-
-    <ol>
-      {#each text.task.firstList as item}
-        <li class='task-list'>{@html item}</li>
-      {/each}
-    </ol>
-
-    <h4>Task 2</h4>
-    <p>{@html text.task.main}</p>
-    <p>{@html text.task.gap}</p>
-
-    <ol>
-      {#each text.task.list as item}
-        <li>{@html item.item}</li>
-        {#if item.list !== null}
-          <ol>
-            {#each item.list as subItem}
-              <li>{@html subItem}</li>
-            {/each}
-          </ol>
-        {/if}
-      {/each}
-    </ol>
-
-    <div class='important-note' id='acceptance'>
-      <p class='title'>HIT Acceptance Criteria</p>
-      <p class='content'>{@html text.task.accept}</p>
-    </div>
-
-    <div class='important-note'>
-      <p class='title'>Bonus Criteria</p>
-      <div class='content'>
-        <p class='content'>{@html text.task.bonus.intro}</p>
-        <ol>
-          {#each text.task.bonus.list as item}
-            <li>{@html item}</li>
-          {/each}
-        </ol>
-      </div>
-    </div>
-
-    <h2 id='detailed-tutorial'>Detailed Tutorial Videos</h2>
+    <!-- <h2 id='detailed-tutorial'>Detailed Tutorial Videos</h2>
     <p>{@html text.detail}</p>
 
     {#each text.video as item, i}
@@ -438,8 +430,19 @@
       </video>
 
       <p>{@html item.text}</p>
-    {/each}
+    {/each} -->
 
+  </div>
+
+  <div class='article-footer'>
+    <div class='footer-main'>
+
+      <div class='footer-cp'>
+        <div>Submission to FAccT'22</div>
+        <div>Thanks for reviewing the manuscript!</div>
+      </div>
+
+    </div>
   </div>
 
 </div>

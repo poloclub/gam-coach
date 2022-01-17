@@ -25,7 +25,7 @@
   import iconRefreshSVG from '../../img/icon-refresh3.svg';
   import iconEditSVG from '../../img/icon-edit.svg';
 
-  import text from '../../config/text.yml';
+  import text from '../../config/user-text.yml';
   import samples from '../../config/lc-classifier-random-samples.json';
 
   const unsubscribes = [];

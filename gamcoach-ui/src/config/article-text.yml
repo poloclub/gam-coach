@@ -84,13 +84,14 @@ video:
         recourse preferences, and experiment with hypothetical values.
 
   - header: Specify Recourse Preferences
-    video: explore
+    video: preference
     isWide: false
     figureID: 2
     caption: >
-      The main view of GAM Coach consists of a Coach Menu (top) and a Feature
-      Panel (bottom). End-users can easily browse different recourse plans and
-      associated feature information.
+      With GAM Coach, end-users can fine-tune recourse plans by specifying their
+      preferences: (1) the difficulty to change a feature; (2) the acceptable
+      change range of a feature; (3) the max number of features that a plan can
+      change.
     text:
       - >
         Users can easily specify their recourse preferences through GAM Coach
@@ -114,12 +115,13 @@ video:
         more concise plans.
 
   - header: Ask "What-If" Questions
-    video: explore
+    video: hypothetical
     isWide: false
     figureID: 3
     caption: >
-      The main view of GAM Coach consists of a Coach Menu (top) and a Feature Panel (bottom).
-      End-users can easily browse different recourse plans and associated feature information.
+      End-users can probe the underlying ML model behaviors by experimenting
+      with hypothetical input values and inspect their impacts on the model
+      outcome in real-time.
     text:
       - >
         To help end-users better understand how the underlying model makes
@@ -133,12 +135,14 @@ video:
         feature values change the model decision in real-time.
 
   - header: Save a Verifiable Recourse Receipt
-    video: explore
+    video: receipt
     isWide: false
-    figureID: 3
+    figureID: 4
     caption: >
-      The main view of GAM Coach consists of a Coach Menu (top) and a Feature Panel (bottom).
-      End-users can easily browse different recourse plans and associated feature information.
+      GAM Coach realizes the recourse receipt concept where the decision maker
+      agrees to provide the decision subjects with desired outcome if a recourse
+      terms were met. End-users can bookmark multiple satisfactory plans and
+      save a verifiable recourse receipt.
     text:
       - >
         When a user finds a satisfactory recourse plan, they can click the star icon next to the

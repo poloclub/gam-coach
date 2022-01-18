@@ -236,7 +236,7 @@
 
       <div class='video'>
         <video autoplay loop muted playsinline class:wide-video={item.isWide}>
-          <source src={`/videos/tutorial-${item.video}.mp4`}>
+          <source src={`/videos/demo-${item.video}.mp4`}>
           <track kind='captions'>
         </video>
         <div class="figure-caption">

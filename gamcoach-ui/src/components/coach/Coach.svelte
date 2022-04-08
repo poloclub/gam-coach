@@ -4,7 +4,12 @@
   import CoachPanel from '../coach-panel/CoachPanel.svelte';
 
   import { EBM } from '../../ebm/ebm';
-  import { Plan, Constraints, initPlans, regeneratePlans } from '../coach/Coach';
+  import {
+    Plan,
+    Constraints,
+    initPlans,
+    regeneratePlans
+  } from '../coach/Coach';
   import '../../typedef';
 
   import d3 from '../../utils/d3-import';
@@ -12,9 +17,17 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
-  import { tooltipConfigStore, inputFormConfigStore,
-    ebmStore, constraintsStore, bookmarkConfigStore } from '../../store';
+  import {
+    tooltipConfigStore,
+    inputFormConfigStore,
+    ebmStore,
+    constraintsStore,
+    bookmarkConfigStore
+  } from '../../store';
 
+  import modelDataLC from '../../config/_temp/lc-classifier.json';
+
+  export let curModelData = modelDataLC;
   export let windowLoaded = false;
   export let curExample = null;
 
@@ -28,17 +41,19 @@
   let tooltip = null;
   let tooltipConfig = null;
   unsubscribes.push(
-    tooltipConfigStore.subscribe(value => {tooltipConfig = value;})
+    tooltipConfigStore.subscribe((value) => {
+      tooltipConfig = value;
+    })
   );
 
   // Set up the input form config store
   let inputFormConfig = null;
   unsubscribes.push(
-    inputFormConfigStore.subscribe(value => inputFormConfig = value)
+    inputFormConfigStore.subscribe((value) => (inputFormConfig = value))
   );
 
   // Set up the GAM Coach object
-  let modelData = null;
+  // let modelData = null;
 
   /** @type {EBM} */
   let ebm = null;
@@ -64,11 +79,12 @@
     initialized = true;
 
     // Load the model data
-    modelData = await d3.json('/data/lc-classifier.json');
+    // modelData = await d3.json('/data/lc-classifier.json');
+    // modelData = await d3.json('/data/adult-classifier.json');
     // console.log(modelData);
 
     // Initialize an ebm model
-    ebm = new EBM(modelData);
+    ebm = new EBM(curModelData);
     ebmStore.set(ebm);
 
     // Re-initialize the bookmark config
@@ -84,18 +100,24 @@
     // Initialize the Constraints based on the info provided by model developers
     // Creating the constraints object can change the modelData (setting
     // the acceptance range based on the curExample)
-    constraints = new Constraints(modelData, curExample);
+    constraints = new Constraints(curModelData, curExample);
 
     constraintsStore.set(constraints);
     unsubscribes.push(
-      constraintsStore.subscribe(value => {
+      constraintsStore.subscribe((value) => {
         constraints = value;
       })
     );
 
     // Initialize the plans
-    await initPlans(modelData, ebm, curExample, constraints, plansUpdated,
-      logger);
+    await initPlans(
+      curModelData,
+      ebm,
+      curExample,
+      constraints,
+      plansUpdated,
+      logger
+    );
 
     // Initialize the input form
     inputFormConfig.ebm = ebm;
@@ -106,19 +128,52 @@
     logger?.addRecord('plans', plans);
   };
 
-  onMount(() => {
-  });
+  onMount(() => {});
 
   onDestroy(() => {
-    unsubscribes.forEach(unsub => unsub());
+    unsubscribes.forEach((unsub) => unsub());
   });
 
   $: curExample && !initialized && initModel();
-
 </script>
 
-<style lang='scss'>
+<div class="coach-panel-wrapper">
+  <CoachPanel
+    {windowLoaded}
+    bind:plans
+    {logger}
+    on:regenerateClicked={() =>
+      regeneratePlans(
+        constraints,
+        curModelData,
+        curExample,
+        plans,
+        plansUpdated,
+        logger
+      )}
+  />
+</div>
 
+{#if plans === null}
+  <div class="feature-panel-wrapper">
+    <FeaturePanel {logger} planStore={null} {constraintsStore} />
+  </div>
+{:else}
+  {#key plans.activePlanIndex}
+    <div class="feature-panel-wrapper">
+      <FeaturePanel
+        {windowLoaded}
+        {logger}
+        planStore={plans.planStores.has(plans.activePlanIndex)
+          ? plans.planStores.get(plans.activePlanIndex)
+          : null}
+        {constraintsStore}
+      />
+    </div>
+  {/key}
+{/if}
+
+<style lang="scss">
   @import '../../define';
 
   .main-standalone {
@@ -161,41 +216,4 @@
     position: relative;
     z-index: 1;
   }
-
 </style>
-
-
-<div class='coach-panel-wrapper'>
-  <CoachPanel
-    windowLoaded={windowLoaded}
-    bind:plans={plans}
-    logger={logger}
-    on:regenerateClicked={
-      () => regeneratePlans(constraints, modelData, curExample, plans,
-        plansUpdated, logger
-      )
-    }
-  />
-</div>
-
-{#if plans === null}
-  <div class='feature-panel-wrapper'>
-    <FeaturePanel
-      logger={logger}
-      planStore={null}
-      constraintsStore={constraintsStore}
-    />
-  </div>
-{:else}
-  {#key plans.activePlanIndex}
-    <div class='feature-panel-wrapper'>
-      <FeaturePanel
-        windowLoaded={windowLoaded}
-        logger={logger}
-        planStore={plans.planStores.has(plans.activePlanIndex) ?
-          plans.planStores.get(plans.activePlanIndex) : null}
-        constraintsStore={constraintsStore}
-      />
-    </div>
-  {/key}
-{/if}

@@ -213,7 +213,7 @@ export class EBM {
         if (binIndex < 0) {
           // Unseen level during training => use 0 as score instead
           console.log(
-            `Unseen categorical level: ${curFeatureName}, ${j}, ${curFeature}`
+            `Unseen categorical level: ${curFeatureName}, ${j}, [${this.binEdges[j]}], ${curFeature}`
           );
           binScore = 0;
         } else {

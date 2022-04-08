@@ -4,8 +4,11 @@
   import { Logger } from '../../utils/logger';
   import { bindInlineSVG } from '../../utils/utils';
   import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
-  import { tooltipConfigStore, confirmModalConfigStore,
-    bookmarkConfigStore, inputFormConfigStore
+  import {
+    tooltipConfigStore,
+    confirmModalConfigStore,
+    bookmarkConfigStore,
+    inputFormConfigStore
   } from '../../store';
 
   import ScorePanel from '../score-panel/ScorePanel.svelte';
@@ -44,7 +47,7 @@
 
   // Set up tooltip
   unsubscribes.push(
-    tooltipConfigStore.subscribe(value => {
+    tooltipConfigStore.subscribe((value) => {
       tooltipConfig = value;
     })
   );
@@ -60,7 +63,7 @@
 
   let confirmModalConfig = null;
   unsubscribes.push(
-    confirmModalConfigStore.subscribe(value => {
+    confirmModalConfigStore.subscribe((value) => {
       confirmModalConfig = value;
     })
   );
@@ -69,7 +72,7 @@
   /** @type{BookmarkConfig} */
   let bookmarkConfig = null;
   unsubscribes.push(
-    bookmarkConfigStore.subscribe(value => {
+    bookmarkConfigStore.subscribe((value) => {
       bookmarkConfig = value;
 
       if (bookmarkConfig.action === 'addUnpicked') {
@@ -97,7 +100,7 @@
 
       if (bookmarkConfig.action === 'delete') {
         // Sync up the bookmarked plans
-        savedPlanIndex.forEach(planIndex => {
+        savedPlanIndex.forEach((planIndex) => {
           if (!bookmarkConfig.plans.has(planIndex)) {
             savedPlanIndex.delete(planIndex);
             savedPlanIndex = savedPlanIndex;
@@ -113,7 +116,7 @@
   /** @type {InputFormConfig}*/
   let inputFormConfig = null;
   unsubscribes.push(
-    inputFormConfigStore.subscribe(value => {
+    inputFormConfigStore.subscribe((value) => {
       inputFormConfig = value;
     })
   );
@@ -132,12 +135,10 @@
 
     // Check if users have already saved this plan
     if (savedPlanIndex.has(plan.planIndex)) {
-
       // Remove the plan from the bookmarks
       bookmarkConfig.plans.delete(plan.planIndex);
       bookmarkConfigStore.set(bookmarkConfig);
       savedPlanIndex.delete(plan.planIndex);
-
     } else {
       // Warn the users that they are saving adjusted plans
       const curPlan = localPlans.get(plan.planIndex);
@@ -178,7 +179,7 @@
                 savedPlanIndex.add(plan.planIndex);
                 savedPlanIndex = savedPlanIndex;
               }
-            },
+            }
           };
           confirmModalConfigStore.set(confirmModalConfig);
           return;
@@ -196,7 +197,6 @@
 
       // Save the plan to the local record
       savedPlanIndex.add(plan.planIndex);
-
     }
     savedPlanIndex = savedPlanIndex;
 
@@ -217,9 +217,7 @@
   const tabTransitionEndHandler = (e, planIndex) => {
     // Listen to the flex-grow event
     if (e.propertyName === 'flex-grow' && planIndex === plans.activePlanIndex) {
-      d3.select(e.target)
-        .select('.tab-score')
-        .classed('shown', true);
+      d3.select(e.target).select('.tab-score').classed('shown', true);
     }
   };
 
@@ -228,7 +226,7 @@
    * @param e {MouseEvent} Mouse event
    * @param planIndex {number} Plan index
    */
-  const tabClicked = (e, planIndex)  => {
+  const tabClicked = (e, planIndex) => {
     if (!plans.planStores.has(planIndex)) {
       return;
     }
@@ -244,9 +242,7 @@
     });
 
     // First hide all the scores on tab
-    d3.select(component)
-      .selectAll('.tab-score')
-      .classed('shown', false);
+    d3.select(component).selectAll('.tab-score').classed('shown', false);
 
     plans.activePlanIndex = planIndex;
   };
@@ -265,11 +261,9 @@
     await tick();
 
     // Show the current active tab details
-    const tab = d3.select(component)
-      .select(`.tab-${plans.activePlanIndex}`);
+    const tab = d3.select(component).select(`.tab-${plans.activePlanIndex}`);
 
-    tab.select('.tab-score')
-      .classed('shown', true);
+    tab.select('.tab-score').classed('shown', true);
 
     // Set up the width for score panels
     // Need to set a timeout here to wait for the tab transition animation
@@ -308,9 +302,9 @@
     plans.planStores.forEach((planStore, planIndex) => {
       // Add this plan index to a local array and subscribe the store
       if (!localPlans.has(planIndex)) {
-        unsubscribes.push(planStore.subscribe(
-          value => planStoreUpdated(value, planIndex)
-        ));
+        unsubscribes.push(
+          planStore.subscribe((value) => planStoreUpdated(value, planIndex))
+        );
 
         console.log('Adding to local plan', planIndex);
       }
@@ -324,8 +318,12 @@
     // Let users wait the current batch to finish or fail before starting the
     // next batch
     if (plans.failedPlans.size === 0 && localPlans.size !== 5) {
-      alert(''.concat('Please wait until all pending plans are generated ',
-        'before regenerating any new plans.'));
+      alert(
+        ''.concat(
+          'Please wait until all pending plans are generated ',
+          'before regenerating any new plans.'
+        )
+      );
       return;
     }
 
@@ -352,7 +350,7 @@
             );
             dispatchRegenerateClicked();
           }
-        },
+        }
       };
       confirmModalConfigStore.set(confirmModalConfig);
     } else {
@@ -366,7 +364,6 @@
   const dispatchRegenerateClicked = () => {
     // Save two un-pinked plans for review during user study
     if (logger && plans.nextPlanIndex === 6) {
-
       bookmarkConfig.unpickedPlans = new Map();
       for (let i = 1; i < 6; i++) {
         if (!bookmarkConfig.plans.has(i)) {
@@ -403,7 +400,7 @@
    */
   const bookmarkClicked = () => {
     // If the the bookmark is already shown, we hide it
-    if ((Date.now() - bookmarkConfig.focusOutTime) < 200) {
+    if (Date.now() - bookmarkConfig.focusOutTime < 200) {
       bookmarkConfig.show = false;
       bookmarkConfigStore.set(bookmarkConfig);
     } else {
@@ -422,73 +419,60 @@
     const iconList = [
       { class: 'icon-refresh', svg: refreshIcon },
       { class: 'icon-star-solid', svg: starIconSolid },
-      { class: 'icon-star-outline', svg: starIconOutline },
+      { class: 'icon-star-outline', svg: starIconOutline }
     ];
     bindInlineSVG(component, iconList);
   });
 
   onDestroy(() => {
-    unsubscribes.forEach(unsub => unsub());
+    unsubscribes.forEach((unsub) => unsub());
   });
 
   $: windowLoaded && plans && !initialized && initPlanPanel();
   $: plans && localPlans.size !== NUM_TOTAL_PAN && planStoreAdded();
-
 </script>
 
-<style lang='scss'>
-  @import './CoachPanel.scss';
-</style>
-
-<div class='coach-panel' bind:this={component}>
-
-  <div class='coach-header'>
-
-    <div class='coach-logo'>
-      <img src='/logo.svg' alt='GAM Coach' draggable='false'>
+<div class="coach-panel" bind:this={component}>
+  <div class="coach-header">
+    <div class="coach-logo">
+      <img src="/logo.svg" alt="GAM Coach" draggable="false" />
       <!-- <span class='coach-name'>GAM Coach</span> -->
-      <span class='coach-tagline'>
+      <span class="coach-tagline">
         Personal coach to help you obtain desired AI decisions
       </span>
     </div>
 
-    <div class='coach-controls'>
-      <div class='icon-wrapper'
-        on:click={bookmarkClicked}
-        title='Saved plans'
-      >
-        <div class='svg-icon icon-star-outline'></div>
-        <span class='icon-label'>Bookmarks</span>
+    <div class="coach-controls">
+      <div class="icon-wrapper" on:click={bookmarkClicked} title="Saved plans">
+        <div class="svg-icon icon-star-outline" />
+        <span class="icon-label">Bookmarks</span>
       </div>
 
-      <div class='icon-wrapper'
+      <div
+        class="icon-wrapper"
         on:click={regenerateClicked}
-        title='Generate new plans based on my configurations'
+        title="Generate new plans based on my configurations"
       >
-        <div class='svg-icon icon-refresh'></div>
-        <span class='icon-label'>Regenerate</span>
+        <div class="svg-icon icon-refresh" />
+        <span class="icon-label">Regenerate</span>
       </div>
-
     </div>
-
   </div>
 
-  <div class='coach-tab-bar'>
-
+  <div class="coach-tab-bar">
     {#if plans !== null}
-
-      <div class='tab-input'>
+      <div class="tab-input">
         <span>{tabInputLabel}</span>
 
         {#if plans.isRegression}
-          <span class='tab-keyword'>{plans.regressionName}</span>
+          <span class="tab-keyword">{plans.regressionName}</span>
           <span>from</span>
-          <input type='number' step='any' id='goal-from'>
+          <input type="number" step="any" id="goal-from" />
 
           <span>to</span>
-          <input type='number' step='any' id='goal-to'>
+          <input type="number" step="any" id="goal-to" />
         {:else}
-          <div class='select'>
+          <div class="select">
             <select>
               {#each plans.classes as c, i}
                 {#if plans.classTarget.includes(i)}
@@ -498,71 +482,77 @@
             </select>
           </div>
         {/if}
-
       </div>
 
-      <div class='tabs'>
+      <div class="tabs">
         {#each planLabels as planLabel}
-          <div class={`tab tab-${planLabel.planIndex}`}
+          <div
+            class={`tab tab-${planLabel.planIndex}`}
             class:selected={planLabel.planIndex === plans.activePlanIndex}
             class:regression={plans.isRegression}
             on:click={(e) => tabClicked(e, planLabel.planIndex)}
-            on:transitionend={(e) => tabTransitionEndHandler(e, planLabel.planIndex)}
+            on:transitionend={(e) =>
+              tabTransitionEndHandler(e, planLabel.planIndex)}
           >
-
-            <div class='loading-container'
+            <div
+              class="loading-container"
               class:no-animation={plans.failedPlans.has(planLabel.planIndex)}
               class:no-display={plans.planStores.has(planLabel.planIndex)}
             >
-              <div class='line'></div>
-              <div class='line'></div>
-              <div class='line'></div>
+              <div class="line" />
+              <div class="line" />
+              <div class="line" />
             </div>
 
-            <span class='tab-name'
+            <span
+              class="tab-name"
               class:hidden={!plans.planStores.has(planLabel.planIndex)}
-              data-text={planLabel.name}
-            >{planLabel.name}</span>
-
-            <div class='star-wrapper'
-              class:hidden={!plans.planStores.has(planLabel.planIndex)}
-              on:click={e => starClicked(e, planLabel)}
-              title='Click to save this plan'
+              data-text={planLabel.name}>{planLabel.name}</span
             >
-              <div class='svg-icon tab-icon icon-star-solid'
+
+            <div
+              class="star-wrapper"
+              class:hidden={!plans.planStores.has(planLabel.planIndex)}
+              on:click={(e) => starClicked(e, planLabel)}
+              title="Click to save this plan"
+            >
+              <div
+                class="svg-icon tab-icon"
                 class:no-display={!savedPlanIndex.has(planLabel.planIndex)}
               >
                 {@html starIconSolid}
               </div>
-              <div class='svg-icon tab-icon icon-star-outline'
+              <div
+                class="svg-icon tab-icon"
                 class:no-display={savedPlanIndex.has(planLabel.planIndex)}
               >
                 {@html starIconOutline}
               </div>
             </div>
 
-            <div class='tab-score'
+            <div
+              class="tab-score"
               class:hidden={!plans.planStores.has(planLabel.planIndex)}
             >
-              <div class='score-bar-wrapper'>
-                <ScorePanel planLabel={planLabel}
+              <div class="score-bar-wrapper">
+                <ScorePanel
+                  {planLabel}
                   isFailed={plans.failedPlans.has(planLabel.planIndex)}
-                  planStore={plans.planStores.has(planLabel.planIndex) ?
-                    plans.planStores.get(planLabel.planIndex) : null
-                  }
+                  planStore={plans.planStores.has(planLabel.planIndex)
+                    ? plans.planStores.get(planLabel.planIndex)
+                    : null}
                   scoreWidth={scorePanelWidth}
-                  logger={logger}
+                  {logger}
                 />
               </div>
             </div>
-
           </div>
         {/each}
-
       </div>
-
     {/if}
-
   </div>
-
 </div>
+
+<style lang="scss">
+  @import './CoachPanel.scss';
+</style>

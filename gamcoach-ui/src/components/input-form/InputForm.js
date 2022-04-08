@@ -65,7 +65,7 @@ export const getInputLists = (features, curExample) => {
         name: f.description.displayName,
         description: f.description.description,
         levelName: curExample[f.featureID],
-        levelDisplayName: f.description.levelDescription[curLevel].displayName,
+        levelDisplayName: f.description.levelDescription[curLevel]?.displayName,
         allValues: values,
         featureID: f.featureID,
         labelEncoder: f.labelEncoder

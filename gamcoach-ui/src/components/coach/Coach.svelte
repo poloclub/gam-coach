@@ -25,7 +25,7 @@
     bookmarkConfigStore
   } from '../../store';
 
-  import modelDataLC from '../../config/_temp/lc-classifier.json';
+  import modelDataLC from '../../config/data/lc-classifier.json';
 
   export let curModelData = modelDataLC;
   export let windowLoaded = false;

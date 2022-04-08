@@ -37,48 +37,54 @@
   import text from '../../config/article-text.yml';
 
   // Import samples
-  import samplesLC from '../../config/_temp/lc-classifier-random-samples.json';
-  import samplesAdult from '../../config/_temp/adult-classifier-random-samples.json';
-  import samplesCredit from '../../config/_temp/credit-classifier-random-samples.json';
-  import samplesGerman from '../../config/_temp/german-classifier-random-samples.json';
-  import samplesCompas from '../../config/_temp/compas-classifier-random-samples.json';
+  import samplesLC from '../../config/data/lc-classifier-random-samples.json';
+  import samplesAdult from '../../config/data/adult-classifier-random-samples.json';
+  import samplesCredit from '../../config/data/credit-classifier-random-samples.json';
+  import samplesGerman from '../../config/data/german-classifier-random-samples.json';
+  import samplesCompas from '../../config/data/compas-classifier-random-samples.json';
 
   // Import models
-  import modelDataLC from '../../config/_temp/lc-classifier.json';
-  import modelDataAdult from '../../config/_temp/adult-classifier.json';
-  import modelDataCredit from '../../config/_temp/credit-classifier.json';
-  import modelDataGerman from '../../config/_temp/german-classifier.json';
-  import modelDataCompass from '../../config/_temp/compas-classifier.json';
+  import modelDataLC from '../../config/data/lc-classifier.json';
+  import modelDataAdult from '../../config/data/adult-classifier.json';
+  import modelDataCredit from '../../config/data/credit-classifier.json';
+  import modelDataGerman from '../../config/data/german-classifier.json';
+  import modelDataCompass from '../../config/data/compas-classifier.json';
 
-  export let modelName = 'compas';
+  export let modelName = 'adult';
 
   let curModelData = modelDataLC;
   let curSamples = samplesLC;
+  let curIndex = 126;
 
   switch (modelName) {
     case 'lc': {
       curModelData = modelDataLC;
       curSamples = samplesLC;
+      curIndex = 126;
       break;
     }
     case 'adult': {
       curModelData = modelDataAdult;
       curSamples = samplesAdult;
+      curIndex = 322;
       break;
     }
     case 'credit': {
       curModelData = modelDataCredit;
       curSamples = samplesCredit;
+      curIndex = 333;
       break;
     }
     case 'german': {
       curModelData = modelDataGerman;
       curSamples = samplesGerman;
+      curIndex = 181;
       break;
     }
     case 'compas': {
       curModelData = modelDataCompass;
       curSamples = samplesCompas;
+      curIndex = 380;
       break;
     }
     default: {
@@ -86,6 +92,7 @@
       curModelData = modelDataLC;
       curSamples = samplesLC;
       modelName = 'lc';
+      curIndex = 126;
     }
   }
 
@@ -102,7 +109,6 @@
   // Initialize the logger
   const logger = null;
 
-  let curIndex = 126;
   /** @type {any[]} */
   let curExample = [
     17000.0,
@@ -138,7 +144,7 @@
   // curIndex = 23;
   // curExample = samples[curIndex];
 
-  curIndex = random(0, curSamples.length - 1);
+  // curIndex = random(0, curSamples.length - 1);
   curExample = curSamples[curIndex];
 
   const pointArrowSVGProcessed = pointArrowSVG.replaceAll(
@@ -195,7 +201,7 @@
     updated = false;
     curExample = newExample;
 
-    console.log(logger?.toJSON());
+    // console.log(logger?.toJSON());
   };
 
   const editClicked = () => {

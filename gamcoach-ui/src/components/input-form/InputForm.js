@@ -100,7 +100,7 @@ export const getNewCurExample = (contList, catList) => {
       curValue = round(curValue, 0);
     }
     if (f.transform === 'log10') {
-      curValue = Math.log(curValue) / Math.log(10);
+      curValue = Math.log(curValue + 1e-6) / Math.log(10);
     }
     newCurExample[f.featureID] = curValue;
   });

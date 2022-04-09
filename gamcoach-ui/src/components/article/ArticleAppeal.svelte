@@ -17,7 +17,8 @@
     getInputFormConfigStore,
     inputFormConfigStore,
     constraintsStore,
-    bookmarkConfigStore
+    bookmarkConfigStore,
+    ebmStore
   } from '../../store';
   import { Constraints } from '../coach/Coach';
   import { random } from '../../utils/utils';
@@ -182,6 +183,7 @@
 
     modelName = option.name;
 
+    ebmStore.set({});
     inputFormConfigStore.set({
       show: false,
       ebm: null,
@@ -292,7 +294,10 @@
         </a>
       </div>
       <div class="dataset-menu">
-        <span class="dataset-description">Choose a dataset</span>
+        <!-- <span class="dataset-description">Choose a dataset</span> -->
+        <span class="dataset-description"
+          >Consistent user experience across datasets:</span
+        >
         {#each datasetOptions as option, i}
           <div
             class="dataset-option"

@@ -264,6 +264,11 @@
     flex-direction: column;
     align-items: flex-end;
 
+    a {
+      color: white;
+      text-decoration: underline;
+    }
+
     strong {
       font-weight: 800;
     }

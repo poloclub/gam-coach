@@ -216,7 +216,9 @@
       <div class="help-note">
         <div class="arrow" />
         <div class="title-top">Imagine...</div>
-        <div class="title">You're loan applicant</div>
+        <div class="title">
+          You're {modelName === 'compas' ? 'bail' : 'loan'} applicant
+        </div>
         <div class="input-number">
           <div
             class="svg-icon"
@@ -239,12 +241,27 @@
         <div class="description">
           <span class="line"> Your application is rejected </span>
           <div class="help-arrow">{@html pointArrowSVGProcessed}</div>
-          <span class="line"> The bank points you to </span>
+          <span class="line">
+            The {modelName === 'compas' ? 'court' : 'bank'} points you to
+          </span>
           <span class="line">
             <strong>GAM Coach</strong> to help you
           </span>
           <span class="line"> succeed in next application </span>
         </div>
+        {#if modelName === 'compas'}
+          <div class="description">
+            <span class="line" style="margin-top: 30px;">
+              *We would not like to use COMPAS to evaluate GAM Coach, this demo
+              is only for review appeal purpose.
+            </span>
+            <span class="line" style="margin-top: 10px;">
+              See <a href="https://arxiv.org/abs/2106.05498" target="_blank"
+                >this paper
+              </a> to learn more about COMPAS.
+            </span>
+          </div>
+        {/if}
       </div>
     </div>
 

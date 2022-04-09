@@ -44,15 +44,6 @@ export const bookmarkConfigStore = writable({
   plansInfo: null,
 });
 
-export const inputFormConfigStore = writable({
-  show: false,
-  ebm: null,
-  features: null,
-  plansInfo: null,
-  curExample: [],
-  action: null
-});
-
 export const ratingFormConfigStore = writable({
   show: false,
   planRatings: [],
@@ -65,4 +56,24 @@ export const constraintRatingFormConfigStore = writable({
   action: ''
 });
 
-export const ebmStore = writable();
+export const inputFormConfigStore = writable({
+  show: false,
+  ebm: null,
+  features: null,
+  plansInfo: null,
+  curExample: [],
+  action: null
+});
+
+export const getInputFormConfigStore = () => {
+  return writable({
+    show: false,
+    ebm: null,
+    features: null,
+    plansInfo: null,
+    curExample: [],
+    action: null
+  });
+};
+
+export const ebmStore = writable({});

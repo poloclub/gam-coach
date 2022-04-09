@@ -14,6 +14,7 @@
   import { fade, fly } from 'svelte/transition';
   import {
     tooltipConfigStore,
+    getInputFormConfigStore,
     inputFormConfigStore,
     constraintsStore,
     bookmarkConfigStore
@@ -42,39 +43,53 @@
   let curSamples = samplesLC;
   let curIndex = 126;
 
-  switch (modelName) {
-    case 'lc': {
-      curSamples = samplesLC;
-      curIndex = 126;
-      break;
+  const datasetOptions = [
+    { name: 'lc', display: 'Lending Club' },
+    { name: 'adult', display: 'Adult Census Income' },
+    { name: 'credit', display: 'Credit' },
+    { name: 'german', display: 'German Credit' },
+    { name: 'compas', display: 'COMPAS' }
+  ];
+
+  const initModelInfo = () => {
+    switch (modelName) {
+      case 'lc': {
+        curSamples = samplesLC;
+        curIndex = 126;
+        break;
+      }
+      case 'adult': {
+        curSamples = samplesAdult;
+        curIndex = 322;
+        break;
+      }
+      case 'credit': {
+        curSamples = samplesCredit;
+        curIndex = 333;
+        break;
+      }
+      case 'german': {
+        curSamples = samplesGerman;
+        curIndex = 181;
+        break;
+      }
+      case 'compas': {
+        curSamples = samplesCompas;
+        curIndex = 380;
+        break;
+      }
+      default: {
+        console.warn('Unknown model name');
+        curSamples = samplesLC;
+        modelName = 'lc';
+        curIndex = 126;
+      }
     }
-    case 'adult': {
-      curSamples = samplesAdult;
-      curIndex = 322;
-      break;
-    }
-    case 'credit': {
-      curSamples = samplesCredit;
-      curIndex = 333;
-      break;
-    }
-    case 'german': {
-      curSamples = samplesGerman;
-      curIndex = 181;
-      break;
-    }
-    case 'compas': {
-      curSamples = samplesCompas;
-      curIndex = 380;
-      break;
-    }
-    default: {
-      console.warn('Unknown model name');
-      curSamples = samplesLC;
-      modelName = 'lc';
-      curIndex = 126;
-    }
-  }
+  };
+
+  initModelInfo();
+  let ebmStore = writable({});
+  // let inputFormConfigStore = getInputFormConfigStore();
 
   const unsubscribes = [];
   let windowLoaded = false;
@@ -129,6 +144,7 @@
       inputFormConfig = value;
 
       // Update curExample if it is changed
+      console.log(value, value.action, value.curExample);
       if (inputFormConfig.action === 'saved') {
         inputFormConfig.action = null;
         updated = true;
@@ -147,6 +163,27 @@
     curExample = newExample;
 
     // console.log(logger?.toJSON());
+  };
+
+  const optionClicked = (e, option) => {
+    e?.preventDefault();
+    if (option.name === modelName) return;
+
+    modelName = option.name;
+
+    ebmStore.set({});
+    inputFormConfigStore.set({
+      show: false,
+      ebm: null,
+      features: null,
+      plansInfo: null,
+      curExample: [],
+      action: null
+    });
+    updated = false;
+
+    initModelInfo();
+    curExample = curSamples[curIndex];
   };
 
   const editClicked = () => {
@@ -227,6 +264,19 @@
           <span>Video</span>
         </a>
       </div>
+      <div class="dataset-menu">
+        <span class="dataset-description">Choose a dataset</span>
+        {#each datasetOptions as option, i}
+          <div
+            class="dataset-option"
+            class:selected={option.name === modelName}
+            on:click={(e) => optionClicked(e, option)}
+          >
+            <div class="dataset-place" />
+            <span class="dataset-name">{option.display}</span>
+          </div>
+        {/each}
+      </div>
     </div>
 
     {#key curExample}
@@ -237,8 +287,14 @@
 
     <DiffPicker {logger} />
     <ConfirmModal />
-    <InputForm />
-    <BookmarkPanel {windowLoaded} {logger} />
+
+    {#key modelName}
+      <InputForm />
+    {/key}
+
+    {#key modelName}
+      <BookmarkPanel {windowLoaded} {logger} />
+    {/key}
   </div>
 
   <div class="article">

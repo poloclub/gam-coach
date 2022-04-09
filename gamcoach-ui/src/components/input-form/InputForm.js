@@ -17,7 +17,7 @@ export const getInputLists = (features, curExample) => {
 
   features.forEach(f => {
     if (f.isCont) {
-      let curValue = curExample[f.featureID];
+      let curValue = parseFloat(curExample[f.featureID]);
       if (f.transform === 'log10') {
         curValue = Math.pow(10, curValue);
       }
@@ -25,7 +25,7 @@ export const getInputLists = (features, curExample) => {
       if (f.requiresInt) {
         curValue = round(curValue, 0);
       } else {
-        curValue = formatter(curValue);
+        curValue = round(curValue, 2);
       }
 
       contList.push({

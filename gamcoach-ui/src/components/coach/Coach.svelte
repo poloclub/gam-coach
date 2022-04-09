@@ -77,6 +77,7 @@
    * Load the model and populate the plans.
    */
   const initModel = async () => {
+    console.log('initing model');
     initialized = true;
 
     // Load the model data
@@ -120,9 +121,9 @@
     );
 
     // Initialize the input form
-    inputFormConfig.ebm = ebm;
-    inputFormConfig.curExample = curExample;
-    inputFormConfigStore.set(inputFormConfig);
+    // inputFormConfig.ebm = ebm;
+    // inputFormConfig.curExample = curExample;
+    // inputFormConfigStore.set(inputFormConfig);
 
     // Log the plans
     logger?.addRecord('plans', plans);

@@ -140,6 +140,55 @@
       height: 30px;
     }
   }
+
+  .dataset-menu {
+    display: flex;
+    flex-direction: column;
+    margin-top: 60px;
+    gap: 2px;
+
+    .dataset-description {
+      font-weight: 200;
+      border-bottom: 2px solid change-color($color: $teal-700, $alpha: 0.3);
+      margin-bottom: 5px;
+      display: flex;
+      padding-left: 10px;
+    }
+
+    .dataset-option {
+      display: flex;
+
+      .dataset-place {
+        width: 10px;
+        border-left: 4px solid $teal-900;
+        transition: border-color 100ms ease-in-out, color 100ms ease-in-out;
+      }
+
+      .dataset-name {
+        cursor: pointer;
+        transition: border-color 100ms ease-in-out, color 100ms ease-in-out,
+          font-weight 100ms ease-in-out;
+        font-variant: small-caps;
+      }
+
+      &:hover {
+        .dataset-name {
+          color: $teal-500;
+        }
+      }
+
+      &.selected {
+        .dataset-place {
+          border-left: 4px solid $teal-700;
+        }
+
+        .dataset-name {
+          // font-weight: 800;
+          color: $teal-500;
+        }
+      }
+    }
+  }
 }
 
 .coach-wrapper {

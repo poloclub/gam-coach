@@ -77,7 +77,6 @@
    * Load the model and populate the plans.
    */
   const initModel = async () => {
-    console.log('initing model');
     initialized = true;
 
     // Load the model data

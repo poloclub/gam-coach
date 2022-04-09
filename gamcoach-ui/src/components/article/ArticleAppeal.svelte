@@ -87,9 +87,21 @@
     }
   };
 
+  // localhost:5005/?dataset=compas
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlModelName = urlParams.get('dataset');
+  const validModelNames = new Set([
+    'lc',
+    'adult',
+    'credit',
+    'german',
+    'compas'
+  ]);
+  if (urlModelName !== null && validModelNames.has(urlModelName)) {
+    modelName = urlModelName;
+  }
+
   initModelInfo();
-  let ebmStore = writable({});
-  // let inputFormConfigStore = getInputFormConfigStore();
 
   const unsubscribes = [];
   let windowLoaded = false;
@@ -144,7 +156,6 @@
       inputFormConfig = value;
 
       // Update curExample if it is changed
-      console.log(value, value.action, value.curExample);
       if (inputFormConfig.action === 'saved') {
         inputFormConfig.action = null;
         updated = true;
@@ -171,7 +182,6 @@
 
     modelName = option.name;
 
-    ebmStore.set({});
     inputFormConfigStore.set({
       show: false,
       ebm: null,

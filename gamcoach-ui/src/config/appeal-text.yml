@@ -46,7 +46,13 @@ crash:
   response: >
     This comment is inaccurate. Our tool does not crash after repeating the
     process to restrict the range of features. Instead, our tool gracefully
-    displays error messages on the plan tab bar (Figure 1, Video 1).
+    displays error messages on the plan tab bar (Video 1).
+  caption: >
+    When GAM Coach fails to find solutions for an infeasible ILP, it displays
+    error messages on the plan tab bar to indicate failure, and the tool is
+    still usable. Video is taken from the <a
+    href="https://anonfacct.github.io/gam-coach" target="_blank">original demo
+    page</a> (unchanged since paper submission).
 
 development:
   title: Tool is developed with one model on one dataset

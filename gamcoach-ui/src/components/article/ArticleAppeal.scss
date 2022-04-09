@@ -8,14 +8,17 @@
 
 .article {
   h4 {
-    margin-top: 20px;
+    margin-top: 40px;
     margin-bottom: 0px;
+
+    &:first-of-type {
+      margin-top: 10px;
+    }
   }
 }
 
 blockquote {
   grid-column: text-start / text-end;
-  margin: 10px 0;
   background: $orange-50;
   border-left: 10px solid $orange-100;
   color: $brown-900;
@@ -38,6 +41,7 @@ blockquote {
   }
 
   &.response {
+    margin: 10px 0 10px 0;
     background: $green-50;
     border-left: 10px solid $green-100;
     color: $teal-900;

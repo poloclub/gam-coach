@@ -335,7 +335,9 @@
   </div>
 
   <div class="article">
-    <h2 id="summary">Appeal Summary</h2>
+    <h2 id="summary" style="margin-top: 5px;">
+      Submission 218: Appeal Summary
+    </h2>
     <p>{@html text.summary.intro}</p>
     <ol>
       {#each text.summary.list as item}
@@ -349,6 +351,21 @@
     <h4 id="mistake-1">M1: "{@html text.crash.title}"</h4>
     <blockquote><p>{@html text.crash.review}</p></blockquote>
     <p>{@html text.crash.response}</p>
+
+    <div class="video wide-video" id="infeasible-video">
+      <video
+        controls
+        playsinline
+        muted
+        poster="https://i.imgur.com/EiuL6If.png"
+      >
+        <source src="/videos/appeal-infeasible.mp4" />
+        <track kind="captions" />
+      </video>
+      <div class="figure-caption">
+        Video 1. {@html text.crash.caption}
+      </div>
+    </div>
 
     <h4 id="mistake-2">M2: "{@html text.development.title}"</h4>
     <blockquote><p>{@html text.development.review}</p></blockquote>

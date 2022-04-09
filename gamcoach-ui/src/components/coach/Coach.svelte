@@ -25,9 +25,10 @@
     bookmarkConfigStore
   } from '../../store';
 
-  import modelDataLC from '../../config/data/lc-classifier.json';
+  // import modelDataLC from '../../config/data/lc-classifier.json';
 
-  export let curModelData = modelDataLC;
+  export let modelName = 'lc';
+  // export let curModelData = modelDataLC;
   export let windowLoaded = false;
   export let curExample = null;
 
@@ -53,7 +54,7 @@
   );
 
   // Set up the GAM Coach object
-  // let modelData = null;
+  let curModelData = null;
 
   /** @type {EBM} */
   let ebm = null;
@@ -79,8 +80,7 @@
     initialized = true;
 
     // Load the model data
-    // modelData = await d3.json('/data/lc-classifier.json');
-    // modelData = await d3.json('/data/adult-classifier.json');
+    curModelData = await d3.json(`/data/${modelName}-classifier.json`);
     // console.log(modelData);
 
     // Initialize an ebm model

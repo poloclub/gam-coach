@@ -1,0 +1,96 @@
+# Text for the article
+
+summary:
+  intro: >
+    We appreciate the detailed comments and insightful feedback from all
+    reviewers. We would like to point out four serious material mistakes in R4’s
+    review which ultimately lead to the decision recommendation.
+  list:
+    - >
+      R4 incorrectly states that after repeatedly restricting feature range our
+      tool crashes. Our tool does not crash and instead it gracefully displays
+      error messages when it fails to find ILP solutions.
+    - >
+      R4 incorrectly states that our tool is developed with one model on one
+      dataset. Our submission explicitly describes how our tool handles
+      different cases and has a link to a detailed documentation site explaining
+      how a model developer can use our tool with GAMs trained on different
+      datasets.
+    - >
+      R4 incorrectly states that different datasets could lead to different user
+      experiences. As described in our paper, our user interface generalizes to
+      any tabular dataset with continuous and categorical variables. In the
+      supporting document, we demonstrate a consistent user experience across
+      five datasets that are commonly used in algorithmic recourse literature.
+    - >
+      R4 incorrectly suggests that our user evaluation needs to consider other
+      datasets/cases. In the paper, we explicitly discuss our rationale for
+      choosing the LendingClub dataset for the user study. In the supporting
+      document, we demonstrate how other four common datasets are not suitable
+      for crowdworker user study.
+  conclusion: >
+    As R1, R2, R3, and the meta reviewer point out, the useful and usable user
+    interface is our primary contribution, and this novel interface design meets
+    critical needs. Therefore, we appeal to the FAccT committee to discard R4’s
+    reviews and reconsider the final decision.
+
+crash:
+  title: Tool crashes when the ILP is infeasible
+  review: >
+    [R4] The tool does not currently handle cases where individuals might have
+    no recourse (i.e., the ILP is infeasible). This is critical information that
+    can be produced via an ILP approach. In this case, the simplest way to check
+    is by forcing the tool to mine 1-feature changes and restricting the range
+    of features that are proposed. Repeating this process several times leads to
+    a setting where the ILP is infeasible and the tool crashes.
+  response: >
+    This comment is inaccurate. Our tool does not crash after repeating the
+    process to restrict the range of features. Instead, our tool gracefully
+    displays error messages on the plan tab bar (Figure 1, Video 1).
+
+development:
+  title: Tool is developed with one model on one dataset
+  review: >
+    [R4] The tool appears to be developed and evaluated with one model on one
+    dataset.
+  response: >
+    This comment is inaccurate. Our submission explicitly describes how our tool
+    handles different cases [Page 15] and includes a link [Page 9] to a detailed
+    documentation site explaining how a model developer can use our tool with
+    GAMs trained on different datasets.
+  quote: >
+    [Page 15] Also, our open-source implementation handles special cases, such
+    as features requiring integer values or using log transformations, and
+    provides ML developers with simple APIs to integrate domain-specific
+    descriptions when creating their own instance of GAM Coach.
+
+experience:
+  title: Different datasets, different user experiences
+  review: >
+    [R4] …ensuring a consistent user experience across datasets (specifically as
+    certain datasets might expose other kinds of effects).
+  response: >
+    This comment is inaccurate. As discussed in Page7, with the flexible design
+    of Continuous and Categorical Feature Cards, our tool provides a consistent
+    user experience across different tabular datasets. Following online demos
+    demonstrate a consistent user experience on five datasets that are commonly
+    used in algorithmic recourse literature (Table 1).
+
+evaluation:
+  title: Evaluation needs to consider other datasets
+  review: >
+    [R4] In this case, there are two reasons to ask for a more comprehensive
+    evaluation…
+  response: >
+    We explain our rationale for choosing LendingClub for our crowdworker user
+    study on Page 9. Other commonly used datasets in algorithmic recourse
+    literature are also lending related, but they are more dated and have fewer
+    samples and features (Table 1). Compas is used to simulate a bail
+    application scenario, but it is not reasonable for us to ask crowdworkers to
+    pretend to be a bail applicant and ask for recourse.
+  quote: >
+    [Page 9] In this study, we chose a lending scenario because it is one domain
+    where algorithmic recourse might be applied in practice, and there is no
+    specialized knowledge needed to understand the setting. Therefore,
+    crowdworkers would be relatively representative of the population who would
+    use this tool.

@@ -5,14 +5,10 @@
   import DiffPicker from '../DiffPicker.svelte';
   import ConfirmModal from '../confirm-modal/ConfirmModal.svelte';
   import InputForm from '../input-form/InputForm.svelte';
-  import RatingForm from '../input-form/RatingForm.svelte';
-  import ConstraintRatingForm from '../input-form/ConstraintRatingForm.svelte';
   import BookmarkPanel from '../bookmark-panel/BookmarkPanel.svelte';
   import Tooltip from '../Tooltip.svelte';
-  import Youtube from './Youtube.svelte';
 
   import d3 from '../../utils/d3-import';
-  import { Logger } from '../../utils/logger';
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { fade, fly } from 'svelte/transition';
@@ -20,9 +16,7 @@
     tooltipConfigStore,
     inputFormConfigStore,
     constraintsStore,
-    bookmarkConfigStore,
-    ratingFormConfigStore,
-    constraintRatingFormConfigStore
+    bookmarkConfigStore
   } from '../../store';
   import { Constraints } from '../coach/Coach';
   import { random } from '../../utils/utils';
@@ -34,7 +28,7 @@
   import iconVideo from '../../img/icon-youtube.svg';
   import iconPdf from '../../img/icon-pdf.svg';
 
-  import text from '../../config/article-text.yml';
+  import text from '../../config/appeal-text.yml';
 
   // Import samples
   import samplesLC from '../../config/data/lc-classifier-random-samples.json';
@@ -95,43 +89,8 @@
   // Initialize the logger
   const logger = null;
 
-  /** @type {any[]} */
-  let curExample = [
-    17000.0,
-    '36 months',
-    '3 years',
-    'RENT',
-    4.831869774280501,
-    'Source Verified',
-    'major_purchase',
-    10.09,
-    '0',
-    11.0,
-    '0',
-    5.0,
-    '1',
-    1.7075701760979363,
-    0.4,
-    9.0,
-    'Individual',
-    '0',
-    '1',
-    712.0
-  ];
-
-  // // Example that is closest to the median
-  // curExample = [15000.0, '36 months', '10+ years', 'RENT', 4.785329835010767,
-  //   'Source Verified', 'debt_consolidation', 20.47, '0', 16.0, '0', 11.0, '0',
-  //   4.041451902647006, 57.7, 21.0, 'Individual', '0', '0', 677.0];
-
-  // curIndex = 451;
-  // curExample = samples[curIndex];
-
-  // curIndex = 23;
-  // curExample = samples[curIndex];
-
   // curIndex = random(0, curSamples.length - 1);
-  curExample = curSamples[curIndex];
+  let curExample = curSamples[curIndex];
 
   const pointArrowSVGProcessed = pointArrowSVG.replaceAll(
     'white',
@@ -283,74 +242,45 @@
   </div>
 
   <div class="article">
-    <h2 id="tool">What is <span class="teal">GAM Coach</span>?</h2>
-    {#each text.tool.pre as p}
-      <p>{@html p}</p>
-    {/each}
-
-    <h2 id="tutorial">
-      How to Use <span class="teal">GAM Coach</span> as an End-user?
-    </h2>
-
-    {#each text.video as item, i}
-      {#if item.header !== null}
-        <h4 id={`${item.video}`}>{item.header}</h4>
-      {/if}
-
-      <div class="video">
-        <video autoplay loop muted playsinline class:wide-video={item.isWide}>
-          <source src={`/videos/demo-${item.video}.mp4`} />
-          <track kind="captions" />
-        </video>
-        <div class="figure-caption">
-          Figure {item.figureID}. {@html item.caption}
-        </div>
-      </div>
-
-      {#each item.text as p}
-        <p>{@html p}</p>
+    <h2 id="summary">Appeal Summary</h2>
+    <p>{@html text.summary.intro}</p>
+    <ol>
+      {#each text.summary.list as item}
+        <li class="task-list"><span class="list-item">{@html item}</span></li>
       {/each}
-    {/each}
+    </ol>
+    <p>{@html text.summary.conclusion}</p>
 
-    <h2 id="tutorial">
-      Use <span class="teal">GAM Coach</span> as an ML Developer
-    </h2>
+    <h2 id="support">Supporting Document</h2>
 
-    {#each text.developer as p}
-      <p>{@html p}</p>
-    {/each}
+    <h4 id="mistake-1">M1: "{@html text.crash.title}"</h4>
+    <blockquote><p>{@html text.crash.review}</p></blockquote>
+    <p>{@html text.crash.response}</p>
 
-    <h2 id="tutorial">Demo Video</h2>
+    <h4 id="mistake-2">M2: "{@html text.development.title}"</h4>
+    <blockquote><p>{@html text.development.review}</p></blockquote>
+    <p>{@html text.development.response}</p>
+    <blockquote class="response">
+      <p>{@html text.development.quote}</p>
+    </blockquote>
 
-    <ul class="video-list">
-      {#each text.youtubeTimes as time, i}
-        <li class="video-link" on:click={currentPlayer.play(time.startTime)}>
-          {time.name}
-          <small>{time.timestamp}</small>
-        </li>
-      {/each}
-    </ul>
+    <h4 id="mistake-3">M3: "{@html text.experience.title}"</h4>
+    <blockquote><p>{@html text.experience.review}</p></blockquote>
+    <p>{@html text.experience.response}</p>
 
-    <div class="youtube-video">
-      <Youtube
-        videoId="0q3aqwrSbTk"
-        playerId="demo_video"
-        bind:this={currentPlayer}
-      />
-    </div>
-
-    <h2 id="tutorial">How is <span class="teal">GAM Coach</span> Developed?</h2>
-
-    {#each text.development as p}
-      <p>{@html p}</p>
-    {/each}
+    <h4 id="mistake-4">M4: "{@html text.evaluation.title}"</h4>
+    <blockquote><p>{@html text.evaluation.review}</p></blockquote>
+    <p>{@html text.evaluation.response}</p>
+    <blockquote class="response">
+      <p>{@html text.evaluation.quote}</p>
+    </blockquote>
   </div>
 
   <div class="article-footer">
     <div class="footer-main">
       <div class="footer-cp">
         <div>FAccT'22 Submission</div>
-        <div>Thanks for reviewing the manuscript!</div>
+        <div>Thanks again for reviewing this manuscript!</div>
       </div>
     </div>
   </div>
@@ -358,4 +288,5 @@
 
 <style lang="scss">
   @import './Article.scss';
+  @import './ArticleAppeal.scss';
 </style>

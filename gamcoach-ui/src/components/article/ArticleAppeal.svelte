@@ -14,7 +14,6 @@
   import { fade, fly } from 'svelte/transition';
   import {
     tooltipConfigStore,
-    getInputFormConfigStore,
     inputFormConfigStore,
     constraintsStore,
     bookmarkConfigStore,
@@ -181,8 +180,6 @@
     e?.preventDefault();
     if (option.name === modelName) return;
 
-    modelName = option.name;
-
     ebmStore.set({});
     inputFormConfigStore.set({
       show: false,
@@ -192,8 +189,16 @@
       curExample: [],
       action: null
     });
+    bookmarkConfigStore.set({
+      show: false,
+      features: null,
+      plans: new Map(),
+      focusOutTime: 0,
+      plansInfo: null
+    });
     updated = false;
 
+    modelName = option.name;
     initModelInfo();
     curExample = curSamples[curIndex];
   };

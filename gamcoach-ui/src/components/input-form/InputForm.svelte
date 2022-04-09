@@ -80,7 +80,8 @@
   const inputUpdated = () => {
     if (
       contList.length + catList.length > 0 &&
-      !inputFormConfig.plansInfo.isRegression
+      ebm.predictProb !== undefined &&
+      !inputFormConfig.plansInfo?.isRegression
     ) {
       newCurExample = getNewCurExample(contList, catList);
       const newScore = ebm.predictProb([newCurExample])[0];

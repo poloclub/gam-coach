@@ -5,7 +5,8 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public --no-clear --port 5005"
+    "start": "sirv public --no-clear --port 5005",
+    "vercel": "pnpm run build && vercel public"
   },
   "devDependencies": {
     "@babel/core": "^7.15.8",

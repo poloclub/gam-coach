@@ -2,32 +2,39 @@
 
 summary:
   intro: >
-    We appreciate the detailed comments and insightful feedback from all
-    reviewers. We would like to point out four serious material mistakes in R4’s
-    review which ultimately lead to the decision recommendation.
+    We appreciate all reviewers’ insightful feedback. Our paper’s reviews were
+    split, with scores of 3, 2, 0, and -2. The meta reviewer notes "all four
+    reviewers mentioned that the paper was clear, well-written, and
+    well-executed - praising the online demo as well as the user interface." The
+    meta reviewer states that their recommendation to reject was specifically
+    based on two methodological concerns raised by R4. We believe both are
+    serious, demonstrable material mistakes and would therefore like to appeal
+    the decision. We present the evidence below:
   list:
     - >
-      R4 incorrectly states that after repeatedly restricting feature range our
-      tool crashes. Our tool does not crash and instead it gracefully displays
-      error messages when it fails to find ILP solutions.
+      R4 experienced our tool crashing after repeatedly restricting feature
+      ranges. We looked into this and have been unable to reproduce the bug.
+      When we follow R4’s steps, our tool does not crash. <a
+      href="#infeasible-video">Instead, it informs the user when it fails to
+      find ILP solutions.</a>
     - >
-      R4 incorrectly states that our tool is developed with one model on one
-      dataset. Our submission explicitly describes how our tool handles
-      different cases and has a link to a detailed documentation site explaining
-      how a model developer can use our tool with GAMs trained on different
-      datasets.
+      R4 raised a serious concern that our tool would not generalize to other
+      datasets/cases, and such differences could lead to inconsistent user
+      experience. This is inaccurate, because:
     - >
-      R4 incorrectly states that different datasets could lead to different user
-      experiences. As described in our paper, our user interface generalizes to
-      any tabular dataset with continuous and categorical variables. In the
-      supporting document, we demonstrate a consistent user experience across
-      five datasets that are commonly used in algorithmic recourse literature.
+      Our paper has described how our tool handles diverse datasets/cases, and
+      linked to <a
+      href="https://anonfacct.github.io/gam-coach/docs/gamcoach/gamcoach.html#get_model_data"
+      target="_blank">detailed documentation</a> explaining how a practitioner
+      can use our tool on different datasets.
     - >
-      R4 incorrectly suggests that our user evaluation needs to consider other
-      datasets/cases. In the paper, we explicitly discuss our rationale for
-      choosing the LendingClub dataset for the user study. In the supporting
-      document, we demonstrate how other four common datasets are not suitable
-      for crowdworker user study.
+      Our paper has also described how the interface design generalizes to any
+      dataset with continuous and categorical variables, providing consistent
+      user experience. As further evidence, we provide four additional working
+      demonstrations in the supporting document to show such consistent user
+      experience across commonly used datasets/cases. Thus, the user study
+      performed on the LendingClub dataset is indeed significant in evaluating
+      the tool’s generalizable usability.
   conclusion: >
     As R1, R2, R3, and the meta reviewer point out, the useful and usable user
     interface is our primary contribution, and this novel interface design meets
@@ -35,7 +42,7 @@ summary:
     reviews and reconsider the final decision.
 
 crash:
-  title: Tool crashes when the ILP is infeasible
+  title: 1. Tool does not crash when the ILP is infeasible
   review: >
     [R4] The tool does not currently handle cases where individuals might have
     no recourse (i.e., the ILP is infeasible). This is critical information that
@@ -44,26 +51,36 @@ crash:
     of features that are proposed. Repeating this process several times leads to
     a setting where the ILP is infeasible and the tool crashes.
   response: >
-    This comment is inaccurate. Our tool does not crash after repeating the
-    process to restrict the range of features. Instead, our tool gracefully
-    displays error messages on the plan tab bar (Video 1).
+    R4 experienced our tool crashing when the integer linear program (ILP) is
+    infeasible. We have looked into this and have been unable to reproduce the
+    reported bug. After forcing the tool to mine 1-feature changes and repeating
+    the process to restrict the range of features, our tool does not crash.
+    Instead, it displays error messages on the plan tab bar to inform users that
+    it cannot find a solution (<a href="#infeasible-video">Video 1</a>).
   caption: >
-    When GAM Coach fails to find solutions for an infeasible ILP, it displays
+    If GAM Coach fails to find solutions for an infeasible ILP, it displays
     error messages on the plan tab bar to indicate failure, and the tool is
-    still usable. Video is taken from the <a
+    still usable. Screenshot is taken from the <a
     href="https://anonfacct.github.io/gam-coach" target="_blank">original demo
     page</a> (unchanged since paper submission).
 
 development:
-  title: Tool is developed with one model on one dataset
+  title: 2 (a). Our paper has described how the tool handles different datasets/cases
   review: >
     [R4] The tool appears to be developed and evaluated with one model on one
-    dataset.
+    dataset. This is an issue given that there are serious differences between
+    recourse and actionability across datasets and models (feasibility being one
+    of them). In this case, there are two reasons to ask for a more
+    comprehensive evaluation: (a) designing a tool that is robust and can be
+    adapted to different cases;[...]
   response: >
-    This comment is inaccurate. Our submission explicitly describes how our tool
-    handles different cases [Page 15] and includes a link [Page 9] to a detailed
-    documentation site explaining how a model developer can use our tool with
-    GAMs trained on different datasets.
+    This comment is inaccurate. Our paper has described how GAM Coach handles
+    different cases <span class="response-tag">[Page 15]</span> and provided a
+    link <span class="response-tag">[Page 9]</span> to <a
+      href="https://anonfacct.github.io/gam-coach/docs/gamcoach/gamcoach.html#get_model_data"
+      target="_blank">detailed documentation</a>
+    (unchanged since paper submission), which explains how a model developer can
+    use our tool with GAMs trained on different datasets.
   quote: >
     [Page 15] Also, our open-source implementation handles special cases, such
     as features requiring integer values or using log transformations, and
@@ -71,16 +88,24 @@ development:
     descriptions when creating their own instance of GAM Coach.
 
 experience:
-  title: Different datasets, different user experiences
+  title: 2 (b). Our paper has described how the interface design provides a consistent user experience
   review: >
-    [R4] …ensuring a consistent user experience across datasets (specifically as
-    certain datasets might expose other kinds of effects).
+    [R4] […] (b) ensuring a consistent user experience across datasets
+    (specifically as certain datasets might expose other kinds of effects).
   response: >
-    This comment is inaccurate. As discussed in Page7, with the flexible design
-    of Continuous and Categorical Feature Cards, our tool provides a consistent
-    user experience across different tabular datasets. Following online demos
-    demonstrate a consistent user experience on five datasets that are commonly
-    used in algorithmic recourse literature (Table 1).
+    This comment is inaccurate. As discussed in <span
+    class="response-tag">Section 5.2</span>, with a flexible design of
+    Continuous and Categorical Feature Cards, our tool provides a consistent
+    user experience across different datasets. As further evidence, we provide
+    four additional working demonstrations below to show such consistent user
+    experience across commonly used datasets/cases in the algorithmic recourse
+    literature (Table 1). Thus, the user study performed on the LendingClub
+    dataset is indeed significant in evaluating the tool’s generalizable
+    usability.
+  caption: >
+    We provide four working demonstrations in addition to the LendingClub
+    dataset to show that GAM Coach provides a consistent user experience across
+    commonly used datasets/cases in the algorithmic recourse literature.
 
 evaluation:
   title: Evaluation needs to consider other datasets

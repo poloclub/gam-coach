@@ -45,9 +45,9 @@
 
   const datasetOptions = [
     { name: 'lc', display: 'Lending Club' },
-    { name: 'adult', display: 'Adult Census Income' },
     { name: 'credit', display: 'Credit' },
     { name: 'german', display: 'German Credit' },
+    { name: 'adult', display: 'Adult Census Income' },
     { name: 'compas', display: 'COMPAS' }
   ];
 
@@ -177,7 +177,6 @@
   };
 
   const optionClicked = (e, option) => {
-    e?.preventDefault();
     if (option.name === modelName) return;
 
     ebmStore.set({});
@@ -334,21 +333,31 @@
     {/key}
   </div>
 
-  <div class="article">
+  <div class="article appeal-article">
     <h2 id="summary" style="margin-top: 5px;">
-      Submission 218: Appeal Summary
+      Appeal Submission 218: Summary
     </h2>
     <p>{@html text.summary.intro}</p>
     <ol>
-      {#each text.summary.list as item}
-        <li class="task-list"><span class="list-item">{@html item}</span></li>
-      {/each}
+      <li>
+        <span class="list-item">{@html text.summary.list[0]}</span>
+      </li>
+      <li>
+        <span class="list-item">{@html text.summary.list[1]}</span>
+        <ol class="summary-list">
+          <li>
+            <span class="list-item">{@html text.summary.list[2]}</span>
+          </li>
+          <li>
+            <span class="list-item">{@html text.summary.list[3]}</span>
+          </li>
+        </ol>
+      </li>
     </ol>
-    <p>{@html text.summary.conclusion}</p>
 
-    <h2 id="support">Supporting Document</h2>
+    <h2 id="support">Appeal Supporting Document</h2>
 
-    <h4 id="mistake-1">M1: "{@html text.crash.title}"</h4>
+    <h4 id="evidence-1">{@html text.crash.title}</h4>
     <blockquote><p>{@html text.crash.review}</p></blockquote>
     <p>{@html text.crash.response}</p>
 
@@ -367,30 +376,203 @@
       </div>
     </div>
 
-    <h4 id="mistake-2">M2: "{@html text.development.title}"</h4>
+    <h4 id="evidence-2">{@html text.development.title}</h4>
     <blockquote><p>{@html text.development.review}</p></blockquote>
     <p>{@html text.development.response}</p>
     <blockquote class="response">
       <p>{@html text.development.quote}</p>
     </blockquote>
 
-    <h4 id="mistake-3">M3: "{@html text.experience.title}"</h4>
+    <h4 id="evidence-3">{@html text.experience.title}</h4>
     <blockquote><p>{@html text.experience.review}</p></blockquote>
     <p>{@html text.experience.response}</p>
 
-    <h4 id="mistake-4">M4: "{@html text.evaluation.title}"</h4>
-    <blockquote><p>{@html text.evaluation.review}</p></blockquote>
-    <p>{@html text.evaluation.response}</p>
-    <blockquote class="response">
-      <p>{@html text.evaluation.quote}</p>
-    </blockquote>
+    <div class="article-table" id="dataset-table">
+      <div class="figure-caption">
+        Table 1. {@html text.experience.caption}
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Dataset</th>
+            <th>GAM Coach</th>
+            <th>Size</th>
+            <th>Target Variable</th>
+            <th>Country, Date</th>
+            <th>Recourse Papers</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Lending Club</td>
+            <td
+              ><a
+                href="#top"
+                on:click={(e) => {
+                  optionClicked(e, datasetOptions[0]);
+                }}>Demo</a
+              >
+            </td>
+            <td>n = 124026, d = 20</td>
+            <td>Loan Default</td>
+            <td>US, 2007–2018</td>
+            <td
+              >[
+              <a
+                href="https://dl.acm.org/doi/abs/10.1145/3351095.3372850"
+                target="_blank">1</a
+              >,
+              <a
+                href="https://proceedings.neurips.cc/paper/2020/hash/c2ba1bc54b239208cb37b901c0d3b363-Abstract.html"
+                target="_blank">2</a
+              >
+              ]</td
+            >
+          </tr>
+          <tr>
+            <td>Credit</td>
+            <td
+              ><a
+                href="#top"
+                on:click={(e) => {
+                  optionClicked(e, datasetOptions[1]);
+                }}>Demo</a
+              >
+            </td>
+            <td>n = 29623, d = 14</td>
+            <td>Loan Default</td>
+            <td>Taiwan, 2005</td>
+            <td
+              >[
+              <a
+                href="https://proceedings.neurips.cc/paper/2020/hash/c2ba1bc54b239208cb37b901c0d3b363-Abstract.html"
+                target="_blank">2</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.1145/3287560.3287566"
+                target="_blank">3</a
+              >,
+              <a
+                href="https://proceedings.mlr.press/v108/karimi20a.html"
+                target="_blank">4</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.14778/3461535.3461555"
+                target="_blank">5</a
+              >
+              ]</td
+            >
+          </tr>
+          <tr>
+            <td>German Credit</td>
+            <td
+              ><a
+                href="#top"
+                on:click={(e) => {
+                  optionClicked(e, datasetOptions[2]);
+                }}>Demo</a
+              >
+            </td>
+            <td>n = 1000, d = 20</td>
+            <td>Good Customer</td>
+            <td>German, 1994</td>
+            <td
+              >[
+              <a
+                href="https://dl.acm.org/doi/abs/10.1145/3351095.3372850"
+                target="_blank">1</a
+              >,
+              <a
+                href="https://proceedings.neurips.cc/paper/2020/hash/c2ba1bc54b239208cb37b901c0d3b363-Abstract.html"
+                target="_blank">2</a
+              >,
+              <a href="https://arxiv.org/abs/2106.02666" target="_blank">6</a>,
+              <a
+                href="https://proceedings.neurips.cc/paper/2020/hash/8ee7730e97c67473a424ccfeff49ab20-Abstract.html"
+                target="_blank">7</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/abs/10.1145/3442188.3445899"
+                target="_blank">8</a
+              >
+              ]</td
+            >
+          </tr>
+          <tr>
+            <td>Adult</td>
+            <td
+              ><a
+                href="#top"
+                on:click={(e) => {
+                  optionClicked(e, datasetOptions[3]);
+                }}>Demo</a
+              >
+            </td>
+            <td>n = 45222, d = 12</td>
+            <td>Income ≥ 50K</td>
+            <td>US, 1996</td>
+            <td
+              >[
+              <a
+                href="https://dl.acm.org/doi/abs/10.1145/3351095.3372850"
+                target="_blank">1</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.1145/3287560.3287566"
+                target="_blank">3</a
+              >,
+              <a
+                href="https://proceedings.mlr.press/v108/karimi20a.html"
+                target="_blank">4</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.14778/3461535.3461555"
+                target="_blank">5</a
+              >,
+              <a href="https://arxiv.org/abs/2106.02666" target="_blank">6</a>
+              ]</td
+            >
+          </tr>
+          <tr>
+            <td>COMPAS</td>
+            <td
+              ><a
+                href="#top"
+                on:click={(e) => {
+                  optionClicked(e, datasetOptions[4]);
+                }}>Demo</a
+              >
+            </td>
+            <td>n = 5278, d = 5</td>
+            <td>Recidivism in two years</td>
+            <td>US, 2016</td>
+            <td
+              >[
+              <a
+                href="https://dl.acm.org/doi/abs/10.1145/3351095.3372850"
+                target="_blank">1</a
+              >,
+              <a
+                href="https://proceedings.mlr.press/v108/karimi20a.html"
+                target="_blank">4</a
+              >,
+              <a
+                href="https://proceedings.neurips.cc/paper/2020/hash/8ee7730e97c67473a424ccfeff49ab20-Abstract.html"
+                target="_blank">7</a
+              >
+              ]</td
+            >
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="article-footer">
     <div class="footer-main">
       <div class="footer-cp">
-        <div>FAccT'22 Submission</div>
-        <div>Thanks again for reviewing this manuscript!</div>
+        <div>FAccT'22 Appeal Submission #218</div>
+        <div>We appreciate your consideration for our appeal!</div>
       </div>
     </div>
   </div>

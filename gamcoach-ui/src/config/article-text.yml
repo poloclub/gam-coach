@@ -120,7 +120,7 @@ video:
     figureID: 3
     caption: >
       End-users can probe the underlying ML model behaviors by experimenting
-      with hypothetical input values and inspect their impacts on the model
+      with hypothetical input values and inspecting their impacts on the model
       outcome in real-time.
     text:
       - >
@@ -140,7 +140,7 @@ video:
     figureID: 4
     caption: >
       GAM Coach realizes the recourse receipt concept where the decision maker
-      agrees to provide the decision subjects with desired outcome if a recourse
+      agrees to provide the decision subjects with the desired outcome if recourse
       terms were met. End-users can bookmark multiple satisfactory plans and
       save a verifiable recourse receipt.
     text:
@@ -152,7 +152,7 @@ video:
         If the user is happy with all saved plans, they can download a recourse receipt.
         Introduced by <a href='https://arxiv.org/abs/1711.00399'>Wachter et al.</a>,
         a recourse receipt is a contract that the decision maker agrees to provide the decision subject
-        with the preferred outcome if the a recourse plan is achieved in a specified period.
+        with the preferred outcome if the recourse plan is achieved in a specified period.
       - >
         GAM Coach is the first system that realizes this receipt concept.
         Leveraging modern public-key cryptography, GAM Coach introduces a
@@ -164,7 +164,7 @@ video:
         the saved recourse plans. Therefore, a decision subject can hold
         the decision maker accountable by proving the authenticity of the
         receipt to a third-party authority with the decision maker's public key.
-        In addition, the decision maker can prevent a decision subject to cheat
+        In addition, the decision maker can prevent a decision subject from cheating
         with a counterfeit receipt by verifying the receipt's integrity with the private
         key.
 
@@ -180,8 +180,8 @@ developer:
     libraries (both Python and JavaScript) to generate recourse plans for EBM
     models. The GAM Coach user interface is model-agnostic, so developers can
     apply the interface as long as the recourse generation method supports users
-    to specify preferences. Visit GAM Coach's <aa
-    href="https://github.com/anonfacct/gam-coach">GitHub repository</a> to learn
+    to specify preferences (Table 1). Visit GAM Coach's <aa
+    href="https://github.com/anonnips/gam-coach">GitHub repository</a> to learn
     more.
   - >
     Even though GAM Coach is designed for decision subjects who are less
@@ -189,7 +189,7 @@ developer:
     Coach to understand and debug their models. In an online study with 41
     Amazon Mechanical Turk Workers, many GAM Coach users have encountered and
     reported counterintuitive recourse plans, such as lowering the income to
-    obtain a loan approval. It suggests that developers can also use GAM Coach
+    obtain loan approval. It suggests that developers can also use GAM Coach
     to discover potentially problematic patterns in their ML model or recourse
     generation methods.
 
@@ -205,3 +205,11 @@ development:
     Javascript using <a href="https://svelte.dev/">Svelte</a> as a framework and
     <a href="https://d3js.org/">D3.js</a> for visualizations.
     See our manuscript for details about the recourse generation technique and implementations.
+
+table:
+  caption: >
+    We provide five working demos to show that GAM Coach provides a
+    consistent user experience across commonly used datasets/cases in the
+    algorithmic recourse literature. We evaluate GAM Coach through an online
+    user study on the LendingClub dataset, as it is the largest dataset used in
+    recourse literature and is most relatable to our US-based participants.

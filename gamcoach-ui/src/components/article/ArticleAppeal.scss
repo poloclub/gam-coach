@@ -86,7 +86,7 @@ blockquote {
 }
 
 .article-table {
-  grid-column: long-start / long-end;
+  grid-column: text-start / text-end;
   display: flex;
   flex-direction: column;
   justify-content: center;

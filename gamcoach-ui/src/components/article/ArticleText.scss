@@ -5,7 +5,8 @@ $header-color: currentcolor;
 .article {
   margin-bottom: 60px;
   display: grid;
-  grid-template-columns: [start] 1fr [long-start] calc((1000px - 78ch) / 2)
+  grid-template-columns:
+    [start] 1fr [long-start] calc((1000px - 78ch) / 2)
     [text-start] 78ch [text-end] calc((1000px - 78ch) / 2) [long-end] 1fr [end];
   color: $gray-800;
 }
@@ -15,6 +16,7 @@ $header-color: currentcolor;
   font-size: 40px;
   font-weight: 600;
   margin-bottom: 12px;
+  margin-top: 20px;
   border-bottom: 1px solid #eaecef;
   grid-column: text-start / text-end;
 }
@@ -74,7 +76,7 @@ $header-color: currentcolor;
 }
 
 .article .video-link {
-  color: #3273DC;
+  color: #3273dc;
   cursor: pointer;
   font-weight: normal;
   text-decoration: none;
@@ -95,11 +97,12 @@ $header-color: currentcolor;
 
 .article :global(code),
 .article :global(pre) {
-  font-family: SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace;
+  font-family: SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo,
+    monospace;
 }
 
 .article :global(code) {
-  padding: .2em .2em;
+  padding: 0.2em 0.2em;
   margin: 0;
   font-size: 85%;
   background-color: $gray-100;
@@ -179,7 +182,8 @@ $header-color: currentcolor;
 .important-note {
   border-left: 0.2rem solid $teal-600;
   border-radius: 0.2rem;
-  box-shadow: 0 .2rem .5rem hsla(0, 0%, 0%, 0.05),0 0 .0625rem hsla(0, 0%, 0%, 0.1);
+  box-shadow: 0 0.2rem 0.5rem hsla(0, 0%, 0%, 0.05),
+    0 0 0.0625rem hsla(0, 0%, 0%, 0.1);
   padding: 0 0.5rem 0.5rem;
   grid-column: text-start / text-end;
   margin: 15px 0;
@@ -188,7 +192,7 @@ $header-color: currentcolor;
     background-color: $teal-50;
     font-weight: 600;
     margin: 0 -0.5rem 0.5rem;
-    padding: .5rem .5rem .5rem 1rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
     border-top-right-radius: 0.2rem;
   }
 
@@ -196,14 +200,13 @@ $header-color: currentcolor;
     margin: 5px 0;
     padding-left: 0.5rem;
   }
-
 }
 
 video {
   width: 100%;
   grid-column: text-start / text-end;
 
-  box-shadow: 0px 0px 3px hsla(0, 0%, 0%, 0.2),0px 2px 8px hsla(0, 0%, 0%, 0.1);
+  box-shadow: 0px 0px 3px hsla(0, 0%, 0%, 0.2), 0px 2px 8px hsla(0, 0%, 0%, 0.1);
   border-radius: 10px;
 
   &.wide-video {
@@ -227,4 +230,33 @@ video {
 
 .article .youtube-video {
   grid-column: text-start / text-end;
+}
+
+.article-table {
+  grid-column: text-start / text-end;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .figure-caption {
+    padding: 5px 5px 5px 5px;
+  }
+
+  table {
+    border-spacing: 0;
+    border-collapse: collapse;
+  }
+
+  table thead tr th {
+    border-bottom: 2px solid var(--md-gray-300);
+  }
+
+  td,
+  th {
+    text-align: left;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
 }

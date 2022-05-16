@@ -1,4 +1,4 @@
-<script context='module'>
+<script context="module">
   let iframeApiReady = false;
   import { setContext, onMount } from 'svelte';
   var tag = document.createElement('script');
@@ -6,7 +6,7 @@
   var firstScriptTag = document.getElementsByTagName('script')[0];
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
   window.onYouTubeIframeAPIReady = () =>
-  window.dispatchEvent(new Event('iframeApiReady'));
+    window.dispatchEvent(new Event('iframeApiReady'));
 </script>
 
 <script>
@@ -15,12 +15,12 @@
   export let videoId;
   export let playerId = 'player';
   let player;
-  export function play(startSecond = 0){
+  export function play(startSecond = 0) {
     player.seekTo(startSecond);
     player.playVideo();
   }
   const dispatch = createEventDispatcher();
-  window.addEventListener('iframeApiReady', function(e) {
+  window.addEventListener('iframeApiReady', function (e) {
     player = new YT.Player(playerId, {
       videoId: videoId,
       width: '780',
@@ -31,7 +31,7 @@
     });
   });
   function onPlayerReady(event) {
-    player.mute();
+    // player.mute();
   }
 </script>
 

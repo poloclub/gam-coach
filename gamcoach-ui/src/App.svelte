@@ -1,6 +1,5 @@
 <script>
-  // import Article from './components/article/Article.svelte';
-  import Article from './components/article/ArticleAppeal.svelte';
+  import Article from './components/article/Article.svelte';
 </script>
 
 <svelte:head />

@@ -105,3 +105,5 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
+
+build-doc.sh

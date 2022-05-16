@@ -102,13 +102,27 @@ supports regression problems (e.g., <em>loan interest rate</em> prediction).</p>
 
 <h1 id="how-to-use-gam-coach">How to use GAM Coach?</h1>
 
-<p>To learn how to use GAM Coach, you can check out some example notebooks (<a href=".">binary
-classification</a>, <a href=".">regression</a>). The main functions you will use are
+<p>The main functions you will use are
 <a href="./gamcoach/gamcoach.html#<a href="#__init__">gamcoach.__init__</a>"><code><a href="">gamcoach()</a></code></a> and
 <a href="./gamcoach/gamcoach.html#<a href="#generate_cfs">gamcoach.generate_cfs</a>"><code>generate_cfs()</code></a></p>
 
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="c1">#TODO</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">gamcoach</span> <span class="k">as</span> <span class="nn">coach</span>
+
+<span class="c1"># First create a GAM Coach object</span>
+<span class="c1"># It requires to provide the training data, so it can generate better CFs based</span>
+<span class="c1"># on the data distribution</span>
+<span class="n">my_coach</span> <span class="o">=</span> <span class="n">coach</span><span class="o">.</span><span class="n">GAMCoach</span><span class="p">(</span><span class="n">ebm</span><span class="p">,</span> <span class="n">x_train</span><span class="p">)</span>
+
+<span class="n">cfs</span> <span class="o">=</span> <span class="n">my_coach</span><span class="o">.</span><span class="n">generate_cfs</span><span class="p">(</span>
+    <span class="n">cur_example</span><span class="p">,</span>
+    <span class="n">total_cfs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="c1"># List of features that the CFs can change</span>
+    <span class="n">features_to_vary</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;loan_amnt&#39;</span><span class="p">,</span> <span class="s1">&#39;term&#39;</span><span class="p">,</span> <span class="s1">&#39;emp_length&#39;</span><span class="p">,</span> <span class="s1">&#39;home_ownership&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;annual_inc&#39;</span><span class="p">,</span> <span class="s1">&#39;purpose&#39;</span><span class="p">,</span> <span class="s1">&#39;dti&#39;</span><span class="p">,</span> <span class="s1">&#39;open_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;revol_bal&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;revol_util&#39;</span><span class="p">,</span> <span class="s1">&#39;total_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;application_type&#39;</span><span class="p">,</span> <span class="s1">&#39;mort_acc&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;fico_score&#39;</span><span class="p">],</span>
+    <span class="c1"># Some continuous features need to have integer values in practice</span>
+    <span class="n">continuous_integer_features</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;open_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;total_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;mort_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;fico_score&#39;</span><span class="p">]</span>
 </code></pre></div>
 </div>
 
@@ -144,14 +158,28 @@ classification</a>, <a href=".">regression</a>). The main functions you will use
 
 <span class="sd"># How to use GAM Coach?</span>
 
-<span class="sd">To learn how to use GAM Coach, you can check out some example notebooks ([binary</span>
-<span class="sd">classification](.), [regression](.)). The main functions you will use are</span>
+<span class="sd">The main functions you will use are</span>
 <span class="sd">[`gamcoach()`](./gamcoach/gamcoach.html#gamcoach.__init__) and</span>
 <span class="sd">[`generate_cfs()`](./gamcoach/gamcoach.html#gamcoach.generate_cfs)</span>
 
 <span class="sd">```python</span>
-<span class="sd">import numpy as np</span>
-<span class="sd">#TODO</span>
+<span class="sd">import gamcoach as coach</span>
+
+<span class="sd"># First create a GAM Coach object</span>
+<span class="sd"># It requires to provide the training data, so it can generate better CFs based</span>
+<span class="sd"># on the data distribution</span>
+<span class="sd">my_coach = coach.GAMCoach(ebm, x_train)</span>
+
+<span class="sd">cfs = my_coach.generate_cfs(</span>
+<span class="sd">    cur_example,</span>
+<span class="sd">    total_cfs=3,</span>
+<span class="sd">    # List of features that the CFs can change</span>
+<span class="sd">    features_to_vary=[&#39;loan_amnt&#39;, &#39;term&#39;, &#39;emp_length&#39;, &#39;home_ownership&#39;,</span>
+<span class="sd">                      &#39;annual_inc&#39;, &#39;purpose&#39;, &#39;dti&#39;, &#39;open_acc&#39;, &#39;revol_bal&#39;,</span>
+<span class="sd">                      &#39;revol_util&#39;, &#39;total_acc&#39;, &#39;application_type&#39;, &#39;mort_acc&#39;,</span>
+<span class="sd">                      &#39;fico_score&#39;],</span>
+<span class="sd">    # Some continuous features need to have integer values in practice</span>
+<span class="sd">    continuous_integer_features=[&#39;open_acc&#39;, &#39;total_acc&#39;, &#39;mort_acc&#39;, &#39;fico_score&#39;]</span>
 <span class="sd">```</span>
 <span class="sd">&quot;&quot;&quot;</span>
 

@@ -28,14 +28,28 @@ supports regression problems (e.g., *loan interest rate* prediction).
 
 # How to use GAM Coach?
 
-To learn how to use GAM Coach, you can check out some example notebooks ([binary
-classification](.), [regression](.)). The main functions you will use are
+The main functions you will use are
 [`gamcoach()`](./gamcoach/gamcoach.html#gamcoach.__init__) and
 [`generate_cfs()`](./gamcoach/gamcoach.html#gamcoach.generate_cfs)
 
 ```python
-import numpy as np
-#TODO
+import gamcoach as coach
+
+# First create a GAM Coach object
+# It requires to provide the training data, so it can generate better CFs based
+# on the data distribution
+my_coach = coach.GAMCoach(ebm, x_train)
+
+cfs = my_coach.generate_cfs(
+    cur_example,
+    total_cfs=3,
+    # List of features that the CFs can change
+    features_to_vary=['loan_amnt', 'term', 'emp_length', 'home_ownership',
+                      'annual_inc', 'purpose', 'dti', 'open_acc', 'revol_bal',
+                      'revol_util', 'total_acc', 'application_type', 'mort_acc',
+                      'fico_score'],
+    # Some continuous features need to have integer values in practice
+    continuous_integer_features=['open_acc', 'total_acc', 'mort_acc', 'fico_score']
 ```
 """
 

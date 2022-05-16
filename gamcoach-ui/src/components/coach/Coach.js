@@ -191,7 +191,7 @@ export class SavedPlan {
     // Iterate through the samples to register changes
     for (let i = 0; i < features.length; i++) {
       if (this.sample[i] !== this.curExample[i]) {
-        const curFeature = features.filter(f => f.featureID === i)[0];
+        const curFeature = features.filter((f) => f.featureID === i)[0];
         let originalValue = this.curExample[i];
         let newValue = this.sample[i];
         let changeValue = null;
@@ -202,11 +202,14 @@ export class SavedPlan {
         if (!curFeature.isCont) {
           const labelDecoder = new Map();
 
-          Object.entries(curFeature.labelEncoder).
-            forEach(([level, levelName]) => {
-              labelDecoder.set(levelName,
-                curFeature.description.levelDescription[level].displayName);
-            });
+          Object.entries(curFeature.labelEncoder).forEach(
+            ([level, levelName]) => {
+              labelDecoder.set(
+                levelName,
+                curFeature.description.levelDescription[level].displayName
+              );
+            }
+          );
 
           originalValue = labelDecoder.get(originalValue);
           newValue = labelDecoder.get(newValue);
@@ -407,7 +410,7 @@ export const initPlans = async (
   curExample,
   constraints,
   plansUpdated,
-  logger=null
+  logger = null
 ) => {
   /**@type {Plans}*/
   const tempPlans = {
@@ -527,6 +530,21 @@ export const initPlans = async (
       plansUpdated(plans);
     }
 
+    // Handle the case where all plans failed
+    window.alert(
+      'There is no strategy to change the AI decision under your current configuration. Relax some constraitns and try to regenerate again.'
+    );
+    curPlan = new Plan(
+      modelData,
+      curExample,
+      plans,
+      cfs.isSuccessful ? cfs.data[0] : curExample,
+      tempPlans.nextPlanIndex
+    );
+
+    curPlanStore = writable(curPlan);
+    plans.planStores.set(plans.activePlanIndex, curPlanStore);
+
     plans.nextPlanIndex += 5;
     plansUpdated(plans);
     return;
@@ -612,7 +630,7 @@ export const regeneratePlans = async (
   curExample,
   plans,
   plansUpdated,
-  logger=null
+  logger = null
 ) => {
   /**
    * To generate new plans, we need to complete the following steps:
@@ -657,7 +675,7 @@ export const regeneratePlans = async (
 
   // If the plan only uses one feature, we store it to a set and avoid future
   // plans that only uses that feature
-  if (cfs.activeVariables[0].length === 1) {
+  if (cfs.activeVariables.length > 0 && cfs.activeVariables[0].length === 1) {
     const curFeature = cfs.activeVariables[0][0].replace(/(.*):.*/g, '$1');
     singleFeatures.add(curFeature);
   }
@@ -694,6 +712,21 @@ export const regeneratePlans = async (
       plans.failedPlans.add(j);
       plansUpdated(plans);
     }
+
+    // Handle the case where all 5 plans failed
+    window.alert(
+      'There is no strategy to change the AI decision under your current configuration. Relax some constraitns and try to regenerate again.'
+    );
+    curPlan = new Plan(
+      modelData,
+      curExample,
+      plans,
+      cfs.isSuccessful ? cfs.data[0] : curExample,
+      plans.activePlanIndex
+    );
+
+    curPlanStore = writable(curPlan);
+    plans.planStores.set(plans.activePlanIndex, curPlanStore);
 
     plans.nextPlanIndex += 5;
     plansUpdated(plans);

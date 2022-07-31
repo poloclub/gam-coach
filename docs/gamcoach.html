@@ -41,6 +41,7 @@
                             Module Index
                         </a>
 
+                        <img src="https://gist.githubusercontent.com/aneurips/eeb6cc703b4c8556224f5f4deb651553/raw/75b98f177cb535886d3337860e64802e6b7dc345/gamcoach-logo.svg" class="logo" alt="project logo"/>
 
                         <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                                pattern=".+" required>
@@ -48,7 +49,16 @@
                     <h2>Contents</h2>
                     <ul>
   <li><a href="#what-is-gam-coach">What is GAM Coach?</a></li>
-  <li><a href="#how-to-use-gam-coach">How to use GAM Coach?</a></li>
+  <li><a href="#get-started">Get Started</a>
+  <ul>
+    <li><a href="#use-gam-coach-algorithm-without-a-ui">Use GAM Coach Algorithm without a UI</a></li>
+    <li><a href="#use-gam-coach-ui-with-my-own-ebm-model">Use GAM Coach UI with My Own EBM Model</a></li>
+    <li><a href="#use-gam-coach-ui-with-different-ml-models">Use GAM Coach UI with Different ML Models</a>
+    <ul>
+      <li><a href="#replace-the-model">Replace the Model</a></li>
+      <li><a href="#reconfigure-the-controller">Reconfigure the Controller</a></li>
+    </ul></li>
+  </ul></li>
 </ul>
 
 
@@ -74,37 +84,46 @@ gamcoach    </h1>
 
                         <div class="docstring"><h1 id="what-is-gam-coach">What is GAM Coach?</h1>
 
-<p>GAM Coach is a simple and flexible algorithm to generate counterfactual (CF)
+<p>GAM Coach is the first interactive system to generate customizable counterfactual (CF)
 explanations for Generalized Additive Models (GAMs).</p>
 
 <p>In many machine learning (ML) applications, people use CF examples to help end
 users learn about model decisions.
 Given a data point, a CF example is a similar example where the machine learning
 model gives a different prediction.
-Take loan application as an example, one can explain why a borrower's application
+Take loan applications as an example, one can explain why a borrower's application
 is rejected with a CF example — <em>"if your annual income were $5k higher, your application would
 be approved."</em></p>
 
-<p>GAM Coach is designed to generate CFs for <a href="https://interpret.ml/docs/ebm.html">Explanable Boosting Machine
+<p>GAM Coach is designed to generate CFs for <a href="https://interpret.ml/docs/ebm.html">Explainable Boosting Machine
 (EBM)</a>, the state-of-the-art GAM trained with
 boosting trees.
 GAM Coach uses <a href="https://en.wikipedia.org/wiki/Integer_programming">mixed-integer linear programming</a>:
-it can efficiently generates CFs are gauranteed to be optimal (minimal changes)
+it can efficiently generate CFs that are guaranteed to be optimal (minimal changes)
 and sparse (use minimal features).</p>
 
-<p>GAM Coach is flexible. You can easily impose diverse constraints
-for your target CFs. For example, you can tell GAM Coach to generate CFs
+<p>GAM Coach is flexible. You can easily impose diverse constraints on your target CFs. For example, you can tell GAM Coach to generate CFs
 that only <strong>use certain features</strong>, <strong>within some ranges</strong>, and <strong>make at most
-some number of changes</strong>. Then, GAM Coach is gauranteed to find the best CFs
+some number of changes</strong>. Then, GAM Coach is guaranteed to find the best CFs
 meet these conditions (if feasible). In addition to the classic binary
 classification problems (e.g., <em>loan approval</em> prediction), GAM Coach also
 supports regression problems (e.g., <em>loan interest rate</em> prediction).</p>
 
-<h1 id="how-to-use-gam-coach">How to use GAM Coach?</h1>
+<h1 id="get-started">Get Started</h1>
 
-<p>The main functions you will use are
-<a href="./gamcoach/gamcoach.html#<a href="#__init__">gamcoach.__init__</a>"><code><a href="">gamcoach()</a></code></a> and
-<a href="./gamcoach/gamcoach.html#<a href="#generate_cfs">gamcoach.generate_cfs</a>"><code>generate_cfs()</code></a></p>
+<h2 id="use-gam-coach-algorithm-without-a-ui">Use GAM Coach Algorithm without a UI</h2>
+
+<p>If you only want to use the GAM Coach algorithm to generate CFs for EBMs without a UI, you can simply use the accompanying Python library.</p>
+
+<p>The two primary python functions you will use are <code><a href="gamcoach/gamcoach.html#GAMCoach.__init__">gamcoach.gamcoach.GAMCoach.__init__()</a></code> and <code><a href="gamcoach/gamcoach.html#GAMCoach.generate_cfs">gamcoach.gamcoach.GAMCoach.generate_cfs()</a></code>.</p>
+
+<ol>
+<li>Train an EBM classifier or regressor</li>
+<li>Instantiate a <code>GAMCoach</code> object with the trained EBM model and your training data</li>
+<li>Generate customizable CFs on the interested input sample</li>
+</ol>
+
+<p>Below is a minimal example to generate CFs for EBMs:</p>
 
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">gamcoach</span> <span class="k">as</span> <span class="nn">coach</span>
 
@@ -124,43 +143,144 @@ supports regression problems (e.g., <em>loan interest rate</em> prediction).</p>
     <span class="c1"># Some continuous features need to have integer values in practice</span>
     <span class="n">continuous_integer_features</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;open_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;total_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;mort_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;fico_score&#39;</span><span class="p">]</span>
 </code></pre></div>
+
+<p>Read the documentation of <code><a href="gamcoach/gamcoach.html#GAMCoach.generate_cfs">gamcoach.gamcoach.GAMCoach.generate_cfs</a></code> to learn how to set up constraints for the CFs. These constraints include the difficulty of changing a feature, the acceptable range of a feature, and the total number of features that a CF can change.</p>
+
+<h2 id="use-gam-coach-ui-with-my-own-ebm-model">Use GAM Coach UI with My Own EBM Model</h2>
+
+<p><img width="100%" src="https://camo.githubusercontent.com/4ff93ffb5052a590d0c51a94f0df95ddf89098e75d7c560094ca9bf8870432bf/68747470733a2f2f692e696d6775722e636f6d2f794f6d45427a362e706e67"></p>
+
+<p>GAM Coach also provides an easy-to-use interface that empowers end-users to easily specify their preferences and interactively fine-tune recourse plans. You can try out the GAM Coach UI on <a href="https://aneurips.github.io/gam-coach/">the public demo website</a>, or watch <a href="https://youtu.be/EEi74BQg3qo">a demo video</a>.</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/EEi74BQg3qo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<p>Steps to use GAM Coach UI on your own EBM model:</p>
+
+<ol>
+<li>Train an EBM model</li>
+<li>Call <code><a href="gamcoach/gamcoach.html#get_model_data">gamcoach.gamcoach.get_model_data()</a></code> to extract model weights</li>
+<li>Save the model weights into a <code>JSON</code> file in the <code>gamcoach-ui/public/data</code> folder</li>
+<li>Launch the GAM Coach UI</li>
+</ol>
+
+<p>Please read the documentation of <code><a href="gamcoach/gamcoach.html#get_model_data">gamcoach.gamcoach.get_model_data()</a></code> to see what information you need to prepare to extract the model weights. You can configure the default difficulties of each features, whether to use log transformation on some continuous features, or if a continuous feature require integer values, etc.</p>
+
+<p>To launch the GAM Coach UI:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># Install the dependencies</span>
+<span class="nb">cd</span> gamcoach-ui
+npm install
+
+<span class="c1"># Start a localhost server</span>
+npm run dev
+</code></pre></div>
+
+<p>Navigate to <a href="https://localhost:5005">localhost:5005</a>. You should see GAM Coach running in your browser :)</p>
+
+<h2 id="use-gam-coach-ui-with-different-ml-models">Use GAM Coach UI with Different ML Models</h2>
+
+<p>GAM Coach UI's design and implementation are model agnostic, which means it can be applied to any other ML model. The goal of GAM Coach UI is to empower end-users to easily specify their preferences and interactively fine-tune recourse plans. Therefore, GAM Coach UI assumes that the new models and their recourse generation algorithms have the following three properties:</p>
+
+<ol>
+<li>One can specify the <strong>difficulty</strong> of changing a feature. Features that are deemed <em>difficult to change</em> should be least modified by the recourse generation algorithm.</li>
+<li>One can control the <strong>acceptable range</strong> of a feature, and the recourse generation algorithm respects specified acceptable ranges. For example, the algorithm only generates recourse plans with <code>loan amount &gt; $3k</code> and <code>home ownership is “rent”</code>.</li>
+<li>Model inference is available.</li>
+</ol>
+
+<p>Once these three assumptions are met, you can easily swap our integer linear programming code with new recourse algorithms and GAM inference code with new ML models.</p>
+
+<p>The GAM Coach UI uses <a href="https://svelte.dev">Svelte framework</a>, where each view (e.g., header, tab bar, feature card) is a standalone and reusable component module. In our implementation, we follow a <code>Model-View-Controller</code> <a href="https://en.wikipedia.org/wiki/Model–view–controller">(MVC</a>) software architectural pattern to separate the GUI (GAM Coach UI) and the computational model (ML and integer linear program). Therefore, to use GAM Coach UI with a different ML model, you only need to replace the <code>Model</code> code and reconfigure the <code>Controller</code> code, without modifying the <code>View</code> code.</p>
+
+<h3 id="replace-the-model">Replace the Model</h3>
+
+<p>Sorry for overloading the word "model"! In the MVC architecture, the <code>Model</code> means the underlying data logic of a software. In GAM Coach, the <code>Model</code> is the ML model and its recourse generation algorithm. Therefore, to use a different ML model, you need to replace our <code>Model</code> with your new ML model inference and its recourse generation algorithm.</p>
+
+<ol>
+<li>The ML model is at <a href="https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js"><code>ebm.js</code></a> and <a href="https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js"><code>ebmLocal.js</code></a>.
+<ol>
+<li><a href="https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js"><code>ebm.js</code></a> implements the EBM inference in JavsScript.</li>
+<li><a href="https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js"><code>ebmLocal.js</code></a> extends the <a href="https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js"><code>ebm.js</code></a> object to store a data sample where the users want to generate CFs</li>
+</ol></li>
+<li>The recourse generation algorithm is at <a href="https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/gamcoach.js"><code><a href="#js">gamcoach.js</a></code></a>.</li>
+</ol>
+
+<p>We made the extra effort to create a lightweight <a href="https://aneurips.github.io/gam-coach">demo website</a> for GAM Coach, which is serverless and runs entirely in the client’s browser. To do that, we <strong>re-implemented</strong> the GAM inference and integer programming optimization using JavaScript and <a href="https://webassembly.org">WebAssembly</a>. In contrast, to implement your own <code>Model</code>, you can replace our GAM and integer programming code with a backend server that directly calls your ML models and recourse algorithms in your favorite languages and packages (e.g., Python, R, C++, Scikit-learn).</p>
+
+<h3 id="reconfigure-the-controller">Reconfigure the Controller</h3>
+
+<p>In the MVC architecture, the <code>Controller</code> functions as a communicator between the <code>Model</code> and <code>View</code>. You can see two examples below:</p>
+
+<ol>
+<li>When a user clicks and drags feature cards:
+<ol>
+<li><code>View</code> tells <code>Controller</code> that users has specified some preferences</li>
+<li><code>Controller</code> tells the <code>Model</code> to update internal parameters</li>
+</ol></li>
+<li>When a user clicks the <code>Regenerate</code> button:
+<ol>
+<li><code>View</code> tells <code>Controller</code> that users wants new recourse plans</li>
+<li><code>Controller</code> tells <code>Model</code> to generate new recourse plans</li>
+<li><code>Model</code> generates new recourse plans with the latest preference configurations</li>
+<li><code>Model</code> passes the results to <code>Controller</code></li>
+<li><code>Controller</code> passes the results to <code>View</code> asks <code>View</code> to render them</li>
+<li><code>View</code> visualizes the new results</li>
+</ol></li>
+</ol>
+
+<p>Therefore, once you have updated your <code>Model</code>, you need to update a few lines in <code>Controller</code> to hook up the communication between <code>Controller</code> and the new <code>Model</code>. The <code>Controller</code> code is at <a href="https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/components/coach/Coach.js"><code>Coach.js</code></a>. In this file, you only need to make 8 lines of changes:</p>
+
+<ol>
+<li>Replace <code>EBM</code> and <code>EBMLocal</code> with your new ML model (2 lines)</li>
+<li>Replace <code>GAMCoach</code> with your new recourse generation algorithm (1 line)</li>
+<li>Replace <code>coach.generateCfs()</code> with your new method to generate counterfactual explanations (there are 5 calls in this file)</li>
+</ol>
+
+<p>Voilà, without changing any code in <code>View</code>, you can use GAM Coach UI with your new ML models! 🎉</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;#What is GAM Coach?</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># What is GAM Coach?</span>
 
-<span class="sd">GAM Coach is a simple and flexible algorithm to generate counterfactual (CF)</span>
+<span class="sd">GAM Coach is the first interactive system to generate customizable counterfactual (CF)</span>
 <span class="sd">explanations for Generalized Additive Models (GAMs).</span>
 
 <span class="sd">In many machine learning (ML) applications, people use CF examples to help end</span>
 <span class="sd">users learn about model decisions.</span>
 <span class="sd">Given a data point, a CF example is a similar example where the machine learning</span>
 <span class="sd">model gives a different prediction.</span>
-<span class="sd">Take loan application as an example, one can explain why a borrower&#39;s application</span>
+<span class="sd">Take loan applications as an example, one can explain why a borrower&#39;s application</span>
 <span class="sd">is rejected with a CF example — *&quot;if your annual income were $5k higher, your application would</span>
 <span class="sd">be approved.&quot;*</span>
 
-<span class="sd">GAM Coach is designed to generate CFs for [Explanable Boosting Machine</span>
+<span class="sd">GAM Coach is designed to generate CFs for [Explainable Boosting Machine</span>
 <span class="sd">(EBM)](https://interpret.ml/docs/ebm.html), the state-of-the-art GAM trained with</span>
 <span class="sd">boosting trees.</span>
 <span class="sd">GAM Coach uses [mixed-integer linear programming](https://en.wikipedia.org/wiki/Integer_programming):</span>
-<span class="sd">it can efficiently generates CFs are gauranteed to be optimal (minimal changes)</span>
+<span class="sd">it can efficiently generate CFs that are guaranteed to be optimal (minimal changes)</span>
 <span class="sd">and sparse (use minimal features).</span>
 
-<span class="sd">GAM Coach is flexible. You can easily impose diverse constraints</span>
-<span class="sd">for your target CFs. For example, you can tell GAM Coach to generate CFs</span>
+<span class="sd">GAM Coach is flexible. You can easily impose diverse constraints on your target CFs. For example, you can tell GAM Coach to generate CFs</span>
 <span class="sd">that only **use certain features**, **within some ranges**, and **make at most</span>
-<span class="sd">some number of changes**. Then, GAM Coach is gauranteed to find the best CFs</span>
+<span class="sd">some number of changes**. Then, GAM Coach is guaranteed to find the best CFs</span>
 <span class="sd">meet these conditions (if feasible). In addition to the classic binary</span>
 <span class="sd">classification problems (e.g., *loan approval* prediction), GAM Coach also</span>
 <span class="sd">supports regression problems (e.g., *loan interest rate* prediction).</span>
 
-<span class="sd"># How to use GAM Coach?</span>
+<span class="sd"># Get Started</span>
 
-<span class="sd">The main functions you will use are</span>
-<span class="sd">[`gamcoach()`](./gamcoach/gamcoach.html#gamcoach.__init__) and</span>
-<span class="sd">[`generate_cfs()`](./gamcoach/gamcoach.html#gamcoach.generate_cfs)</span>
+<span class="sd">## Use GAM Coach Algorithm without a UI</span>
+
+<span class="sd">If you only want to use the GAM Coach algorithm to generate CFs for EBMs without a UI, you can simply use the accompanying Python library.</span>
+
+<span class="sd">The two primary python functions you will use are `gamcoach.gamcoach.GAMCoach.__init__()` and `gamcoach.gamcoach.GAMCoach.generate_cfs()`.</span>
+
+<span class="sd">1. Train an EBM classifier or regressor</span>
+<span class="sd">2. Instantiate a `GAMCoach` object with the trained EBM model and your training data</span>
+<span class="sd">3. Generate customizable CFs on the interested input sample</span>
+
+<span class="sd">Below is a minimal example to generate CFs for EBMs:</span>
 
 <span class="sd">```python</span>
 <span class="sd">import gamcoach as coach</span>
@@ -181,11 +301,92 @@ supports regression problems (e.g., <em>loan interest rate</em> prediction).</p>
 <span class="sd">    # Some continuous features need to have integer values in practice</span>
 <span class="sd">    continuous_integer_features=[&#39;open_acc&#39;, &#39;total_acc&#39;, &#39;mort_acc&#39;, &#39;fico_score&#39;]</span>
 <span class="sd">```</span>
+
+<span class="sd">Read the documentation of `gamcoach.gamcoach.GAMCoach.generate_cfs` to learn how to set up constraints for the CFs. These constraints include the difficulty of changing a feature, the acceptable range of a feature, and the total number of features that a CF can change.</span>
+
+<span class="sd">## Use GAM Coach UI with My Own EBM Model</span>
+
+<span class="sd">&lt;img width=&quot;100%&quot; src=&quot;https://camo.githubusercontent.com/4ff93ffb5052a590d0c51a94f0df95ddf89098e75d7c560094ca9bf8870432bf/68747470733a2f2f692e696d6775722e636f6d2f794f6d45427a362e706e67&quot;&gt;</span>
+
+<span class="sd">GAM Coach also provides an easy-to-use interface that empowers end-users to easily specify their preferences and interactively fine-tune recourse plans. You can try out the GAM Coach UI on [the public demo website](https://aneurips.github.io/gam-coach/), or watch [a demo video](https://youtu.be/EEi74BQg3qo).</span>
+
+<span class="sd">&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/EEi74BQg3qo&quot; title=&quot;YouTube video player&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;</span>
+
+<span class="sd">Steps to use GAM Coach UI on your own EBM model:</span>
+
+<span class="sd">1. Train an EBM model</span>
+<span class="sd">2. Call `gamcoach.gamcoach.get_model_data()` to extract model weights</span>
+<span class="sd">3. Save the model weights into a `JSON` file in the `gamcoach-ui/public/data` folder</span>
+<span class="sd">4. Launch the GAM Coach UI</span>
+
+<span class="sd">Please read the documentation of `gamcoach.gamcoach.get_model_data()` to see what information you need to prepare to extract the model weights. You can configure the default difficulties of each features, whether to use log transformation on some continuous features, or if a continuous feature require integer values, etc.</span>
+
+<span class="sd">To launch the GAM Coach UI:</span>
+
+<span class="sd">```bash</span>
+<span class="sd"># Install the dependencies</span>
+<span class="sd">cd gamcoach-ui</span>
+<span class="sd">npm install</span>
+
+<span class="sd"># Start a localhost server</span>
+<span class="sd">npm run dev</span>
+<span class="sd">```</span>
+
+<span class="sd">Navigate to [localhost:5005](https://localhost:5005). You should see GAM Coach running in your browser :)</span>
+
+<span class="sd">## Use GAM Coach UI with Different ML Models</span>
+
+<span class="sd">GAM Coach UI&#39;s design and implementation are model agnostic, which means it can be applied to any other ML model. The goal of GAM Coach UI is to empower end-users to easily specify their preferences and interactively fine-tune recourse plans. Therefore, GAM Coach UI assumes that the new models and their recourse generation algorithms have the following three properties:</span>
+
+<span class="sd">1. One can specify the **difficulty** of changing a feature. Features that are deemed *difficult to change* should be least modified by the recourse generation algorithm.</span>
+<span class="sd">2. One can control the **acceptable range** of a feature, and the recourse generation algorithm respects specified acceptable ranges. For example, the algorithm only generates recourse plans with `loan amount &gt; $3k` and `home ownership is “rent”`.</span>
+<span class="sd">3. Model inference is available.</span>
+
+<span class="sd">Once these three assumptions are met, you can easily swap our integer linear programming code with new recourse algorithms and GAM inference code with new ML models.</span>
+
+<span class="sd">The GAM Coach UI uses [Svelte framework](https://svelte.dev), where each view (e.g., header, tab bar, feature card) is a standalone and reusable component module. In our implementation, we follow a `Model-View-Controller` [(MVC](https://en.wikipedia.org/wiki/Model–view–controller)) software architectural pattern to separate the GUI (GAM Coach UI) and the computational model (ML and integer linear program). Therefore, to use GAM Coach UI with a different ML model, you only need to replace the `Model` code and reconfigure the `Controller` code, without modifying the `View` code.</span>
+
+<span class="sd">### Replace the Model</span>
+
+<span class="sd">Sorry for overloading the word &quot;model&quot;! In the MVC architecture, the `Model` means the underlying data logic of a software. In GAM Coach, the `Model` is the ML model and its recourse generation algorithm. Therefore, to use a different ML model, you need to replace our `Model` with your new ML model inference and its recourse generation algorithm.</span>
+
+<span class="sd">1. The ML model is at [`ebm.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) and [`ebmLocal.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js).</span>
+<span class="sd">    1. [`ebm.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) implements the EBM inference in JavsScript.</span>
+<span class="sd">    2. [`ebmLocal.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js) extends the [`ebm.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) object to store a data sample where the users want to generate CFs</span>
+<span class="sd">1. The recourse generation algorithm is at [`gamcoach.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/gamcoach.js).</span>
+
+<span class="sd">We made the extra effort to create a lightweight [demo website](https://aneurips.github.io/gam-coach) for GAM Coach, which is serverless and runs entirely in the client’s browser. To do that, we **re-implemented** the GAM inference and integer programming optimization using JavaScript and [WebAssembly](https://webassembly.org). In contrast, to implement your own `Model`, you can replace our GAM and integer programming code with a backend server that directly calls your ML models and recourse algorithms in your favorite languages and packages (e.g., Python, R, C++, Scikit-learn).</span>
+
+
+<span class="sd">### Reconfigure the Controller</span>
+
+<span class="sd">In the MVC architecture, the `Controller` functions as a communicator between the `Model` and `View`. You can see two examples below:</span>
+
+<span class="sd">1. When a user clicks and drags feature cards:</span>
+<span class="sd">   1. `View` tells `Controller` that users has specified some preferences</span>
+<span class="sd">   2. `Controller` tells the `Model` to update internal parameters</span>
+<span class="sd">2. When a user clicks the `Regenerate` button:</span>
+<span class="sd">   1. `View` tells `Controller` that users wants new recourse plans</span>
+<span class="sd">   2. `Controller` tells `Model` to generate new recourse plans</span>
+<span class="sd">   3. `Model` generates new recourse plans with the latest preference configurations</span>
+<span class="sd">   4. `Model` passes the results to `Controller`</span>
+<span class="sd">   5. `Controller` passes the results to `View` asks `View` to render them</span>
+<span class="sd">   6. `View` visualizes the new results</span>
+
+<span class="sd">Therefore, once you have updated your `Model`, you need to update a few lines in `Controller` to hook up the communication between `Controller` and the new `Model`. The `Controller` code is at [`Coach.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/components/coach/Coach.js). In this file, you only need to make 8 lines of changes:</span>
+
+<span class="sd">1. Replace `EBM` and `EBMLocal` with your new ML model (2 lines)</span>
+<span class="sd">2. Replace `GAMCoach` with your new recourse generation algorithm (1 line)</span>
+<span class="sd">3. Replace `coach.generateCfs()` with your new method to generate counterfactual explanations (there are 5 calls in this file)</span>
+
+<span class="sd">Voilà, without changing any code in `View`, you can use GAM Coach UI with your new ML models! 🎉</span>
+
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Jay Wang&quot;&quot;&quot;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;jay@zijie.wang&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.1&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;jay@zijie.wang&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1.1&quot;</span>
 
 <span class="kn">from</span> <span class="nn">gamcoach.gamcoach</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">gamcoach.counterfactuals</span> <span class="kn">import</span> <span class="o">*</span>

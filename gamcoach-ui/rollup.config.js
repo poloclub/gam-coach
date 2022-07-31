@@ -8,6 +8,7 @@ import preprocess from 'svelte-preprocess';
 import inlineSvg from 'rollup-plugin-inline-svg';
 import json from '@rollup/plugin-json';
 import yaml from '@rollup/plugin-yaml';
+import replace from '@rollup/plugin-replace';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -21,10 +22,14 @@ function serve() {
   return {
     writeBundle() {
       if (server) return;
-      server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
-        stdio: ['ignore', 'inherit', 'inherit'],
-        shell: true
-      });
+      server = require('child_process').spawn(
+        'npm',
+        ['run', 'start', '--', '--dev'],
+        {
+          stdio: ['ignore', 'inherit', 'inherit'],
+          shell: true
+        }
+      );
 
       process.on('SIGTERM', toExit);
       process.on('exit', toExit);
@@ -43,7 +48,7 @@ export default {
   plugins: [
     inlineSvg({
       removeTags: false,
-      removeSVGTagAttrs: false,
+      removeSVGTagAttrs: false
     }),
     json(),
     yaml(),
@@ -54,6 +59,8 @@ export default {
       },
       preprocess: preprocess()
     }),
+    // Resolve the public domain path
+    replace({ PUBLIC_URL: production ? '/gam-coach' : '' }),
     // we'll extract any component CSS out into
     // a separate file - better for performance
     css({ output: 'bundle.css' }),

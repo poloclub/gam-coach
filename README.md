@@ -7,7 +7,7 @@ An interactive tool to help everyday users discover actionable strategies to obt
 
 |<img src='https://i.imgur.com/yOmEBz6.png'>|
 |:---:|
-|<a href="https://youtu.be/3eGqTmsStJM"> 📺 Demo Video for "GAM COACH: Towards Interactive and User-centered Algorithmic Recourse"</a>|
+|<a href="https://youtu.be/3eGqTmsStJM"> 📺 Demo Video for "GAM Coach: Towards Interactive and User-centered Algorithmic Recourse"</a>|
 
 ## Live Demo
 

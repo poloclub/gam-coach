@@ -80,7 +80,9 @@
     initialized = true;
 
     // Load the model data
-    curModelData = await d3.json(`/data/${modelName}-classifier.json`);
+    curModelData = await d3.json(
+      `PUBLIC_URL/data/${modelName}-classifier.json`
+    );
     // console.log(modelData);
 
     // Initialize an ebm model

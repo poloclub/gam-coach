@@ -368,7 +368,7 @@
         muted
         poster="https://i.imgur.com/EiuL6If.png"
       >
-        <source src="/videos/appeal-infeasible.mp4" />
+        <source src="PUBLIC_URL/videos/appeal-infeasible.mp4" />
         <track kind="captions" />
       </video>
       <div class="figure-caption">

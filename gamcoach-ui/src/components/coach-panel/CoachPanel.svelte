@@ -435,7 +435,7 @@
 <div class="coach-panel" bind:this={component}>
   <div class="coach-header">
     <div class="coach-logo">
-      <img src="/logo.svg" alt="GAM Coach" draggable="false" />
+      <img src="PUBLIC_URL/logo.svg" alt="GAM Coach" draggable="false" />
       <!-- <span class='coach-name'>GAM Coach</span> -->
       <span class="coach-tagline">
         Personal coach to help you obtain desired AI decisions

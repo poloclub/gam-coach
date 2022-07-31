@@ -348,7 +348,7 @@
 
       <div class="video">
         <video autoplay loop muted playsinline class:wide-video={item.isWide}>
-          <source src={`/videos/demo-${item.video}.mp4`} />
+          <source src={`PUBLIC_URL/videos/demo-${item.video}.mp4`} />
           <track kind="captions" />
         </video>
         <div class="figure-caption">
@@ -361,13 +361,13 @@
       {/each}
     {/each}
 
-    <h2 id="tutorial">
+    <h2 id="tutorial-developer">
       Use <span class="teal">GAM Coach</span> as an ML Developer
     </h2>
 
     <p>{@html text.developer[0]}</p>
 
-    <div class="article-table" id="dataset-table">
+    <div class="article-table" id="datasets">
       <div class="figure-caption">
         Table 1. {@html text.table.caption}
       </div>

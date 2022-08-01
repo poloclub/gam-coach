@@ -644,7 +644,10 @@ class GAMCoach:
             main_score_gain = additives[i] - cur_feature_score
 
             # Interaction terms
+            # A list to track all interaction score gain offsets
+            # [[interaction id, interaction score gain]]
             inter_score_gain = 0
+            inter_score_gains = []
 
             for d in associated_interactions:
                 inter_bin_id = search_sorted_lower_index(
@@ -653,6 +656,13 @@ class GAMCoach:
                 inter_score_gain += (
                     d["feature_inter_additives"][inter_bin_id]
                     - d["feature_inter_score"]
+                )
+                inter_score_gains.append(
+                    [
+                        d["cur_interaction_id"],
+                        d["feature_inter_additives"][inter_bin_id]
+                        - d["feature_inter_score"],
+                    ]
                 )
 
             score_gain = main_score_gain + inter_score_gain
@@ -667,7 +677,7 @@ class GAMCoach:
                 if cf_direction == -1 and score_gain < score_gain_bound:
                     continue
 
-            cont_options.append([target, score_gain, distance, i, inter_score_gain])
+            cont_options.append([target, score_gain, distance, i, inter_score_gains])
 
         # Now we can apply the second round of filtering to remove redundant options
         # Redundant options refer to bins that give similar score gain with larger distance
@@ -823,13 +833,23 @@ class GAMCoach:
                 main_score_gain = additives[i] - cur_feature_score
 
                 # Interaction terms
+                # A list to track all interaction score gain offsets
+                # [[interaction id, interaction score gain]]
                 inter_score_gain = 0
+                inter_score_gains = []
 
                 for d in associated_interactions:
                     inter_bin_id = d["feature_inter_bin_starts"].index(target)
                     inter_score_gain += (
                         d["feature_inter_additives"][inter_bin_id]
                         - d["feature_inter_score"]
+                    )
+                    inter_score_gains.append(
+                        [
+                            d["cur_interaction_id"],
+                            d["feature_inter_additives"][inter_bin_id]
+                            - d["feature_inter_score"],
+                        ]
                     )
 
                 score_gain = main_score_gain + inter_score_gain
@@ -845,7 +865,7 @@ class GAMCoach:
                     if cf_direction == -1 and score_gain < score_gain_bound:
                         continue
 
-                cat_options.append([target, score_gain, distance, i, inter_score_gain])
+                cat_options.append([target, score_gain, distance, i, inter_score_gains])
 
         return cat_options
 
@@ -957,17 +977,20 @@ class GAMCoach:
                 # The score gain on the interaction term need to offset the interaction
                 # score gain we have already counted on the main effect options. That
                 # score is saved in the option tuple.
-                score_gain -= opt_1[4]
-                score_gain -= opt_2[4]
 
-                # Optimization: here we cannot compare the score_gain with
-                # original interaction score to filter interaction options,
-                # because the choice of two individual main effects do not
-                # consider this interaction score
-                #
-                # Basically, the score gain of one interaction effect does
-                # not affect the way we choose options for the main
-                # variables. Only the solver can decide that :(
+                # We first need to find the common interaction id
+                common_index = [-1, -1]
+                for m in range(len(opt_1[4])):
+                    for n in range(len(opt_2[4])):
+                        if opt_1[4][m][0] == opt_2[4][m][0]:
+                            common_index = [m, n]
+                            break
+
+                    if common_index[0] != -1 and common_index[1] != -1:
+                        break
+
+                score_gain -= opt_1[4][common_index[0]][1]
+                score_gain -= opt_2[4][common_index[1]][1]
 
                 inter_options.append(
                     [[opt_1[0], opt_2[0]], score_gain, 0, [opt_1[3], opt_2[3]], 0]

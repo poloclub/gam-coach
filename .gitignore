@@ -108,3 +108,4 @@ ENV/
 
 build-doc.sh
 pnpm-lock.yaml
+examples/model_pickles

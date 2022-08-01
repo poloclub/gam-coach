@@ -79,7 +79,7 @@ class Counterfactuals:
         """New bins used in each row of `data`."""
 
         self.values: list
-        """Cooresponding objective values (total distance) of each `data` row."""
+        """Corresponding objective values (total distance) of each `data` row."""
 
         self.convert_cfs_to_data(solutions)
 
@@ -98,7 +98,9 @@ class Counterfactuals:
 
             for var in active_variables:
                 # Skip interaction vars (included)
-                if " x " not in var.name:
+                # In EBM, interaction names are `f1 x f2`, pulp's variable name
+                # is `f1_x_f2`
+                if "_x_" not in var.name:
                     f_name = re.sub(r"(.+):\d+", r"\1", var.name)
                     bin_i = int(re.sub(r".+:(\d+)", r"\1", var.name))
 
@@ -153,7 +155,7 @@ class Counterfactuals:
 
             for var in active_variables:
                 # Skip interaction vars (included)
-                if " x " not in var.name:
+                if "_x_" not in var.name:
                     f_name = re.sub(r"(.+):\d+", r"\1", var.name)
                     bin_i = int(re.sub(r".+:(\d+)", r"\1", var.name))
 

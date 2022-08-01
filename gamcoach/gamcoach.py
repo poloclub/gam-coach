@@ -331,7 +331,7 @@ class GAMCoach:
                 f_type = self.ebm.feature_types[f_index]
 
                 if f_type == "continuous":
-                    # Delete options that use ineligible options
+                    # Delete options that use out-of-range options
                     for o in range(len(options[f_name]) - 1, -1, -1):
                         cur_target = options[f_name][o][0]
                         if cur_target < cur_range[0] or cur_target > cur_range[1]:
@@ -353,7 +353,6 @@ class GAMCoach:
                 cur_feature_index_2 = self.ebm.feature_groups_[cur_feature_id][1]
 
                 cur_feature_score = cur_scores[cur_feature_name]
-
                 options[cur_feature_name] = self.generate_inter_options(
                     cur_feature_id,
                     cur_feature_index_1,
@@ -455,7 +454,7 @@ class GAMCoach:
         skip_unhelpful=True,
     ):
         """
-        Generage all alternative options for this continuous variable. This function
+        Generate all alternative options for this continuous variable. This function
         would filter out all options that are:
 
         1. Not helpful for the counterfactual generation.
@@ -463,7 +462,7 @@ class GAMCoach:
 
         Args:
             cf_direction (int): Integer `+1` if 0 => 1, `-1` if 1 => 0
-                (classification); `+1` if we need to incrase the prediction,
+                (classification); `+1` if we need to increase the prediction,
                 `-1` if decrease (regression).
             cur_feature_index (int): The index of the current continuous feature.
             cur_feature_name (str): Name of the current feature.
@@ -594,7 +593,7 @@ class GAMCoach:
             distance = 0
 
             if i < cur_bin_id:
-                # First need to consier if it is need to be an integer
+                # First need to consider if it is need to be an integer
                 # If so, it would be the closest integer to the right point
                 if need_to_be_int:
                     target = float(int(bin_starts[i + 1]))
@@ -616,7 +615,7 @@ class GAMCoach:
                     target -= 1e-4
 
             elif i > cur_bin_id:
-                # First need to consier if it should be an integer value
+                # First need to consider if it should be an integer value
                 # If so, it would be the closest integer to the left point
                 if need_to_be_int:
                     target = float(np.ceil(bin_starts[i]))
@@ -633,7 +632,7 @@ class GAMCoach:
                     target = bin_starts[i]
                     distance = np.abs(target - cur_feature_value)
 
-            # Scale the distance based on the deviation of the feature (how changable it is)
+            # Scale the distance based on the deviation of the feature (how changeable it is)
             if cont_mads[cur_feature_name] > 0:
                 distance /= cont_mads[cur_feature_name]
 
@@ -696,13 +695,13 @@ class GAMCoach:
         skip_unhelpful=True,
     ):
         """
-        Generage all alternative options for this categorical variable. This function
+        Generate all alternative options for this categorical variable. This function
         would filter out all options that are not helpful for the counterfactual
         generation.
 
         Args:
             cf_direction (int): Integer `+1` if 0 => 1, `-1` if 1 => 0
-                (classification); `+1` if we need to incrase the prediction,
+                (classification); `+1` if we need to increase the prediction,
                 `-1` if decrease (regression).
             cur_feature_index (int): The index of the current continuous feature.
             cur_feature_value (float): The current feature value.
@@ -784,7 +783,7 @@ class GAMCoach:
                     else:
                         feature_inter_score = inter_additives[other_bin, feature_bin]
 
-                    # Extract the row or column where we fix the other feeature and
+                    # Extract the row or column where we fix the other features and
                     # vary the current feature
                     feature_inter_bin_starts = bin_starts_feature
                     feature_inter_additives = []
@@ -859,13 +858,13 @@ class GAMCoach:
         options,
     ):
         """
-        Generage all possible options for this interaction variable.
+        Generate all possible options for this interaction variable.
 
         Interaction terms are interesting in this MILP. Each option counts as a
         variable, but each variable only affects the score gain, not the distance.
 
         Note that in EBM, the bin definitions for interaction terms can be different
-        from their defintiions for individual continuous variables.
+        from their definitions for individual continuous variables.
 
         To model interaction terms, we can think it as a binary variable. The
         value is determined by the multiplication of two main effect variables.
@@ -961,10 +960,10 @@ class GAMCoach:
                 score_gain -= opt_1[4]
                 score_gain -= opt_2[4]
 
-                # Optimization: here we cannot comapre the score_gain with
+                # Optimization: here we cannot compare the score_gain with
                 # original interaction score to filter interaction options,
                 # because the choice of two individual main effects do not
-                # consier this interaction score
+                # consider this interaction score
                 #
                 # Basically, the score gain of one interaction effect does
                 # not affect the way we choose options for the main

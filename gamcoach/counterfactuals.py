@@ -83,8 +83,6 @@ class Counterfactuals:
 
         self.convert_cfs_to_data(solutions)
 
-        print("Found {} counterfactual examples.".format(len(solutions)))
-
     def convert_cfs_to_data(self, solutions):
         """Convert optimal CF solutions to the original dataformat."""
 

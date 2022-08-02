@@ -31,6 +31,7 @@ class GAMCoach:
         x_train: np.ndarray,
         cont_mads=None,
         cat_distances=None,
+        adjust_cat_distance=True,
     ):
         """Initialize a GAMCoach object.
 
@@ -50,6 +51,9 @@ class GAMCoach:
                 that it is easier to move to a more frequent. If `cat_distances`
                 is provided, it will overwrite the default distance for
                 categorical variables.
+            adjust_cat_distance (bool, optional): If true, we use (1 -
+                frequency(level)) for each level. Otherwise, we give distance = 1
+                for different levels and 0 for the same level.
         """
 
         self.ebm: Union[
@@ -68,6 +72,8 @@ class GAMCoach:
         for one level $L_i$. It implies that it is easier to move to a more
         frequent level.
         """
+
+        self.adjust_cat_distance: bool = adjust_cat_distance
 
         # If cont_mads is not given, we compute it from the training data
         if self.cont_mads is None:
@@ -98,10 +104,16 @@ class GAMCoach:
 
             self.cat_distances = {}
 
-            for i in ebm_cat_indexes:
-                self.cat_distances[
-                    self.ebm.feature_names[i]
-                ] = self.compute_frequency_distance(self.x_train[:, i])
+            if self.adjust_cat_distance:
+                for i in ebm_cat_indexes:
+                    self.cat_distances[
+                        self.ebm.feature_names[i]
+                    ] = GAMCoach.compute_frequency_distance(self.x_train[:, i])
+            else:
+                for i in ebm_cat_indexes:
+                    self.cat_distances[
+                        self.ebm.feature_names[i]
+                    ] = GAMCoach.compute_naive_cat_distance(self.x_train[:, i])
 
         # Determine if the ebm is a classifier or a regressor
         self.is_classifier = isinstance(self.ebm.intercept_, np.ndarray)
@@ -119,7 +131,7 @@ class GAMCoach:
         max_num_features_to_vary: int = None,
         feature_ranges: dict = None,
         continuous_integer_features: list = None,
-        verbose: bool = False,
+        verbose: int = 1,
     ) -> Counterfactuals:
         """Generate counterfactual examples.
 
@@ -165,8 +177,8 @@ class GAMCoach:
                 `feature_name` -> [`level1`, `level2`, ...] for categorical features.
             continuous_integer_features (list, optional): A list of names of
                 continuous features that need to be integers (e.g., age, FICO score)
-            verbose (bool): True if you want it to print out the optimization
-                process from each iteration.
+            verbose (int): 0: no any output, 1: show progress bar, 2: show internal
+                optimization details
 
         Returns:
             Counterfactuals: The generated counterfactual examples with their
@@ -395,7 +407,7 @@ class GAMCoach:
         muted_variables = []
         is_successful = True
 
-        for _ in tqdm(range(total_cfs)):
+        for _ in tqdm(range(total_cfs), disable=verbose == 0):
             model, variables = self.create_milp(
                 cf_direction,
                 needed_score_gain,
@@ -405,12 +417,12 @@ class GAMCoach:
                 muted_variables=muted_variables,
             )
 
-            model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose, warmStart=True))
+            model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose > 0, warmStart=True))
 
             if model.status != 1:
                 is_successful = False
 
-            if verbose:
+            if verbose == 2:
                 print("solver runs for {:.2f} seconds".format(model.solutionTime))
                 print("status: {}".format(pulp.LpStatus[model.status]))
 
@@ -422,7 +434,7 @@ class GAMCoach:
                     if x.varValue > 0:
                         active_variables.append(x)
 
-            if verbose:
+            if verbose == 2:
                 print("\nFound solutions:")
                 self.print_solution(cur_example, active_variables, options)
 
@@ -528,12 +540,16 @@ class GAMCoach:
                     # Get the current additive scores and bin edges
                     inter_additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
 
+                    # Have to skip the max edge if it is continuous
                     bin_starts_feature = self.ebm.pair_preprocessor_._get_bin_labels(
                         cur_feature_index
-                    )
+                    )[:-1]
+
                     bin_starts_other = self.ebm.pair_preprocessor_._get_bin_labels(
                         other_index
                     )
+                    if other_type == "continuous":
+                        bin_starts_other = bin_starts_other[:-1]
 
                     # Get the current interaction term score
                     other_bin = None
@@ -775,6 +791,10 @@ class GAMCoach:
                         other_index
                     )
 
+                    # Have to skip the max edge if it is continuous
+                    if other_type == "continuous":
+                        bin_starts_other = bin_starts_other[:-1]
+
                     # Get the current interaction term score
                     other_bin = None
                     if other_type == "continuous":
@@ -982,7 +1002,7 @@ class GAMCoach:
                 common_index = [-1, -1]
                 for m in range(len(opt_1[4])):
                     for n in range(len(opt_2[4])):
-                        if opt_1[4][m][0] == opt_2[4][m][0]:
+                        if opt_1[4][m][0] == opt_2[4][n][0]:
                             common_index = [m, n]
                             break
 
@@ -1156,7 +1176,7 @@ class GAMCoach:
 
         for var in active_variables:
             # Skip interaction vars (included)
-            if " x " not in var.name:
+            if "_x_" not in var.name:
                 f_name = re.sub(r"(.+):\d+", r"\1", var.name)
                 bin_i = int(re.sub(r".+:(\d+)", r"\1", var.name))
 
@@ -1244,6 +1264,29 @@ class GAMCoach:
 
         for key in counter:
             results[key] = 1 - (counter[key] / len(xs))
+
+        return results
+
+    @staticmethod
+    def compute_naive_cat_distance(xs):
+        """
+        Alternative to compute_frequency_distance() to compute distance for
+        categorical variables. The distance 1 for different levels and 0 for
+        the same levels. Here we give them all score 1, because same-level
+        options will be filtered out when we create categorical options for the
+        optimization program.
+
+        Args:
+            xs (np.ndarray): A column of categorical values.
+
+        Returns:
+            dict: category level -> 1.
+        """
+        counter = Counter(xs)
+        results = {}
+
+        for key in counter:
+            results[key] = 1
 
         return results
 

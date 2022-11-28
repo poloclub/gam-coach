@@ -115,7 +115,7 @@
     if (modelName === 'compas') {
       return 'bail applicant';
     } else if (modelName === 'crime-mitigated' || modelName === 'crime') {
-      return 'funding applicant county';
+      return 'funding applying county';
     } else {
       return 'loan applicant';
     }
@@ -342,14 +342,14 @@
 
     <div class="coach-right">
       <div class="icon-container">
-        <a target="_blank" href="https://github.com/anonnips/gam-coach/">
+        <a target="_blank" href="https://github.com/anonchi/gam-coach/">
           <div class="svg-icon" title="Open-source code">
             {@html iconGithub}
           </div>
           <span>Code</span>
         </a>
 
-        <a target="_blank" href="https://youtu.be/EEi74BQg3qo">
+        <a target="_blank" href="https://youtu.be/Z2vdqZFKNeg">
           <div class="svg-icon" title="Demo video">
             {@html iconVideo}
           </div>
@@ -438,7 +438,7 @@
             <th>Size</th>
             <th>Prediction</th>
             <th>Country</th>
-            <th>Papers</th>
+            <th>Recourse Papers</th>
           </tr>
         </thead>
         <tbody>
@@ -452,7 +452,7 @@
                 }}>Demo</a
               >
             </td>
-            <td>n = 124026, d = 20</td>
+            <td>n=12,4026<br />d=20</td>
             <td>Loan Default</td>
             <td>US, 2007–2018</td>
             <td
@@ -468,8 +468,9 @@
               ]</td
             >
           </tr>
+
           <tr>
-            <td>Credit</td>
+            <td>Communities & Crime</td>
             <td
               ><a
                 href="#top"
@@ -478,32 +479,20 @@
                 }}>Demo</a
               >
             </td>
-            <td>n = 29623, d = 14</td>
-            <td>Loan Default</td>
-            <td>Taiwan, 2005</td>
+            <td>n=1,994<br />d=120</td>
+            <td>Low Crime Risk</td>
+            <td>US, 1995</td>
             <td
               >[
               <a
-                href="https://proceedings.neurips.cc/paper/2020/hash/c2ba1bc54b239208cb37b901c0d3b363-Abstract.html"
-                target="_blank">2</a
-              >,
-              <a
-                href="https://dl.acm.org/doi/10.1145/3287560.3287566"
+                href="https://proceedings.neurips.cc/paper/2021/hash/009c434cab57de48a31f6b669e7ba266-Abstract.html"
                 target="_blank">3</a
-              >,
-              <a
-                href="https://proceedings.mlr.press/v108/karimi20a.html"
-                target="_blank">4</a
-              >,
-              <a
-                href="https://dl.acm.org/doi/10.14778/3461535.3461555"
-                target="_blank">5</a
-              >
-              ]</td
+              > ]</td
             >
           </tr>
+
           <tr>
-            <td>German Credit</td>
+            <td>Adult</td>
             <td
               ><a
                 href="#top"
@@ -512,7 +501,43 @@
                 }}>Demo</a
               >
             </td>
-            <td>n = 1000, d = 20</td>
+            <td>n=45,222<br />d=12</td>
+            <td>Income ≥ 50K</td>
+            <td>US, 1996</td>
+            <td
+              >[
+              <a
+                href="https://dl.acm.org/doi/abs/10.1145/3351095.3372850"
+                target="_blank">1</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.1145/3287560.3287566"
+                target="_blank">4</a
+              >,
+              <a
+                href="https://proceedings.mlr.press/v108/karimi20a.html"
+                target="_blank">5</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.14778/3461535.3461555"
+                target="_blank">6</a
+              >,
+              <a href="https://arxiv.org/abs/2106.02666" target="_blank">6</a>
+              ]</td
+            >
+          </tr>
+
+          <tr>
+            <td>German Credit</td>
+            <td
+              ><a
+                href="#top"
+                on:click={(e) => {
+                  optionClicked(e, datasetOptions[3]);
+                }}>Demo</a
+              >
+            </td>
+            <td>n=1,000<br />d=20</td>
             <td>Good Customer</td>
             <td>German, 1994</td>
             <td
@@ -528,50 +553,16 @@
               <a href="https://arxiv.org/abs/2106.02666" target="_blank">6</a>,
               <a
                 href="https://proceedings.neurips.cc/paper/2020/hash/8ee7730e97c67473a424ccfeff49ab20-Abstract.html"
-                target="_blank">7</a
+                target="_blank">8</a
               >,
               <a
                 href="https://dl.acm.org/doi/abs/10.1145/3442188.3445899"
-                target="_blank">8</a
+                target="_blank">9</a
               >
               ]</td
             >
           </tr>
-          <tr>
-            <td>Adult</td>
-            <td
-              ><a
-                href="#top"
-                on:click={(e) => {
-                  optionClicked(e, datasetOptions[3]);
-                }}>Demo</a
-              >
-            </td>
-            <td>n = 45222, d = 12</td>
-            <td>Income ≥ 50K</td>
-            <td>US, 1996</td>
-            <td
-              >[
-              <a
-                href="https://dl.acm.org/doi/abs/10.1145/3351095.3372850"
-                target="_blank">1</a
-              >,
-              <a
-                href="https://dl.acm.org/doi/10.1145/3287560.3287566"
-                target="_blank">3</a
-              >,
-              <a
-                href="https://proceedings.mlr.press/v108/karimi20a.html"
-                target="_blank">4</a
-              >,
-              <a
-                href="https://dl.acm.org/doi/10.14778/3461535.3461555"
-                target="_blank">5</a
-              >,
-              <a href="https://arxiv.org/abs/2106.02666" target="_blank">6</a>
-              ]</td
-            >
-          </tr>
+
           <tr>
             <td>COMPAS</td>
             <td
@@ -582,7 +573,7 @@
                 }}>Demo</a
               >
             </td>
-            <td>n = 5278, d = 5</td>
+            <td>n=5,278<br />d=5</td>
             <td>Recidivism in two years</td>
             <td>US, 2016</td>
             <td
@@ -593,11 +584,46 @@
               >,
               <a
                 href="https://proceedings.mlr.press/v108/karimi20a.html"
-                target="_blank">4</a
+                target="_blank">5</a
               >,
               <a
                 href="https://proceedings.neurips.cc/paper/2020/hash/8ee7730e97c67473a424ccfeff49ab20-Abstract.html"
-                target="_blank">7</a
+                target="_blank">8</a
+              >
+              ]</td
+            >
+          </tr>
+
+          <tr>
+            <td>Credit</td>
+            <td
+              ><a
+                href="#top"
+                on:click={(e) => {
+                  optionClicked(e, datasetOptions[5]);
+                }}>Demo</a
+              >
+            </td>
+            <td>n=29,623<br />d=14</td>
+            <td>Loan Default</td>
+            <td>Taiwan, 2005</td>
+            <td
+              >[
+              <a
+                href="https://proceedings.neurips.cc/paper/2020/hash/c2ba1bc54b239208cb37b901c0d3b363-Abstract.html"
+                target="_blank">2</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.1145/3287560.3287566"
+                target="_blank">4</a
+              >,
+              <a
+                href="https://proceedings.mlr.press/v108/karimi20a.html"
+                target="_blank">5</a
+              >,
+              <a
+                href="https://dl.acm.org/doi/10.14778/3461535.3461555"
+                target="_blank">6</a
               >
               ]</td
             >
@@ -621,7 +647,7 @@
 
     <div class="youtube-video">
       <Youtube
-        videoId="EEi74BQg3qo"
+        videoId="Z2vdqZFKNeg"
         playerId="demo_video"
         bind:this={currentPlayer}
       />
@@ -637,7 +663,7 @@
   <div class="article-footer">
     <div class="footer-main">
       <div class="footer-cp">
-        <div>NeurIPS'22 Submission</div>
+        <div>CHI'23 Submission</div>
         <div>Thanks for reviewing the manuscript!</div>
       </div>
     </div>

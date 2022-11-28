@@ -38,6 +38,8 @@
   import samplesCredit from '../../config/data/credit-classifier-random-samples.json';
   import samplesGerman from '../../config/data/german-classifier-random-samples.json';
   import samplesCompas from '../../config/data/compas-classifier-random-samples.json';
+  import samplesCrime from '../../config/data/crime-classifier-random-samples.json';
+  import samplesCrimeMitigated from '../../config/data/crime-mitigated-classifier-random-samples.json';
 
   export let modelName = 'lc';
 
@@ -46,10 +48,11 @@
 
   const datasetOptions = [
     { name: 'lc', display: 'Lending Club' },
-    { name: 'credit', display: 'Credit' },
-    { name: 'german', display: 'German Credit' },
+    { name: 'crime-mitigated', display: 'Communities & Crime' },
     { name: 'adult', display: 'Adult Census Income' },
-    { name: 'compas', display: 'COMPAS' }
+    { name: 'german', display: 'German Credit' },
+    { name: 'compas', display: 'COMPAS' },
+    { name: 'credit', display: 'Credit' }
   ];
 
   const initModelInfo = () => {
@@ -77,6 +80,11 @@
       case 'compas': {
         curSamples = samplesCompas;
         curIndex = 380;
+        break;
+      }
+      case 'crime-mitigated': {
+        curSamples = samplesCrimeMitigated;
+        curIndex = 165;
         break;
       }
       default: {

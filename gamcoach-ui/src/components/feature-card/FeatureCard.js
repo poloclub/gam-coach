@@ -10,7 +10,9 @@ const formatter = d3.format(',.2~f');
  * Helper function to show the annotation.
  */
 const showAnnotation = (component, state, type) => {
-  if (state.showingAnnotation !== null) { return; }
+  if (state.showingAnnotation !== null) {
+    return;
+  }
 
   // Log the interaction
   /** @type {Logger} */
@@ -20,13 +22,9 @@ const showAnnotation = (component, state, type) => {
     elementName: `annotation ${type}`
   });
 
-  d3.select(component)
-    .selectAll('.annotation-name')
-    .classed('show', false);
+  d3.select(component).selectAll('.annotation-name').classed('show', false);
 
-  d3.select(component)
-    .selectAll(`.annotation-${type}`)
-    .classed('show', true);
+  d3.select(component).selectAll(`.annotation-${type}`).classed('show', true);
 
   state.showingAnnotation = type;
 };
@@ -35,15 +33,13 @@ const showAnnotation = (component, state, type) => {
  * Helper function to hide the annotation.
  */
 const hideAnnotation = (component, state, type) => {
-  if (state.showingAnnotation !== type) { return; }
+  if (state.showingAnnotation !== type) {
+    return;
+  }
 
-  d3.select(component)
-    .selectAll('.annotation-name')
-    .classed('show', true);
+  d3.select(component).selectAll('.annotation-name').classed('show', true);
 
-  d3.select(component)
-    .selectAll(`.annotation-${type}`)
-    .classed('show', false);
+  d3.select(component).selectAll(`.annotation-${type}`).classed('show', false);
 
   state.showingAnnotation = null;
 };
@@ -157,34 +153,36 @@ export const initSlider = (component, state) => {
   // Register event listeners
   d3.select(component)
     .select(`#${leftThumbID}`)
-    .on('mousedown', e => mouseDownHandler(e, component, state));
+    .on('mousedown', (e) => mouseDownHandler(e, component, state));
 
   d3.select(component)
     .select(`#${rightThumbID}`)
-    .on('mousedown', e => mouseDownHandler(e, component, state));
+    .on('mousedown', (e) => mouseDownHandler(e, component, state));
 
   // Move the curValue thumb to the coach value
   moveThumb(component, state, middleThumbID, state.feature.coachValue);
 
   d3.select(component)
     .select(`#${middleThumbID}`)
-    .on('mousedown', e => mouseDownHandler(e, component, state));
+    .on('mousedown', (e) => mouseDownHandler(e, component, state));
 
   syncRangeTrack(component, state);
 };
 
 const updateRangeAnnotation = (component, state) => {
+  if (state.histSVG === null) {
+    return;
+  }
 
-  if (state.histSVG === null) { return; }
-
-  const rangeTrackBBox = d3.select(component)
+  const rangeTrackBBox = d3
+    .select(component)
     .select('.range-track')
     .node()
     //@ts-ignore
     .getBoundingClientRect();
 
-  let labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 -
-    state.annotationRangeXOffset;
+  let labelLeft =
+    rangeTrackBBox.x + rangeTrackBBox.width / 2 - state.annotationRangeXOffset;
 
   // Handle out of bounds
   if (labelLeft < 0) {
@@ -248,7 +246,8 @@ export const moveThumb = (component, state, thumbID, value) => {
   }
 
   // Save the current value to the HTML element
-  const thumb = d3.select(component)
+  const thumb = d3
+    .select(component)
     .select(`#${thumbID}`)
     .attr('data-curValue', value);
 
@@ -258,8 +257,10 @@ export const moveThumb = (component, state, thumbID, value) => {
   //@ts-ignore
   const trackBBox = thumb.node().parentNode.getBoundingClientRect();
 
-  let xPos = (value - state.feature.valueMin) /
-    (state.feature.valueMax - state.feature.valueMin) * trackBBox.width;
+  let xPos =
+    ((value - state.feature.valueMin) /
+      (state.feature.valueMax - state.feature.valueMin)) *
+    trackBBox.width;
 
   // Need to offset the xPos based on the thumb type
   // Also register different values based on the thumb type
@@ -346,18 +347,21 @@ const syncTicks = (state) => {
     return;
   }
 
-  state.histSVG.select('g.tick-top-group')
+  state.histSVG
+    .select('g.tick-top-group')
     .selectAll('g.tick')
-    .filter(d => d >= state.feature.curMin && d <= state.feature.curMax)
+    .filter((d) => d >= state.feature.curMin && d <= state.feature.curMax)
     .classed('out-range', false);
 
-  state.histSVG.select('g.tick-top-group')
+  state.histSVG
+    .select('g.tick-top-group')
     .selectAll('g.tick')
-    .filter(d => d < state.feature.curMin || d > state.feature.curMax)
+    .filter((d) => d < state.feature.curMin || d > state.feature.curMax)
     .classed('out-range', true);
 
   if (state.feature.curMax === state.feature.curMin) {
-    state.histSVG.select('g.tick-top-group')
+    state.histSVG
+      .select('g.tick-top-group')
       .selectAll('g.tick')
       .classed('out-range', true);
   }
@@ -384,11 +388,9 @@ const syncTooltips = (component, state) => {
  * Sync the background range track with teh current min & max range
  */
 export const syncRangeTrack = (component, state) => {
-  const leftThumb = d3.select(component)
-    .select('#slider-left-thumb');
+  const leftThumb = d3.select(component).select('#slider-left-thumb');
 
-  const rightThumb = d3.select(component)
-    .select('#slider-right-thumb');
+  const rightThumb = d3.select(component).select('#slider-right-thumb');
 
   //@ts-ignore
   const thumbWidth = leftThumb.node().getBoundingClientRect().width;
@@ -405,8 +407,10 @@ export const syncRangeTrack = (component, state) => {
   if (state.densityClip !== null) {
     state.densityClip
       .attr('x', state.tickXScale(state.feature.curMin))
-      .attr('width', state.tickXScale(state.feature.curMax) -
-        state.tickXScale(state.feature.curMin)
+      .attr(
+        'width',
+        state.tickXScale(state.feature.curMax) -
+          state.tickXScale(state.feature.curMin)
       );
   }
 };
@@ -414,7 +418,8 @@ export const syncRangeTrack = (component, state) => {
 const syncFeature = (state) => {
   // Update the feature for range selections
   // Feature's `acceptableRange` is null if all are selected
-  if (state.feature.curMin !== state.feature.valueMin ||
+  if (
+    state.feature.curMin !== state.feature.valueMin ||
     state.feature.curMax !== state.feature.valueMax
   ) {
     state.featurePtr.acceptableRange = [
@@ -454,12 +459,11 @@ export const initHistSize = (component, state) => {
  * Initialize the density plot.
  */
 export const initHist = (component, state) => {
-  console.log(state.feature);
+  // console.log(state.feature);
 
   // Use the parent size to initialize the SVG size
-  const parentDiv = d3.select(component)
-    .select('.feature-hist');
-    //@ts-ignore
+  const parentDiv = d3.select(component).select('.feature-hist');
+  //@ts-ignore
   const parentBBox = parentDiv.node().getBoundingClientRect();
 
   const width = parentBBox.width;
@@ -468,17 +472,16 @@ export const initHist = (component, state) => {
   const vGap = 15;
   const height = histHeight + tickHeight + vGap;
 
-  state.histSVG = d3.select(component)
+  state.histSVG = d3
+    .select(component)
     .select('.svg-hist')
     .attr('width', width)
     .attr('height', height);
 
   // Offset the range thumb to align with the track
-  const thumbWidth = d3.select(component)
-    .select('#slider-left-thumb')
-    .node()
+  const thumbWidth =
     //@ts-ignore
-    .offsetWidth;
+    d3.select(component).select('#slider-left-thumb').node().offsetWidth;
 
   const padding = {
     top: 35,
@@ -491,7 +494,8 @@ export const initHist = (component, state) => {
   const totalWidth = width - padding.left - padding.right;
 
   // Draw a bounding box for this density plot
-  state.histSVG.append('g')
+  state.histSVG
+    .append('g')
     .attr('class', 'border')
     .attr('transform', `translate(${0}, ${padding.top})`)
     .append('rect')
@@ -501,60 +505,72 @@ export const initHist = (component, state) => {
     .style('stroke', colors['gray-200']);
 
   // Add density plot
-  const histGroup = state.histSVG.append('g')
+  const histGroup = state.histSVG
+    .append('g')
     .attr('class', 'hist-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
-  const tickGroup = state.histSVG.append('g')
+  const tickGroup = state.histSVG
+    .append('g')
     .attr('class', 'tick-group')
     .attr('transform', `translate(${thumbWidth}, ${histHeight + vGap})`);
 
   // The top layer to show vertical marks
-  const markGroup = state.histSVG.append('g')
+  const markGroup = state.histSVG
+    .append('g')
     .attr('class', 'mark-group')
     .attr('transform', `translate(${thumbWidth}, ${padding.top})`);
 
   // Compute the frequency
   const totalSampleNum = state.feature.histCount.reduce((a, b) => a + b);
-  const curDensity = state.feature.histCount.map((d, i) =>
-    [state.feature.histEdge[i], d / totalSampleNum]
-  );
+  const curDensity = state.feature.histCount.map((d, i) => [
+    state.feature.histEdge[i],
+    d / totalSampleNum
+  ]);
   curDensity.unshift([state.feature.histEdge[0], 0]);
-  curDensity.push(
-    [state.feature.histEdge[state.feature.histEdge.length - 1], 0]
-  );
+  curDensity.push([
+    state.feature.histEdge[state.feature.histEdge.length - 1],
+    0
+  ]);
 
   // Create the axis scales
-  state.tickXScale = d3.scaleLinear()
+  state.tickXScale = d3
+    .scaleLinear()
     .domain([state.feature.valueMin, state.feature.valueMax])
     .range([0, totalWidth]);
 
-  const yScale = d3.scaleLinear()
+  const yScale = d3
+    .scaleLinear()
     //@ts-ignore
     .domain([0, d3.max(curDensity, (d) => d[1])])
     .range([histHeight - padding.bottom - padding.top, padding.histTop]);
 
-  const curve = d3.line()
+  const curve = d3
+    .line()
     .curve(d3.curveBasis)
-    .x(d => state.tickXScale(d[0]))
-    .y(d => yScale(d[1]));
+    .x((d) => state.tickXScale(d[0]))
+    .y((d) => yScale(d[1]));
 
   // Draw the area curve
-  const underArea = histGroup.append('path')
+  const underArea = histGroup
+    .append('path')
     .attr('class', 'area-path')
     .datum(curDensity)
     .attr('d', curve);
 
-  const upperArea = underArea.clone(true)
-    .classed('selected', true);
+  const upperArea = underArea.clone(true).classed('selected', true);
 
   // Create a clip path
-  state.densityClip = histGroup.append('clipPath')
+  state.densityClip = histGroup
+    .append('clipPath')
     .attr('id', `${state.feature.id}-area-clip`)
     .append('rect')
     .attr('x', state.tickXScale(state.feature.curMin))
-    .attr('width', state.tickXScale(state.feature.curMax) -
-      state.tickXScale(state.feature.curMin))
+    .attr(
+      'width',
+      state.tickXScale(state.feature.curMax) -
+        state.tickXScale(state.feature.curMin)
+    )
     .attr('height', histHeight);
 
   upperArea.attr('clip-path', `url(#${state.feature.id}-area-clip)`);
@@ -565,15 +581,19 @@ export const initHist = (component, state) => {
   const lineHeight = histHeight - padding.top;
 
   // --- User ---
-  state.densityUserMark = markGroup.append('g')
+  state.densityUserMark = markGroup
+    .append('g')
     .attr('class', 'mark density-user-mark')
-    .attr('transform',
-      `translate(${state.tickXScale(state.feature.curValue)}, ${0})`)
+    .attr(
+      'transform',
+      `translate(${state.tickXScale(state.feature.curValue)}, ${0})`
+    )
     .on('mouseenter', () => showAnnotation(component, state, 'user'))
     .on('mouseleave', () => hideAnnotation(component, state, 'user'));
 
   // Add an invisible region to make it easier to hover over
-  state.densityUserMark.append('rect')
+  state.densityUserMark
+    .append('rect')
     .attr('class', '.hover-place')
     .attr('x', -2)
     .attr('width', 4)
@@ -582,7 +602,8 @@ export const initHist = (component, state) => {
     .lower();
 
   // Add the line and a second white line at the background to highlight it
-  state.densityUserMark.append('line')
+  state.densityUserMark
+    .append('line')
     .attr('y2', lineHeight)
     .clone(true)
     .style('stroke-width', 3)
@@ -591,15 +612,19 @@ export const initHist = (component, state) => {
     .lower();
 
   // --- Coach ---
-  state.densityCoachMark = markGroup.append('g')
+  state.densityCoachMark = markGroup
+    .append('g')
     .attr('class', 'mark density-coach-mark')
-    .attr('transform',
-      `translate(${state.tickXScale(state.feature.coachValue)}, ${0})`)
+    .attr(
+      'transform',
+      `translate(${state.tickXScale(state.feature.coachValue)}, ${0})`
+    )
     .on('mouseenter', () => showAnnotation(component, state, 'coach'))
     .on('mouseleave', () => hideAnnotation(component, state, 'coach'));
 
   // Add an invisible region to make it easier to hover over
-  state.densityCoachMark.append('rect')
+  state.densityCoachMark
+    .append('rect')
     .attr('class', '.hover-place')
     .attr('x', -2)
     .attr('width', 4)
@@ -608,7 +633,8 @@ export const initHist = (component, state) => {
     .lower();
 
   // Add the line and a second white line at the background to highlight it
-  state.densityCoachMark.append('line')
+  state.densityCoachMark
+    .append('line')
     .attr('y2', lineHeight)
     .clone(true)
     .style('stroke-width', 3)
@@ -617,15 +643,19 @@ export const initHist = (component, state) => {
     .lower();
 
   // --- Original ---
-  state.densityOriginalMark = markGroup.append('g')
+  state.densityOriginalMark = markGroup
+    .append('g')
     .attr('class', 'mark density-original-mark')
-    .attr('transform',
-      `translate(${state.tickXScale(state.feature.originalValue)}, ${0})`)
+    .attr(
+      'transform',
+      `translate(${state.tickXScale(state.feature.originalValue)}, ${0})`
+    )
     .on('mouseenter', () => showAnnotation(component, state, 'original'))
     .on('mouseleave', () => hideAnnotation(component, state, 'original'));
 
   // Add an invisible region to make it easier to hover over
-  state.densityOriginalMark.append('rect')
+  state.densityOriginalMark
+    .append('rect')
     .attr('class', '.hover-place')
     .attr('x', -2)
     .attr('width', 4)
@@ -634,7 +664,8 @@ export const initHist = (component, state) => {
     .lower();
 
   // Add the mark line
-  state.densityOriginalMark.append('line')
+  state.densityOriginalMark
+    .append('line')
     .attr('y2', lineHeight)
     .clone(true)
     .style('stroke-width', 3)
@@ -643,24 +674,25 @@ export const initHist = (component, state) => {
     .lower();
 
   // Initialize the ticks below the slider
-  const tickBackGroup = tickGroup.append('g')
-    .attr('class', 'tick-back-group');
+  const tickBackGroup = tickGroup.append('g').attr('class', 'tick-back-group');
 
-  const tickTopGroup = tickGroup.append('g')
-    .attr('class', 'tick-top-group');
+  const tickTopGroup = tickGroup.append('g').attr('class', 'tick-top-group');
 
   const tickCount = 30;
   const tickArray = [];
   for (let i = 0; i <= tickCount; i++) {
-    tickArray.push(state.feature.valueMin +
-      (state.feature.valueMax - state.feature.valueMin) * i / tickCount);
+    tickArray.push(
+      state.feature.valueMin +
+        ((state.feature.valueMax - state.feature.valueMin) * i) / tickCount
+    );
   }
 
-  tickTopGroup.selectAll('g.tick')
+  tickTopGroup
+    .selectAll('g.tick')
     .data(tickArray)
     .join('g')
     .attr('class', 'tick')
-    .attr('transform', d => `translate(${state.tickXScale(d)}, 0)`)
+    .attr('transform', (d) => `translate(${state.tickXScale(d)}, 0)`)
     .append('line')
     .attr('y2', state.tickHeights.default);
 
@@ -668,7 +700,8 @@ export const initHist = (component, state) => {
   syncTicks(state);
 
   // Add labels for the min and max value
-  tickBackGroup.append('text')
+  tickBackGroup
+    .append('text')
     .attr('class', 'label-min-value')
     .attr('x', -4)
     .attr('y', state.tickHeights.default * 2.2)
@@ -678,7 +711,8 @@ export const initHist = (component, state) => {
     .style('fill', colors['gray-500'])
     .text(formatter(state.feature.transformFunc(state.feature.valueMin)));
 
-  tickBackGroup.append('text')
+  tickBackGroup
+    .append('text')
     .attr('class', 'label-max-value')
     .attr('x', totalWidth + 4)
     .attr('y', state.tickHeights.default * 2.2)
@@ -689,30 +723,36 @@ export const initHist = (component, state) => {
     .text(formatter(state.feature.transformFunc(state.feature.valueMax)));
 
   // Initialize the positions for the annotation labels
-  const xOffset = d3.select(component)
+  const xOffset = d3
+    .select(component)
     .select('.feature-hist')
     .node()
     //@ts-ignore
     .getBoundingClientRect().x;
 
-  const xBound = d3.select(component)
+  const xBound = d3
+    .select(component)
     .select('.feature-hist')
     .node()
     //@ts-ignore
     .getBoundingClientRect().width;
 
   // --- Original ---
-  state.annotationOriginal = d3.select(component)
+  state.annotationOriginal = d3
+    .select(component)
     .select('.annotation-original');
 
-  let tempClone = state.annotationOriginal.clone(true)
+  let tempClone = state.annotationOriginal
+    .clone(true)
     .style('visibility', 'hidden')
     .classed('show', true);
   let labelWidth = tempClone.node().getBoundingClientRect().width;
   tempClone.remove();
 
-  let labelLeft = state.densityOriginalMark.select('line').node()
-    .getBoundingClientRect().x - xOffset - labelWidth / 2;
+  let labelLeft =
+    state.densityOriginalMark.select('line').node().getBoundingClientRect().x -
+    xOffset -
+    labelWidth / 2;
 
   const handleOutOfBound = (annotation, labelLeft) => {
     if (labelLeft < 0) {
@@ -736,10 +776,10 @@ export const initHist = (component, state) => {
   state.annotationOriginal.style('left', `${labelLeft}px`);
 
   // --- User ---
-  state.annotationUser = d3.select(component)
-    .select('.annotation-user');
+  state.annotationUser = d3.select(component).select('.annotation-user');
 
-  tempClone = state.annotationUser.clone(true)
+  tempClone = state.annotationUser
+    .clone(true)
     .style('visibility', 'hidden')
     .classed('show', true);
   labelWidth = tempClone.node().getBoundingClientRect().width;
@@ -749,8 +789,10 @@ export const initHist = (component, state) => {
   state.annotationUserXOffset = xOffset + labelWidth / 2;
   state.annotationUserXBound = xBound - labelWidth;
 
-  labelLeft = state.densityUserMark.select('line').node()
-    .getBoundingClientRect().x - xOffset - labelWidth / 2;
+  labelLeft =
+    state.densityUserMark.select('line').node().getBoundingClientRect().x -
+    xOffset -
+    labelWidth / 2;
 
   // Handle out of bounds
   labelLeft = handleOutOfBound(state.annotationUser, labelLeft);
@@ -758,17 +800,19 @@ export const initHist = (component, state) => {
   state.annotationUser.style('left', `${labelLeft}px`);
 
   // --- Coach ---
-  state.annotationCoach = d3.select(component)
-    .select('.annotation-coach');
+  state.annotationCoach = d3.select(component).select('.annotation-coach');
 
-  tempClone = state.annotationCoach.clone(true)
+  tempClone = state.annotationCoach
+    .clone(true)
     .style('visibility', 'hidden')
     .classed('show', true);
   labelWidth = tempClone.node().getBoundingClientRect().width;
   tempClone.remove();
 
-  labelLeft = state.densityCoachMark.select('line').node()
-    .getBoundingClientRect().x - xOffset - labelWidth / 2;
+  labelLeft =
+    state.densityCoachMark.select('line').node().getBoundingClientRect().x -
+    xOffset -
+    labelWidth / 2;
 
   // Handle out of bounds
   labelLeft = handleOutOfBound(state.annotationCoach, labelLeft);
@@ -776,10 +820,10 @@ export const initHist = (component, state) => {
   state.annotationCoach.style('left', `${labelLeft}px`);
 
   // --- Range ---
-  state.annotationRange = d3.select(component)
-    .select('.annotation-range');
+  state.annotationRange = d3.select(component).select('.annotation-range');
 
-  tempClone = state.annotationRange.clone(true)
+  tempClone = state.annotationRange
+    .clone(true)
     .style('visibility', 'hidden')
     .classed('show', true);
   labelWidth = tempClone.node().getBoundingClientRect().width;
@@ -796,8 +840,8 @@ export const initHist = (component, state) => {
   state.annotationRangeXOffset = xOffset + labelWidth / 2;
   state.annotationRangeXBound = xBound - labelWidth;
 
-  labelLeft = rangeTrackBBox.x + rangeTrackBBox.width / 2 -
-    xOffset - labelWidth / 2;
+  labelLeft =
+    rangeTrackBBox.x + rangeTrackBBox.width / 2 - xOffset - labelWidth / 2;
 
   // Handle out of bounds
   labelLeft = handleOutOfBound(state.annotationRange, labelLeft);

@@ -82,6 +82,11 @@
         curIndex = 380;
         break;
       }
+      case 'crime': {
+        curSamples = samplesCrime;
+        curIndex = 347;
+        break;
+      }
       case 'crime-mitigated': {
         curSamples = samplesCrimeMitigated;
         curIndex = 165;
@@ -93,6 +98,26 @@
         modelName = 'lc';
         curIndex = 126;
       }
+    }
+  };
+
+  const getAgencyName = (modelName) => {
+    if (modelName === 'compas') {
+      return 'court';
+    } else if (modelName === 'crime-mitigated' || modelName === 'crime') {
+      return 'funding agency';
+    } else {
+      return 'bank';
+    }
+  };
+
+  const getApplicantName = (modelName) => {
+    if (modelName === 'compas') {
+      return 'bail applicant';
+    } else if (modelName === 'crime-mitigated' || modelName === 'crime') {
+      return 'funding applicant county';
+    } else {
+      return 'loan applicant';
     }
   };
 
@@ -242,7 +267,7 @@
         <div class="arrow" />
         <div class="title-top">Imagine...</div>
         <div class="title">
-          You're {modelName === 'compas' ? 'bail' : 'loan'} applicant
+          You're {getApplicantName(modelName)}
         </div>
         <div class="input-number">
           <div
@@ -267,7 +292,7 @@
           <span class="line"> Your application is rejected </span>
           <div class="help-arrow">{@html pointArrowSVGProcessed}</div>
           <span class="line">
-            The {modelName === 'compas' ? 'court' : 'bank'} points you to
+            The {getAgencyName(modelName)} points you to
           </span>
           <span class="line">
             <strong>GAM Coach</strong> to help you
@@ -277,13 +302,38 @@
         {#if modelName === 'compas'}
           <div class="description">
             <span class="line" style="margin-top: 30px;">
-              *We would not like to use COMPAS to evaluate GAM Coach, this demo
-              is only for review appeal purpose.
+              *We don't expect one to use COMPAS to evaluate GAM Coach; we use
+              it to demonstrate the generalizability of GAM Coach.
             </span>
-            <span class="line" style="margin-top: 10px;">
-              See <a href="https://arxiv.org/abs/2106.05498" target="_blank"
-                >this paper
-              </a> to learn more about COMPAS.
+          </div>
+        {:else if modelName === 'crime-mitigated'}
+          <div class="description">
+            <span class="line" style="margin-top: 30px;">
+              *Before training this model, we removed sensitive features (e.g.,
+              Black Population) and features with many missing values.
+              <a
+                href="javascript:"
+                on:click={(e) =>
+                  optionClicked(e, {
+                    name: 'crime',
+                    display: 'Communities & Crime'
+                  })}>Try full model</a
+              >
+            </span>
+          </div>
+        {:else if modelName === 'crime'}
+          <div class="description">
+            <span class="line" style="margin-top: 30px;">
+              *This model was trained on sensitive features (e.g., Black
+              Population) and features with many missing values.
+              <a
+                href="javascript:"
+                on:click={(e) =>
+                  optionClicked(e, {
+                    name: 'crime-mitigated',
+                    display: 'Communities & Crime'
+                  })}>Try sanitized model</a
+              >
             </span>
           </div>
         {/if}
@@ -311,7 +361,8 @@
         {#each datasetOptions as option, i}
           <div
             class="dataset-option"
-            class:selected={option.name === modelName}
+            class:selected={option.name === modelName ||
+              (option.name === 'crime-mitigated' && modelName === 'crime')}
             on:click={(e) => optionClicked(e, option)}
           >
             <div class="dataset-place" />

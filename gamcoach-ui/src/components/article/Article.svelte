@@ -39,7 +39,7 @@
   import samplesGerman from '../../config/data/german-classifier-random-samples.json';
   import samplesCompas from '../../config/data/compas-classifier-random-samples.json';
   import samplesCrime from '../../config/data/crime-classifier-random-samples.json';
-  import samplesCrimeMitigated from '../../config/data/crime-mitigated-classifier-random-samples.json';
+  import samplesCrimeFull from '../../config/data/crime-full-classifier-random-samples.json';
 
   export let modelName = 'lc';
 
@@ -48,7 +48,7 @@
 
   const datasetOptions = [
     { name: 'lc', display: 'Lending Club' },
-    { name: 'crime-mitigated', display: 'Communities & Crime' },
+    { name: 'crime', display: 'Communities & Crime' },
     { name: 'adult', display: 'Adult Census Income' },
     { name: 'german', display: 'German Credit' },
     { name: 'compas', display: 'COMPAS' },
@@ -82,13 +82,13 @@
         curIndex = 380;
         break;
       }
-      case 'crime': {
-        curSamples = samplesCrime;
+      case 'crime-full': {
+        curSamples = samplesCrimeFull;
         curIndex = 347;
         break;
       }
-      case 'crime-mitigated': {
-        curSamples = samplesCrimeMitigated;
+      case 'crime': {
+        curSamples = samplesCrime;
         curIndex = 165;
         break;
       }
@@ -104,7 +104,7 @@
   const getAgencyName = (modelName) => {
     if (modelName === 'compas') {
       return 'court';
-    } else if (modelName === 'crime-mitigated' || modelName === 'crime') {
+    } else if (modelName === 'crime-full' || modelName === 'crime') {
       return 'funding agency';
     } else {
       return 'bank';
@@ -113,11 +113,11 @@
 
   const getApplicantName = (modelName) => {
     if (modelName === 'compas') {
-      return 'bail applicant';
-    } else if (modelName === 'crime-mitigated' || modelName === 'crime') {
-      return 'funding applying county';
+      return 'a bail applicant';
+    } else if (modelName === 'crime-full' || modelName === 'crime') {
+      return 'a county applying for funding';
     } else {
-      return 'loan applicant';
+      return 'a loan applicant';
     }
   };
 
@@ -129,7 +129,9 @@
     'adult',
     'credit',
     'german',
-    'compas'
+    'compas',
+    'crime',
+    'crime-full'
   ]);
   if (urlModelName !== null && validModelNames.has(urlModelName)) {
     modelName = urlModelName;
@@ -306,7 +308,7 @@
               it to demonstrate the generalizability of GAM Coach.
             </span>
           </div>
-        {:else if modelName === 'crime-mitigated'}
+        {:else if modelName === 'crime'}
           <div class="description">
             <span class="line" style="margin-top: 30px;">
               *Before training this model, we removed sensitive features (e.g.,
@@ -315,13 +317,13 @@
                 href="javascript:"
                 on:click={(e) =>
                   optionClicked(e, {
-                    name: 'crime',
+                    name: 'crime-full',
                     display: 'Communities & Crime'
                   })}>Try full model</a
               >
             </span>
           </div>
-        {:else if modelName === 'crime'}
+        {:else if modelName === 'crime-full'}
           <div class="description">
             <span class="line" style="margin-top: 30px;">
               *This model was trained on sensitive features (e.g., Black
@@ -330,7 +332,7 @@
                 href="javascript:"
                 on:click={(e) =>
                   optionClicked(e, {
-                    name: 'crime-mitigated',
+                    name: 'crime',
                     display: 'Communities & Crime'
                   })}>Try sanitized model</a
               >
@@ -362,7 +364,7 @@
           <div
             class="dataset-option"
             class:selected={option.name === modelName ||
-              (option.name === 'crime-mitigated' && modelName === 'crime')}
+              (option.name === 'crime-full' && modelName === 'crime')}
             on:click={(e) => optionClicked(e, option)}
           >
             <div class="dataset-place" />

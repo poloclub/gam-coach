@@ -208,7 +208,7 @@ development:
 
 table:
   caption: >
-    We provide five working demos to show that GAM Coach provides a
+    We provide six working demos to show that GAM Coach provides a
     consistent user experience across commonly used datasets/cases in the
     algorithmic recourse literature. We evaluate GAM Coach through an online
     user study on the LendingClub dataset, as it is the largest dataset used in

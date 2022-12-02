@@ -12,5 +12,6 @@ pytest
 numpy
 pandas
 tqdm
-interpret
+interpret==0.2.7
+interpret-core==0.2.7
 pulp

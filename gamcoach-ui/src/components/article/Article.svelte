@@ -125,7 +125,7 @@
   const urlParams = new URLSearchParams(window.location.search);
   const urlModelName = urlParams.get('dataset');
   const validModelNames = new Set([
-    'lc',
+    'lending',
     'adult',
     'credit',
     'german',

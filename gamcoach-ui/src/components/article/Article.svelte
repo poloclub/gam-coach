@@ -116,7 +116,7 @@
     if (modelName === 'compas') {
       return 'a bail applicant';
     } else if (modelName === 'crime-full' || modelName === 'crime') {
-      return 'a grants manager in county';
+      return 'applying for grants for county';
     } else {
       return 'a loan applicant';
     }
@@ -365,7 +365,7 @@
           <div
             class="dataset-option"
             class:selected={option.name === modelName ||
-              (option.name === 'crime-full' && modelName === 'crime')}
+              (option.name === 'crime' && modelName === 'crime-full')}
             on:click={(e) => optionClicked(e, option)}
           >
             <div class="dataset-place" />

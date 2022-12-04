@@ -40,6 +40,8 @@ $border-radius: 5px;
   padding: 15px $v-padding;
   border-top: 1px solid $gray-light-border;
   border-bottom: 1px solid $gray-light-border;
+  max-height: 500px;
+  overflow-y: auto;
 
   font-size: 0.9rem;
 
@@ -157,7 +159,6 @@ $border-radius: 5px;
     &:active {
       border: 1px solid adjust-color($gray-light-border, $alpha: +0.1);
     }
-
   }
 }
 

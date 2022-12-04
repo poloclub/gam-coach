@@ -89,7 +89,8 @@
       }
       case 'crime': {
         curSamples = samplesCrime;
-        curIndex = 165;
+        // curIndex = 165;
+        curIndex = 368;
         break;
       }
       default: {
@@ -115,7 +116,7 @@
     if (modelName === 'compas') {
       return 'a bail applicant';
     } else if (modelName === 'crime-full' || modelName === 'crime') {
-      return 'a county applying for funding';
+      return 'a grants manager in county';
     } else {
       return 'a loan applicant';
     }

@@ -8,8 +8,13 @@
   import { cubicInOut } from 'svelte/easing';
   import { tooltipConfigStore, diffPickerConfigStore } from '../../store';
 
-  import { initHist, initHistSize, syncBars, titleMouseenterHandler,
-    titleMouseleaveHandler } from './FeatureCardCat';
+  import {
+    initHist,
+    initHistSize,
+    syncBars,
+    titleMouseenterHandler,
+    titleMouseleaveHandler
+  } from './FeatureCardCat';
 
   import rightArrowIcon from '../../img/icon-right-arrow.svg';
   import levelThumbIcon from '../../img/icon-level-thumb.svg';
@@ -42,7 +47,7 @@
     default: 6,
     original: 6 * 1.8,
     user: 6 * 1.8,
-    coach: 6 * 1.8,
+    coach: 6 * 1.8
   };
 
   // Binding variables, which will be initialized after window is loaded
@@ -84,28 +89,28 @@
   };
 
   const difficultyIconMap = {
-    'neutral': neutralIcon,
-    'easy': easyIcon,
+    neutral: neutralIcon,
+    easy: easyIcon,
     'very-easy': veryEasyIcon,
-    'hard': hardIcon,
+    hard: hardIcon,
     'very-hard': veryHardIcon,
-    'lock': lockIcon,
+    lock: lockIcon
   };
 
   const difficultyTextMap = {
-    'neutral': 'Default difficulty',
-    'easy': 'Easy to change',
+    neutral: 'Default difficulty',
+    easy: 'Easy to change',
     'very-easy': 'Very easy to change',
-    'hard': 'Hard to change',
+    hard: 'Hard to change',
     'very-hard': 'Very hard to change',
-    'lock': 'New plans won\'t change it',
+    lock: "New plans won't change it"
   };
 
   let diffPickerConfig = null;
-  let unsub = diffPickerConfigStore.subscribe(value => {
-
+  let unsub = diffPickerConfigStore.subscribe((value) => {
     // Listen to the picked event
-    if (value.action === 'picked' &&
+    if (
+      value.action === 'picked' &&
       value.feature === state.feature.featureName
     ) {
       // Log the interaction
@@ -121,7 +126,10 @@
       feature.difficulty = value.difficulty;
 
       // Change `isConstrained` if necessary
-      if (feature.difficulty === 'neutral' && feature.acceptableRange === null) {
+      if (
+        feature.difficulty === 'neutral' &&
+        feature.acceptableRange === null
+      ) {
         feature.isConstrained = false;
       } else {
         feature.isConstrained = true;
@@ -139,7 +147,7 @@
   unsubscribes.push(unsub);
 
   let tooltipConfig = null;
-  unsub = tooltipConfigStore.subscribe(value => {
+  unsub = tooltipConfigStore.subscribe((value) => {
     tooltipConfig = value;
   });
   unsubscribes.push(unsub);
@@ -149,7 +157,7 @@
    * @param {string | null} [key] Type of the update, can be one of ['value',
    *  null]. It triggers corresponding callbacks to update the stores.
    */
-  const stateUpdated = (key=null) => {
+  const stateUpdated = (key = null) => {
     // Trigger svelte interactivity
     state = state;
 
@@ -167,7 +175,7 @@
    * @param {string | null} [key] If key is 'constraint', then it triggers an
    * event to the feature panel to update the global constraints.
    */
-  const featureUpdated = (key=null) => {
+  const featureUpdated = (key = null) => {
     feature = state.featurePtr;
     state = state;
 
@@ -186,7 +194,6 @@
    * which is only accurate after content is loaded
    */
   const initFeatureCard = async () => {
-
     initialized = true;
 
     const featureInfo = feature.data;
@@ -204,9 +211,10 @@
       id: feature.featureID,
       description: featureInfo.description,
       labelEncoder: feature.labelEncoder,
-      searchValues: feature.acceptableRange === null ?
-        new Set(featureInfo.histEdge) :
-        new Set(feature.acceptableRange)
+      searchValues:
+        feature.acceptableRange === null
+          ? new Set(featureInfo.histEdge)
+          : new Set(feature.acceptableRange)
     };
 
     state.logger = logger;
@@ -227,10 +235,10 @@
    * Handler for clicking the difficulty picker
    */
   const diffClickedHandler = () => {
-
     // If the diff picker is shown for the current feature, we stop showing
-    if (diffPickerConfig.feature === state.feature.featureName &&
-      (Date.now() - diffPickerConfig.focusOutTime) < 200
+    if (
+      diffPickerConfig.feature === state.feature.featureName &&
+      Date.now() - diffPickerConfig.focusOutTime < 200
     ) {
       diffPickerConfig.x = 0;
       diffPickerConfig.y = 0;
@@ -243,7 +251,8 @@
 
     // Trigger the difficulty picker
     // Figure out the location to put the picker
-    const bbox = d3.select(component)
+    const bbox = d3
+      .select(component)
       .select('.feature-difficulty')
       .node()
       .getBoundingClientRect();
@@ -264,8 +273,7 @@
    * size of the header
    */
   const fitFeatureName = () => {
-    const featureNameElem = d3.select(component)
-      .select('.feature-name');
+    const featureNameElem = d3.select(component).select('.feature-name');
 
     let fontSize = parseFloat(
       window.getComputedStyle(featureNameElem.node()).fontSize
@@ -273,7 +281,7 @@
     const nameHeight = featureNameElem.node().clientHeight;
     const parentHeight = featureNameElem.node().parentNode.clientHeight;
 
-    if(nameHeight > parentHeight) {
+    if (nameHeight > parentHeight) {
       fontSize -= 0.5;
       featureNameElem.style('font-size', `${fontSize}px`);
       fitFeatureName();
@@ -293,7 +301,7 @@
       elementName: 'feature card',
       valueName: 'isCollapsed',
       oldValue: isCollapsed ? 'collapsed' : 'extended',
-      newValue: !isCollapsed ? 'collapsed' : 'extended',
+      newValue: !isCollapsed ? 'collapsed' : 'extended'
     });
 
     // Register the initial size
@@ -312,10 +320,7 @@
     const finalConfigBBox = configDIV.getBoundingClientRect();
 
     const animation = component.animate(
-      [
-        { height: `${initBBox.height}px` },
-        { height: `${finalBBox.height}px` }
-      ],
+      [{ height: `${initBBox.height}px` }, { height: `${finalBBox.height}px` }],
       {
         duration: 250,
         easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
@@ -338,8 +343,9 @@
     if (feature.isConstrained) {
       configDIV.animate(
         [
-          { transform: `translate(0, ${initConfigBBox.y -
-            finalConfigBBox.y}px)` },
+          {
+            transform: `translate(0, ${initConfigBBox.y - finalConfigBBox.y}px)`
+          },
           { transform: 'none' }
         ],
         {
@@ -356,9 +362,8 @@
    * @param acceptableRange
    */
   const displayAcceptableRange = (acceptableRange) => {
-
     if (acceptableRange !== null && acceptableRange.length === 0) {
-      return 'New plans won\'t consider this feature';
+      return "New plans won't consider this feature";
     }
 
     let text = 'New plans consider ';
@@ -369,23 +374,28 @@
       acceptableRangeAll = Object.keys(feature.labelEncoder);
     }
 
-    text = text.concat(`"${levelDescription[
-      acceptableRangeAll[0]].displayName}"`);
+    text = text.concat(
+      `"${levelDescription[acceptableRangeAll[0]].displayName}"`
+    );
 
     for (let i = 1; i < acceptableRangeAll.length - 1; i++) {
-      text = text.concat(', ', `"${
-        levelDescription[acceptableRangeAll[i]].displayName
-      }"`);
+      text = text.concat(
+        ', ',
+        `"${levelDescription[acceptableRangeAll[i]].displayName}"`
+      );
     }
 
     if (acceptableRangeAll.length == 2) {
-      text = text.concat(` and "${
-        levelDescription[acceptableRangeAll[1]].displayName}"`);
+      text = text.concat(
+        ` and "${levelDescription[acceptableRangeAll[1]].displayName}"`
+      );
     } else if (acceptableRangeAll.length > 2) {
-      text = text.concat(`, and "${
-        levelDescription[acceptableRangeAll[acceptableRangeAll.length - 1]]
-          .displayName
-      }"`);
+      text = text.concat(
+        `, and "${
+          levelDescription[acceptableRangeAll[acceptableRangeAll.length - 1]]
+            .displayName
+        }"`
+      );
     }
 
     return text;
@@ -394,7 +404,9 @@
   const displayLevel = (state, value) => {
     if (state.feature.description.levelDescription === undefined) {
       return '';
-    } else if (state.feature.description.levelDescription[value] === undefined) {
+    } else if (
+      state.feature.description.levelDescription[value] === undefined
+    ) {
       return '';
     } else {
       return state.feature.description.levelDescription[value].displayName;
@@ -459,149 +471,145 @@
       { class: 'icon-level-thumb', svg: levelThumbIcon },
       { class: 'icon-info', svg: infoIcon },
       { class: 'icon-close', svg: closeIcon },
-      { class: 'icon-refresh', svg: refreshIcon },
+      { class: 'icon-refresh', svg: refreshIcon }
     ];
     bindInlineSVG(component, iconList);
     mounted = true;
   });
 
   onDestroy(() => {
-    unsubscribes.forEach(unsub => unsub());
+    unsubscribes.forEach((unsub) => unsub());
   });
 
   $: feature && mounted && !initialized && initFeatureCard();
-
 </script>
 
-<style lang="scss">
-  @import '../feature-card/FeatureCard.scss';
-  @import './FeatureCardCat.scss';
-</style>
-
-<div class='feature-card' bind:this={component}
-  class:collapsed={isCollapsed}
->
-
-  <div class='feature-header'
+<div class="feature-card" bind:this={component} class:collapsed={isCollapsed}>
+  <div
+    class="feature-header"
     class:collapsed={isCollapsed}
     on:click={headerClicked}
   >
-
-    <div class='top-row'>
-
-      <div class='feature-info'
-        on:mouseenter={(e) => titleMouseenterHandler(
-          e, tooltipConfig, tooltipConfigStore, state.feature.descriptionString
-        )}
-        on:mouseleave={(e) => titleMouseleaveHandler(
-          e, tooltipConfig, tooltipConfigStore
-        )}
+    <div class="top-row">
+      <div
+        class="feature-info"
+        on:mouseenter={(e) =>
+          titleMouseenterHandler(
+            e,
+            tooltipConfig,
+            tooltipConfigStore,
+            state.feature.descriptionString
+          )}
+        on:mouseleave={(e) =>
+          titleMouseleaveHandler(e, tooltipConfig, tooltipConfigStore)}
       >
-        <span class='feature-name'>
+        <span class="feature-name">
           {state.feature.name}
         </span>
       </div>
 
-      <div class='card-icons'
+      <div
+        class="card-icons"
         class:collapsed={isCollapsed}
         on:click={resetClicked}
+        title="Reset"
       >
-
-        <div class='svg-icon icon-refresh'>
-          <div class='local-tooltip'>
+        <div class="svg-icon icon-refresh">
+          <!-- <div class='local-tooltip'>
             <span class='content'>Reset</span>
-          </div>
+          </div> -->
         </div>
-
       </div>
-
     </div>
 
-    <div class='values'>
+    <div class="values">
       {#if state.feature.originalValue === state.feature.curValue}
-
-        <span class='value-label'>
+        <span class="value-label">
           {displayLevel(state, state.feature.originalValue)}
         </span>
-
       {:else}
-
-        <span class='value-label'>
+        <span class="value-label">
           {displayLevel(state, state.feature.originalValue)}
         </span>
 
-        <div class='feature-arrow'>
-          <div class='arrow-right'></div>
+        <div class="feature-arrow">
+          <div class="arrow-right" />
         </div>
 
-        <span class='value-label'>
+        <span class="value-label">
           {displayLevel(state, state.feature.curValue)}
         </span>
-
       {/if}
     </div>
-
   </div>
 
-  <div class='feature-hist'
+  <div
+    class="feature-hist"
     class:collapsed={isCollapsed}
     class:expanded={isExpanded}
   >
-    <svg class='svg-hist'></svg>
+    <svg class="svg-hist" />
 
-    <div class='feature-annotations'>
-      <div class='annotation annotation-name show'>
-
-        <div class='svg-icon icon-info'></div>
+    <div class="feature-annotations">
+      <div class="annotation annotation-name show">
+        <div class="svg-icon icon-info" />
 
         {#key state.helperMessage}
-          <span in:fade={{duration: 200, easing: cubicInOut}}>
+          <span in:fade={{ duration: 200, easing: cubicInOut }}>
             {@html state.helperMessage}
           </span>
         {/key}
 
-        <div class='feature-difficulty'
-          on:click={diffClickedHandler}
-        >
-          <div class={`icon icon-${feature.difficulty}`}
-            title='Specify how easy for you to change this feature'
+        <div class="feature-difficulty" on:click={diffClickedHandler}>
+          <div
+            class={`icon icon-${feature.difficulty}`}
+            title="Specify how easy for you to change this feature"
           >
             {@html difficultyIconMap[feature.difficulty]}
           </div>
         </div>
-
       </div>
-
     </div>
   </div>
 
-  <div class='configuration'
+  <div
+    class="configuration"
     class:constrained={feature === null ? false : feature.isConstrained}
     class:collapsed={isCollapsed}
     class:expanded={isExpanded}
     on:click={headerClicked}
   >
-    <span class='tag acceptable-tag'
+    <span
+      class="tag acceptable-tag"
       class:shown={feature.acceptableRange !== null}
     >
       {displayAcceptableRange(feature.acceptableRange)}
-      <div class='local-tooltip'>
-        <span class='content'>New strategies will only consider options within this range</span>
+      <div class="local-tooltip">
+        <span class="content"
+          >New strategies will only consider options within this range</span
+        >
       </div>
     </span>
 
-    <span class='tag difficulty-tag'
+    <span
+      class="tag difficulty-tag"
       class:shown={feature.difficulty !== 'neutral'}
     >
       <div class={`icon icon-${feature.difficulty}`}>
         {@html difficultyIconMap[feature.difficulty]}
       </div>
       {difficultyTextMap[feature.difficulty]}
-      <div class='local-tooltip'>
-        <span class='content'>New strategies will prioritize features that are easy for you to change</span>
+      <div class="local-tooltip">
+        <span class="content"
+          >New strategies will prioritize features that are easy for you to
+          change</span
+        >
       </div>
     </span>
-
   </div>
-
 </div>
+
+<style lang="scss">
+  @import '../feature-card/FeatureCard.scss';
+  @import './FeatureCardCat.scss';
+</style>

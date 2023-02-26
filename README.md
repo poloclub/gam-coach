@@ -15,7 +15,7 @@ An interactive tool to help everyday users discover actionable strategies to obt
   <tr></tr>
   <tr>
     <td><a href="https://poloclub.github.io/timbertrek">🚀 Live Demo</a></td>
-    <td><a href="https://youtu.be/3eGqTmsStJM">📺 Demo Video</a></td>
+    <td><a href="https://youtu.be/ubacP34H9XE">📺 Demo Video</a></td>
     <!-- <td><a href="https://youtu.be/l1mr9z1TuAk">👨🏻‍🏫 Conference Talk</a></td> -->
     <!-- <td><a href="https://arxiv.org/abs/2209.09227">📖 Research Paper</a></td> -->
   </tr>

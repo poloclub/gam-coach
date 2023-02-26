@@ -1,0 +1,125 @@
+<!-- You must include this JavaScript file -->
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+
+<!-- For the full list of available Crowd HTML Elements and their input/output documentation,
+      please refer to https://docs.aws.amazon.com/sagemaker/latest/dg/sms-ui-template-reference.html -->
+
+<style>
+
+  form {
+    width: 72ch;
+    margin: 0 auto;
+  }
+
+  .content {
+    margin-bottom: 20px;
+  }
+
+  .verification {
+    margin-top: 30px;
+  }
+
+  .verification h2 {
+    margin-bottom: 0px;
+  }
+
+  .important {
+    color: #E03177;
+  }
+
+  .ending {
+    color: #067A6F;
+    font-style: italic;
+  }
+
+  img.emoji {
+    width: 1rem;
+    height: 1rem;
+    margin-bottom: -2px;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+</style>
+
+<!-- You must include crowd-form so that your task submits answers to MTurk -->
+<crowd-form answer-format="flatten-objects">
+
+  <div class='content'>
+    <h2>Introduction</h2>
+    <p>
+      <img class='emoji' src='https://i.imgur.com/0AJHckE.png'>
+      Hello! We are a team of computer science researchers. Thank you so much for taking your time to help
+      us improve our tool, GAM Coach.
+    </p>
+
+    <p>
+      You might have heard that some banks
+      <img class='emoji' src='https://i.imgur.com/FthIB2T.png'>
+      are using Artificial Intelligence
+      (AI) to decide whether a person can or cannot get a loan.
+      These banks ask for the loan applicant's information, such as <u>annual income</u>,
+      <u>employment length</u>, and <u>credit score</u>.
+      Then, the banks use AI programs to go through all collected
+      information and decide on whether to <strong>approve or reject this client's loan application</strong>.
+    </p>
+
+    <p>
+      Unfortunately, many people's loan applications are rejected by these programs.
+      <img class='emoji' src='https://i.imgur.com/RfnVhdV.png'>
+      Therefore, we are developing GAM Coach, an interactive coaching tool to <strong>help
+      these rejected loan applicants succeed in their future applications!</strong>
+      <img class='emoji' src='https://i.imgur.com/3IJ5vun.png'>
+      To do that, GAM Coach identifies an applicant's current weakness and provides simple and customizable strategies
+      to get their next loan application approved.
+    </p>
+
+    <p>
+      In this task, we want you to <strong>pretend to be a person whose loan application is rejected by a bank</strong>.
+      The bank points you to GAM Coach to help you improve and succeed in future applications.
+    </p>
+
+    <p>
+      <span class='important'>
+        It is very important to try your best to imagine that you are a real user—using GAM Coach to find
+        the strategies that <strong>you think are useful</strong>.
+      </span>
+      <span>
+        Our goal in this study is to learn what strategies would be helpful for real users and how GAM Coach can help everyday people.
+      </span>
+    </p>
+
+    <h2>Instruction</h2>
+
+    <p>
+      There are five steps to complete this HIT:
+    </p>
+
+    <ol>
+      <li>Open this <a href="https://forms.gle/VFQtjKq8jHJ6AsUM6" target="_blank">
+        Google Survey</a> in a new browser tab. Finish section 1–3 (consent form and background survey) and skim through the questions in section 4 (task survey)</li>
+      <li>Learn how to use GAM Coach and what we want you to do by reading this <a href="https://gam-coach-xiaohk.vercel.app/#s-introduction" target="_blank">tutorial</a></li>
+      <li>Scroll top to <a href="" target="_blank">GAM Coach</a> and perform the tasks listed in the
+        <a href="https://gam-coach-xiaohk.vercel.app/#s-task" target="_blank">tutorial</a></li>
+      <li>Answer all questions in the <a href="https://forms.gle/VFQtjKq8jHJ6AsUM6" target="_blank">Google Survey</a> and submit the survey</li>
+      <li>Enter the verification code below and submit the task</li>
+    </ol>
+
+
+    <p>Tips: some survey questions might be easier to answer while you are using GAM Coach.</p>
+
+    <div class='verification'>
+      <h2>Verification Code <img class='emoji' src='https://i.imgur.com/CIovVkN.png'></h2>
+      <crowd-input name="verification" placeholder="e.g. 213666" />
+    </div>
+
+    <span class='ending'>Thank you again for helping us improve GAM Coach!
+      <img class='emoji' src='https://i.imgur.com/HBOCp4M.png'>
+      Have a good day!
+    </span>
+
+  </div>
+
+
+</crowd-form>

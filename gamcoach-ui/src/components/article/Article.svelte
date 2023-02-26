@@ -28,6 +28,10 @@
   import iconEditSVG from '../../img/icon-edit.svg';
   import iconGithub from '../../img/icon-github.svg';
   import iconVideo from '../../img/icon-youtube.svg';
+  import iconGT from '../../img/icon-gt.svg';
+  import iconMS from '../../img/icon-ms.svg';
+  import iconCopy from '../../img/icon-copy-box.svg';
+  import iconCheckBox from '../../img/icon-check-box.svg';
   import iconPdf from '../../img/icon-pdf.svg';
 
   import text from '../../config/article-text.yml';
@@ -45,6 +49,9 @@
 
   let curSamples = samplesLC;
   let curIndex = 126;
+
+  let bibtexCopied = false;
+  let bibtexHovering = false;
 
   const datasetOptions = [
     { name: 'lc', display: 'Lending Club' },
@@ -345,14 +352,14 @@
 
     <div class="coach-right">
       <div class="icon-container">
-        <a target="_blank" href="https://github.com/anonchi/gam-coach/">
+        <a target="_blank" href="https://github.com/xiaohk/gam-coach/">
           <div class="svg-icon" title="Open-source code">
             {@html iconGithub}
           </div>
           <span>Code</span>
         </a>
 
-        <a target="_blank" href="https://youtu.be/Z2vdqZFKNeg">
+        <a target="_blank" href="https://youtu.be/ubacP34H9XE">
           <div class="svg-icon" title="Demo video">
             {@html iconVideo}
           </div>
@@ -650,7 +657,7 @@
 
     <div class="youtube-video">
       <Youtube
-        videoId="Z2vdqZFKNeg"
+        videoId="ubacP34H9XE"
         playerId="demo_video"
         bind:this={currentPlayer}
       />
@@ -661,13 +668,92 @@
     {#each text.development as p}
       <p>{@html p}</p>
     {/each}
+
+    <h2 id="team">Who Developed <span class="teal">GAM Coach</span>?</h2>
+    <p>{@html text.team}</p>
+
+    <h2 id="contribute">How Can I Contribute?</h2>
+    <p>{@html text.contribute[0]}</p>
+    <p>{@html text.contribute[1]}</p>
+
+    <h2 id="cite">How to learn more?</h2>
+
+    <p>{@html text.cite.intro}</p>
+
+    <div class="paper-info">
+      <div class="left">
+        <a target="_blank" href={text.cite.paperLink}
+          ><img src="PUBLIC_URL/imgs/paper-preview.jpeg" /></a
+        >
+      </div>
+      <div class="right">
+        <a target="_blank" href={text.cite.paperLink}
+          ><span class="paper-title">{text.cite.title}</span></a
+        >
+        <a target="_blank" href={text.cite.venueLink}
+          ><span class="paper-venue">{text.cite.venue}</span></a
+        >
+        <div class="paper-authors">
+          {#each text.cite.authors as author, i}
+            <a href={author.url} target="_blank"
+              >{author.name}{i === text.cite.authors.length - 1 ? '' : ','}</a
+            >
+          {/each}
+        </div>
+      </div>
+    </div>
+    <div
+      class="bibtex-block"
+      on:mouseenter={() => {
+        bibtexHovering = true;
+      }}
+      on:mouseleave={() => {
+        bibtexHovering = false;
+      }}
+    >
+      <div class="bibtex">
+        {@html text.cite['bibtex']}
+      </div>
+
+      <div
+        class="copy-button"
+        class:hide={!bibtexHovering}
+        on:click={() => {
+          navigator.clipboard.writeText(text.cite['bibtex']).then(() => {
+            bibtexCopied = true;
+          });
+        }}
+        on:mouseleave={() => {
+          setTimeout(() => {
+            bibtexCopied = false;
+          }, 500);
+        }}
+      >
+        {#if bibtexCopied}
+          <span class="svg-icon check">{@html iconCheckBox}</span>
+          <span class="copy-label check">Copied!</span>
+        {:else}
+          <span class="svg-icon copy">{@html iconCopy}</span>
+          <span class="copy-label copy">Copy</span>
+        {/if}
+      </div>
+    </div>
   </div>
 
   <div class="article-footer">
     <div class="footer-main">
-      <div class="footer-cp">
-        <div>CHI'23 Submission</div>
-        <div>Thanks for reviewing the manuscript!</div>
+      <div class="footer-logo">
+        <a target="_blank" href="https://www.gatech.edu/">
+          <div class="svg-icon icon-gt" title="Georgia Tech">
+            {@html iconGT}
+          </div>
+        </a>
+
+        <a target="_blank" href="https://www.microsoft.com/en-us/research/">
+          <div class="svg-icon icon-ms" title="Microsoft Research">
+            {@html iconMS}
+          </div>
+        </a>
       </div>
     </div>
   </div>

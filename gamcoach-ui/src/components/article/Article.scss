@@ -319,7 +319,16 @@
 .footer-logo {
   display: flex;
   margin-right: 30px;
-  gap: 30px;
+  gap: 80px;
+
+  .svg-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    :global(svg) {
+      height: 45px;
+    }
+  }
 }
 
 .no-display {

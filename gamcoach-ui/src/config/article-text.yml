@@ -213,3 +213,59 @@ table:
     algorithmic recourse literature. We evaluate GAM Coach through an online
     user study on the LendingClub dataset, as it is the largest dataset used in
     recourse literature and is most relatable to our US-based participants.
+
+team: >
+  GAM Coach is a result of a collaboration between ML and visualization
+  researchers from Georgia Tech and Microsoft Research. GAM Coach is created by
+  <a href='https://zijie.wang/' target='_blank'>Jay Wang</a>, <a
+  href='https://www.jennwv.com' target='_blank'>Jenn Wortman Vaughan</a>, <a
+  href='https://www.microsoft.com/en-us/research/people/rcaruana/'
+  target='_blank'>Rich Caruana</a>, and <a href='' target='_blank'>Polo
+  Chau</a>.
+
+contribute:
+  - >
+    If you have any questions or feedback, feel free to <a
+    href='https://github.com/poloclub/gam-coach/issues' target='_blank'>open an
+    issue</a> or contact <a href='https://zijie.wang/' target='_blank'>Jay
+    Wang</a>.
+  - >
+    We’d love to hear your experience with GAM Coach! If you’d like to
+    share (e.g., what is your typical workflow to use GAM Coach, what
+    features of GAM Coach you find most helpful), please reach out to us.
+    GAM Coach is an open-source project, and we welcome <a
+    href='https://github.com/poloclub/gam-coach/pulls' target='_blank'>pull
+    requests</a> for new feature implementations and bug fixes, etc.
+
+cite:
+  intro: >
+    To learn more about GAM Coach, please read our <a
+    href='https://arxiv.org/abs/2209.09227' target='_blank'>research paper</a>
+    (published at <a href='https://chi2023.acm.org'
+    target='_blank'>CHI '23</a>). If you find TimberTrek useful for your research,
+    please consider citing our paper. Thanks!
+  bibtex: >
+    @inproceedings{wangGAMCoachInteractive2023,
+      title = {{{GAM Coach}}: {{Towards Interactive}} and {{User-centered Algorithmic Recourse}}},
+      booktitle = {{{CHI Conference}} on {{Human Factors}} in {{Computing Systems}}},
+      author = {Wang, Zijie J. and Vaughan, Jennifer Wortman and Caruana, Rich and Chau, Duen Horng},
+      year = {2023},
+      doi = {10.1145/3544548.3580816},
+    }
+  title: >
+    GAM Coach: Towards Interactive and User-centered Algorithmic Recourse
+  paperLink: >
+    https://arxiv.org/abs/2209.09227
+  venue: >
+    ACM CHI Conference on Human Factors in Computing Systems 2023
+  venueLink: >
+    https://chi2023.acm.org
+  authors:
+    - name: Zijie J. Wang
+      url: 'https://zijie.wang/'
+    - name: Jenn Wortman Vaughan
+      url: 'https://www.jennwv.com'
+    - name: Rich Caruana
+      url: 'https://www.microsoft.com/en-us/research/people/rcaruana/'
+    - name: Polo Chau
+      url: 'https://www.cc.gatech.edu/~dchau'

@@ -1,5 +1,5 @@
-@import '../../define';
 @use 'sass:math';
+@import '../../define';
 
 $range-thumb-width: 8px;
 $base-circle-radius: 5px;
@@ -391,8 +391,8 @@ $card-h-padding: 16px;
       // Center the background circle
       left: 50%;
       top: 50%;
-      margin-top: -($base-circle-radius / 2);
-      margin-left: -($base-circle-radius / 2);
+      margin-top: calc($base-circle-radius / -2);
+      margin-left: calc($base-circle-radius / -2);
       -webkit-backface-visibility: hidden;
       -webkit-transform: translateZ(0);
       transform: scale(0.1);

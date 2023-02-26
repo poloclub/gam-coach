@@ -3,7 +3,7 @@
 An interactive tool to help everyday users discover actionable strategies to obtain desired AI decisions.
 
 [![build](https://github.com/poloclub/gam-coach/workflows/build/badge.svg)](https://github.com/poloclub/gam-coach/actions)
-[![license](https://img.shields.io/pypi/l/gamcoach?color=blue)](https://github.com/poloclub/gam-coach/blob/master/LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-blue)](https://github.com/poloclub/gam-coach/blob/master/LICENSE)
 ![npm](https://img.shields.io/npm/v/gamcoach)
 [![pypi](https://img.shields.io/pypi/v/gamcoach?color=blue)](https://pypi.python.org/pypi/gamcoach)
 

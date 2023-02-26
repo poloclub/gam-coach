@@ -1,5 +1,5 @@
-@import '../../define';
 @use 'sass:math';
+@import '../../define';
 
 $range-thumb-width: 8px;
 $base-circle-radius: 5px;
@@ -19,7 +19,7 @@ $card-h-padding: 16px;
 
   &::after,
   &::before {
-    content: "";
+    content: '';
     display: block;
     box-sizing: border-box;
     position: absolute;

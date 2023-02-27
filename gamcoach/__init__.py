@@ -58,6 +58,7 @@ cfs = my_coach.generate_cfs(
                       'fico_score'],
     # Some continuous features need to have integer values in practice
     continuous_integer_features=['open_acc', 'total_acc', 'mort_acc', 'fico_score']
+)
 ```
 
 Read the documentation of `gamcoach.gamcoach.GAMCoach.generate_cfs` to learn how to set up constraints for the CFs. These constraints include the difficulty of changing a feature, the acceptable range of a feature, and the total number of features that a CF can change.
@@ -66,9 +67,9 @@ Read the documentation of `gamcoach.gamcoach.GAMCoach.generate_cfs` to learn how
 
 <img width="100%" src="https://camo.githubusercontent.com/4ff93ffb5052a590d0c51a94f0df95ddf89098e75d7c560094ca9bf8870432bf/68747470733a2f2f692e696d6775722e636f6d2f794f6d45427a362e706e67">
 
-GAM Coach also provides an easy-to-use interface that empowers end-users to easily specify their preferences and interactively fine-tune recourse plans. You can try out the GAM Coach UI on [the public demo website](https://aneurips.github.io/gam-coach/), or watch [a demo video](https://youtu.be/EEi74BQg3qo).
+GAM Coach also provides an easy-to-use interface that empowers end-users to easily specify their preferences and interactively fine-tune recourse plans. You can try out the GAM Coach UI on [the public demo website](https://poloclub.github.io/gam-coach/), or watch [a demo video](https://youtu.be/ubacP34H9XE).
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/EEi74BQg3qo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ubacP34H9XE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 Steps to use GAM Coach UI on your own EBM model:
 
@@ -108,12 +109,12 @@ The GAM Coach UI uses [Svelte framework](https://svelte.dev), where each view (e
 
 Sorry for overloading the word "model"! In the MVC architecture, the `Model` means the underlying data logic of a software. In GAM Coach, the `Model` is the ML model and its recourse generation algorithm. Therefore, to use a different ML model, you need to replace our `Model` with your new ML model inference and its recourse generation algorithm.
 
-1. The ML model is at [`ebm.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) and [`ebmLocal.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js).
-    1. [`ebm.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) implements the EBM inference in JavsScript.
-    2. [`ebmLocal.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js) extends the [`ebm.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) object to store a data sample where the users want to generate CFs
-1. The recourse generation algorithm is at [`gamcoach.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/ebm/gamcoach.js).
+1. The ML model is at [`ebm.js`](https://github.com/poloclub/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) and [`ebmLocal.js`](https://github.com/poloclub/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js).
+    1. [`ebm.js`](https://github.com/poloclub/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) implements the EBM inference in JavsScript.
+    2. [`ebmLocal.js`](https://github.com/poloclub/gam-coach/blob/master/gamcoach-ui/src/ebm/ebmLocal.js) extends the [`ebm.js`](https://github.com/poloclub/gam-coach/blob/master/gamcoach-ui/src/ebm/ebm.js) object to store a data sample where the users want to generate CFs
+1. The recourse generation algorithm is at [`gamcoach.js`](https://github.com/poloclub/gam-coach/blob/master/gamcoach-ui/src/ebm/gamcoach.js).
 
-We made the extra effort to create a lightweight [demo website](https://aneurips.github.io/gam-coach) for GAM Coach, which is serverless and runs entirely in the client’s browser. To do that, we **re-implemented** the GAM inference and integer programming optimization using JavaScript and [WebAssembly](https://webassembly.org). In contrast, to implement your own `Model`, you can replace our GAM and integer programming code with a backend server that directly calls your ML models and recourse algorithms in your favorite languages and packages (e.g., Python, R, C++, Scikit-learn).
+We made the extra effort to create a lightweight [demo website](https://poloclub.github.io/gam-coach) for GAM Coach, which is serverless and runs entirely in the client’s browser. To do that, we **re-implemented** the GAM inference and integer programming optimization using JavaScript and [WebAssembly](https://webassembly.org). In contrast, to implement your own `Model`, you can replace our GAM and integer programming code with a backend server that directly calls your ML models and recourse algorithms in your favorite languages and packages (e.g., Python, R, C++, Scikit-learn).
 
 
 ### Reconfigure the Controller
@@ -131,7 +132,7 @@ In the MVC architecture, the `Controller` functions as a communicator between th
    5. `Controller` passes the results to `View` asks `View` to render them
    6. `View` visualizes the new results
 
-Therefore, once you have updated your `Model`, you need to update a few lines in `Controller` to hook up the communication between `Controller` and the new `Model`. The `Controller` code is at [`Coach.js`](https://github.com/aneurips/gam-coach/blob/master/gamcoach-ui/src/components/coach/Coach.js). In this file, you only need to make 8 lines of changes:
+Therefore, once you have updated your `Model`, you need to update a few lines in `Controller` to hook up the communication between `Controller` and the new `Model`. The `Controller` code is at [`Coach.js`](https://github.com/poloclub/gam-coach/blob/master/gamcoach-ui/src/components/coach/Coach.js). In this file, you only need to make 8 lines of changes:
 
 1. Replace `EBM` and `EBMLocal` with your new ML model (2 lines)
 2. Replace `GAMCoach` with your new recourse generation algorithm (1 line)

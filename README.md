@@ -1,4 +1,4 @@
-# GAM Coach <a href="https://poloclub.github.io/gamcoach/"><img align="right" src="gamcoach-ui/src/img/icon-gamcoach.svg" height="35"></img></a>
+# GAM Coach <a href="https://poloclub.github.io/gam-coach/"><img align="right" src="gamcoach-ui/src/img/icon-gamcoach.svg" height="35"></img></a>
 
 An interactive tool to help everyday users discover actionable strategies to obtain desired AI decisions.
 
@@ -10,7 +10,7 @@ An interactive tool to help everyday users discover actionable strategies to obt
 
 <table>
   <tr>
-    <td colspan="4"><a href="https://poloclub.github.io/gamcoach"><img src='https://i.imgur.com/yOmEBz6.png'></a></td>
+    <td colspan="4"><a href="https://poloclub.github.io/gam-coach"><img src='https://i.imgur.com/yOmEBz6.png'></a></td>
   </tr>
   <tr></tr>
   <tr>
@@ -20,6 +20,13 @@ An interactive tool to help everyday users discover actionable strategies to obt
     <!-- <td><a href="https://arxiv.org/abs/2209.09227">📖 Research Paper</a></td> -->
   </tr>
 </table>
+
+## What is GAM Coach?
+
+GAM Coach is an interactive tool that helps **everyday users** *understand* and *alter* machine learning models' decisions.
+It shows users diverse ways to change their input data so that they can get a different output from the model, and it allows users to customize these suggestions through a few clicks!
+For example, if a user wants to get approved for a loan, GAM Coach may suggest they increase their credit score.
+If the user finds it difficult to increase their credit score, GAM Coach will search for alternative strategies, such as lowering the loan amount.
 
 ## Live Demo
 
@@ -53,7 +60,32 @@ Navigate to [localhost:5005](https://localhost:5005). You should see GAM Coach r
 
 ## Use the Python Library
 
-You can also use GAM Coach as a Python library to generate customizable counterfactual examples for generalized additive models (GAMs). For a tutorial and examples, read the [documentation](https://anonchi.github.io/gam-coach/docs/gamcoach).
+You can also use GAM Coach as a Python library to generate customizable counterfactual examples for generalized additive models (GAMs). You can install GAM Coach through `pip`.
+
+Then, you only need one function call to generate customizable counterfactual examples for your GAM models!
+
+```python
+import gamcoach as coach
+
+# First create a GAM Coach object
+# It requires to provide the training data, so it can generate better CFs based
+# on the data distribution
+my_coach = coach.GAMCoach(ebm, x_train)
+
+cfs = my_coach.generate_cfs(
+    cur_example,
+    total_cfs=3,
+    # List of features that the CFs can change
+    features_to_vary=['loan_amnt', 'term', 'emp_length', 'home_ownership',
+                      'annual_inc', 'purpose', 'dti', 'open_acc', 'revol_bal',
+                      'revol_util', 'total_acc', 'application_type', 'mort_acc',
+                      'fico_score'],
+    # Some continuous features need to have integer values in practice
+    continuous_integer_features=['open_acc', 'total_acc', 'mort_acc', 'fico_score']
+)
+```
+
+For more details and examples, read our [documentation](https://anonchi.github.io/gam-coach/docs/gamcoach).
 
 ```bash
 pip install gamcoach
@@ -61,7 +93,7 @@ pip install gamcoach
 
 ## Set Up Your Own GAM Coach
 
-In the [demo page](https://poloclub.github.io/gam-coach), we provide five demos with the most commonly used datasets in the algorithmic recourse literature. You can easily set up a GAM Coach for your own GAM model (with only one function call). See the [documentation](https://poloclub.github.io/gam-coach/docs/gamcoach/gamcoach.html#get_model_data) for details.
+In the [demo page](https://poloclub.github.io/gam-coach), we provide five demos with the most commonly used datasets in the algorithmic recourse literature. You can easily set up a GAM Coach for your own GAM model (with only one function call). See this [documentation page](https://poloclub.github.io/gam-coach/docs/gamcoach/gamcoach.html#get_model_data) for details.
 
 ## Credits
 
@@ -70,7 +102,7 @@ GAM Coach is created by <a href='https://zijie.wang/' target='_blank'>Jay Wang</
 
 <!-- ## Citation
 
-To learn more about TimberTrek, please read our [research paper](https://arxiv.org/abs/2209.09227) (published at [CHI 2023](https://chi2023.acm.org)).
+To learn more about GAM Coach, please read our [research paper](https://arxiv.org/abs/2209.09227) (published at [CHI 2023](https://chi2023.acm.org)).
 
 ```bibTeX
 @inproceedings{wangTimberTrekExploringCurating2022,

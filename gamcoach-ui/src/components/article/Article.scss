@@ -306,27 +306,32 @@
   width: 100%;
   justify-content: center;
 }
+
 .footer-main {
   display: flex;
   max-width: 100ch;
   flex-direction: row;
 }
+
 .footer-cp {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .footer-logo {
   display: flex;
   margin-right: 30px;
-  gap: 80px;
+  gap: 70px;
 
   .svg-icon {
     display: flex;
     justify-content: center;
     align-items: center;
+
     :global(svg) {
       height: 45px;
+      width: 165px;
     }
   }
 }

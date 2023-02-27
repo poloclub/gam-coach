@@ -4,6 +4,7 @@ An interactive tool to help everyday users discover actionable strategies to obt
 
 [![build](https://github.com/poloclub/gam-coach/workflows/build/badge.svg)](https://github.com/poloclub/gam-coach/actions)
 [![license](https://img.shields.io/badge/license-MIT-blue)](https://github.com/poloclub/gam-coach/blob/master/LICENSE)
+[![doc](https://img.shields.io/badge/doc-available-yellow)](https://poloclub.github.io/gam-coach/docs/gamcoach)
 ![npm](https://img.shields.io/npm/v/gamcoach)
 [![pypi](https://img.shields.io/pypi/v/gamcoach?color=blue)](https://pypi.python.org/pypi/gamcoach)
 
@@ -85,7 +86,7 @@ cfs = my_coach.generate_cfs(
 )
 ```
 
-For more details and examples, read our [documentation](https://anonchi.github.io/gam-coach/docs/gamcoach).
+For more details and examples, read our [documentation](https://poloclub.github.io/gam-coach/docs/gamcoach).
 
 ```bash
 pip install gamcoach

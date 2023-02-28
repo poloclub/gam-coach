@@ -36,6 +36,6 @@ setup(
     name="gamcoach",
     packages=find_packages(include=["gamcoach", "gamcoach.*"]),
     url="https://github.com/xiaohk/gam-coach",
-    version="0.1.1",
+    version="0.1.2",
     zip_safe=False,
 )

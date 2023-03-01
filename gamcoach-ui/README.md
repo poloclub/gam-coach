@@ -1,12 +1,14 @@
-# GAM Coach <a href="https://poloclub.github.io/gam-coach/"><img align="right" src="gamcoach-ui/src/img/icon-gamcoach.svg" height="35"></img></a>
+# GAM Coach <a href="https://poloclub.github.io/gam-coach/"><img align="right" src="src/img/icon-gamcoach.svg" height="35"></img></a>
 
 An interactive tool to help everyday users discover actionable strategies to obtain desired AI decisions.
 
 [![build](https://github.com/poloclub/gam-coach/workflows/build/badge.svg)](https://github.com/poloclub/gam-coach/actions)
 [![license](https://img.shields.io/badge/license-MIT-blue)](https://github.com/poloclub/gam-coach/blob/master/LICENSE)
-[![doc](https://img.shields.io/badge/doc-available-yellow)](https://poloclub.github.io/gam-coach/docs/gamcoach)
+[![doc](https://img.shields.io/badge/doc-available-blue)](https://poloclub.github.io/gam-coach/docs/gamcoach)
 ![npm](https://img.shields.io/npm/v/gamcoach)
 [![pypi](https://img.shields.io/pypi/v/gamcoach?color=blue)](https://pypi.python.org/pypi/gamcoach)
+[![arxiv badge](https://img.shields.io/badge/arXiv-2302.14165-red)](https://arxiv.org/abs/2302.14165)
+<!-- [![DOI:10.1145/3491101.3519653](https://img.shields.io/badge/DOI-10.1145/3491101.3519653-blue)](https://doi.org/10.1145/3491101.3519653) -->
 
 <table>
   <tr>
@@ -17,7 +19,7 @@ An interactive tool to help everyday users discover actionable strategies to obt
     <td><a href="https://poloclub.github.io/timbertrek">🚀 Live Demo</a></td>
     <td><a href="https://youtu.be/ubacP34H9XE">📺 Demo Video</a></td>
     <!-- <td><a href="https://youtu.be/l1mr9z1TuAk">👨🏻‍🏫 Conference Talk</a></td> -->
-    <!-- <td><a href="https://arxiv.org/abs/2209.09227">📖 Research Paper</a></td> -->
+    <td><a href="https://arxiv.org/abs/2302.14165">📖 Research Paper</a></td>
   </tr>
 </table>
 
@@ -40,7 +42,7 @@ Clone or download this repository:
 git clone git@github.com:poloclub/gam-coach.git
 
 # use --depth if you don't want to download the whole commit history
-git clone --depth 1 poloclub/gam-coach.git
+git clone --depth 1 git@github.com:poloclub/gam-coach.git
 ```
 
 Install the dependencies:
@@ -100,18 +102,20 @@ In the [demo page](https://poloclub.github.io/gam-coach), we provide five demos 
 GAM Coach is a result of a collaboration between ML and visualization researchers from Georgia Tech and Microsoft Research.
 GAM Coach is created by <a href='https://zijie.wang/' target='_blank'>Jay Wang</a>, <a href='https://www.jennwv.com' target='_blank'>Jenn Wortman Vaughan</a>, <a href='https://www.microsoft.com/en-us/research/people/rcaruana/' target='_blank'>Rich Caruana</a>, and <a href='' target='_blank'>Polo Chau</a>.
 
-<!-- ## Citation
+## Citation
 
-To learn more about GAM Coach, please read our [research paper](https://arxiv.org/abs/2209.09227) (published at [CHI 2023](https://chi2023.acm.org)).
+To learn more about GAM Coach, please read our [research paper](https://arxiv.org/abs/2302.14165) (published at [CHI 2023](https://chi2023.acm.org)).
 
 ```bibTeX
-@inproceedings{wangTimberTrekExploringCurating2022,
-  title = {{{TimberTrek}}: {{Exploring}} and {{Curating Trustworthy Decision Trees}} with {{Interactive Visualization}}},
-  booktitle = {2022 {{IEEE Visualization Conference}} ({{VIS}})},
-  author = {Wang, Zijie J. and Zhong, Chudi and Xin, Rui and Takagi, Takuya and Chen, Zhi and Chau, Duen Horng and Rudin, Cynthia and Seltzer, Margo},
-  year = {2022}
+@article{wangGAMCoachInteractive2023,
+  title = {{{GAM Coach}}: {{Towards Interactive}} and {{User-centered Algorithmic Recourse}}},
+  year = {2023},
+  doi = {10.1145/3544548.3580816}
+  journal = {arXiv:2302.14165},
+  url = {https://arxiv.org/abs/2302.14165},
+  archiveprefix = {arXiv}
 }
-``` -->
+```
 
 ## License
 

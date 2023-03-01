@@ -365,6 +365,13 @@
           </div>
           <span>Video</span>
         </a>
+
+        <a target="_blank" href="https://arxiv.org/abs/2302.14165">
+          <div class="svg-icon" title="Research paper">
+            {@html iconPdf}
+          </div>
+          <span>Paper</span>
+        </a>
       </div>
       <div class="dataset-menu">
         <span class="dataset-description">Choose a dataset</span>

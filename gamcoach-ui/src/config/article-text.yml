@@ -240,7 +240,7 @@ contribute:
 cite:
   intro: >
     To learn more about GAM Coach, please read our <a
-    href='https://arxiv.org/abs/2209.09227' target='_blank'>research paper</a>
+    href='https://arxiv.org/abs/2302.14165' target='_blank'>research paper</a>
     (published at <a href='https://chi2023.acm.org'
     target='_blank'>CHI '23</a>). If you find TimberTrek useful for your research,
     please consider citing our paper. Thanks!
@@ -255,7 +255,7 @@ cite:
   title: >
     GAM Coach: Towards Interactive and User-centered Algorithmic Recourse
   paperLink: >
-    https://arxiv.org/abs/2209.09227
+    https://arxiv.org/abs/2302.14165
   venue: >
     ACM CHI Conference on Human Factors in Computing Systems 2023
   venueLink: >

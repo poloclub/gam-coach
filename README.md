@@ -26,7 +26,7 @@ An interactive tool to help everyday users discover actionable strategies to obt
 
 ## What is GAM Coach?
 
-GAM Coach is an interactive tool that helps **everyday users** *understand* and *alter* machine learning models' decisions.
+GAM Coach is an interactive tool that helps *everyday users* **understand** and **alter** machine learning models' decisions.
 It shows users diverse ways to change their input data so that they can get a different output from the model, and it allows users to customize these suggestions through a few clicks!
 For example, if a user wants to get approved for a loan, GAM Coach may suggest they increase their credit score.
 If the user finds it difficult to increase their credit score, GAM Coach will search for alternative strategies, such as lowering the loan amount.

@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-requirements = ["interpret==0.2.7", "interpret-core==0.2.7", "pulp"]
+requirements = ["interpret>=0.3.0", "interpret-core>=0.3.0", "pulp"]
 
 test_requirements = [
     "pytest>=3",

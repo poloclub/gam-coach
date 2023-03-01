@@ -5,9 +5,9 @@ explanations for generalized additive models (GAMs).
 """
 
 import numpy as np
-import pandas as pd
 import re
 import pulp
+from copy import copy
 from tqdm import tqdm
 from scipy.stats import gaussian_kde
 from interpret.glassbox import (
@@ -36,8 +36,10 @@ class GAMCoach:
         """Initialize a GAMCoach object.
 
         Args:
-            ebm (Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor]):
-                The trained EBM model. It can be either a classifier or a regressor.
+            ebm (Union[ExplainableBoostingClassifier,
+            ExplainableBoostingRegressor]):
+                The trained EBM model. It can be either a classifier or a
+                regressor.
             x_train (np.ndarray): The training data. It is used to compute the
                 distance for different features.
             cont_mads (dict, optional): `feature_name` -> `median absolute
@@ -45,15 +47,15 @@ class GAMCoach:
                 computed MADs for continuous variables. It is useful when you
                 want to provide a custom normalization function to compute the
                 distance between continuous features.
-            cat_distances (dict, optional): `feature_name` -> {`level_name` -> `distance`}.
-                Level distance of categorical variables. By default, the distance
-                is computed by (1 - frequency(level)) for each level. It imples
-                that it is easier to move to a more frequent. If `cat_distances`
-                is provided, it will overwrite the default distance for
-                categorical variables.
+            cat_distances (dict, optional): `feature_name` -> {`level_name` ->
+                `distance`}. Level distance of categorical variables. By
+                default, the distance is computed by (1 - frequency(level)) for
+                each level. It imples that it is easier to move to a more
+                frequent. If `cat_distances` is provided, it will overwrite the
+                default distance for categorical variables.
             adjust_cat_distance (bool, optional): If true, we use (1 -
-                frequency(level)) for each level. Otherwise, we give distance = 1
-                for different levels and 0 for the same level.
+                frequency(level)) for each level. Otherwise, we give distance =
+                1 for different levels and 0 for the same level.
         """
 
         self.ebm: Union[
@@ -73,6 +75,32 @@ class GAMCoach:
         frequent level.
         """
 
+        # Create feature_names in interpret v0.2.7 format
+        feature_names = copy(self.ebm.feature_names_in_)
+        for g in self.ebm.term_features_:
+            if len(g) == 2:
+                name_1 = self.ebm.feature_names_in_[g[0]]
+                name_2 = self.ebm.feature_names_in_[g[1]]
+                feature_names.append(f"{name_1} x {name_2}")
+        self.feature_names = feature_names
+
+        # Create feature_types in interpret v0.2.7 format
+        feature_types = []
+        for t in ebm.feature_types_in_:
+            if t == "continuous":
+                feature_types.append("continuous")
+            elif t == "nominal":
+                feature_types.append("categorical")
+            else:
+                raise Exception(f"Unsupported feature type {t}")
+
+        for g in ebm.term_features_:
+            if len(g) == 2:
+                feature_types.append("interaction")
+        self.feature_types = feature_types
+
+        self.feature_groups = copy(self.ebm.term_features_)
+
         self.adjust_cat_distance: bool = adjust_cat_distance
 
         # If cont_mads is not given, we compute it from the training data
@@ -80,15 +108,15 @@ class GAMCoach:
             ebm_cont_indexes = np.array(
                 [
                     i
-                    for i in range(len(self.ebm.feature_names))
-                    if self.ebm.feature_types[i] == "continuous"
+                    for i in range(len(self.ebm.feature_names_in_))
+                    if self.ebm.feature_types_in_[i] == "continuous"
                 ]
             )
 
             self.cont_mads = {}
 
             for i in ebm_cont_indexes:
-                self.cont_mads[ebm.feature_names[i]] = self.compute_mad(
+                self.cont_mads[ebm.feature_names_in_[i]] = self.compute_mad(
                     self.x_train[:, i]
                 )
 
@@ -97,8 +125,8 @@ class GAMCoach:
             ebm_cat_indexes = np.array(
                 [
                     i
-                    for i in range(len(self.ebm.feature_names))
-                    if self.ebm.feature_types[i] == "categorical"
+                    for i in range(len(self.ebm.feature_names_in_))
+                    if self.ebm.feature_types_in_[i] == "nominal"
                 ]
             )
 
@@ -107,12 +135,12 @@ class GAMCoach:
             if self.adjust_cat_distance:
                 for i in ebm_cat_indexes:
                     self.cat_distances[
-                        self.ebm.feature_names[i]
+                        self.ebm.feature_names_in_[i]
                     ] = GAMCoach.compute_frequency_distance(self.x_train[:, i])
             else:
                 for i in ebm_cat_indexes:
                     self.cat_distances[
-                        self.ebm.feature_names[i]
+                        self.ebm.feature_names_in_[i]
                     ] = GAMCoach.compute_naive_cat_distance(self.x_train[:, i])
 
         # Determine if the ebm is a classifier or a regressor
@@ -191,9 +219,9 @@ class GAMCoach:
 
         if features_to_vary is None:
             features_to_vary = [
-                self.ebm.feature_names[i]
-                for i in range(len(self.ebm.feature_types))
-                if self.ebm.feature_types[i] != "interaction"
+                self.ebm.feature_names_in_[i]
+                for i in range(len(self.ebm.feature_types_in_))
+                if self.ebm.feature_types_in_[i] != "interaction"
             ]
 
         # Step 1: Find the current score for each feature
@@ -207,10 +235,9 @@ class GAMCoach:
 
         local_data = self.ebm.explain_local(cur_example)._internal_obj
 
-        for i in range(len(self.ebm.feature_names)):
-            cur_feature_name = self.ebm.feature_names[i]
-            cur_feature_type = self.ebm.feature_types[i]
-
+        for i in range(len(self.feature_names)):
+            cur_feature_name = self.feature_names[i]
+            cur_feature_type = self.feature_types[i]
             cur_scores[cur_feature_name] = local_data["specific"][0]["scores"][i]
 
         # Find the CF direction
@@ -256,9 +283,9 @@ class GAMCoach:
         if sim_threshold is None:
             additive_ranges = []
 
-            for i in range(len(self.ebm.feature_names)):
-                if self.ebm.feature_types[i] == "continuous":
-                    cur_values = self.ebm.additive_terms_[i]
+            for i in range(len(self.feature_names)):
+                if self.feature_types[i] == "continuous":
+                    cur_values = self.ebm.term_scores_[i][:-1]
                     additive_ranges.append(np.max(cur_values) - np.min(cur_values))
 
             sim_threshold = np.mean(additive_ranges) * sim_threshold_factor
@@ -277,11 +304,11 @@ class GAMCoach:
         # should be relatively small, otherwise we might miss the optimal solution.
 
         # Step 2.1: Find all good options from continuous and categorical features
-        for cur_feature_id in range(len(self.ebm.feature_names)):
+        for cur_feature_id in range(len(self.feature_names)):
 
-            cur_feature_name = self.ebm.feature_names[cur_feature_id]
-            cur_feature_type = self.ebm.feature_types[cur_feature_id]
-            cur_feature_index = self.ebm.feature_groups_[cur_feature_id][0]
+            cur_feature_name = self.feature_names[cur_feature_id]
+            cur_feature_type = self.feature_types[cur_feature_id]
+            cur_feature_index = self.feature_groups[cur_feature_id][0]
 
             if cur_feature_type == "interaction":
                 continue
@@ -339,8 +366,8 @@ class GAMCoach:
         if feature_ranges is not None:
             for f_name in feature_ranges:
                 cur_range = feature_ranges[f_name]
-                f_index = self.ebm.feature_names.index(f_name)
-                f_type = self.ebm.feature_types[f_index]
+                f_index = self.feature_names.index(f_name)
+                f_type = self.feature_types[f_index]
 
                 if f_type == "continuous":
                     # Delete options that use out-of-range options
@@ -354,15 +381,15 @@ class GAMCoach:
                             options[f_name].pop(o)
 
         # Step 2.3: Compute the interaction offsets for all possible options
-        for cur_feature_id in range(len(self.ebm.feature_names)):
+        for cur_feature_id in range(len(self.feature_names)):
 
-            cur_feature_name = self.ebm.feature_names[cur_feature_id]
-            cur_feature_type = self.ebm.feature_types[cur_feature_id]
+            cur_feature_name = self.feature_names[cur_feature_id]
+            cur_feature_type = self.feature_types[cur_feature_id]
 
             if cur_feature_type == "interaction":
 
-                cur_feature_index_1 = self.ebm.feature_groups_[cur_feature_id][0]
-                cur_feature_index_2 = self.ebm.feature_groups_[cur_feature_id][1]
+                cur_feature_index_1 = self.feature_groups[cur_feature_id][0]
+                cur_feature_index_2 = self.feature_groups[cur_feature_id][1]
 
                 cur_feature_score = cur_scores[cur_feature_name]
                 options[cur_feature_name] = self.generate_inter_options(
@@ -380,8 +407,8 @@ class GAMCoach:
             cat_distances = []
 
             for f_name in options:
-                f_index = self.ebm.feature_names.index(f_name)
-                f_type = self.ebm.feature_types[f_index]
+                f_index = self.feature_names.index(f_name)
+                f_type = self.feature_types[f_index]
 
                 if f_type == "continuous":
                     for option in options[f_name]:
@@ -393,8 +420,8 @@ class GAMCoach:
             categorical_weight = np.mean(cont_distances) / np.mean(cat_distances)
 
         for f_name in options:
-            f_index = self.ebm.feature_names.index(f_name)
-            f_type = self.ebm.feature_types[f_index]
+            f_index = self.feature_names.index(f_name)
+            f_type = self.feature_types[f_index]
 
             if f_type == "categorical":
                 for option in options[f_name]:
@@ -405,7 +432,6 @@ class GAMCoach:
         # Find diverse solutions by accumulatively muting the optimal solutions
         solutions = []
         muted_variables = []
-        is_successful = True
 
         for _ in tqdm(range(total_cfs), disable=verbose == 0):
             model, variables = self.create_milp(
@@ -417,10 +443,10 @@ class GAMCoach:
                 muted_variables=muted_variables,
             )
 
-            model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose > 0, warmStart=True))
+            model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose > 1, warmStart=False))
 
             if model.status != 1:
-                is_successful = False
+                continue
 
             if verbose == 2:
                 print("solver runs for {:.2f} seconds".format(model.solutionTime))
@@ -446,7 +472,7 @@ class GAMCoach:
                     muted_variables.append(var.name)
 
         cfs = Counterfactuals(
-            solutions, is_successful, model, variables, self.ebm, cur_example, options
+            solutions, model, variables, self.ebm, cur_example, options
         )
 
         return cfs
@@ -508,10 +534,10 @@ class GAMCoach:
         # (2) distance is L1 distance divided by median absolute deviation (MAD)
 
         # Get the additive scores of this feature
-        additives = self.ebm.additive_terms_[cur_feature_index][1:]
+        additives = self.ebm.term_scores_[cur_feature_index][1:-1]
 
         # Get the bin edges of this feature
-        bin_starts = self.ebm.preprocessor_._get_bin_labels(cur_feature_index)[:-1]
+        bin_starts = _get_main_bin_labels(self.ebm, cur_feature_index)[:-1]
 
         # Create "options", each option is a tuple (target, score_gain, distance,
         # bin_index)
@@ -524,30 +550,28 @@ class GAMCoach:
         # Identify interaction terms that we need to consider
         associated_interactions = []
 
-        for cur_feature_id in range(len(self.ebm.feature_names)):
-            cur_feature_type = self.ebm.feature_types[cur_feature_id]
+        for cur_feature_id in range(len(self.feature_names)):
+            cur_feature_type = self.feature_types[cur_feature_id]
             if cur_feature_type == "interaction":
 
-                indexes = self.ebm.feature_groups_[cur_feature_id]
+                indexes = self.feature_groups[cur_feature_id]
 
                 if cur_feature_index in indexes:
                     feature_position = 0 if indexes[0] == cur_feature_index else 1
 
                     other_position = 1 - feature_position
                     other_index = indexes[other_position]
-                    other_type = self.ebm.feature_types[other_index]
+                    other_type = self.feature_types[other_index]
 
                     # Get the current additive scores and bin edges
-                    inter_additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
+                    inter_additives = self.ebm.term_scores_[cur_feature_id][1:-1, 1:-1]
 
                     # Have to skip the max edge if it is continuous
-                    bin_starts_feature = self.ebm.pair_preprocessor_._get_bin_labels(
-                        cur_feature_index
+                    bin_starts_feature = _get_pair_bin_labels(
+                        self.ebm, cur_feature_index
                     )[:-1]
 
-                    bin_starts_other = self.ebm.pair_preprocessor_._get_bin_labels(
-                        other_index
-                    )
+                    bin_starts_other = _get_pair_bin_labels(self.ebm, other_index)
                     if other_type == "continuous":
                         bin_starts_other = bin_starts_other[:-1]
 
@@ -648,7 +672,8 @@ class GAMCoach:
                     target = bin_starts[i]
                     distance = np.abs(target - cur_feature_value)
 
-            # Scale the distance based on the deviation of the feature (how changeable it is)
+            # Scale the distance based on the deviation of the feature (how
+            # changeable it is)
             if cont_mads[cur_feature_name] > 0:
                 distance /= cont_mads[cur_feature_name]
 
@@ -696,7 +721,8 @@ class GAMCoach:
             cont_options.append([target, score_gain, distance, i, inter_score_gains])
 
         # Now we can apply the second round of filtering to remove redundant options
-        # Redundant options refer to bins that give similar score gain with larger distance
+        # Redundant options refer to bins that give similar score gain with larger
+        # distance
         cont_options = sorted(cont_options, key=lambda x: x[2])
 
         start = 0
@@ -756,40 +782,38 @@ class GAMCoach:
         # to "move to"
 
         # Get the additive scores of this feature
-        additives = self.ebm.additive_terms_[cur_feature_index][1:]
+        additives = self.ebm.term_scores_[cur_feature_index][1:-1]
 
         # Get the bin edges of this feature
-        levels = self.ebm.preprocessor_._get_bin_labels(cur_feature_index)
+        levels = _get_main_bin_labels(self.ebm, cur_feature_index)
 
-        # Create "options", each option is a tuple (target, score_gain, distance, bin_index)
+        # Create "options", each option is a tuple (target, score_gain,
+        # distance, bin_index)
         cat_options = []
 
         # Identify interaction terms that we need to consider
         associated_interactions = []
 
-        for cur_feature_id in range(len(self.ebm.feature_names)):
-            cur_feature_type = self.ebm.feature_types[cur_feature_id]
+        for cur_feature_id in range(len(self.feature_names)):
+            cur_feature_type = self.feature_types[cur_feature_id]
             if cur_feature_type == "interaction":
 
-                indexes = self.ebm.feature_groups_[cur_feature_id]
+                indexes = self.feature_groups[cur_feature_id]
 
                 if cur_feature_index in indexes:
                     feature_position = 0 if indexes[0] == cur_feature_index else 1
 
                     other_position = 1 - feature_position
                     other_index = indexes[other_position]
-                    other_type = self.ebm.feature_types[other_index]
-                    other_name = self.ebm.feature_names[other_index]
+                    other_type = self.feature_types[other_index]
 
                     # Get the current additive scores and bin edges
-                    inter_additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
+                    inter_additives = self.ebm.term_scores_[cur_feature_id][1:-1, 1:-1]
 
-                    bin_starts_feature = self.ebm.pair_preprocessor_._get_bin_labels(
-                        cur_feature_index
+                    bin_starts_feature = _get_pair_bin_labels(
+                        self.ebm, cur_feature_index
                     )
-                    bin_starts_other = self.ebm.pair_preprocessor_._get_bin_labels(
-                        other_index
-                    )
+                    bin_starts_other = _get_pair_bin_labels(self.ebm, other_index)
 
                     # Have to skip the max edge if it is continuous
                     if other_type == "continuous":
@@ -927,16 +951,16 @@ class GAMCoach:
         """
 
         # Get the sub-types for this interaction term
-        cur_feature_type_1 = self.ebm.feature_types[cur_feature_index_1]
-        cur_feature_type_2 = self.ebm.feature_types[cur_feature_index_2]
+        cur_feature_type_1 = self.feature_types[cur_feature_index_1]
+        cur_feature_type_2 = self.feature_types[cur_feature_index_2]
 
         # Get the sub-names for this interaction term
-        cur_feature_name_1 = self.ebm.feature_names[cur_feature_index_1]
-        cur_feature_name_2 = self.ebm.feature_names[cur_feature_index_2]
+        cur_feature_name_1 = self.feature_names[cur_feature_index_1]
+        cur_feature_name_2 = self.feature_names[cur_feature_index_2]
 
         # The first column and row are reserved for missing values (even with
         # categorical features)
-        additives = self.ebm.additive_terms_[cur_feature_id][1:, 1:]
+        additives = self.ebm.term_scores_[cur_feature_id][1:-1, 1:-1]
 
         # Four possibilities here: cont x cont, cont x cat, cat x cont, cat x cat.
         # Each has a different way to lookup the bin table.
@@ -947,12 +971,8 @@ class GAMCoach:
         for opt_1 in options[cur_feature_name_1]:
             for opt_2 in options[cur_feature_name_2]:
 
-                bin_starts_1 = self.ebm.pair_preprocessor_._get_bin_labels(
-                    cur_feature_index_1
-                )
-                bin_starts_2 = self.ebm.pair_preprocessor_._get_bin_labels(
-                    cur_feature_index_2
-                )
+                bin_starts_1 = _get_pair_bin_labels(self.ebm, cur_feature_index_1)
+                bin_starts_2 = _get_pair_bin_labels(self.ebm, cur_feature_index_2)
 
                 bin_1 = None
                 bin_2 = None
@@ -1116,8 +1136,8 @@ class GAMCoach:
                         )
                         z.setInitialValue(0)
 
-                        # Need to iterate through existing variables for f1 and f2 to find
-                        # the corresponding variables
+                        # Need to iterate through existing variables for f1 and f2
+                        # to find the corresponding variables
                         x_f1 = None
                         x_f2 = None
 
@@ -1181,14 +1201,14 @@ class GAMCoach:
                 bin_i = int(re.sub(r".+:(\d+)", r"\1", var.name))
 
                 # Find the original value
-                org_value = cur_example[0][self.ebm.feature_names.index(f_name)]
+                org_value = cur_example[0][self.feature_names.index(f_name)]
 
                 # Find the target bin
-                f_index = self.ebm.feature_names.index(f_name)
-                f_type = self.ebm.feature_types[f_index]
+                f_index = self.feature_names.index(f_name)
+                f_type = self.feature_types[f_index]
 
                 if f_type == "continuous":
-                    bin_starts = self.ebm.preprocessor_._get_bin_labels(f_index)[:-1]
+                    bin_starts = _get_main_bin_labels(self.ebm, f_index)[:-1]
 
                     target_bin = "[{},".format(bin_starts[bin_i])
 
@@ -1249,8 +1269,8 @@ class GAMCoach:
     @staticmethod
     def compute_frequency_distance(xs):
         """
-        For categorical variables, we compute 1 - frequency as their distance. It implies
-        that switching to a frequent value takes less effort.
+        For categorical variables, we compute 1 - frequency as their distance.
+        It implies that switching to a frequent value takes less effort.
 
         Args:
             xs (np.ndarray): A column of categorical values.
@@ -1362,9 +1382,9 @@ def _init_feature_descriptions(ebm, label_encoder):
     # Initialize the feature description dictionary
     feature_descriptions = {}
 
-    for i in range(len(ebm.feature_names)):
-        cur_name = ebm.feature_names[i]
-        cur_type = ebm.feature_types[i]
+    for i in range(len(ebm.feature_names_in_)):
+        cur_name = ebm.feature_names_in_[i]
+        cur_type = ebm.feature_types_in_[i]
 
         # Use the feature name as the default display name
         if cur_type == "continuous":
@@ -1375,7 +1395,7 @@ def _init_feature_descriptions(ebm, label_encoder):
 
         # For categorical features, we can also give display name and description
         # for different levels
-        elif cur_type == "categorical":
+        elif cur_type == "nominal":
 
             level_descriptions = {}
 
@@ -1401,12 +1421,12 @@ def _init_feature_configuration(ebm):
     # Initialize the feature configuration dictionary
     feature_configuration = {}
 
-    for i in range(len(ebm.feature_names)):
-        cur_name = ebm.feature_names[i]
-        cur_type = ebm.feature_types[i]
+    for i in range(len(ebm.feature_names_in_)):
+        cur_name = ebm.feature_names_in_[i]
+        cur_type = ebm.feature_types_in_[i]
 
         # Use the feature name as the default display name
-        if cur_type == "continuous" or cur_type == "categorical":
+        if cur_type == "continuous" or cur_type == "nominal":
             feature_configuration[cur_name] = {
                 "difficulty": 3,
                 "requiresInt": False,
@@ -1425,12 +1445,96 @@ def _get_kde_sample(xs, n_sample=200):
     """
     Compute kernel density estimation.
     """
-    kernel = gaussian_kde(xs.astype(float))
+    xs_float = xs.astype(float)
+    kernel = gaussian_kde(xs_float)
 
-    sample_x = np.linspace(np.min(xs), np.max(xs), n_sample)
+    sample_x = np.linspace(np.min(xs_float), np.max(xs_float), n_sample)
     sample_y = kernel(sample_x)
 
     return sample_x, sample_y
+
+
+def _get_feature_type(ebm, feature_index):
+    col_type = ebm.feature_types_in_[feature_index]
+    if col_type == "continuous":
+        return "continuous"
+    elif col_type == "nominal":
+        return "categorical"
+    else:
+        raise Exception("Unsupported feature type", col_type)
+
+
+def _get_main_bin_labels(ebm, feature_index):
+    """Returns main effect bin labels for a given feature index.
+
+    Args:
+        feature_index: An integer for feature index.
+
+    Returns:
+        List of labels for bins.
+    """
+
+    col_type = ebm.feature_types_in_[feature_index]
+    if col_type == "continuous":
+        min_val = ebm.feature_bounds_[feature_index][0]
+        cuts = ebm.bins_[feature_index][0]
+        max_val = ebm.feature_bounds_[feature_index][1]
+        return list(np.concatenate(([min_val], cuts, [max_val])))
+    elif col_type == "nominal":
+        map = ebm.bins_[feature_index][0]
+        return list(map.keys())
+    else:  # pragma: no cover
+        raise Exception("Unknown column type")
+
+
+def _get_pair_bin_labels(ebm, feature_index):
+    """Returns pair interaction effect bin labels for a given feature index.
+
+    Args:
+        feature_index: An integer for feature index.
+
+    Returns:
+        List of labels for bins.
+    """
+
+    col_type = ebm.feature_types_in_[feature_index]
+    if col_type == "continuous":
+        min_val = ebm.feature_bounds_[feature_index][0]
+        # The first element is main effect bin cuts
+        # If there is a second element, then the pair effect bin cuts are
+        # different and are stored there.
+        if len(ebm.bins_[feature_index]) > 1:
+            cuts = ebm.bins_[feature_index][1]
+        else:
+            cuts = ebm.bins_[feature_index][0]
+        max_val = ebm.feature_bounds_[feature_index][1]
+        return list(np.concatenate(([min_val], cuts, [max_val])))
+    elif col_type == "nominal":
+        map = ebm.bins_[feature_index][0]
+        return list(map.keys())
+    else:  # pragma: no cover
+        raise Exception("Unknown column type")
+
+
+def _get_hist_counts(ebm, feature_index):
+    col_type = ebm.feature_types_in_[feature_index]
+    if col_type == "continuous":
+        return list(ebm.histogram_counts_[feature_index][1:-1])
+    elif col_type == "nominal":
+        return list(ebm.histogram_counts_[feature_index][1:-1])
+    else:  # pragma: no cover
+        raise Exception("Cannot get counts for type: {0}".format(col_type))
+
+
+def _get_hist_edges(ebm, feature_index):
+    col_type = ebm.feature_types_in_[feature_index]
+    if col_type == "continuous":
+        return list(ebm.hist_edges_[feature_index])
+    elif col_type == "nominal":
+        map = ebm.bins_[feature_index][0]
+        return list(map.keys())
+    else:  # pragma: no cover
+        raise Exception("Cannot get counts for type: {0}".format(col_type))
 
 
 def get_model_data(
@@ -1495,58 +1599,60 @@ def get_model_data(
     # Track the score range
     score_range = [np.inf, -np.inf]
 
-    for i in tqdm(range(len(ebm.feature_names))):
+    for i in tqdm(range(len(ebm.term_features_))):
         cur_feature = {}
-        cur_feature["name"] = ebm.feature_names[i]
-        cur_feature["type"] = ebm.feature_types[i]
-        cur_feature["importance"] = ebm.feature_importances_[i]
+        cur_feature["importance"] = float(ebm.term_importances()[i])
 
         # Handle interaction term differently from cont/cat
-        if cur_feature["type"] == "interaction":
-            cur_id = ebm.feature_groups_[i]
+        if i >= len(ebm.feature_names_in_):
+            # This feature is an interaction term
+            cur_feature["type"] = "interaction"
+
+            cur_id = ebm.term_features_[i]
             cur_feature["id"] = list(cur_id)
 
             # Info for each individual feature
-            cur_feature["name1"] = ebm.feature_names[cur_id[0]]
-            cur_feature["name2"] = ebm.feature_names[cur_id[1]]
+            cur_feature["name1"] = ebm.feature_names_in_[cur_id[0]]
+            cur_feature["name2"] = ebm.feature_names_in_[cur_id[1]]
+            cur_feature["name"] = f'{cur_feature["name1"]} x {cur_feature["name2"]}'
 
-            cur_feature["type1"] = ebm.feature_types[cur_id[0]]
-            cur_feature["type2"] = ebm.feature_types[cur_id[1]]
+            cur_feature["type1"] = _get_feature_type(ebm, cur_id[0])
+            cur_feature["type2"] = _get_feature_type(ebm, cur_id[1])
 
             # Skip the first item from both dimensions
-            cur_feature["additive"] = np.round(ebm.additive_terms_[i], ROUND)[
-                1:, 1:
+            cur_feature["additive"] = np.round(ebm.term_scores_[i], ROUND)[
+                1:-1, 1:-1
             ].tolist()
-            cur_feature["error"] = np.round(ebm.term_standard_deviations_[i], ROUND)[
-                1:, 1:
+            cur_feature["error"] = np.round(ebm.standard_deviations_[i], ROUND)[
+                1:-1, 1:-1
             ].tolist()
 
             # Get the bin label info
-            cur_feature["binLabel1"] = ebm.pair_preprocessor_._get_bin_labels(cur_id[0])
-            cur_feature["binLabel2"] = ebm.pair_preprocessor_._get_bin_labels(cur_id[1])
+            cur_feature["binLabel1"] = _get_pair_bin_labels(ebm, cur_id[0])
+            cur_feature["binLabel2"] = _get_pair_bin_labels(ebm, cur_id[1])
 
             # Encode categorical levels as integers
             if cur_feature["type1"] == "categorical":
-                level_str_to_int = ebm.pair_preprocessor_.col_mapping_[cur_id[0]]
+                level_str_to_int = ebm.bins_[cur_id[0]][0]
                 cur_feature["binLabel1"] = list(
                     map(lambda x: level_str_to_int[x], cur_feature["binLabel1"])
                 )
 
             if cur_feature["type2"] == "categorical":
-                level_str_to_int = ebm.pair_preprocessor_.col_mapping_[cur_id[1]]
+                level_str_to_int = ebm.bins_[cur_id[1]][0]
                 cur_feature["binLabel2"] = list(
                     map(lambda x: level_str_to_int[x], cur_feature["binLabel2"])
                 )
 
             # Get density info
             if cur_feature["type1"] == "categorical":
-                level_str_to_int = ebm.pair_preprocessor_.col_mapping_[cur_id[0]]
-                cur_feature["histEdge1"] = ebm.preprocessor_._get_hist_edges(cur_id[0])
+                level_str_to_int = ebm.bins_[cur_id[0]][0]
+                cur_feature["histEdge1"] = _get_hist_edges(ebm, cur_id[0])
                 cur_feature["histEdge1"] = list(
                     map(lambda x: level_str_to_int[x], cur_feature["histEdge1"])
                 )
                 cur_feature["histCount1"] = np.round(
-                    ebm.preprocessor_._get_hist_counts(cur_id[0]), ROUND
+                    _get_hist_counts(ebm, cur_id[0]), ROUND
                 ).tolist()
             else:
                 # Use KDE to draw density plots for cont features
@@ -1555,13 +1661,13 @@ def get_model_data(
                 cur_feature["histCount1"] = counts.tolist()
 
             if cur_feature["type2"] == "categorical":
-                level_str_to_int = ebm.pair_preprocessor_.col_mapping_[cur_id[1]]
-                cur_feature["histEdge2"] = ebm.preprocessor_._get_hist_edges(cur_id[1])
+                level_str_to_int = ebm.bins_[cur_id[1]][0]
+                cur_feature["histEdge2"] = _get_hist_edges(ebm, cur_id[1])
                 cur_feature["histEdge2"] = list(
                     map(lambda x: level_str_to_int[x], cur_feature["histEdge2"])
                 )
                 cur_feature["histCount2"] = np.round(
-                    ebm.preprocessor_._get_hist_counts(cur_id[1]), ROUND
+                    _get_hist_counts(ebm, cur_id[1]), ROUND
                 ).tolist()
             else:
                 # Use KDE to draw density plots for cont features
@@ -1570,33 +1676,39 @@ def get_model_data(
                 cur_feature["histCount2"] = counts.tolist()
 
         else:
+            cur_feature["name"] = ebm.feature_names_in_[i]
+            cur_feature["type"] = _get_feature_type(ebm, i)
+
             # Skip the first item (reserved for missing value)
-            cur_feature["additive"] = np.round(ebm.additive_terms_[i], ROUND).tolist()[
-                1:
+            # Also need to skip the last item (seems always 0?)
+            cur_feature["additive"] = np.round(ebm.term_scores_[i], ROUND).tolist()[
+                1:-1
             ]
             cur_feature["error"] = np.round(
-                ebm.term_standard_deviations_[i], ROUND
-            ).tolist()[1:]
-            cur_feature["id"] = ebm.feature_groups_[i]
-            cur_id = ebm.feature_groups_[i][0]
-            cur_feature["count"] = ebm.preprocessor_.col_bin_counts_[cur_id].tolist()[
-                1:
-            ]
+                ebm.standard_deviations_[i], ROUND
+            ).tolist()[1:-1]
+            cur_feature["id"] = [ebm.term_features_[i][0]]
+            cur_id = ebm.term_features_[i][0]
+            cur_feature["count"] = ebm.bin_weights_[cur_id].tolist()[1:-1]
 
             # Track the global score range
-            score_range[0] = min(
-                score_range[0],
-                np.min(ebm.additive_terms_[i] - ebm.term_standard_deviations_[i]),
+            score_range[0] = float(
+                min(
+                    score_range[0],
+                    np.min(ebm.term_scores_[i] - ebm.standard_deviations_[i]),
+                )
             )
-            score_range[1] = max(
-                score_range[1],
-                np.max(ebm.additive_terms_[i] + ebm.term_standard_deviations_[i]),
+            score_range[1] = float(
+                max(
+                    score_range[1],
+                    np.max(ebm.term_scores_[i] + ebm.standard_deviations_[i]),
+                )
             )
 
             # Add the binning information for continuous features
             if cur_feature["type"] == "continuous":
                 # Add the bin information
-                cur_feature["binEdge"] = ebm.preprocessor_._get_bin_labels(cur_id)
+                cur_feature["binEdge"] = _get_main_bin_labels(ebm, cur_id)
 
                 # Use KDE to draw density plots for cont features
                 edges, counts = _get_kde_sample(x_train[:, cur_id])
@@ -1606,7 +1718,7 @@ def get_model_data(
 
             elif cur_feature["type"] == "categorical":
                 # Get the level value mapping
-                level_str_to_int = ebm.preprocessor_.col_mapping_[cur_id]
+                level_str_to_int = ebm.bins_[cur_id][0]
 
                 if resort_categorical:
                     level_str_to_int = _resort_categorical_level(level_str_to_int)
@@ -1614,7 +1726,7 @@ def get_model_data(
                 cur_feature["binLabel"] = list(
                     map(
                         lambda x: level_str_to_int[x],
-                        ebm.preprocessor_._get_bin_labels(cur_id),
+                        _get_main_bin_labels(ebm, cur_id),
                     )
                 )
 
@@ -1623,12 +1735,12 @@ def get_model_data(
                 cur_feature["histEdge"] = list(
                     map(
                         lambda x: level_str_to_int[x],
-                        ebm.preprocessor_._get_hist_edges(cur_id),
+                        _get_hist_edges(ebm, cur_id),
                     )
                 )
 
                 cur_feature["histCount"] = np.round(
-                    ebm.preprocessor_._get_hist_counts(cur_id), ROUND
+                    _get_hist_counts(ebm, cur_id), ROUND
                 ).tolist()
 
                 if resort_categorical:
@@ -1657,7 +1769,7 @@ def get_model_data(
 
                 # Add the label encoding information
                 labelEncoder[cur_feature["name"]] = {
-                    i: s for s, i in level_str_to_int.items()
+                    str(i): s for s, i in level_str_to_int.items()
                 }
 
         features.append(cur_feature)
@@ -1668,10 +1780,9 @@ def get_model_data(
     feature_types = []
 
     # Sample data does not record interaction features
-    for i in range(len(ebm.feature_names)):
-        if ebm.feature_types[i] != "interaction":
-            feature_names.append(ebm.feature_names[i])
-            feature_types.append(ebm.feature_types[i])
+    for i in range(len(ebm.feature_names_in_)):
+        feature_names.append(ebm.feature_names_in_[i])
+        feature_types.append(_get_feature_type(ebm, i))
 
     # Compute the MAD scores and frequencies
     ebm_cont_indexes = np.array(
@@ -1681,7 +1792,7 @@ def get_model_data(
     contMads = {}
 
     for i in ebm_cont_indexes:
-        contMads[ebm.feature_names[i]] = GAMCoach.compute_mad(x_train[:, i])
+        contMads[ebm.feature_names_in_[i]] = GAMCoach.compute_mad(x_train[:, i])
 
     ebm_cat_indexes = np.array(
         [i for i in range(len(feature_names)) if feature_types[i] == "categorical"]
@@ -1707,12 +1818,13 @@ def get_model_data(
     if feature_level_info:
         for feature in feature_level_info:
             for level in feature_level_info[feature]:
+                level_str = str(level)
                 display_name = feature_level_info[feature][level][0]
                 description = feature_level_info[feature][level][1]
-                feature_descriptions[feature]["levelDescription"][level][
+                feature_descriptions[feature]["levelDescription"][level_str][
                     "displayName"
                 ] = display_name
-                feature_descriptions[feature]["levelDescription"][level][
+                feature_descriptions[feature]["levelDescription"][level_str][
                     "description"
                 ] = description
 
@@ -1744,7 +1856,9 @@ def get_model_data(
             feature["config"] = feature_configurations[feature["name"]]
 
     data = {
-        "intercept": ebm.intercept_[0] if hasattr(ebm, "classes_") else ebm.intercept_,
+        "intercept": float(ebm.intercept_[0])
+        if hasattr(ebm, "classes_")
+        else float(ebm.intercept_),
         "isClassifier": hasattr(ebm, "classes_"),
         "modelInfo": model_info,
         "features": features,

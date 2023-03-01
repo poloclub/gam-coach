@@ -21,13 +21,35 @@ from typing import Union
 SEED = 922
 
 
+def _get_main_bin_labels(ebm, feature_index):
+    """Returns main effect bin labels for a given feature index.
+
+    Args:
+        feature_index: An integer for feature index.
+
+    Returns:
+        List of labels for bins.
+    """
+
+    col_type = ebm.feature_types_in_[feature_index]
+    if col_type == "continuous":
+        min_val = ebm.feature_bounds_[feature_index][0]
+        cuts = ebm.bins_[feature_index][0]
+        max_val = ebm.feature_bounds_[feature_index][1]
+        return list(np.concatenate(([min_val], cuts, [max_val])))
+    elif col_type == "nominal":
+        map = ebm.bins_[feature_index][0]
+        return list(map.keys())
+    else:  # pragma: no cover
+        raise Exception("Unknown column type")
+
+
 class Counterfactuals:
     """Class to represent GAM counterfactual explanations."""
 
     def __init__(
         self,
         solutions: list,
-        isSuccessful: bool,
         model: pulp.LpProblem,
         variables: dict,
         ebm: Union[ExplainableBoostingClassifier, ExplainableBoostingRegressor],
@@ -39,8 +61,6 @@ class Counterfactuals:
         Args:
             solutions (list): List of generated `(active_variables, optimal value)`.
                 If successful, it should have `total_cfs` items.
-            isSuccessful (bool): True if the mixed-integer linear problem has
-                `total_cfs` number of solutions under all constraints.
             model (LpProblem): Linear programming model
             variables (dict): Dictionary containing all MILP variables,
                 `feature_name` -> [`variables`],
@@ -51,9 +71,6 @@ class Counterfactuals:
                 selected features. `feature_name` -> `[[target, score_gain,
                 distance, bin_id]]`
         """
-        self.isSuccessful = isSuccessful
-        """Boolean to indicate if the optimization is successful."""
-
         self.model = model
         """MILP program model."""
 
@@ -110,9 +127,7 @@ class Counterfactuals:
                     f_type = self.ebm.feature_types[f_index]
 
                     if f_type == "continuous":
-                        bin_starts = self.ebm.preprocessor_._get_bin_labels(f_index)[
-                            :-1
-                        ]
+                        bin_starts = _get_main_bin_labels(self.ebm, f_index)[:-1]
 
                         target_bin = "[{},".format(bin_starts[bin_i])
 
@@ -139,7 +154,8 @@ class Counterfactuals:
             self.values.append(value)
             self.target_ranges.append(cur_target_ranges)
 
-        self.data = np.vstack(self.data)
+        if len(self.data) > 0:
+            self.data = np.vstack(self.data)
 
     def show(self):
         """
@@ -165,9 +181,7 @@ class Counterfactuals:
                     f_type = self.ebm.feature_types[f_index]
 
                     if f_type == "continuous":
-                        bin_starts = self.ebm.preprocessor_._get_bin_labels(f_index)[
-                            :-1
-                        ]
+                        bin_starts = _get_main_bin_labels(self.ebm, f_index)[:-1]
 
                         target_bin = "[{},".format(bin_starts[bin_i])
 
@@ -228,6 +242,9 @@ class Counterfactuals:
                 )
             )
 
+        if len(self.data) == 0:
+            return pd.DataFrame()
+
         data_df = pd.DataFrame(self.data)
         data_df.columns = np.array(self.ebm.feature_names)[
             [
@@ -243,6 +260,9 @@ class Counterfactuals:
         return data_df
 
     def __repr__(self) -> str:
+        if len(self.data) == 0:
+            return "The optimization is infeasible."
+
         summary = self.model_summary()
         return summary.to_string()
 

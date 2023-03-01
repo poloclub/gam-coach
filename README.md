@@ -98,6 +98,8 @@ pip install gamcoach
 
 In the [demo page](https://poloclub.github.io/gam-coach), we provide five demos with the most commonly used datasets in the algorithmic recourse literature. You can easily set up a GAM Coach for your own GAM model (with only one function call). See this [documentation page](https://poloclub.github.io/gam-coach/docs/gamcoach/gamcoach.html#get_model_data) for details.
 
+You can also check out this [example notebook](examples/gam_coach_extract_model.ipynb) to see how to extract GAM model weights for GAM Coach.
+
 ## Credits
 
 GAM Coach is a result of a collaboration between ML and visualization researchers from Georgia Tech and Microsoft Research.

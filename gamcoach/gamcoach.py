@@ -443,7 +443,7 @@ class GAMCoach:
                 muted_variables=muted_variables,
             )
 
-            model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose > 1, warmStart=False))
+            model.solve(pulp.apis.PULP_CBC_CMD(msg=verbose > 1, warmStart=True))
 
             if model.status != 1:
                 continue
@@ -1168,6 +1168,11 @@ class GAMCoach:
                         model += z <= x_f1
                         model += z <= x_f2
                         model += z >= x_f1 + x_f2 - 1
+
+                        # Need to add the interaction offset
+                        # For more details, check out the paper appendix and
+                        # our JavaScript implementation
+                        score_gain += option[1] * z
 
                         cur_variables.append(z)
 

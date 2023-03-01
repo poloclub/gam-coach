@@ -19,109 +19,104 @@ from collections import Counter
 SEED = 101221
 
 
-def test_temp():
-    assert 1 == 1
+def test_generate_cf():
+    # Load a pre-processed lending club dataset
+    ca_data_url = "https://gist.githubusercontent.com/xiaohk/06266553d43e591817914bfe52ec9b60/raw/c190b7cea837739797336d690fe44df9d8f9384c/lending-club-data-5000-ca.json"
 
+    with urllib.request.urlopen(ca_data_url) as url:
+        data = json.loads(url.read().decode())
 
-# def test_generate_cf():
-#     # Load a pre-processed lending club dataset
-#     ca_data_url = "https://gist.githubusercontent.com/xiaohk/06266553d43e591817914bfe52ec9b60/raw/c190b7cea837739797336d690fe44df9d8f9384c/lending-club-data-5000-ca.json"
+    # Load the training data
+    x_all = np.array(data["x_all"])
+    y_all = np.array(data["y_all"])  # `y_all`: 1 if paid off, 0 if failed to pay off
 
-#     with urllib.request.urlopen(ca_data_url) as url:
-#         data = json.loads(url.read().decode())
+    # Load some meta data
+    feature_names = data["feature_names"]
+    # feature_types = data['feature_types']
+    feature_types = [
+        "continuous" if t == "continuous" else "nominal" for t in data["feature_types"]
+    ]
 
-#     # Load the training data
-#     x_all = np.array(data["x_all"])
-#     y_all = np.array(data["y_all"])  # `y_all`: 1 if paid off, 0 if failed to pay off
+    cont_index = data["cont_index"]
+    cat_index = data["cat_index"]
 
-#     # Load some meta data
-#     feature_names = data["feature_names"]
-#     # feature_types = data['feature_types']
-#     feature_types = [
-#         "continuous" if t == "continuous" else "nominal" for t in data["feature_types"]
-#     ]
+    # Use float to encode continuous features and string for categorical features
+    for i, t in enumerate(feature_types):
+        if t == "continuous":
+            x_all[:, i] = x_all[:, i].astype(float)
+        elif t == "categorical":
+            x_all[:, i] = x_all[:, i].astype(str)
 
-#     cont_index = data["cont_index"]
-#     cat_index = data["cat_index"]
+    # Create a dataFrame to validate that we load the correct data
+    df = pd.DataFrame(x_all)
+    df.columns = feature_names
 
-#     # Use float to encode continuous features and string for categorical features
-#     for i, t in enumerate(feature_types):
-#         if t == "continuous":
-#             x_all[:, i] = x_all[:, i].astype(float)
-#         elif t == "categorical":
-#             x_all[:, i] = x_all[:, i].astype(str)
+    # Train a binary classifier
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_all, y_all, test_size=0.2, random_state=SEED
+    )
 
-#     # Create a dataFrame to validate that we load the correct data
-#     df = pd.DataFrame(x_all)
-#     df.columns = feature_names
+    # Use sample weight to combat class imbalance
+    weight = np.bincount(y_train)[1] / np.bincount(y_train)[0]
+    x_train_sample_weights = [
+        weight if y_train[i] == 0 else 1 for i in range(len(y_train))
+    ]
 
-#     # Train a binary classifier
-#     x_train, x_test, y_train, y_test = train_test_split(
-#         x_all, y_all, test_size=0.2, random_state=SEED
-#     )
+    ebm = ExplainableBoostingClassifier(feature_names, feature_types, random_state=SEED)
 
-#     # Use sample weight to combat class imbalance
-#     weight = np.bincount(y_train)[1] / np.bincount(y_train)[0]
-#     x_train_sample_weights = [
-#         weight if y_train[i] == 0 else 1 for i in range(len(y_train))
-#     ]
+    ebm.fit(x_train, y_train, sample_weight=x_train_sample_weights)
 
-#     ebm = ExplainableBoostingClassifier(feature_names, feature_types, random_state=SEED)
+    # Evaluate our model
+    y_pred = ebm.predict(x_test)
 
-#     ebm.fit(x_train, y_train, sample_weight=x_train_sample_weights)
+    # Find an interesting data point
+    # We can focus on test cases where our model rejcets the application (y_hat = 0)
+    reject_index = y_pred == 0
+    x_reject = x_test[reject_index, :]
+    y_pred_reject = y_pred[reject_index]
 
-#     # Evaluate our model
-#     y_pred = ebm.predict(x_test)
-#     y_pred_prob = ebm.predict_proba(x_test)[:, 1]
+    reject_df = pd.DataFrame(np.hstack((x_reject, y_pred_reject.reshape(-1, 1))))
+    reject_df.columns = feature_names + ["prediction"]
+    reject_df.head()
 
-#     # Find an interesting data point
-#     # We can focus on test cases where our model rejcets the application (y_hat = 0)
-#     reject_index = y_pred == 0
-#     x_reject = x_test[reject_index, :]
-#     y_pred_reject = y_pred[reject_index]
+    # Find a random sample
+    rs = np.random.RandomState(SEED)
+    target_index = rs.choice(range(reject_df.shape[0]))
+    cur_example = x_reject[target_index, :]
 
-#     reject_df = pd.DataFrame(np.hstack((x_reject, y_pred_reject.reshape(-1, 1))))
-#     reject_df.columns = feature_names + ["prediction"]
-#     reject_df.head()
+    print(cur_example)
 
-#     # Find a random sample
-#     rs = np.random.RandomState(SEED)
-#     target_index = rs.choice(range(reject_df.shape[0]))
-#     cur_example = x_reject[target_index, :]
+    my_coach = coach.GAMCoach(ebm, x_train)
 
-#     print(cur_example)
+    # To generate good CF explantions, we need to consider what features are mutable
+    # and they possible values
 
-#     my_coach = coach.GAMCoach(ebm, x_train)
+    cfs = my_coach.generate_cfs(
+        cur_example,
+        total_cfs=100,
+        # List of features that the CFs can change
+        features_to_vary=[
+            "loan_amnt",
+            "term",
+            "emp_length",
+            "home_ownership",
+            "annual_inc",
+            "purpose",
+            "dti",
+            "open_acc",
+            "revol_bal",
+            "revol_util",
+            "total_acc",
+            "application_type",
+            "mort_acc",
+            "fico_score",
+        ],
+        # Some continuous features need to have integer values in practice
+        continuous_integer_features=["open_acc", "total_acc", "mort_acc", "fico_score"],
+    )
 
-#     # To generate good CF explantions, we need to consider what features are mutable
-#     # and they possible values
-
-#     cfs = my_coach.generate_cfs(
-#         cur_example,
-#         total_cfs=10,
-#         # List of features that the CFs can change
-#         features_to_vary=[
-#             "loan_amnt",
-#             "term",
-#             "emp_length",
-#             "home_ownership",
-#             "annual_inc",
-#             "purpose",
-#             "dti",
-#             "open_acc",
-#             "revol_bal",
-#             "revol_util",
-#             "total_acc",
-#             "application_type",
-#             "mort_acc",
-#             "fico_score",
-#         ],
-#         # Some continuous features need to have integer values in practice
-#         continuous_integer_features=["open_acc", "total_acc", "mort_acc", "fico_score"],
-#     )
-
-#     cf_df = cfs.to_df()
-#     assert np.sum(cf_df["new_prediction"] == 0) == 0
+    cf_df = cfs.to_df()
+    assert np.sum(cf_df["new_prediction"] == 0) == 0
 
 
 # Tests are out-dated because of interpret v0.3.0 update

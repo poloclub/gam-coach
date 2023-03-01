@@ -19,6 +19,10 @@ from collections import Counter
 SEED = 101221
 
 
+def test_temp():
+    assert 1 == 1
+
+
 # def test_generate_cf():
 #     # Load a pre-processed lending club dataset
 #     ca_data_url = "https://gist.githubusercontent.com/xiaohk/06266553d43e591817914bfe52ec9b60/raw/c190b7cea837739797336d690fe44df9d8f9384c/lending-club-data-5000-ca.json"

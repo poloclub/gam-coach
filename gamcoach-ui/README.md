@@ -109,6 +109,7 @@ To learn more about GAM Coach, please read our [research paper](https://arxiv.or
 ```bibTeX
 @article{wangGAMCoachInteractive2023,
   title = {{{GAM Coach}}: {{Towards Interactive}} and {{User-centered Algorithmic Recourse}}},
+  author = {Wang, Zijie J. and Vaughan, Jennifer Wortman and Caruana, Rich and Chau, Duen Horng},
   year = {2023},
   doi = {10.1145/3544548.3580816}
   journal = {arXiv:2302.14165},

@@ -144,7 +144,7 @@ Voilà, without changing any code in `View`, you can use GAM Coach UI with your 
 
 __author__ = """Jay Wang"""
 __email__ = "jay@zijie.wang"
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 from gamcoach.gamcoach import *
 from gamcoach.counterfactuals import *

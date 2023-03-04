@@ -1534,7 +1534,7 @@ def _get_hist_counts(ebm, feature_index):
 def _get_hist_edges(ebm, feature_index):
     col_type = ebm.feature_types_in_[feature_index]
     if col_type == "continuous":
-        return list(ebm.hist_edges_[feature_index])
+        return list(ebm.histogram_edges_[feature_index])
     elif col_type == "nominal":
         map = ebm.bins_[feature_index][0]
         return list(map.keys())

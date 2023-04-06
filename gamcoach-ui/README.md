@@ -30,6 +30,9 @@ It shows users diverse ways to change their input data so that they can get a di
 For example, if a user wants to get approved for a loan, GAM Coach may suggest they increase their credit score.
 If the user finds it difficult to increase their credit score, GAM Coach will search for alternative strategies, such as lowering the loan amount.
 
+<img src="https://user-images.githubusercontent.com/15007159/230276843-f82102ec-ad5e-425e-a9e5-6f62127d0ee6.gif" width="100%">
+
+
 ## Live Demo
 
 For a live demo, visit: <https://poloclub.github.io/gam-coach/>

@@ -111,6 +111,5 @@ pnpm-lock.yaml
 examples/model_pickles
 .DS_STORE
 gh-page
-publish.sh
 docs
 ignore

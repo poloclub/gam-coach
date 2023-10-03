@@ -2,9 +2,19 @@
   import Article from './components/article/Article.svelte';
 </script>
 
-<svelte:head />
+<svelte:head>
+  <script
+    type="module"
+    src="https://unpkg.com/recommender-overlay/dist/recommender-overlay.es.js"
+  ></script>
+</svelte:head>
 
 <div class="stand-alone-page">
+  <recommender-overlay
+    my-brand="GAM Coach"
+    position-left="20"
+    display-delay="20000"
+  />
   <Article />
 </div>
 
